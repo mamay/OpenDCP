@@ -1,0 +1,24 @@
+ASDCPLIB	1.7.40
+    libasdcp
+    libkumu
+
+OPENJPEG	1.4.0.697
+    libopenjpeg
+
+OPENSSL		1.0.0a
+    libssl
+    libcrypto
+
+LIBTIFF		3.9.4
+    libtiff
+
+LIBEXPAT	2.0.1
+    libexpat
+
+LIBXML2		2.7.8
+   libxml2
+   libxslt
+
+LIXMLSec	1.2.16
+   libxmlsec1
+   libxmlsec1-openssl

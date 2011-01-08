@@ -1,0 +1,280 @@
+/*
+    OpenDCP: Builds Digital Cinema Packages
+    Copyright (c) 2010 Terrence Meiczinger, All Rights Reserved
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <openjpeg.h>
+#include <tiffio.h>
+#include "../opendcp.h"
+#include "opendcp_image.h"
+#include "opendcp_xyz.h"
+
+int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
+    TIFF *tif;
+    tdata_t buf;
+    tstrip_t strip;
+    tsize_t strip_size;
+    int index,w,h,image_size;
+    unsigned short int bps = 0;
+    unsigned short int photo = 0;
+    odcp_image_t *image = 00;
+
+    /* open tiff using filename or file descriptor */
+    if (fd == 0) {
+        tif = TIFFOpen(infile, "r");
+    } else {
+        tif = TIFFFdOpen(fd,infile,"r");
+    }
+
+    if (!tif) {
+        dcp_log(LOG_ERROR,"Failed to open %s for reading\n", infile);
+        return DCP_FATAL;
+    }
+
+    TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &w);
+    TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &h);
+    TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bps);
+    TIFFGetField(tif, TIFFTAG_PHOTOMETRIC, &photo);
+
+    image_size = w * h;
+
+    if (photo == 2) {
+        /* create the image */
+        dcp_log(LOG_DEBUG,"allocating odcp image\n");
+        image = odcp_image_create(3,image_size);
+    
+        if(!image) {
+            TIFFClose(tif);
+            dcp_log(LOG_ERROR,"Failed to create image %s\n", infile);
+            return DCP_FATAL;
+        }
+
+        /* RGB color */
+        image->bpp          = 12;
+        image->precision    = 12;
+        image->n_components = 3;
+        image->signed_bit   = 0;
+        image->dx           = 1;
+        image->dy           = 1;
+        image->w            = w;
+        image->h            = h;
+
+        /* set image offset and reference grid */
+        image->x0 = 0;
+        image->y0 = 0;
+        image->x1 = !image->x0 ? (w - 1) * image->dx + 1 : image->x0 + (w - 1) * image->dx + 1;
+        image->y1 = !image->y0 ? (h - 1) * image->dy + 1 : image->y0 + (h - 1) * image->dy + 1;
+
+        buf = _TIFFmalloc(TIFFStripSize(tif));
+        strip_size=0;
+        strip_size=TIFFStripSize(tif);
+        index = 0;
+
+        /* Read the Image components*/
+        for (strip = 0; strip < TIFFNumberOfStrips(tif); strip++) {
+            unsigned char *dat8;
+            int i, ssize;
+            ssize = TIFFReadEncodedStrip(tif, strip, buf, strip_size);
+            dat8 = (unsigned char*)buf;
+
+            /*12 bits per pixel*/
+            if (bps==12) {
+                for (i=0; i<ssize; i+=9) {
+                    if((index < image_size)&(index+1 < image_size)) {
+                        image->component[0].data[index]   = ( dat8[i+0]<<4 )        |(dat8[i+1]>>4);
+                        image->component[1].data[index]   = ((dat8[i+1]& 0x0f)<< 8) | dat8[i+2];
+                        image->component[2].data[index]   = ( dat8[i+3]<<4)         |(dat8[i+4]>>4);
+                        image->component[0].data[index+1] = ((dat8[i+4]& 0x0f)<< 8) | dat8[i+5];
+                        image->component[1].data[index+1] = ( dat8[i+6] <<4)        |(dat8[i+7]>>4);
+                        image->component[2].data[index+1] = ((dat8[i+7]& 0x0f)<< 8) | dat8[i+8];
+                        index+=2;
+                    } else {
+                        break;
+                    }
+                }
+            /* 16 bits per pixel */
+            } else if(bps==16) {
+                for (i=0; i<ssize; i+=6) {
+                    if(index < image_size) {
+                        image->component[0].data[index] = ( dat8[i+1] << 8 ) | dat8[i+0]; // R 
+                        image->component[1].data[index] = ( dat8[i+3] << 8 ) | dat8[i+2]; // G 
+                        image->component[2].data[index] = ( dat8[i+5] << 8 ) | dat8[i+4]; // B 
+                        /* round to 12 bits dcinema */
+                        image->component[0].data[index] = (image->component[0].data[index] + 0x08) >> 4 ;
+                        image->component[1].data[index] = (image->component[1].data[index] + 0x08) >> 4 ;
+                        image->component[2].data[index] = (image->component[2].data[index] + 0x08) >> 4 ;
+                        index++;
+                    } else {
+                        break;
+                    }
+                }
+            /* 8 bits per pixel */
+            } else if (bps==8) {
+                for (i=0; i<ssize; i+=3) {
+                    if(index < image_size) {
+                        /* rounded to 12 bits */
+                        image->component[0].data[index] = dat8[i+0] << 4; // R 
+                        image->component[1].data[index] = dat8[i+1] << 4; // G 
+                        image->component[2].data[index] = dat8[i+2] << 4; // B 
+                        index++;
+                    } else {
+                         break;
+                    }
+                }
+            } else {
+                 dcp_log(LOG_ERROR,"TIFF file load failed. Bits=%d, Only 8,12,16 bits implemented",bps);
+                 return DCP_FATAL;
+            }
+        }
+        _TIFFfree(buf);
+        TIFFClose(tif);
+    } else {
+        dcp_log(LOG_ERROR,"TIFF file creation. Bad color format. Only RGB & Grayscale has been implemented");
+        return DCP_FATAL;
+    }
+
+    dcp_log(LOG_DEBUG,"TIFF read complete");
+    *image_ptr = image;
+    return 0;
+}
+    
+int write_tif(odcp_image_t *image, const char *outfile, int fd) {
+    int image_size;
+    int index,adjust = 0;
+    int last_i=0;
+    TIFF *tif;
+    tdata_t buf;
+    tstrip_t strip;
+    tsize_t strip_size;
+
+    if (image->n_components == 3) {
+        /* open tiff using filename or file descriptor */
+        if (fd == 0) {
+            tif = TIFFOpen(outfile, "wb");
+        } else {
+            tif = TIFFFdOpen(fd, outfile, "wb");
+        }
+
+        if (tif == NULL) {
+            dcp_log(LOG_ERROR, "Failed to open %s for writing", outfile);
+            return DCP_FATAL;
+        }
+
+        image_size = image->w * image->h;
+
+        /* Set tags */
+        TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, image->w);
+        TIFFSetField(tif, TIFFTAG_IMAGELENGTH, image->h);
+        TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, 3);
+        TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, image->precision);
+        TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+        TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+        TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+        TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1);
+
+        /* Get a buffer for the data */
+        strip_size=TIFFStripSize(tif);
+        buf = _TIFFmalloc(strip_size);
+        index=0;
+        adjust = image->signed_bit ? 1 << (image->precision - 1) : 0;
+        for (strip = 0; strip < TIFFNumberOfStrips(tif); strip++) {
+            unsigned char *dat8;
+            int i, ssize;
+            ssize = TIFFStripSize(tif);
+            dat8 = (unsigned char*)buf;
+            /* 12 bits per pixel */
+            for (i=0; i<ssize-8; i+=9) {    // 12 bits per pixel 
+                int r = 0,g = 0,b = 0;
+                int r1 = 0,g1 = 0,b1 = 0;
+                if ((index < image_size)&(index+1 < image_size)) {
+                    r  = image->component[0].data[index];
+                    g  = image->component[1].data[index];
+                    b  = image->component[2].data[index];
+                    r1 = image->component[0].data[index+1];
+                    g1 = image->component[1].data[index+1];
+                    b1 = image->component[2].data[index+1];
+                    if (image->signed_bit) {                                        
+                        r  += adjust;
+                        g  += adjust;
+                        b  += adjust;
+                        r1 += adjust;
+                        g1 += adjust;
+                        b1 += adjust;
+                    }
+                    dat8[i+0] = (r >> 4);
+                    dat8[i+1] = ((r & 0x0f) << 4 )|((g >> 8)& 0x0f);
+                    dat8[i+2] = g ;
+                    dat8[i+3] = (b >> 4);
+                    dat8[i+4] = ((b & 0x0f) << 4 )|((r1 >> 8)& 0x0f);
+                    dat8[i+5] = r1;
+                    dat8[i+6] = (g1 >> 4);
+                    dat8[i+7] = ((g1 & 0x0f)<< 4 )|((b1 >> 8)& 0x0f);
+                    dat8[i+8] = b1;
+                    index+=2;
+                    last_i = i+9;
+                } else {
+                    break;
+                }
+            }
+            if (last_i < ssize) {
+                for (i=last_i; i<ssize; i+=9) {
+                    int r = 0,g = 0,b = 0;
+                    int r1 = 0,g1 = 0,b1 = 0;
+                    if ((index < image_size)&(index+1 < image_size)) {
+                        r  = image->component[0].data[index];
+                        g  = image->component[1].data[index];
+                        b  = image->component[2].data[index];
+                        r1 = image->component[0].data[index+1];
+                        g1 = image->component[1].data[index+1];
+                        b1 = image->component[2].data[index+1];
+                        if (image->signed_bit) {                                
+                            r  += adjust;
+                            g  += adjust;
+                            b  += adjust;
+                            r1 += adjust;
+                            g1 += adjust;
+                            b1 += adjust;
+                        }
+                        dat8[i+0] = (r >> 4);
+                        if (i+1 <ssize) dat8[i+1] = ((r & 0x0f) << 4 )|((g >> 8)& 0x0f); else break;
+                        if (i+2 <ssize) dat8[i+2] = g; else break;
+                        if (i+3 <ssize) dat8[i+3] = (b >> 4); else break;
+                        if (i+4 <ssize) dat8[i+4] = ((b & 0x0f) << 4 )|((r1 >> 8)& 0x0f);else break;
+                        if (i+5 <ssize) dat8[i+5] = r1; else break;
+                        if (i+6 <ssize) dat8[i+6] = (g1 >> 4); else break;
+                        if (i+7 <ssize) dat8[i+7] = ((g1 & 0x0f)<< 4 )|((b1 >> 8)& 0x0f); else break;
+                        if (i+8 <ssize) dat8[i+8] = b1; else break;
+                        index+=2;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            TIFFWriteEncodedStrip(tif, strip, buf, strip_size);
+        }
+        _TIFFfree(buf);
+        TIFFClose(tif);
+    } else {
+        dcp_log(LOG_ERROR,"Failed TIFF file %s creation. Bad color format. Only RGB & Grayscale has been implemented",outfile);
+        return DCP_FATAL;
+    }
+    return 0;
+}

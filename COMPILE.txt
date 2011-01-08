@@ -1,0 +1,59 @@
+OpenDCP
+------------
+This program builds the XML files for Digital Cinema Packages. 
+
+Requirements
+------------
+The program requires the following libraries.
+ 
+  - AS-DCP File Access Library (http://www.cinecert.com/asdcplib/)
+  - OpenSSL (http://www.openssl.org/docs/crypto/crypto.html)
+  - LibXML2 (http://xmlsoft.org/)
+  - LibXSLT (http://xmlsoft.org/)
+  - LibXMLSec (http://www.aleksey.com/xmlsec/)
+  - OpenJPEG (http://www.openjpeg.org)
+
+Mac OS X and many linux distributions already have OpenSSL (libcrypto) installed.
+
+Cmake
+------------
+CMake is used to build this application. You may need to install CMake.
+Most linux distributions have CMake installed or have it available through the package manager.
+On Mac OSX, CMake is easily installed with MacPorts.
+
+Compile
+------------
+Type 'cmake .'
+This will build the Makefiles for OpenDCP using dynamic libraries.
+
+Type 'cmake -DSTATIC=1 .'
+This will build the Makefiles for OpenDCP using static libraries. See notes about static compiling.
+
+Type 'make'
+This will compile the OpenDCP tools.
+
+You should end up with opendcp_xml, opendcp_j2k in the build directory.
+
+Install
+------------
+There is no need to install, but there is an install option which installs into /usr/local/bin
+
+Type 'make install'
+
+Static Notes
+------------
+Static libraries are included for OSX and WIN32. On Linux, you'll most likey want dynamically compile.
+
+The static libraries included were compiled as follows:
+
+AS-DCP
+./configure --with-expat
+make
+
+OpenSSL
+./configure
+make
+
+OpenJPEG
+cmake .
+make
