@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <openjpeg.h>
+#include <omp.h>
 #include "opendcp.h"
 #include "image/opendcp_image.h"
 
@@ -104,24 +105,30 @@ int check_image_compliance(context_t *context, odcp_image_t *image) {
     return DCP_SUCCESS;
 }
 
-int convert_to_j2k(context_t *context, char *in_file, char *out_file) {
+int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_path) {
     odcp_image_t *odcp_image;
     int result;
-
+	
+	if (tmp_path == NULL) {
+		tmp_path = "./";
+	}
     dcp_log(LOG_DEBUG,"Reading input file %s",in_file);
-    read_tif(&odcp_image, in_file,0);
-
-    if (!odcp_image) {
+     
+	 
+		 read_tif(&odcp_image, in_file,0);
+	 
+	
+     if (!odcp_image) {
         dcp_log(LOG_ERROR,"Unable to load tiff file %s",in_file);
         return DCP_FATAL;
-    }
+     }
 
-    /* verify image is dci compliant  */
-    if (check_image_compliance(context, odcp_image) != DCP_SUCCESS) {
-        dcp_log(LOG_ERROR,"Image %s is not DCI Compliant",in_file);
-        return DCP_FATAL;
-    }
-
+    // verify image is dci compliant 
+     if (check_image_compliance(context, odcp_image) != DCP_SUCCESS) {
+         dcp_log(LOG_ERROR,"Image %s is not DCI Compliant",in_file);
+         return DCP_FATAL;
+     }
+    
     if (context->xyz) {
         dcp_log(LOG_INFO,"RGB->XYZ color conversion %s",in_file);
         if (rgb_to_xyz(odcp_image)) {
@@ -133,13 +140,14 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file) {
     if ( context->encoder == J2K_KAKADU ) {
         char tempfile[255];
         int n = omp_get_thread_num(); 
-        sprintf(tempfile,"tmp%d%s",n,"file.tif");
+        sprintf(tempfile,"%stmp%d%s",tmp_path,n,"file.tif");
+		result = write_tif(odcp_image,tempfile,0);
         
-        if (write_tif(odcp_image,tempfile,0) != DCP_SUCCESS) {
+	if (result != DCP_SUCCESS) {
             dcp_log(LOG_ERROR,"Writing temporary tif failed");
             return DCP_FATAL;
         }
-	result = encode_kakadu(context, tempfile, out_file);
+	result = encode_kakadu(context, tempfile, out_file, tmp_path);
 	if ( result != DCP_SUCCESS) {
             dcp_log(LOG_ERROR,"Kakadu JPEG2000 conversion failed %s",in_file);
             remove(tempfile);
@@ -151,10 +159,11 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file) {
             dcp_log(LOG_ERROR,"OpenJPEG JPEG2000 conversion failed %s",in_file);
             return DCP_FATAL;
         }
-        /* free the image memory */
-        odcp_image_free(odcp_image);
+        
+        
     }
-
+	/* free the image memory */
+	odcp_image_free(odcp_image);
     return DCP_SUCCESS;
 }
 
@@ -165,7 +174,8 @@ int encode_kakadu(context_t *context, char *in_file, char *out_file) {
     int max_comp_size;
     char k_lengths[128];
     char cmd[512];
-
+	FILE *cmdfp = NULL;
+	
     /* set the max image and component sizes based on frame_rate */
     max_cs_len = ((float)MAX_DCP_JPEG_BITRATE)/8/context->frame_rate;
     max_comp_size = ((float)max_cs_len)/1.25;
@@ -175,7 +185,9 @@ int encode_kakadu(context_t *context, char *in_file, char *out_file) {
         sprintf(k_lengths,"%s Creslengths:C%d=%d,%d",k_lengths,j,max_cs_len,max_comp_size);
     }
     sprintf(cmd,"kdu_compress -i %s -o %s Sprofile=CINEMA2K %s -num_threads 1 -quiet -precise",in_file,out_file,k_lengths);
-    result = system(cmd);
+    cmdfp=popen(cmd,"r");
+    result=pclose(cmdfp);
+    
     if (result) {
             return DCP_FATAL;
     }
