@@ -140,7 +140,7 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
     if ( context->encoder == J2K_KAKADU ) {
         char tempfile[255];
         int n = omp_get_thread_num(); 
-        sprintf(tempfile,"%stmp%d%s",tmp_path,n,"file.tif");
+        sprintf(tempfile,"%stmp%s%s",tmp_path,tempnam(tmp_path),"file.tif");
 		result = write_tif(odcp_image,tempfile,0);
         
 	if (result != DCP_SUCCESS) {
