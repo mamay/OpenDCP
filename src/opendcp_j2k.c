@@ -114,10 +114,10 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
 	}
     dcp_log(LOG_DEBUG,"Reading input file %s",in_file);
      
-	 
-		 read_tif(&odcp_image, in_file,0);
-	 
-	
+     #pragma omp critical
+     {	 
+         read_tif(&odcp_image, in_file,0);
+     }
      if (!odcp_image) {
         dcp_log(LOG_ERROR,"Unable to load tiff file %s",in_file);
         return DCP_FATAL;
@@ -140,7 +140,7 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
     if ( context->encoder == J2K_KAKADU ) {
         char tempfile[255];
         int n = omp_get_thread_num(); 
-        sprintf(tempfile,"%stmp%d%s",tmp_path,n,"file.tif");
+        sprintf(tempfile,"%s/tmp%d%s",tmp_path,n,"file.tif");
 		result = write_tif(odcp_image,tempfile,0);
         
 	if (result != DCP_SUCCESS) {
@@ -162,8 +162,8 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
         
         
     }
-	/* free the image memory */
-	odcp_image_free(odcp_image);
+    /* free the image memory */
+    odcp_image_free(odcp_image);
     return DCP_SUCCESS;
 }
 
