@@ -81,7 +81,7 @@ void dcp_usage() {
     fprintf(fp,"       -l | --log_level <level>       - Sets the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
     fprintf(fp,"       -h | --help                    - show help\n");
     fprintf(fp,"       -v | --version                 - show version\n");
-	fprintf(fp,"       -m | --tmp_dir                 - sets temporary directory (usually tmpfs one) to save there temporary tiffs for Kakadu");
+    fprintf(fp,"       -m | --tmp_dir                 - sets temporary directory (usually tmpfs one) to save there temporary tiffs for Kakadu");
     fprintf(fp,"\n\n");
     fprintf(fp,"^ Kakadu requires you to download and have the kdu_compress utility in your path.\n");
     fprintf(fp,"  You must agree to the Kakadu licensing terms and assume all respsonsibility of its use.\n");
@@ -207,7 +207,7 @@ int main (int argc, char **argv) {
     context_t *context;
     char *in_path = NULL;
     char *out_path = NULL;
-	char *tmp_path = NULL;
+    char *tmp_path = NULL;
     char dir_str[] = "tmpXXXXXX";
     filelist_t *filelist;
 
@@ -254,9 +254,9 @@ int main (int argc, char **argv) {
             {"threads",        required_argument, 0, 't'},
             {"encoder",        required_argument, 0, 'e'},
             {"no_xyz",         no_argument,       0, 'x'},
-            {"3d", 	       no_argument,       0, '3'},
+            {"3d",             no_argument,       0, '3'},
             {"version",        no_argument,       0, 'v'},
-			{"tmp_dir",        required_argument, 0, 'm'},
+            {"tmp_dir",        required_argument, 0, 'm'},
             {0, 0, 0, 0}
         };
 
@@ -343,10 +343,10 @@ int main (int argc, char **argv) {
             case 'v':
                version();
             break;
-			
-			case 'm':
-				tmp_path = optarg;
-			break;
+
+            case 'm':
+                tmp_path = optarg;
+            break;
         }
     }
 
@@ -374,7 +374,7 @@ int main (int argc, char **argv) {
 
     /* adjust frame rate for 3D */
     if (context->stereoscopic) {
-	context->frame_rate *=2;
+        context->frame_rate *=2;
     }
 
     if (context->log_level>0 && context->log_level<3) { progress_bar(0,0); }

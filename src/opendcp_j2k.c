@@ -60,7 +60,7 @@ void set_cinema_encoder_parameters(context_t *context, opj_cparameters_t *parame
     parameters->image_offset_y0 = 0;
 
     /*Codeblock size= 32*32*/
-    parameters->cblockw_init = 32;	
+    parameters->cblockw_init = 32;
     parameters->cblockh_init = 32;
     parameters->csty |= 0x01;
 
@@ -92,7 +92,7 @@ int check_image_compliance(context_t *context, odcp_image_t *image) {
             if (!((image->w == 2048) | (image->h == 1080))) {
                 return DCP_FATAL;
             }
-	    break;
+        break;
         case DCP_CINEMA4K:
             if (!((image->w == 4096) | (image->h == 2160))) {
                 return DCP_FATAL;
@@ -108,26 +108,27 @@ int check_image_compliance(context_t *context, odcp_image_t *image) {
 int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_path) {
     odcp_image_t *odcp_image;
     int result;
-	
-	if (tmp_path == NULL) {
-		tmp_path = "./";
-	}
+
+    if (tmp_path == NULL) {
+        tmp_path = "./";
+    }
     dcp_log(LOG_DEBUG,"Reading input file %s",in_file);
      
-     #pragma omp critical
-     {	 
-         read_tif(&odcp_image, in_file,0);
-     }
-     if (!odcp_image) {
+    #pragma omp critical
+    {
+    read_tif(&odcp_image, in_file,0);
+    }
+
+    if (!odcp_image) {
         dcp_log(LOG_ERROR,"Unable to load tiff file %s",in_file);
         return DCP_FATAL;
-     }
+    }
 
-    // verify image is dci compliant 
-     if (check_image_compliance(context, odcp_image) != DCP_SUCCESS) {
-         dcp_log(LOG_ERROR,"Image %s is not DCI Compliant",in_file);
-         return DCP_FATAL;
-     }
+    /* verify image is dci compliant */
+    if (check_image_compliance(context, odcp_image) != DCP_SUCCESS) {
+        dcp_log(LOG_ERROR,"Image %s is not DCI Compliant",in_file);
+        return DCP_FATAL;
+    }
     
     if (context->xyz) {
         dcp_log(LOG_INFO,"RGB->XYZ color conversion %s",in_file);
@@ -141,14 +142,15 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
         char tempfile[255];
         int n = omp_get_thread_num(); 
         sprintf(tempfile,"%s/tmp%d%s",tmp_path,n,"file.tif");
-		result = write_tif(odcp_image,tempfile,0);
+        result = write_tif(odcp_image,tempfile,0);
         
-	if (result != DCP_SUCCESS) {
+        if (result != DCP_SUCCESS) {
             dcp_log(LOG_ERROR,"Writing temporary tif failed");
             return DCP_FATAL;
         }
-	result = encode_kakadu(context, tempfile, out_file, tmp_path);
-	if ( result != DCP_SUCCESS) {
+
+        result = encode_kakadu(context, tempfile, out_file, tmp_path);
+        if ( result != DCP_SUCCESS) {
             dcp_log(LOG_ERROR,"Kakadu JPEG2000 conversion failed %s",in_file);
             remove(tempfile);
             return DCP_FATAL;
@@ -174,8 +176,8 @@ int encode_kakadu(context_t *context, char *in_file, char *out_file) {
     int max_comp_size;
     char k_lengths[128];
     char cmd[512];
-	FILE *cmdfp = NULL;
-	
+    FILE *cmdfp = NULL;
+
     /* set the max image and component sizes based on frame_rate */
     max_cs_len = ((float)MAX_DCP_JPEG_BITRATE)/8/context->frame_rate;
     max_comp_size = ((float)max_cs_len)/1.25;

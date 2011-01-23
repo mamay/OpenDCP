@@ -239,7 +239,28 @@ extern "C" int read_asset_info(asset_t *asset)
             sprintf(asset->sample_rate,"%d %d",desc.AudioSamplingRate.Numerator,desc.AudioSamplingRate.Denominator);
         }
         break;
-        default:
+        case ESS_TIMED_TEXT:
+        { 
+            TimedText::MXFReader reader;
+            TimedText::TimedTextDescriptor desc;
+            result = reader.OpenRead(asset->filename);
+
+            if (ASDCP_FAILURE(result)) {
+                return DCP_FATAL;
+            }
+  
+            reader.FillTimedTextDescriptor(desc);
+            reader.FillWriterInfo(info);
+  
+            asset->essence_type   = essence_type;
+            asset->duration       = desc.ContainerDuration;
+            asset->entry_point    = 0;
+            asset->xml_ns         = info.LabelSetType;
+            sprintf(asset->uuid,"%.36s", Kumu::bin2UUIDhex(info.AssetUUID,16,uuid_buffer, 64));
+            sprintf(asset->edit_rate,"%d %d",desc.EditRate.Numerator,desc.EditRate.Denominator);
+      }
+      break;
+      default:
             return DCP_FATAL;
     }
  
