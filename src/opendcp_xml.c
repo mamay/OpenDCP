@@ -110,7 +110,7 @@ int write_cpl(context_t *context) {
         }
         /* Subtitle */
         if ( context->reel[x].MainSubtitle.essence_type ) {
-            fprintf(fp,"        <MainSound>\n");
+            fprintf(fp,"        <MainSubtitle>\n");
             fprintf(fp,"          <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSubtitle.uuid);
             fprintf(fp,"          <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainSubtitle.annotation);
             fprintf(fp,"          <EditRate>%s</EditRate>\n",context->reel[x].MainSubtitle.edit_rate);
@@ -120,7 +120,7 @@ int write_cpl(context_t *context) {
             if ( context->digest_flag ) {
                 fprintf(fp,"          <Hash>%s</Hash>\n",context->reel[x].MainSubtitle.digest);
             }
-            fprintf(fp,"        </MainSound>\n");
+            fprintf(fp,"        </MainSsubtitle>\n");
         }
 
         fprintf(fp,"      </AssetList>\n");
@@ -165,7 +165,7 @@ int write_pkl(context_t *context) {
     /* PKL XML Start */
     fprintf(fp,"%s\n",XML_HEADER);
     fprintf(fp,"<PackingList xmlns=\"%s\" xmlns:dsig=\"%s\">\n",NS_PKL[context->reel[0].MainPicture.xml_ns],DS_DSIG);
-    fprintf(fp,"  <Id>urn:uuid:%s</Id>\n",context->cpl.uuid);
+    fprintf(fp,"  <Id>urn:uuid:%s</Id>\n",context->pkl.uuid);
     fprintf(fp,"  <AnnotationText>%s</AnnotationText>\n",context->annotation);
     fprintf(fp,"  <IssueDate>%s</IssueDate>\n",context->timestamp);
     fprintf(fp,"  <Issuer>%s</Issuer>\n",context->issuer);
