@@ -149,15 +149,14 @@ int rgb_to_xyz(odcp_image_t *image) {
         //b = pow((image->comps[2].data[i]/bpc),in_gamma);
 
         /* use lookup table for speed */
-        r = lut_gamma[SRGB_GAMMA_SIMPLE][image->component[0].data[i]];
-        g = lut_gamma[SRGB_GAMMA_SIMPLE][image->component[1].data[i]];
-        b = lut_gamma[SRGB_GAMMA_SIMPLE][image->component[2].data[i]];
+        //r = lut_gamma[SRGB_GAMMA_SIMPLE][image->component[0].data[i]];
+        //g = lut_gamma[SRGB_GAMMA_SIMPLE][image->component[1].data[i]];
+        //b = lut_gamma[SRGB_GAMMA_SIMPLE][image->component[2].data[i]];
 
         /* complex sRGB gamma correction */
-        /*
-        r = image->comps[0].data[i]/bpc;
-        g = image->comps[1].data[i]/bpc;
-        b = image->comps[2].data[i]/bpc;
+        r = image->component[0].data[i]/bpc;
+        g = image->component[1].data[i]/bpc;
+        b = image->component[2].data[i]/bpc;
 
         if ( r > 0.04045) {
             r = pow((r+0.055)/1.055,in_gamma);
@@ -174,16 +173,15 @@ int rgb_to_xyz(odcp_image_t *image) {
         } else {
             b = b/12.92;
         }
-        */
 
-        x = pow((r*0.4124)+(g*0.3576)+(b*0.1805),out_gamma) * bpc;
-        y = pow((r*0.2126)+(g*0.7152)+(b*0.0722),out_gamma) * bpc;
-        z = pow((r*0.0193)+(g*0.1192)+(b*0.9505),out_gamma) * bpc;
+        x = pow((r*0.4124+g*0.3576+b*0.1805)*48/52.37,out_gamma) * bpc;
+        y = pow((r*0.2126+g*0.7152+b*0.0722)*48/52.37,out_gamma) * bpc;
+        z = pow((r*0.0193+g*0.1192+b*0.9505)*48/52.37,out_gamma) * bpc;
 
         /* clip any color greater than max bit depth (only z component) */
         image->component[0].data[i] = x;
         image->component[1].data[i] = y; 
-        image->component[2].data[i] = z>bpc?bpc:z;
+        image->component[2].data[i] = z;
     }
 
     return DCP_SUCCESS;

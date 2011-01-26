@@ -127,7 +127,7 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
     /* verify image is dci compliant */
     if (check_image_compliance(context, odcp_image) != DCP_SUCCESS) {
         dcp_log(LOG_ERROR,"Image %s is not DCI Compliant",in_file);
-        return DCP_FATAL;
+        //return DCP_FATAL;
     }
     
     if (context->xyz) {
