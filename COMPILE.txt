@@ -11,6 +11,7 @@ The program requires the following libraries.
   - LibXML2 (http://xmlsoft.org/)
   - LibXSLT (http://xmlsoft.org/)
   - LibXMLSec (http://www.aleksey.com/xmlsec/)
+  - LibTIFF (http://www.libtiff.org/)
   - OpenJPEG (http://www.openjpeg.org)
 
 Mac OS X and many linux distributions already have OpenSSL (libcrypto) installed.
