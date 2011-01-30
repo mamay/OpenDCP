@@ -180,7 +180,7 @@ int main (int argc, char **argv) {
             break;
 
             case 'k':
-               sprintf(context->kind,"%.10s",optarg);
+               sprintf(context->kind,"%.15s",optarg);
             break;
 
             case 'l':
