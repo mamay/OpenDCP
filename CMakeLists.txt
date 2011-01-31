@@ -2,6 +2,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT (OpenDCP)
 SET(CMAKE_BUILD_TYPE Release)
 
+include(ExternalProject)
+
 # Version
 SET(OpenDCP_VERSION_MAJOR 0)
 SET(OpenDCP_VERSION_MINOR 16)
@@ -19,6 +21,18 @@ MESSAGE(STATUS)
 MESSAGE(STATUS "-------------------------------------------------------------------------------")
 MESSAGE(STATUS "OpenDCP Version " ${OpenDCP_VERSION} " CMake - " ${OS})
 MESSAGE(STATUS "-------------------------------------------------------------------------------")
+
+MESSAGE(STATUS "Building ASCPLIB")
+
+IF(ASDCPLIB)
+ExternalProject_Add(ASDCPLIB
+    SOURCE_DIR "3rdparty/asdcplib-1.7.40"
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure --with-openssl --with-expat --enable-static --enable-largefile
+    BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
+    INSTALL_COMMAND ""
+)
+ENDIF(ASDCPLIB)
 
 # Compiler Flags
 SET(CMAKE_CXX_FLAGS "-O2 -D_FILE_OFFSET_BITS=64")
