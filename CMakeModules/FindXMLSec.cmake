@@ -8,7 +8,7 @@
 
 # Include dir
 find_path(XMLSEC_INCLUDE_DIR
-  NAMES xmlsec.h xmlsec/xmlsec.h
+  NAMES xmlsec.h xmlsec1
 )
 
 # Finally the library itself
