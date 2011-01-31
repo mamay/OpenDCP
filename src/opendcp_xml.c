@@ -244,7 +244,7 @@ int write_assetmap(context_t *context) {
     char filename[MAX_FILENAME_LENGTH];
     char uuid_s[40];
 
-    sprintf(filename,"ASSETMAP.xml");
+    sprintf(filename,"ASSETMAP");
 
     fp = fopen(filename, "w");
 
@@ -353,7 +353,7 @@ int write_volumeindex(context_t *context) {
     FILE *fp;
     char filename[MAX_FILENAME_LENGTH];
 
-    sprintf(filename,"VOLINDEX.xml");
+    sprintf(filename,"VOLINDEX");
 
     fp = fopen(filename, "w");
 
