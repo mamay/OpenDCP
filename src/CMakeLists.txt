@@ -37,6 +37,7 @@ MESSAGE(STATUS "----------------------------------------------------------------
 SET(COMMON_SRC opendcp_utils.c opendcp_log.c asdcp_intf.cpp)
 SET(IMG_SRC image/opendcp_tif.c image/opendcp_image.c)
 SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/build/")
+SET(LIBRARY_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/build/")
 
 ADD_EXECUTABLE(opendcp_xml opendcp_xml.c opendcp_xml_cmd.c opendcp_xml_sign.c ${COMMON_SRC})
 TARGET_LINK_LIBRARIES(opendcp_xml ${OPENDCP_LIBRARIES})
