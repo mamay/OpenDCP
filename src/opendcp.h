@@ -16,8 +16,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef _OPEN_DCP_H_
 #define _OPEN_DCP_H_
+
 
 #define MAX_REELS    30 /* Soft limit */
 #define MAX_PATH_LENGTH 4096 
@@ -235,3 +240,6 @@ char *base64(const unsigned char *data, int length);
 char *strip_cert(const char *data);
 char *strip_cert_file(char *filename);
 #endif // _OPEN_DCP_H_
+#ifdef __cplusplus
+}
+#endif
