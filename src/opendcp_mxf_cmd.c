@@ -342,10 +342,6 @@ int main (int argc, char **argv) {
         printf("Error!\n");
     }
 
-    if ( context != NULL) {
-        free(context);
-    }
-
     if ( filelist != NULL) {
         free(filelist);
     }
@@ -354,6 +350,10 @@ int main (int argc, char **argv) {
 
     if (context->log_level > 0) {
         printf("\n");
+    }
+
+    if ( context != NULL) {
+        free(context);
     }
 
     exit(0);
