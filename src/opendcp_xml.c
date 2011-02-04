@@ -123,16 +123,22 @@ int write_cpl(context_t *context) {
         fprintf(fp,"    </Reel>\n");
     }
     fprintf(fp,"  </ReelList>\n");
+
+#ifdef XMLSEC
     if (context->xml_sign) {
         write_dsig_template(context, fp);
     }
+#endif
+
     fprintf(fp,"</CompositionPlaylist>\n");
     fclose(fp);
 
+#ifdef XMLSEC
     /* sign the XML file */
     if (context->xml_sign) {
         xml_sign(context, filename);
     }
+#endif
 
     /* Store CPL file size */
     stat(filename, &st);
@@ -215,17 +221,23 @@ int write_pkl(context_t *context) {
     fprintf(fp,"      <Type>%s</Type>\n","text/xml");
     fprintf(fp,"    </Asset>\n");
     fprintf(fp,"  </AssetList>\n");
+
+#ifdef XMLSEC
     if (context->xml_sign) {
         write_dsig_template(context, fp);
     }
+#endif
+
     fprintf(fp,"</PackingList>\n");
 
     fclose(fp);
 
+#ifdef XMLSEC
     /* sign the XML file */
     if (context->xml_sign) {
         xml_sign(context, filename);
     }
+#endif
 
     /* Store PKL file size */
     stat(filename, &st);
