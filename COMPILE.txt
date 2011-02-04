@@ -8,9 +8,9 @@ The program requires the following libraries.
  
   - AS-DCP File Access Library (http://www.cinecert.com/asdcplib/)
   - OpenSSL (http://www.openssl.org/docs/crypto/crypto.html)
-  - LibXML2 (http://xmlsoft.org/)
-  - LibXSLT (http://xmlsoft.org/)
-  - LibXMLSec (http://www.aleksey.com/xmlsec/)
+  - LibXML2 (http://xmlsoft.org/) [optional - if you want XML signatures]
+  - LibXSLT (http://xmlsoft.org/) [optional - if you want XML signatures]
+  - LibXMLSec (http://www.aleksey.com/xmlsec/) [optional - if you want XML signatures]
   - LibTIFF (http://www.libtiff.org/)
   - OpenJPEG (http://www.openjpeg.org)
 
@@ -24,37 +24,37 @@ On Mac OSX, CMake is easily installed with MacPorts.
 
 Compile
 ------------
-Type 'cmake .'
-This will build the Makefiles for OpenDCP using dynamic libraries.
+It is recommended you perform an out-of-source build. This will prevent cluttering the source directory.
+This can be performed from anywhere, just give cmake the path to the root directory of the OpenDCP source.
 
-Type 'cmake -DSTATIC=1 .'
-This will build the Makefiles for OpenDCP using static libraries. See notes about static compiling.
+For example, if the OpenDCP source is in /home/opendcp, but you want to build in /home/opendcp-build
 
-Type 'make'
-This will compile the OpenDCP tools.
+# cd /home/opendcp-build
+# cmake /home/opendcp/
 
-You should end up with opendcp_xml, opendcp_j2k in the build directory.
+If you want to statically link OpenDCP, you can in the ENABLE_STATIC flag
+
+# cmake -DENABLE_STATIC=ON /home/opendcp
+
+Once cmake completes, you should have the necessary make files. To compile issue the make command.
+
+# make
+
+You should end up with opendcp_xml, opendcp_xml, opendcp_j2k in a directory called build.
 
 Install
 ------------
-There is no need to install, but there is an install option which installs into /usr/local/bin
+You can install OpenDCP so you can invoke the command from anywhere.
 
-Type 'make install'
+# make install
 
 Static Notes
 ------------
-Static libraries are included for OSX and WIN32. On Linux, you'll most likey want dynamically compile.
+Static libraries are included for OSX 10.6 64-bit and WIN32. In Linux or OSX 10.5.x you need to download
+compile, and install the appropiate libraries and compile dynamically. Most of the libraries, execpt AS-DCP
+can be install using your linux package manager or mac ports on OSX.
 
-The static libraries included were compiled as follows:
+The libraries included were compiled as follows:
 
 AS-DCP
-./configure --with-expat
-make
-
-OpenSSL
-./configure
-make
-
-OpenJPEG
-cmake .
-make
+./configure --with-expat --with-openssl
