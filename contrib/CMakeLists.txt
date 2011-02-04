@@ -54,7 +54,8 @@ EXTERNALPROJECT_ADD(03_XSLT
 EXTERNALPROJECT_ADD(04_EXPAT
     URL ${PROJECT_SOURCE_DIR}/contrib/expat-2.0.1.tar.gz
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix= ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS} --disable-dependency-tracking 
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix= ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
+                      --disable-dependency-tracking --enable-static=yes --enable-shared=no
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
 )
@@ -86,7 +87,8 @@ EXTERNALPROJECT_ADD(06_XMLSEC1
 EXTERNALPROJECT_ADD(07_ASDCPLIB
     URL ${PROJECT_SOURCE_DIR}/contrib/asdcplib-1.7.40.tar.gz
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND <SOURCE_DIR>/asdcplib-1.7.40/configure --prefix= ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS} --disable-dependency-tracking --with-openssl --with-expat
+    CONFIGURE_COMMAND <SOURCE_DIR>/asdcplib-1.7.40/configure --prefix= ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
+                       --disable-dependency-tracking --with-openssl --with-expat --enable-static=yes --enable-shared=no
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
 )
@@ -94,7 +96,8 @@ EXTERNALPROJECT_ADD(07_ASDCPLIB
 EXTERNALPROJECT_ADD(08_TIFF
     URL ${PROJECT_SOURCE_DIR}/contrib/tiff-3.9.4.tar.gz
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix= ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS} --disable-dependency-tracking 
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix= ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
+                      --disable-dependency-tracking --enable-static=yes --enable-shared=no
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
 )
