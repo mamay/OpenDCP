@@ -60,11 +60,13 @@ void dcp_usage() {
     fprintf(fp,"       -h | --help                    - show help\n");
     fprintf(fp,"       -v | --version                 - show version\n");
     fprintf(fp,"       -d | --digest                  - Generates digest (used to validate DCP asset integrity)\n");
+#ifdef XMLSEC
     fprintf(fp,"       -s | --sign                    - Writes XML digital signature\n");
     fprintf(fp,"       -1 | --root                    - root pem certificate used to sign XML files\n");
     fprintf(fp,"       -2 | --ca                      - ca (intermediate) pem certificate used to sign XML files\n");
     fprintf(fp,"       -3 | --signer                  - signer (leaf) pem certificate used to sign XML files\n");
     fprintf(fp,"       -p | --privatekey              - privae (signer) pem key used to sign XML files\n");
+#endif
     fprintf(fp,"       -i | --issuer <issuer>         - Issuer details\n");
     fprintf(fp,"       -c | --creator <creator>       - Creator details\n");
     fprintf(fp,"       -a | --annotation <annotation> - Asset annotations\n");
@@ -213,9 +215,12 @@ int main (int argc, char **argv) {
                reel_list[x++].asset_count = j--;
             break;
 
+#ifdef XMLSEC
             case 's':
                 context->xml_sign = 1;
+
             break;
+#endif
 
             case 't':
                sprintf(context->title,"%.80s",optarg);
