@@ -36,10 +36,10 @@ MESSAGE(STATUS "Creating Build Files")
 MESSAGE(STATUS "-------------------------------------------------------------------------------")
 
 #--Set opendcplib source files------------------------------------------------
-SET(OPENDCP_TARGET opendcp_xml opendcp_j2k opendcp_mxf)
+SET(OPENDCP_TARGETS opendcp_xml opendcp_j2k opendcp_mxf)
 SET(OPENDCP_SRC_FILES opendcp_j2k.c opendcp_xml.c  opendcp_utils.c opendcp_log.c asdcp_intf.cpp image/opendcp_tif.c image/opendcp_image.c)
 IF(ENABLE_XMLSEC)
-    SET(OPENDCP_TARGET ${OPENDCP_TARGETS} opendcp_xml_verify)
+    SET(OPENDCP_TARGETS ${OPENDCP_TARGETS} opendcp_xml_verify)
     SET(OPENCDP_SEC_FILES opendcp_xml_verify.c opendcp_xml_sign.c)
 ENDIF(ENABLE_XMLSEC)
 #-----------------------------------------------------------------------------
