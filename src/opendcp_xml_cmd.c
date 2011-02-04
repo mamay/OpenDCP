@@ -85,7 +85,7 @@ void dcp_usage() {
 
 int main (int argc, char **argv) {
     int c,j;
-    int x=0;
+    int reel_count=0;
     char uuid_s[40];
     char buffer[80];
     context_t *context;
@@ -210,9 +210,9 @@ int main (int argc, char **argv) {
                j = 0;
                optind--;
                while ( optind<argc && strncmp("-",argv[optind],1) != 0) {
-				   sprintf(reel_list[x].asset_list[j++].filename,"%s",argv[optind++]);
+				   sprintf(reel_list[reel_count].asset_list[j++].filename,"%s",argv[optind++]);
                }
-               reel_list[x++].asset_count = j--;
+               reel_list[reel_count++].asset_count = j--;
             break;
 
 #ifdef XMLSEC
@@ -260,6 +260,10 @@ int main (int argc, char **argv) {
 
     if (context->log_level > 0) {
         printf("\nOpenDCP XML %s %s\n\n",OPEN_DCP_VERSION,OPEN_DCP_COPYRIGHT);
+    }
+
+    if (reel_count < 1) {
+        dcp_fatal(context,"No reels supplied");
     }
 
     /* check cert files */
@@ -323,7 +327,7 @@ int main (int argc, char **argv) {
     }
 
     /* Add and validate reels */
-    for (c = 0;c<x;c++) {
+    for (c = 0;c<reel_count;c++) {
         if (add_reel(context, reel_list[c]) != DCP_SUCCESS) {
             sprintf(buffer,"Could not add reel %d to DCP\n",c+1); 
             dcp_fatal(context,buffer);
