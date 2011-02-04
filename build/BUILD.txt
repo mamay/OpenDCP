@@ -1,0 +1,2 @@
+To perform an out-of-source build of OpenDCP (recommended), run cmake from the build directory
+# cmake ../
