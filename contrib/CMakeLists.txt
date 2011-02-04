@@ -3,6 +3,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 INCLUDE(ExternalProject)
 
+SET(OPENDCP_URL "http://opendcp.org/opendcp_contrib")
+
 #EXTERNALPROJECT_ADD(00_ZLIB
 #    URL ${PROJECT_SOURCE_DIR}/contrib/zlib-1.2.5.tar.gz
 #    BUILD_IN_SOURCE 1
@@ -12,7 +14,8 @@ INCLUDE(ExternalProject)
 #)
 
 EXTERNALPROJECT_ADD(01_ICONV
-    URL ${PROJECT_SOURCE_DIR}/contrib/libiconv-1.13.1.tar.gz
+    URL ${OPENDCP_URL}/libiconv-1.13.1.tar.gz
+    #URL ${PROJECT_SOURCE_DIR}/contrib/libiconv-1.13.1.tar.gz
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${PROJECT_SOURCE_DIR}/build/contrib ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                        --disable-dependency-tracking --enable-static=yes --enable-shared=no 
@@ -71,10 +74,11 @@ EXTERNALPROJECT_ADD(06_XMLSEC1
     URL ${PROJECT_SOURCE_DIR}/contrib/xmlsec1-1.2.16.tar.gz
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix= ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
-                       --disable-dependency-tracking --enable-static=yes --enable-shared=no
-                       --with-libxml=${PROJECT_SOURCE_DIR}/build/contrib/
-                       --with-libxslt=${PROJECT_SOURCE_DIR}/build/contrib/
-                       --with-openssl=${PROJECT_SOURCE_DIR}/build/contrib/
+                      --disable-dependency-tracking --enable-static=yes --enable-shared=no
+                      --with-libxml=${PROJECT_SOURCE_DIR}/build/contrib/
+                      --with-libxslt=${PROJECT_SOURCE_DIR}/build/contrib/
+                      --with-openssl=${PROJECT_SOURCE_DIR}/build/contrib/
+                      --target=i386 --build=i386 --host=i386
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
 )
