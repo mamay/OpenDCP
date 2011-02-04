@@ -13,7 +13,7 @@ SET(OPENDCP_URL "http://opendcp.org/opendcp_contrib")
 #    INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
 #)
 
-ENDIF(ENABLE_XMLSEC)
+IF(ENABLE_XMLSEC)
 EXTERNALPROJECT_ADD(01_ICONV
     URL ${OPENDCP_URL}/libiconv-1.13.1.tar.gz
     #URL ${PROJECT_SOURCE_DIR}/contrib/libiconv-1.13.1.tar.gz
@@ -26,7 +26,6 @@ EXTERNALPROJECT_ADD(01_ICONV
     #INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
 )
 
-IF(ENABLE_XMLSEC)
 EXTERNALPROJECT_ADD(02_XML2
     URL ${PROJECT_SOURCE_DIR}/contrib/libxml2-2.7.8.tar.gz
     BUILD_IN_SOURCE 1
@@ -51,6 +50,7 @@ EXTERNALPROJECT_ADD(03_XSLT
                       --target=i386 --build=i386 --host=i386
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
+)
 
 EXTERNALPROJECT_ADD(06_XMLSEC1
     URL ${PROJECT_SOURCE_DIR}/contrib/xmlsec1-1.2.16.tar.gz
@@ -63,8 +63,6 @@ EXTERNALPROJECT_ADD(06_XMLSEC1
                       --target=i386 --build=i386 --host=i386
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
-)
-
 )
 ENDIF(ENABLE_XMLSEC)
 
@@ -80,7 +78,9 @@ EXTERNALPROJECT_ADD(04_EXPAT
 EXTERNALPROJECT_ADD(05_OPENSSL
     URL ${PROJECT_SOURCE_DIR}/contrib/openssl-1.0.0c.tar.gz
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND <SOURCE_DIR>/config --prefix=${PROJECT_SOURCE_DIR}/build/contrib
+    CONFIGURE_COMMAND <SOURCE_DIR>/config --prefix=${PROJECT_SOURCE_DIR}/build/contrib 
+                      #CFLAGS=-isysroot /Developer/SDKs/MacOSX10.5.sdk
+                      #CXXFLAGS=-isysroot /Developer/SDKs/MacOSX10.5.sdk
     #CONFIGURE_COMMAND <SOURCE_DIR>/config --prefix=${PROJECT_SOURCE_DIR}/build/contrib ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS} --disable-dependency-tracking 
     #CONFIGURE_COMMAND <SOURCE_DIR>/Configure darwin64-x86_64-cc --prefix=
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
