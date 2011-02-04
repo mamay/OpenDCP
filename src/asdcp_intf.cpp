@@ -28,10 +28,7 @@
 #include <assert.h>
 
 #include "asdcp_intf.h"
-
-extern "C" {
 #include "opendcp.h"
-}
 
 using namespace ASDCP;
 

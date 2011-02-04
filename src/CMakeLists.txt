@@ -24,9 +24,9 @@ IF(STATIC)
         SET(XML_SEC ${LIBXML_STATIC1} ${LIB_DIR}/libxmlsec1.a ${LIB_DIR}/libxmlsec1-openssl.a)
     ENDIF(WIN32)
     SET(STATIC_LIBRARIES ${ASDCP} ${OPENJPEG} ${OPENSSL} ${EXPAT} ${OPENMP} ${XML2} ${XML_SEC})
-    SET(OPENDCP_LIBRARIES ${STATIC_LIBRARIES} ${M_LIB} ${Z_LIB} ${LTDL_LIB}) 
+    SET(CONTRIB_LIBRARIES ${STATIC_LIBRARIES} ${M_LIB} ${Z_LIB} ${LTDL_LIB}) 
 ELSE(STATIC)
-    SET(OPENDCP_LIBRARIES ${OPENJPEG_LIBRARIES} ${ASDCP_LIBRARIES} ${OPENSSL_LIBRARIES} ${XMLSEC_LIBRARIES} ${LIBXML2_LIBRARIES} ${TIFF_LIBRARIES})
+    SET(CONTRIB_LIBRARIES ${OPENJPEG_LIBRARIES} ${ASDCP_LIBRARIES} ${OPENSSL_LIBRARIES} ${XMLSEC_LIBRARIES} ${LIBXML2_LIBRARIES} ${TIFF_LIBRARIES})
 ENDIF(STATIC)
 
 MESSAGE(STATUS)
@@ -36,27 +36,28 @@ MESSAGE(STATUS "----------------------------------------------------------------
 
 SET(COMMON_SRC opendcp_utils.c opendcp_log.c asdcp_intf.cpp)
 SET(IMG_SRC image/opendcp_tif.c image/opendcp_image.c)
-SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/build/")
-SET(LIBRARY_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/build/")
+SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/build/bin/")
+SET(LIBRARY_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/build/lib/")
+SET(OPENDCP_LIB "${PROJECT_SOURCE_DIR}/build/lib/libopendcp.a")
 
-ADD_EXECUTABLE(opendcp_xml opendcp_xml.c opendcp_xml_cmd.c opendcp_xml_sign.c ${COMMON_SRC})
-TARGET_LINK_LIBRARIES(opendcp_xml ${OPENDCP_LIBRARIES})
-
-ADD_EXECUTABLE(opendcp_xml_verify opendcp_xml_verify_cmd.c opendcp_xml_verify.c ${COMMON_SRC})
-TARGET_LINK_LIBRARIES(opendcp_xml_verify ${OPENDCP_LIBRARIES})
-
-ADD_EXECUTABLE(opendcp_j2k opendcp_j2k.c opendcp_j2k_cmd.c ${COMMON_SRC} ${IMG_SRC})
-TARGET_LINK_LIBRARIES(opendcp_j2k ${OPENDCP_LIBRARIES})
-
-ADD_EXECUTABLE(opendcp_mxf opendcp_mxf_cmd.c ${COMMON_SRC})
-TARGET_LINK_LIBRARIES(opendcp_mxf ${OPENDCP_LIBRARIES})
-
-INSTALL(TARGETS opendcp_xml opendcp_xml_verify opendcp_j2k opendcp_mxf 
-  DESTINATION ${OPENDCP_INSTALL_BIN_DIR} COMPONENT Applications
-)
-
-ADD_LIBRARY(opendcp opendcp_j2k.c opendcp_xml_verify.c opendcp_mxf_cmd.c opendcp_xml.c ${COMMON_SRC} ${IMG_SRC})
+ADD_LIBRARY(opendcp opendcp_j2k.c opendcp_xml.c opendcp_xml_verify.c opendcp_xml_sign.c ${COMMON_SRC} ${IMG_SRC})
 TARGET_LINK_LIBRARIES(opendcp ${OPENDCP_LIBRARIES})
 SET_TARGET_PROPERTIES(opendcp PROPERTIES VERSION "{OpenDCP_VERSION_MAJOR}.${OpenDCP_VERSION_MINOR}.0" SOVERSION 1)
 INSTALL(TARGETS opendcp DESTINATION lib)
 INSTALL(FILES opendcp.h DESTINATION include)
+
+ADD_EXECUTABLE(opendcp_xml opendcp_xml_cmd.c opendcp_force_cpp.cpp)
+TARGET_LINK_LIBRARIES(opendcp_xml ${CONTRIB_LIBRARIES} ${OPENDCP_LIB})
+
+ADD_EXECUTABLE(opendcp_xml_verify opendcp_xml_verify_cmd.c opendcp_force_cpp.cpp)
+TARGET_LINK_LIBRARIES(opendcp_xml_verify ${CONTRIB_LIBRARIES} ${OPENDCP_LIB})
+
+ADD_EXECUTABLE(opendcp_j2k opendcp_j2k_cmd.c opendcp_force_cpp.cpp)
+TARGET_LINK_LIBRARIES(opendcp_j2k ${CONTRIB_LIBRARIES} ${OPENDCP_LIB})
+
+ADD_EXECUTABLE(opendcp_mxf opendcp_mxf_cmd.c opendcp_force_cpp.cpp)
+TARGET_LINK_LIBRARIES(opendcp_mxf ${CONTRIB_LIBRARIES} ${OPENDCP_LIB})
+
+INSTALL(TARGETS opendcp_xml opendcp_xml_verify opendcp_j2k opendcp_mxf 
+  DESTINATION ${OPENDCP_INSTALL_BIN_DIR} COMPONENT Applications
+)

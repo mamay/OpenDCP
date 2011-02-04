@@ -21,11 +21,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <sys/stat.h>
-#include <openssl/x509.h>
-#include <openssl/bio.h>
-#include <openssl/pem.h>
 #include "opendcp.h"
-#include "opendcp_certificates.h"
 
 int write_cpl(context_t *context) {
     FILE *fp;
@@ -371,133 +367,6 @@ int write_volumeindex(context_t *context) {
     fprintf(fp,"</VolumeIndex>\n");
 
     fclose(fp);
-
-    return DCP_SUCCESS;
-}
-
-char *dn_oneline(X509_NAME *xn) {
-    BIO* bio;
-    int n;
-    char *result;
-    unsigned long flags = XN_FLAG_RFC2253;
-
-    if ((bio = BIO_new(BIO_s_mem())) == NULL) {
-        return NULL;
-    }
-
-    X509_NAME_print_ex(bio, xn, 0, flags);
-    n = BIO_pending(bio);
-    result = (char *)malloc(sizeof(char *) * (n+1));
-    n = BIO_read(bio, result, n);
-    result[n] = '\0';
-    BIO_free(bio);
-
-    return result;
-}
-
-int write_dsig_template(context_t *context, FILE *fp) {
-    BIO *bio[3];
-    X509 *x[3];
-    X509_NAME *issuer_xn[3];
-    X509_NAME *subject_xn[3];
-    char *cert[3];
-    int i;
-
-    if (context->xml_sign_certs) {
-        /* read certificates from file */
-        FILE *cp; 
-
-        cp = fopen(context->signer_cert_file,"rb");
-        if (cp) {
-            x[0] = PEM_read_X509(cp,NULL,NULL,NULL);
-            fclose(cp);
-        }
-        cp = fopen(context->ca_cert_file,"rb");
-        if (cp) {
-            x[1] = PEM_read_X509(cp,NULL,NULL,NULL);
-            fclose(cp);
-        }
-        cp = fopen(context->root_cert_file,"rb");
-        if (cp) {
-            x[2] = PEM_read_X509(cp,NULL,NULL,NULL);
-            fclose(cp);
-        }
-        cert[0] = strip_cert_file(context->signer_cert_file);
-        cert[1] = strip_cert_file(context->ca_cert_file);
-        cert[2] = strip_cert_file(context->root_cert_file);
-    } else {
-        /* read certificate from memory */
-        bio[0] = BIO_new_mem_buf((void *)opendcp_signer_cert, -1);
-        bio[1] = BIO_new_mem_buf((void *)opendcp_ca_cert, -1);
-        bio[2] = BIO_new_mem_buf((void *)opendcp_root_cert, -1);
-
-        /* save a copy with the BEGIN/END stripped */
-        cert[0] = strip_cert(opendcp_signer_cert);
-        cert[1] = strip_cert(opendcp_ca_cert);
-        cert[2] = strip_cert(opendcp_root_cert);
-
-        for (i=0;i<3;i++) {
-            if (bio[i] == NULL) {
-                dcp_log(LOG_ERROR,"Could allocate certificate from memory");
-                return DCP_FATAL;
-            }
-            x[i] = PEM_read_bio_X509(bio[i], NULL, NULL, NULL);
-            BIO_set_close(bio[i], BIO_NOCLOSE);
-
-            if (x[i] == NULL) {
-                dcp_log(LOG_ERROR,"Could not read certificate");
-                return DCP_FATAL;
-             }
-        }
-    }
-
-    /* get issuer, subject */
-    for (i=0;i<3;i++) {
-        issuer_xn[i]  =  X509_get_issuer_name(x[i]); 
-        subject_xn[i] =  X509_get_subject_name(x[i]); 
-        if (issuer_xn[i] == NULL || subject_xn[i] == NULL) {
-            dcp_log(LOG_ERROR,"Could not parse certificate data");
-            return DCP_FATAL;
-        }
-    }
-
-    /* signer */
-    fprintf(fp,"  <Signer>\n"); 
-    fprintf(fp,"    <dsig:X509Data>\n");
-    fprintf(fp,"      <dsig:X509IssuerSerial>\n");
-    fprintf(fp,"        <dsig:X509IssuerName>%s</dsig:X509IssuerName>\n",dn_oneline(issuer_xn[0]));
-    fprintf(fp,"        <dsig:X509SerialNumber>%ld</dsig:X509SerialNumber>\n",ASN1_INTEGER_get(X509_get_serialNumber(x[0])));
-    fprintf(fp,"      </dsig:X509IssuerSerial>\n");
-    fprintf(fp,"      <dsig:X509SubjectName>%s</dsig:X509SubjectName>\n",dn_oneline(subject_xn[0]));
-    fprintf(fp,"    </dsig:X509Data>\n");
-    fprintf(fp,"  </Signer>\n"); 
-
-    /* template */
-    fprintf(fp,"  <dsig:Signature>\n");
-    fprintf(fp,"    <dsig:SignedInfo>\n");
-    fprintf(fp,"      <dsig:CanonicalizationMethod Algorithm=\"%s\"/>\n",DS_CMA);
-    fprintf(fp,"      <dsig:SignatureMethod Algorithm=\"%s\"/>\n",DS_SMA[context->reel[0].MainPicture.xml_ns]);
-    fprintf(fp,"      <dsig:Reference URI=\"\">\n");
-    fprintf(fp,"        <dsig:Transforms>\n");
-    fprintf(fp,"          <dsig:Transform Algorithm=\"%s\"/>\n",DS_TMA);
-    fprintf(fp,"        </dsig:Transforms>\n");
-    fprintf(fp,"        <dsig:DigestMethod Algorithm=\"%s\"/>\n",DS_DMA);
-    fprintf(fp,"        <dsig:DigestValue/>\n");
-    fprintf(fp,"      </dsig:Reference>\n");
-    fprintf(fp,"    </dsig:SignedInfo>\n");
-    fprintf(fp,"    <dsig:SignatureValue/>\n");
-    fprintf(fp,"    <dsig:KeyInfo>\n");
-    for (i=0;i<3;i++) {
-        fprintf(fp,"      <dsig:X509Data>\n");
-        fprintf(fp,"        <dsig:X509IssuerSerial>\n");
-        fprintf(fp,"          <dsig:X509IssuerName>%s</dsig:X509IssuerName>\n",dn_oneline(issuer_xn[i]));
-        fprintf(fp,"          <dsig:X509SerialNumber>%ld</dsig:X509SerialNumber>\n",ASN1_INTEGER_get(X509_get_serialNumber(x[i])));
-        fprintf(fp,"        </dsig:X509IssuerSerial>\n");
-        fprintf(fp,"        <dsig:X509Certificate>%s</dsig:X509Certificate>\n",cert[i]);
-        fprintf(fp,"      </dsig:X509Data>\n");
-    }
-    fprintf(fp,"    </dsig:KeyInfo>\n");
-    fprintf(fp,"  </dsig:Signature>\n");
 
     return DCP_SUCCESS;
 }

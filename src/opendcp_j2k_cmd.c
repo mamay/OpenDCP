@@ -404,10 +404,6 @@ int main (int argc, char **argv) {
 
     if (context->log_level>0 && context->log_level<3) {progress_bar(count,filelist->file_count);}
 
-    if ( context != NULL) {
-        free(context);
-    }
-
     if ( filelist != NULL) {
         free(filelist);
     }
@@ -417,6 +413,10 @@ int main (int argc, char **argv) {
     }
 
     cleanup(context,0);
+
+    if ( context != NULL) {
+        free(context);
+    }
 
     exit(0);
 }

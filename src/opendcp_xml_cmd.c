@@ -341,12 +341,12 @@ int main (int argc, char **argv) {
 
     dcp_log(LOG_INFO,"DCP Complete");
 
-    if ( context != NULL) {
-        free(context);
-    }
-
     if (context->log_level > 0) {
         printf("\n");
+    }
+
+    if ( context != NULL) {
+        free(context);
     }
 
     exit(0);
