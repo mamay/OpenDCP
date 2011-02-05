@@ -50,6 +50,11 @@ int write_cpl(context_t *context) {
     fprintf(fp,"  <Creator>%s</Creator>\n",context->creator);
     fprintf(fp,"  <ContentTitleText>%s</ContentTitleText>\n",context->title);
     fprintf(fp,"  <ContentKind>%s</ContentKind>\n",context->kind);
+    fprintf(fp,"  <ContentVersion>\n");
+    fprintf(fp,"    <Id>%s_%s</Id>\n",context->cpl.uuid,context->timestamp);
+    fprintf(fp,"    <LabelText>%s_%s</LabelText>\n",context->cpl.uuid,context->timestamp);
+    fprintf(fp,"  </ContentVersion>\n");
+
     if(strcmp(context->rating,"")) {
         fprintf(fp,"  <RatingList>\n");
         fprintf(fp,"    <Agency>%s</Agency>\n",RATING_AGENCY[1]);
