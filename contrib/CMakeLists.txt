@@ -6,41 +6,50 @@ INCLUDE(ExternalProject)
 SET(OPENDCP_URL "http://opendcp.org/opendcp_contrib")
 
 #EXTERNALPROJECT_ADD(00_ZLIB
-#    URL ${PROJECT_SOURCE_DIR}/contrib/zlib-1.2.5.tar.gz
+#    URL ${OPENDCP_URL}/zlib-1.2.5.tar.gz
 #    BUILD_IN_SOURCE 1
-#    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${PROJECT_SOURCE_DIR}/build/contrib --static
+#    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${PROJECT_SOURCE_DIR}/build/contrib
+#                      ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
+#                      --static
 #    BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
-#    INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
+#    INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install
 #)
 
 IF(ENABLE_XMLSEC)
+#EXTERNALPROJECT_ADD(00_LTDL
+#    URL ${OPENDCP_URL}/libtool-2.4.tar.gz
+#    BUILD_IN_SOURCE 1
+#    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${PROJECT_SOURCE_DIR}/build/contrib ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
+#                       --disable-dependency-tracking --enable-static=yes --enable-shared=no 
+#                       target=i386
+#    BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
+#    INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install
+#)
+
 EXTERNALPROJECT_ADD(01_ICONV
     URL ${OPENDCP_URL}/libiconv-1.13.1.tar.gz
-    #URL ${PROJECT_SOURCE_DIR}/contrib/libiconv-1.13.1.tar.gz
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${PROJECT_SOURCE_DIR}/build/contrib ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                        --disable-dependency-tracking --enable-static=yes --enable-shared=no 
                        target=i386
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install
-    #INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
 )
 
 EXTERNALPROJECT_ADD(02_XML2
-    URL ${PROJECT_SOURCE_DIR}/contrib/libxml2-2.7.8.tar.gz
+    URL ${OPENDCP_URL}/libxml2-2.7.8.tar.gz
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${PROJECT_SOURCE_DIR}/build/contrib ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                       --disable-dependency-tracking --enable-static=yes --enable-shared=no
                       --target=i386
                       --with-iconv=${PROJECT_SOURCE_DIR}/build/contrib
-                      #LIBS=${PROJECT_SOURCE_DIR}/build/contrib/lib/libiconv.a
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install
     #INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
 )
 
 EXTERNALPROJECT_ADD(03_XSLT
-    URL ${PROJECT_SOURCE_DIR}/contrib/libxslt-1.1.26.tar.gz
+    URL ${OPENDCP_URL}/libxslt-1.1.26.tar.gz
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix= ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                       --disable-dependency-tracking --enable-static=yes --enable-shared=no
@@ -53,10 +62,13 @@ EXTERNALPROJECT_ADD(03_XSLT
 )
 
 EXTERNALPROJECT_ADD(06_XMLSEC1
-    URL ${PROJECT_SOURCE_DIR}/contrib/xmlsec1-1.2.16.tar.gz
+    URL ${OPENDCP_URL}/xmlsec1-1.2.16.tar.gz
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix= ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                       --disable-dependency-tracking --enable-static=yes --enable-shared=no
+                      #--enable-crypto-dl=no
+                      #--enable-apps-crypto-dl=no
+                      --enable-static-linking=yes
                       --with-libxml=${PROJECT_SOURCE_DIR}/build/contrib/
                       --with-libxslt=${PROJECT_SOURCE_DIR}/build/contrib/
                       --with-openssl=${PROJECT_SOURCE_DIR}/build/contrib/
