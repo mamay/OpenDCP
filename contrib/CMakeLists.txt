@@ -87,26 +87,32 @@ EXTERNALPROJECT_ADD(04_EXPAT
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
 )
 
+
+IF(APPLE)
+    IF(FORCE_I386)
+        SET(OPENSSL_CONFIGURE <SOURCE_DIR>/config --prefix=${PROJECT_SOURCE_DIR}/build/contrib)
+    ELSE()
+        SET(OPENSSL_CONFIGURE <SOURCE_DIR>/Configure darwin64-x86_64-cc --prefix=${PROJECT_SOURCE_DIR}/build/contrib)
+    ENDIF()
+ELSE()
+    SET(OPENSSL_CONFIGURE <SOURCE_DIR>/config --prefix=${PROJECT_SOURCE_DIR}/build/contrib)
+ENDIF()
 EXTERNALPROJECT_ADD(05_OPENSSL
     URL ${OPENDCP_URL}/openssl-1.0.0c.tar.gz
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND <SOURCE_DIR>/config --prefix=${PROJECT_SOURCE_DIR}/build/contrib 
-                      #CFLAGS=-isysroot /Developer/SDKs/MacOSX10.5.sdk
-                      #CXXFLAGS=-isysroot /Developer/SDKs/MacOSX10.5.sdk
-    #CONFIGURE_COMMAND <SOURCE_DIR>/config --prefix=${PROJECT_SOURCE_DIR}/build/contrib ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS} --disable-dependency-tracking 
-    #CONFIGURE_COMMAND <SOURCE_DIR>/Configure darwin64-x86_64-cc --prefix=
+    CONFIGURE_COMMAND ${OPENSSL_CONFIGURE}
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install
 )
 
 EXTERNALPROJECT_ADD(07_ASDCPLIB
     URL ${OPENDCP_URL}/asdcplib-1.7.40.tar.gz
-    #PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/asdcplib-1.7.40_configure.patch
+    PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/asdcplib-1.7.40_configure.patch
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND <SOURCE_DIR>/asdcplib-1.7.40/configure --prefix=
                       ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                       --disable-dependency-tracking
-                      #--with-openssl=${PROJECT_SOURCE_DIR}/build/contrib
+                      --with-openssl=${PROJECT_SOURCE_DIR}/build/contrib
                       --with-expat=${PROJECT_SOURCE_DIR}/build/contrib
                       --enable-static=yes --enable-shared=no
                       ${TARGET} 
