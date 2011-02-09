@@ -21,7 +21,7 @@ IF(ENABLE_XMLSEC)
 #    BUILD_IN_SOURCE 1
 #    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${PROJECT_SOURCE_DIR}/build/contrib ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
 #                       --disable-dependency-tracking --enable-static=yes --enable-shared=no 
-#                       target=i386
+#                       ${TARGET}
 #    BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
 #    INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install
 #)
@@ -31,7 +31,7 @@ EXTERNALPROJECT_ADD(01_ICONV
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${PROJECT_SOURCE_DIR}/build/contrib ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                        --disable-dependency-tracking --enable-static=yes --enable-shared=no 
-                       target=i386
+                       ${TARGET} 
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install
 )
@@ -41,8 +41,8 @@ EXTERNALPROJECT_ADD(02_XML2
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${PROJECT_SOURCE_DIR}/build/contrib ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                       --disable-dependency-tracking --enable-static=yes --enable-shared=no
-                      --target=i386
                       --with-iconv=${PROJECT_SOURCE_DIR}/build/contrib
+                       ${TARGET}
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install
     #INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
@@ -56,7 +56,7 @@ EXTERNALPROJECT_ADD(03_XSLT
                       --with-libxml-prefix=${PROJECT_SOURCE_DIR}/build/contrib/
                       --with-libxml-include-prefix=${PROJECT_SOURCE_DIR}/build/contrib/include/libxml2
                       --with-libxml-libs-prefix=${PROJECT_SOURCE_DIR}/build/contrib/lib
-                      --target=i386
+                      ${TARGET} 
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
 )
@@ -66,13 +66,13 @@ EXTERNALPROJECT_ADD(06_XMLSEC1
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix= ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                       --disable-dependency-tracking --enable-static=yes --enable-shared=no
-                      #--enable-crypto-dl=no
-                      #--enable-apps-crypto-dl=no
+                      --enable-crypto-dl=no
+                      --enable-apps-crypto-dl=no
                       --enable-static-linking=yes
                       --with-libxml=${PROJECT_SOURCE_DIR}/build/contrib/
                       --with-libxslt=${PROJECT_SOURCE_DIR}/build/contrib/
                       --with-openssl=${PROJECT_SOURCE_DIR}/build/contrib/
-                      --target=i386
+                      ${TARGET} 
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
 )
@@ -82,8 +82,7 @@ EXTERNALPROJECT_ADD(04_EXPAT
     URL ${OPENDCP_URL}/expat-2.0.1.tar.gz
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix= ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
-                      --disable-dependency-tracking --enable-static=yes --enable-shared=no
-                      --target=i386
+                      --disable-dependency-tracking --enable-static=yes --enable-shared=no ${TARGET}
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
 )
@@ -110,7 +109,7 @@ EXTERNALPROJECT_ADD(07_ASDCPLIB
                       #--with-openssl=${PROJECT_SOURCE_DIR}/build/contrib
                       --with-expat=${PROJECT_SOURCE_DIR}/build/contrib
                       --enable-static=yes --enable-shared=no
-                      --target=i386
+                      ${TARGET} 
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
 )
@@ -120,7 +119,7 @@ EXTERNALPROJECT_ADD(08_TIFF
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix= ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                       --disable-dependency-tracking --enable-static=yes --enable-shared=no
-                      --target=i386
+                      ${TARGET} 
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PROJECT_SOURCE_DIR}/build/contrib
 )
@@ -131,7 +130,7 @@ EXTERNALPROJECT_ADD(09_OpenJPEG
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${PROJECT_SOURCE_DIR}/build/contrib ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                       --disable-dependency-tracking --enable-static=yes --enable-shared=no --enable-png=no --enable-tiff=no
-                      --target=i386
+                      ${TARGET} 
     BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install
 )
