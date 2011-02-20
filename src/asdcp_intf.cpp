@@ -21,13 +21,13 @@
 #include <KM_prng.h>
 #include <KM_memio.h>
 #include <KM_util.h>
-#include <PCMParserList.h>
 #include <openssl/sha.h>
 
 #include <iostream>
 #include <assert.h>
 
 #include "asdcp_intf.h"
+#include "asdcp_intf_parserList.h"
 #include "opendcp.h"
 
 using namespace ASDCP;
