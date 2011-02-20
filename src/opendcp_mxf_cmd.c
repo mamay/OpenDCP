@@ -20,11 +20,9 @@
 #ifdef WIN32
 #include "win32/opendcp_win32_getopt.h"
 #include "win32/opendcp_win32_dirent.h"
-#include <omp-win32.h>
 #else
 #include <getopt.h>
 #include <dirent.h>
-#include <omp.h>
 #endif
 #include <stdlib.h>
 #include <stdio.h>
