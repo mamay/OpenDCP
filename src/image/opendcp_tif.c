@@ -27,6 +27,13 @@
 #include "opendcp_image.h"
 #include "opendcp_xyz.h"
 
+static inline int clip8(int value)
+{
+    if      (value < 0) return 0;
+    else if (value > 255) return 255;
+    else               return value;
+}
+
 int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
     TIFF *tif;
     tdata_t buf;
@@ -35,6 +42,7 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
     int index,w,h,image_size;
     unsigned short int bps = 0;
     unsigned short int photo = 0;
+    uint16 planar;
     odcp_image_t *image = 00;
 
     /* open tiff using filename or file descriptor */
@@ -53,36 +61,78 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
     TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &h);
     TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bps);
     TIFFGetField(tif, TIFFTAG_PHOTOMETRIC, &photo);
+    TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &planar);
 
     image_size = w * h;
-
-    if (photo == 2) {
-        /* create the image */
-        dcp_log(LOG_DEBUG,"allocating odcp image\n");
-        image = odcp_image_create(3,image_size);
+   
+    /* create the image */
+    dcp_log(LOG_DEBUG,"allocating odcp image\n");
+    image = odcp_image_create(3,image_size);
     
-        if(!image) {
-            TIFFClose(tif);
-            dcp_log(LOG_ERROR,"Failed to create image %s\n", infile);
-            return DCP_FATAL;
+    if(!image) {
+        TIFFClose(tif);
+        dcp_log(LOG_ERROR,"Failed to create image %s\n", infile);
+        return DCP_FATAL;
+    }
+
+    /* RGB color */
+    image->bpp          = 12;
+    image->precision    = 12;
+    image->n_components = 3;
+    image->signed_bit   = 0;
+    image->dx           = 1;
+    image->dy           = 1;
+    image->w            = w;
+    image->h            = h;
+
+    /* set image offset and reference grid */
+    image->x0 = 0;
+    image->y0 = 0;
+    image->x1 = !image->x0 ? (w - 1) * image->dx + 1 : image->x0 + (w - 1) * image->dx + 1;
+    image->y1 = !image->y0 ? (h - 1) * image->dy + 1 : image->y0 + (h - 1) * image->dy + 1;
+
+    if (photo == 6) {
+        int r,c;
+        uint32* raster;
+
+        raster = (uint32*) _TIFFmalloc(image_size * 2 * sizeof (uint32));
+        if (raster == NULL) {
+            dcp_log(LOG_ERROR,"could not allocate memory for raster");
+            return(DCP_FATAL);
         }
 
-        /* RGB color */
-        image->bpp          = 12;
-        image->precision    = 12;
-        image->n_components = 3;
-        image->signed_bit   = 0;
-        image->dx           = 1;
-        image->dy           = 1;
-        image->w            = w;
-        image->h            = h;
+        if (!TIFFReadRGBAImage(tif, w*2, h, raster, 0)) {
+            dcp_log(LOG_ERROR,"could not read tiff into memory");
+            return(DCP_FATAL);
+        }
+        TIFFClose(tif);
 
-        /* set image offset and reference grid */
-        image->x0 = 0;
-        image->y0 = 0;
-        image->x1 = !image->x0 ? (w - 1) * image->dx + 1 : image->x0 + (w - 1) * image->dx + 1;
-        image->y1 = !image->y0 ? (h - 1) * image->dy + 1 : image->y0 + (h - 1) * image->dy + 1;
+        index = 0;
+        unsigned char *img = (unsigned char *) raster;
+        for (r=h;r>0;r--) {
+            for (c=0;c<w;c+=3) {
+                int y,u,v;
+                int c,d,e;
+                int r,g,b;
+                y = img[r*w+c];
+                u = img[(r/2)*(w/2)+(c/2)+image_size];
+                v = img[(r/2)*(w/2)+(c/2)+image_size+(image_size/4)];
+                c = y-16; 
+                d = u-128;
+                e = v-128;
+                r = clip8(((298*c)+(409*e)+128)>>8); 
+                g = clip8(((298*c)-(100*d)-(208*e)+128)>>8);        
+                b = clip8(((298*c)+(516*d)+128)>>8);        
+                image->component[0].data[index] = r << 4; // R 
+                image->component[1].data[index] = g << 4; // G 
+                image->component[2].data[index] = b << 4; // B 
+                index++;
+            }
+        }
+        _TIFFfree(raster);
+    }
 
+    if (photo == 2) {
         buf = _TIFFmalloc(TIFFStripSize(tif));
         strip_size=0;
         strip_size=TIFFStripSize(tif);
