@@ -23,6 +23,27 @@
 #include <sys/stat.h>
 #include "opendcp.h"
 
+char *get_aspect_ratio(char *dimension_string) {
+    char *p, *s;
+    int n, d;
+    float a = 0.0;
+    char ratio[5];
+
+    s = ratio;
+    p = malloc(strlen(dimension_string)+1);
+    strcpy(p,dimension_string);
+    n = atoi(strsep(&p," "));
+    d = atoi(strsep(&p," "));
+    
+    if (d>0) {
+        a = (n * 1.00) / (d * 1.00);
+    }
+    
+    sprintf(ratio,"%-3.2f",a);
+
+    return(s);
+}
+
 int write_cpl(context_t *context) {
     FILE *fp;
     int x;
@@ -50,12 +71,15 @@ int write_cpl(context_t *context) {
     fprintf(fp,"  <Creator>%s</Creator>\n",context->creator);
     fprintf(fp,"  <ContentTitleText>%s</ContentTitleText>\n",context->title);
     fprintf(fp,"  <ContentKind>%s</ContentKind>\n",context->kind);
-    fprintf(fp,"  <ContentVersion>\n");
-    fprintf(fp,"    <Id>%s_%s</Id>\n",context->cpl.uuid,context->timestamp);
-    fprintf(fp,"    <LabelText>%s_%s</LabelText>\n",context->cpl.uuid,context->timestamp);
-    fprintf(fp,"  </ContentVersion>\n");
 
-    if(strcmp(context->rating,"")) {
+    if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
+        fprintf(fp,"  <ContentVersion>\n");
+        fprintf(fp,"    <Id>urn:uri:%s_%s</Id>\n",context->cpl.uuid,context->timestamp);
+        fprintf(fp,"    <LabelText>%s_%s</LabelText>\n",context->cpl.uuid,context->timestamp);
+        fprintf(fp,"  </ContentVersion>\n");
+    }
+
+    if (strcmp(context->rating,"")) {
         fprintf(fp,"  <RatingList>\n");
         fprintf(fp,"    <Agency>%s</Agency>\n",RATING_AGENCY[1]);
         fprintf(fp,"    <Label>%s</Label>\n",context->rating);
@@ -84,7 +108,11 @@ int write_cpl(context_t *context) {
             fprintf(fp,"          <IntrinsicDuration>%d</IntrinsicDuration>\n",context->reel[x].MainPicture.duration);
             fprintf(fp,"          <EntryPoint>%d</EntryPoint>\n",context->reel[x].MainPicture.entry_point);
             fprintf(fp,"          <Duration>%d</Duration>\n",context->reel[x].MainPicture.duration);
-            fprintf(fp,"          <ScreenAspectRatio>%s</ScreenAspectRatio>\n",context->reel[x].MainPicture.aspect_ratio);
+            if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
+                fprintf(fp,"          <ScreenAspectRatio>%s</ScreenAspectRatio>\n",context->reel[x].MainPicture.aspect_ratio);
+            } else {
+                fprintf(fp,"          <ScreenAspectRatio>%s</ScreenAspectRatio>\n",get_aspect_ratio(context->reel[x].MainPicture.aspect_ratio));
+            }
             fprintf(fp,"          <FrameRate>%s</FrameRate>\n",context->reel[x].MainPicture.frame_rate);
             if ( context->digest_flag ) {
                 fprintf(fp,"          <Hash>%s</Hash>\n",context->reel[x].MainPicture.digest);
@@ -185,33 +213,48 @@ int write_pkl(context_t *context) {
         if ( context->reel[x].MainPicture.essence_type ) {
             fprintf(fp,"    <Asset>\n");
             fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainPicture.uuid);
+            fprintf(fp,"      <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainPicture.annotation);
             if ( context->digest_flag ) {
                 fprintf(fp,"      <Hash>%s</Hash>\n",context->reel[x].MainPicture.digest);
             }
             fprintf(fp,"      <Size>%s</Size>\n",context->reel[x].MainPicture.size);
-            fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
+            if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
+                fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
+            } else {
+                fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Picture");
+            }
 	    fprintf(fp,"    </Asset>\n");
         }
         /* Main Sound */
         if ( context->reel[x].MainSound.essence_type ) {
             fprintf(fp,"    <Asset>\n");
             fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSound.uuid);
+            fprintf(fp,"      <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainSound.annotation);
             if ( context->digest_flag ) {
                 fprintf(fp,"      <Hash>%s</Hash>\n",context->reel[x].MainSound.digest);
             }
             fprintf(fp,"      <Size>%s</Size>\n",context->reel[x].MainSound.size);
-            fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
+            if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
+                fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
+            } else {
+                fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Sound");
+            }
 	    fprintf(fp,"    </Asset>\n");
         }
         /* Main Subtitle */
         if ( context->reel[x].MainSubtitle.essence_type ) {
             fprintf(fp,"    <Asset>\n");
             fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSubtitle.uuid);
+            fprintf(fp,"      <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainSubtitle.annotation);
             if ( context->digest_flag ) {
                 fprintf(fp,"      <Hash>%s</Hash>\n",context->reel[x].MainSubtitle.digest);
             }
             fprintf(fp,"      <Size>%s</Size>\n",context->reel[x].MainSubtitle.size);
-            fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
+            if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
+                fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
+            } else {
+                fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Subtitle");
+            }
 	    fprintf(fp,"    </Asset>\n");
         }
     }
@@ -223,7 +266,11 @@ int write_pkl(context_t *context) {
         fprintf(fp,"      <Hash>%s</Hash>\n",context->cpl.digest);
     }
     fprintf(fp,"      <Size>%s</Size>\n",context->cpl.size);
-    fprintf(fp,"      <Type>%s</Type>\n","text/xml");
+    if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
+        fprintf(fp,"      <Type>%s</Type>\n","text/xml");
+    } else {
+        fprintf(fp,"      <Type>%s</Type>\n","text/xml;asdcpKind=CPL");
+    }
     fprintf(fp,"    </Asset>\n");
     fprintf(fp,"  </AssetList>\n");
 
