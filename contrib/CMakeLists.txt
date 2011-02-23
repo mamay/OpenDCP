@@ -72,8 +72,8 @@ IF(DL_XMLSEC)
         BUILD_IN_SOURCE 1
         CONFIGURE_COMMAND <SOURCE_DIR>/configure ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                           --disable-dependency-tracking --enable-static=yes --enable-shared=no
-                          --enable-crypto-dl=no
-                          --enable-apps-crypto-dl=no
+                          --enable-crypto-dl=yes
+                          --enable-apps-crypto-dl=yes
                           --enable-static-linking=yes
                           --with-libxml=${PREFIX}
                           --with-libxslt=${PREFIX}
@@ -114,7 +114,8 @@ IF(DL_OPENSSL)
         BUILD_IN_SOURCE 1
         CONFIGURE_COMMAND ${OPENSSL_CONFIGURE}
         BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
-       INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install
+        #BUILD_COMMAND make "CFLAG=-arch i386 -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk" -f <SOURCE_DIR>/Makefile
+        INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install
     )
 ENDIF(DL_OPENSSL)
 
@@ -161,14 +162,14 @@ IF(DL_OPENJPEG)
     IF(PREFIX)
         SET(OPENJPEG_LIBRARIES "${PREFIX}/lib/libopenjpeg.a")
     ELSE()
-        SET(ASDCP_LIBRARIES "/usr/local/lib/openjpeg.a")
+        SET(OPENJPEG_LIBRARIES "/usr/lib/openjpeg.a")
     ENDIF()
 
     EXTERNALPROJECT_ADD(09_OpenJPEG
-        URL ${OPENDCP_URL}/openjpeg_v1_4_sources_r697_opendcp.tar.gz
-        #PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/openjpeg_v1_4_configure.patch
+        URL ${OPENDCP_URL}/openjpeg_v1_4_sources_r697.tar.gz
+        PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/openjpeg_v1_4_configure.patch
         BUILD_IN_SOURCE 1
-        CONFIGURE_COMMAND <SOURCE_DIR>/openjpeg_v1_4_sources_r697_opendcp/configure ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
+        CONFIGURE_COMMAND <SOURCE_DIR>/configure ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                           --disable-dependency-tracking --enable-static=yes --enable-shared=no --enable-png=no --enable-tiff=no
                           ${TARGET} 
         BUILD_COMMAND make -f <SOURCE_DIR>/Makefile

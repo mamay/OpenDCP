@@ -2,13 +2,14 @@ cmake_minimum_required(VERSION 2.8)
 
 #--Set Libraries--------------------------------------------------------------
 IF(ENABLE_STATIC)
-    SET(OPENSSL ${LIB_DIR}/libssl.a ${LIB_DIR}/libcrypto.a)
+    SET(OPENSSL -lssl -lcrypto)
+    #SET(OPENSSL ${LIB_DIR}/libssl.a ${LIB_DIR}/libcrypto.a)
     SET(ASDCP ${LIB_DIR}/libasdcp.a ${LIB_DIR}/libkumu.a)
     SET(OPENJPEG ${LIB_DIR}/libopenjpeg.a ${LIB_DIR}/libtiff.a)
     SET(EXPAT ${LIB_DIR}/libexpat.a)
     IF(ENABLE_XMLSEC)
         SET(XML2 ${LIB_DIR}/libiconv.a ${LIB_DIR}/libxslt.a ${LIB_DIR}/libxml2.a)
-        SET(XML_SEC ${XML2} ${LIB_DIR}/libxmlsec1.a ${LIB_DIR}/libxmlsec1-openssl.a)
+        SET(XML_SEC ${XML2} ${LIB_DIR}/libxmlsec1.a ${LIB_DIR}/libxmlsec1-openssl.a -lltdl)
     ENDIF(ENABLE_XMLSEC)
     SET(STATIC_LIBRARIES ${ASDCP} ${OPENJPEG} ${OPENSSL} ${EXPAT} ${OPENMP} ${XML2} ${XML_SEC})
     SET(CONTRIB_LIBRARIES ${STATIC_LIBRARIES} ${M_LIB} ${Z_LIB}) 
@@ -51,7 +52,7 @@ TARGET_LINK_LIBRARIES(opendcp_mxf ${OPENDCP_LIB} ${CONTRIB_LIBRARIES})
 
 IF(ENABLE_XMLSEC)
     ADD_EXECUTABLE(opendcp_xml_verify opendcp_xml_verify_cmd.c opendcp_force_cpp.cpp)
-    TARGET_LINK_LIBRARIES(opendcp_xml_verify ${CONTRIB_LIBRARIES} ${OPENDCP_LIB})
+    TARGET_LINK_LIBRARIES(opendcp_xml_verify ${OPENDCP_LIB} ${CONTRIB_LIBRARIES})
 ENDIF(ENABLE_XMLSEC)
 
 INSTALL(TARGETS ${OPENDCP_TARGETS} 
