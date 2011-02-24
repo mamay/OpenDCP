@@ -77,7 +77,7 @@ MESSAGE(STATUS "================================================================
 IF(NOT MSVC)
     #FIND_LIBRARY(M_LIB m REQUIRED)
     FIND_LIBRARY(Z_LIB z REQUIRED)
-    FIND_LIBRARY(LTDL_LIB ltdl REQUIRED)
+    #FIND_LIBRARY(LTDL_LIB ltdl REQUIRED)
 ENDIF(NOT MSVC)
 #-----------------------------------------------------------------------------
 

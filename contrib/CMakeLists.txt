@@ -75,6 +75,9 @@ IF(ENABLE_XMLSEC)
             CONFIGURE_COMMAND <SOURCE_DIR>/configure ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                               --enable-pkgconfig=no
                               --disable-dependency-tracking --enable-static=yes --enable-shared=no
+                              --enable-crypto-dl=no
+                              --enable-apps-crypto-dl=no
+                              --enable-static-linking=yes
                               --with-libxml=${PREFIX}
                               --with-libxslt=${PREFIX}
                               --with-openssl=${PREFIX}
