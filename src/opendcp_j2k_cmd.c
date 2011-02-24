@@ -80,7 +80,7 @@ void dcp_usage() {
     fprintf(fp,"       -3 | --3d                      - Adjust frame rate for 3D\n");
     fprintf(fp,"       -t | --threads <threads>       - Set number of threads (default 4)\n");
     fprintf(fp,"       -x | --no_xyz                  - do not perform rgb->xyz color conversion\n");
-    fprintf(fp,"       -e | --encoder <0 | 1>         - jpeg2000 encoder 0:openjpep 1:kakadu^ (default openjpeg)\n");
+    fprintf(fp,"       -e | --encoder <0 | 1>         - jpeg2000 encoder 0:openjpeg 1:kakadu^ (default openjpeg)\n");
     fprintf(fp,"       -q | --quality                 - image quality level 0-100 (default 100)\n");
     fprintf(fp,"       -l | --log_level <level>       - Sets the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
     fprintf(fp,"       -h | --help                    - show help\n");

@@ -24,12 +24,11 @@
 #include "opendcp.h"
 
 char *get_aspect_ratio(char *dimension_string) {
-    char *p, *s;
+    char *p, *ratio;
     int n, d;
     float a = 0.0;
-    char ratio[5];
 
-    s = ratio;
+    ratio = malloc(sizeof(char)*5);    
     p = malloc(strlen(dimension_string)+1);
     strcpy(p,dimension_string);
     n = atoi(strsep(&p," "));
@@ -41,7 +40,7 @@ char *get_aspect_ratio(char *dimension_string) {
     
     sprintf(ratio,"%-3.2f",a);
 
-    return(s);
+    return(ratio);
 }
 
 int write_cpl(context_t *context) {

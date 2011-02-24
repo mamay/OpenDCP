@@ -14,30 +14,34 @@ SET(OpenDCP_VERSION "${OpenDCP_VERSION_MAJOR}.${OpenDCP_VERSION_MINOR}")
 #--Options--------------------------------------------------------------------
 OPTION(ENABLE_XMLSEC "Enable XML digital singatures and security features" OFF)
 OPTION(ENABLE_STATIC "Enable static link to libraries" OFF)
-OPTION(FORCE_I386    "Force i386 (mostly for OSX)" OFF)
+OPTION(ENABLE_OSX386 "Force i386 and OSX10.5 compatibility" ON)
 
-IF(FORCE_I386)
+IF(ENABLE_XMLSEC)
+    SET(XMLSEC "-DXMLSEC=1")
+ENDIF()
+
+IF(ENABLE_OSX386)
     SET(ARCH "-arch i386")
     SET(TARGET "--target=i386")
-ENDIF(FORCE_I386)
+ENDIF()
 #-----------------------------------------------------------------------------
 
 #--Set Base Compiler Flags----------------------------------------------------
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 -fopenmp")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 -fopenmp")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 -fopenmp ${XMLSEC}")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 -fopenmp ${XMLSEC}")
 SET(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} "-Wl,-search_paths_first")
 #-----------------------------------------------------------------------------
 
 #--Set OS Specific Compiler Flags---------------------------------------------
 IF(APPLE)
     SET(OS "OS X")
-    IF(FORCE_I386)
+    IF(ENABLE_OSX386)
         SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ARCH} -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk")
         SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARCH} -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk")
         SET(AUTO_CFLAGS "CFLAGS=${ARCH} -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk")
         SET(AUTO_CXXFLAGS "CXXFLAGS=${ARCH} -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk")
         SET(AUTO_LDFLAGS "LDFLAGS=${ARCH} -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk -Wl,-search_paths_first")
-    ENDIF(FORCE_I386)
+    ENDIF()
 ELSEIF(WIN32)
     SET(OS "Win32")
     IF(MSVC)
