@@ -3,18 +3,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 INCLUDE(ExternalProject)
 
-IF(DL_ZLIB)
-    EXTERNALPROJECT_ADD(00_ZLIB
-        URL ${OPENDCP_URL}/zlib-1.2.5.tar.gz
-        BUILD_IN_SOURCE 1
-        CONFIGURE_COMMAND <SOURCE_DIR>/configure ${PREFIX_ARG}
-                          ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
-                          --static
-        BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
-        INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install
-    )
-ENDIF(DL_ZLIB)
-
 IF(ENABLE_XMLSEC)
     IF(DL_LTDL)
         EXTERNALPROJECT_ADD(00_LTDL
@@ -72,6 +60,7 @@ IF(ENABLE_XMLSEC)
         EXTERNALPROJECT_ADD(06_XMLSEC1
             URL ${OPENDCP_URL}/xmlsec1-1.2.16.tar.gz
             BUILD_IN_SOURCE 1
+            PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/xmlsec1-1.1.26.patch
             CONFIGURE_COMMAND <SOURCE_DIR>/configure ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                               --enable-pkgconfig=no
                               --disable-dependency-tracking --enable-static=yes --enable-shared=no
@@ -97,7 +86,6 @@ IF(DL_EXPAT)
                           --disable-dependency-tracking --enable-static=yes --enable-shared=no ${TARGET}
         BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
         INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install
-        #INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PREFIX}
     )
 ENDIF(DL_EXPAT)
 
@@ -117,13 +105,11 @@ IF(DL_OPENSSL)
     EXTERNALPROJECT_ADD(05_OPENSSL
         URL http://www.openssl.org/source/openssl-0.9.8r.tar.gz
         BUILD_IN_SOURCE 1
+        PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/openssl-0.9.8r.patch
         CONFIGURE_COMMAND ${OPENSSL_CONFIGURE}
         BUILD_COMMAND make ${OPENSSL_CFLAGS} ${OPENSSL_LDFLAGS} -f <SOURCE_DIR>/Makefile
         INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install
     )
-    SET(OPENSSL_INCLUDE_DIR "${PREFIX}/include")
-    LINK_DIRECTORIES("${PREFIX}/libs")
-    SET(OPENSSL_LIBRARIES ssl crypto)
 ENDIF(DL_OPENSSL)
 
 IF(DL_ASDCPLIB)
@@ -137,7 +123,7 @@ IF(DL_ASDCPLIB)
 
     EXTERNALPROJECT_ADD(07_ASDCPLIB
         URL ${OPENDCP_URL}/asdcplib-1.7.40.tar.gz
-        #PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/asdcplib-1.7.40_configure.patch
+        PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/asdcplib-1.7.40.patch
         BUILD_IN_SOURCE 1
         CONFIGURE_COMMAND <SOURCE_DIR>/configure ${PREFIX_ARG}
                           ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
@@ -148,11 +134,7 @@ IF(DL_ASDCPLIB)
                           ${TARGET} 
         BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
         INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install
-        #INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PREFIX}
     )
-    SET(ASDCP_INCLUDE_DIR "${PREFIX}/include")
-    LINK_DIRECTORIES("${PREFIX}/libs")
-    SET(ASDCP_LIBRARIES lasdcp lkumu)
 ENDIF(DL_ASDCPLIB)
 
 IF(DL_TIFF)
@@ -164,20 +146,13 @@ IF(DL_TIFF)
                           ${TARGET} 
         BUILD_COMMAND make -f <SOURCE_DIR>/Makefile
         INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install
-        #INSTALL_COMMAND make -f <SOURCE_DIR>/Makefile install DESTDIR=${PREFIX}
     )
 ENDIF(DL_TIFF)
 
 IF(DL_OPENJPEG)
-    IF(PREFIX)
-        SET(OPENJPEG_LIBRARIES "${PREFIX}/lib/libopenjpeg.a")
-    ELSE()
-        SET(OPENJPEG_LIBRARIES "/usr/lib/openjpeg.a")
-    ENDIF()
-
     EXTERNALPROJECT_ADD(09_OpenJPEG
         URL ${OPENDCP_URL}/openjpeg_v1_4_sources_r697.tar.gz
-        PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/openjpeg_v1_4_configure.patch
+        PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/openjpeg_v1_4.patch
         BUILD_IN_SOURCE 1
         CONFIGURE_COMMAND <SOURCE_DIR>/configure ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                           --disable-dependency-tracking --enable-static=yes --enable-shared=no --enable-png=no --enable-tiff=no

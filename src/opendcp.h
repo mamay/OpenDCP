@@ -34,7 +34,12 @@ extern "C" {
 #define MAX_DCP_JPEG_BITRATE 250000000  /* Maximum DCI compliant bit rate for JPEG2000 */
 #define MAX_DCP_MPEG_BITRATE  80000000  /* Maximum DCI compliant bit rate for MPEG */
 
-static const char *OPEN_DCP_VERSION   = "0.17"; 
+#ifdef OPENDCP_VERSION
+static const char *OPEN_DCP_VERSION   = OPENDCP_VERSION; 
+#else
+static const char *OPEN_DCP_VERSION   = "unknown"; 
+#endif
+
 static const char *OPEN_DCP_NAME      = "OpenDCP"; 
 static const char *OPEN_DCP_COPYRIGHT = "(c) 2010-2011 Terrence Meiczinger, All Rights Reserved."; 
 
