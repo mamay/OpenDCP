@@ -28,9 +28,9 @@ IF(ENABLE_XMLSEC)
     SET(OPENDCP_SEC_FILES opendcp_xml_verify.c opendcp_xml_sign.c)
 ENDIF(ENABLE_XMLSEC)
 #-----------------------------------------------------------------------------
-SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/build/bin/")
-SET(LIBRARY_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/build/lib/")
-SET(OPENDCP_LIB "${PROJECT_SOURCE_DIR}/build/lib/libopendcp.a")
+SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin/")
+SET(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib/")
+SET(OPENDCP_LIB "${PROJECT_BINARY_DIR}/lib/libopendcp.a")
 
 ADD_LIBRARY(opendcp STATIC ${OPENDCP_SEC_FILES} ${OPENDCP_SRC_FILES})
 TARGET_LINK_LIBRARIES(opendcp ${CONTRIB_LIBRARIES})
