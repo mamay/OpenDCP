@@ -218,7 +218,8 @@ typedef struct {
     int  reel_count;
     cpl_t cpl;
     pkl_t pkl;
-    reel_t reel[MAX_REELS]; 
+    reel_t reel[MAX_REELS];
+    int gamma;
 } context_t;
 
 void dcp_log(int level, const char *fmt, ...);
