@@ -21,11 +21,27 @@
 #include <stdio.h>
 #include <time.h>
 #include <sys/stat.h>
-#include <openssl/x509.h>
-#include <openssl/bio.h>
-#include <openssl/pem.h>
 #include "opendcp.h"
-#include "opendcp_certificates.h"
+
+char *get_aspect_ratio(char *dimension_string) {
+    char *p, *ratio;
+    int n, d;
+    float a = 0.0;
+
+    ratio = malloc(sizeof(char)*5);    
+    p = malloc(strlen(dimension_string)+1);
+    strcpy(p,dimension_string);
+    n = atoi(strsep(&p," "));
+    d = atoi(strsep(&p," "));
+    
+    if (d>0) {
+        a = (n * 1.00) / (d * 1.00);
+    }
+    
+    sprintf(ratio,"%-3.2f",a);
+
+    return(ratio);
+}
 
 int write_cpl(context_t *context) {
     FILE *fp;
@@ -54,7 +70,15 @@ int write_cpl(context_t *context) {
     fprintf(fp,"  <Creator>%s</Creator>\n",context->creator);
     fprintf(fp,"  <ContentTitleText>%s</ContentTitleText>\n",context->title);
     fprintf(fp,"  <ContentKind>%s</ContentKind>\n",context->kind);
-    if(strcmp(context->rating,"")) {
+
+    if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
+        fprintf(fp,"  <ContentVersion>\n");
+        fprintf(fp,"    <Id>urn:uri:%s_%s</Id>\n",context->cpl.uuid,context->timestamp);
+        fprintf(fp,"    <LabelText>%s_%s</LabelText>\n",context->cpl.uuid,context->timestamp);
+        fprintf(fp,"  </ContentVersion>\n");
+    }
+
+    if (strcmp(context->rating,"")) {
         fprintf(fp,"  <RatingList>\n");
         fprintf(fp,"    <Agency>%s</Agency>\n",RATING_AGENCY[1]);
         fprintf(fp,"    <Label>%s</Label>\n",context->rating);
@@ -83,7 +107,11 @@ int write_cpl(context_t *context) {
             fprintf(fp,"          <IntrinsicDuration>%d</IntrinsicDuration>\n",context->reel[x].MainPicture.duration);
             fprintf(fp,"          <EntryPoint>%d</EntryPoint>\n",context->reel[x].MainPicture.entry_point);
             fprintf(fp,"          <Duration>%d</Duration>\n",context->reel[x].MainPicture.duration);
-            fprintf(fp,"          <ScreenAspectRatio>%s</ScreenAspectRatio>\n",context->reel[x].MainPicture.aspect_ratio);
+            if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
+                fprintf(fp,"          <ScreenAspectRatio>%s</ScreenAspectRatio>\n",context->reel[x].MainPicture.aspect_ratio);
+            } else {
+                fprintf(fp,"          <ScreenAspectRatio>%s</ScreenAspectRatio>\n",get_aspect_ratio(context->reel[x].MainPicture.aspect_ratio));
+            }
             fprintf(fp,"          <FrameRate>%s</FrameRate>\n",context->reel[x].MainPicture.frame_rate);
             if ( context->digest_flag ) {
                 fprintf(fp,"          <Hash>%s</Hash>\n",context->reel[x].MainPicture.digest);
@@ -110,7 +138,7 @@ int write_cpl(context_t *context) {
         }
         /* Subtitle */
         if ( context->reel[x].MainSubtitle.essence_type ) {
-            fprintf(fp,"        <MainSound>\n");
+            fprintf(fp,"        <MainSubtitle>\n");
             fprintf(fp,"          <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSubtitle.uuid);
             fprintf(fp,"          <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainSubtitle.annotation);
             fprintf(fp,"          <EditRate>%s</EditRate>\n",context->reel[x].MainSubtitle.edit_rate);
@@ -120,23 +148,29 @@ int write_cpl(context_t *context) {
             if ( context->digest_flag ) {
                 fprintf(fp,"          <Hash>%s</Hash>\n",context->reel[x].MainSubtitle.digest);
             }
-            fprintf(fp,"        </MainSound>\n");
+            fprintf(fp,"        </MainSsubtitle>\n");
         }
 
         fprintf(fp,"      </AssetList>\n");
         fprintf(fp,"    </Reel>\n");
     }
     fprintf(fp,"  </ReelList>\n");
+
+#ifdef XMLSEC
     if (context->xml_sign) {
         write_dsig_template(context, fp);
     }
+#endif
+
     fprintf(fp,"</CompositionPlaylist>\n");
     fclose(fp);
 
+#ifdef XMLSEC
     /* sign the XML file */
     if (context->xml_sign) {
         xml_sign(context, filename);
     }
+#endif
 
     /* Store CPL file size */
     stat(filename, &st);
@@ -165,7 +199,7 @@ int write_pkl(context_t *context) {
     /* PKL XML Start */
     fprintf(fp,"%s\n",XML_HEADER);
     fprintf(fp,"<PackingList xmlns=\"%s\" xmlns:dsig=\"%s\">\n",NS_PKL[context->reel[0].MainPicture.xml_ns],DS_DSIG);
-    fprintf(fp,"  <Id>urn:uuid:%s</Id>\n",context->cpl.uuid);
+    fprintf(fp,"  <Id>urn:uuid:%s</Id>\n",context->pkl.uuid);
     fprintf(fp,"  <AnnotationText>%s</AnnotationText>\n",context->annotation);
     fprintf(fp,"  <IssueDate>%s</IssueDate>\n",context->timestamp);
     fprintf(fp,"  <Issuer>%s</Issuer>\n",context->issuer);
@@ -178,33 +212,48 @@ int write_pkl(context_t *context) {
         if ( context->reel[x].MainPicture.essence_type ) {
             fprintf(fp,"    <Asset>\n");
             fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainPicture.uuid);
+            fprintf(fp,"      <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainPicture.annotation);
             if ( context->digest_flag ) {
                 fprintf(fp,"      <Hash>%s</Hash>\n",context->reel[x].MainPicture.digest);
             }
             fprintf(fp,"      <Size>%s</Size>\n",context->reel[x].MainPicture.size);
-            fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
+            if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
+                fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
+            } else {
+                fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Picture");
+            }
 	    fprintf(fp,"    </Asset>\n");
         }
         /* Main Sound */
         if ( context->reel[x].MainSound.essence_type ) {
             fprintf(fp,"    <Asset>\n");
             fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSound.uuid);
+            fprintf(fp,"      <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainSound.annotation);
             if ( context->digest_flag ) {
                 fprintf(fp,"      <Hash>%s</Hash>\n",context->reel[x].MainSound.digest);
             }
             fprintf(fp,"      <Size>%s</Size>\n",context->reel[x].MainSound.size);
-            fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
+            if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
+                fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
+            } else {
+                fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Sound");
+            }
 	    fprintf(fp,"    </Asset>\n");
         }
         /* Main Subtitle */
         if ( context->reel[x].MainSubtitle.essence_type ) {
             fprintf(fp,"    <Asset>\n");
             fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSubtitle.uuid);
+            fprintf(fp,"      <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainSubtitle.annotation);
             if ( context->digest_flag ) {
                 fprintf(fp,"      <Hash>%s</Hash>\n",context->reel[x].MainSubtitle.digest);
             }
             fprintf(fp,"      <Size>%s</Size>\n",context->reel[x].MainSubtitle.size);
-            fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
+            if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
+                fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
+            } else {
+                fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Subtitle");
+            }
 	    fprintf(fp,"    </Asset>\n");
         }
     }
@@ -216,20 +265,30 @@ int write_pkl(context_t *context) {
         fprintf(fp,"      <Hash>%s</Hash>\n",context->cpl.digest);
     }
     fprintf(fp,"      <Size>%s</Size>\n",context->cpl.size);
-    fprintf(fp,"      <Type>%s</Type>\n","text/xml");
+    if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
+        fprintf(fp,"      <Type>%s</Type>\n","text/xml");
+    } else {
+        fprintf(fp,"      <Type>%s</Type>\n","text/xml;asdcpKind=CPL");
+    }
     fprintf(fp,"    </Asset>\n");
     fprintf(fp,"  </AssetList>\n");
+
+#ifdef XMLSEC
     if (context->xml_sign) {
         write_dsig_template(context, fp);
     }
+#endif
+
     fprintf(fp,"</PackingList>\n");
 
     fclose(fp);
 
+#ifdef XMLSEC
     /* sign the XML file */
     if (context->xml_sign) {
         xml_sign(context, filename);
     }
+#endif
 
     /* Store PKL file size */
     stat(filename, &st);
@@ -244,7 +303,7 @@ int write_assetmap(context_t *context) {
     char filename[MAX_FILENAME_LENGTH];
     char uuid_s[40];
 
-    sprintf(filename,"ASSETMAP.xml");
+    sprintf(filename,"ASSETMAP");
 
     fp = fopen(filename, "w");
 
@@ -353,7 +412,7 @@ int write_volumeindex(context_t *context) {
     FILE *fp;
     char filename[MAX_FILENAME_LENGTH];
 
-    sprintf(filename,"VOLINDEX.xml");
+    sprintf(filename,"VOLINDEX");
 
     fp = fopen(filename, "w");
 
@@ -371,133 +430,6 @@ int write_volumeindex(context_t *context) {
     fprintf(fp,"</VolumeIndex>\n");
 
     fclose(fp);
-
-    return DCP_SUCCESS;
-}
-
-char *dn_oneline(X509_NAME *xn) {
-    BIO* bio;
-    int n;
-    char *result;
-    unsigned long flags = XN_FLAG_RFC2253;
-
-    if ((bio = BIO_new(BIO_s_mem())) == NULL) {
-        return NULL;
-    }
-
-    X509_NAME_print_ex(bio, xn, 0, flags);
-    n = BIO_pending(bio);
-    result = (char *)malloc(sizeof(char *) * (n+1));
-    n = BIO_read(bio, result, n);
-    result[n] = '\0';
-    BIO_free(bio);
-
-    return result;
-}
-
-int write_dsig_template(context_t *context, FILE *fp) {
-    BIO *bio[3];
-    X509 *x[3];
-    X509_NAME *issuer_xn[3];
-    X509_NAME *subject_xn[3];
-    char *cert[3];
-    int i;
-
-    if (context->xml_sign_certs) {
-        /* read certificates from file */
-        FILE *cp; 
-
-        cp = fopen(context->signer_cert_file,"rb");
-        if (cp) {
-            x[0] = PEM_read_X509(cp,NULL,NULL,NULL);
-            fclose(cp);
-        }
-        cp = fopen(context->ca_cert_file,"rb");
-        if (cp) {
-            x[1] = PEM_read_X509(cp,NULL,NULL,NULL);
-            fclose(cp);
-        }
-        cp = fopen(context->root_cert_file,"rb");
-        if (cp) {
-            x[2] = PEM_read_X509(cp,NULL,NULL,NULL);
-            fclose(cp);
-        }
-        cert[0] = strip_cert_file(context->signer_cert_file);
-        cert[1] = strip_cert_file(context->ca_cert_file);
-        cert[2] = strip_cert_file(context->root_cert_file);
-    } else {
-        /* read certificate from memory */
-        bio[0] = BIO_new_mem_buf((void *)opendcp_signer_cert, -1);
-        bio[1] = BIO_new_mem_buf((void *)opendcp_ca_cert, -1);
-        bio[2] = BIO_new_mem_buf((void *)opendcp_root_cert, -1);
-
-        /* save a copy with the BEGIN/END stripped */
-        cert[0] = strip_cert(opendcp_signer_cert);
-        cert[1] = strip_cert(opendcp_ca_cert);
-        cert[2] = strip_cert(opendcp_root_cert);
-
-        for (i=0;i<3;i++) {
-            if (bio[i] == NULL) {
-                dcp_log(LOG_ERROR,"Could allocate certificate from memory");
-                return DCP_FATAL;
-            }
-            x[i] = PEM_read_bio_X509(bio[i], NULL, NULL, NULL);
-            BIO_set_close(bio[i], BIO_NOCLOSE);
-
-            if (x[i] == NULL) {
-                dcp_log(LOG_ERROR,"Could not read certificate");
-                return DCP_FATAL;
-             }
-        }
-    }
-
-    /* get issuer, subject */
-    for (i=0;i<3;i++) {
-        issuer_xn[i]  =  X509_get_issuer_name(x[i]); 
-        subject_xn[i] =  X509_get_subject_name(x[i]); 
-        if (issuer_xn[i] == NULL || subject_xn[i] == NULL) {
-            dcp_log(LOG_ERROR,"Could not parse certificate data");
-            return DCP_FATAL;
-        }
-    }
-
-    /* signer */
-    fprintf(fp,"  <Signer>\n"); 
-    fprintf(fp,"    <dsig:X509Data>\n");
-    fprintf(fp,"      <dsig:X509IssuerSerial>\n");
-    fprintf(fp,"        <dsig:X509IssuerName>%s</dsig:X509IssuerName>\n",dn_oneline(issuer_xn[0]));
-    fprintf(fp,"        <dsig:X509SerialNumber>%ld</dsig:X509SerialNumber>\n",ASN1_INTEGER_get(X509_get_serialNumber(x[0])));
-    fprintf(fp,"      </dsig:X509IssuerSerial>\n");
-    fprintf(fp,"      <dsig:X509SubjectName>%s</dsig:X509SubjectName>\n",dn_oneline(subject_xn[0]));
-    fprintf(fp,"    </dsig:X509Data>\n");
-    fprintf(fp,"  </Signer>\n"); 
-
-    /* template */
-    fprintf(fp,"  <dsig:Signature>\n");
-    fprintf(fp,"    <dsig:SignedInfo>\n");
-    fprintf(fp,"      <dsig:CanonicalizationMethod Algorithm=\"%s\"/>\n",DS_CMA);
-    fprintf(fp,"      <dsig:SignatureMethod Algorithm=\"%s\"/>\n",DS_SMA[context->reel[0].MainPicture.xml_ns]);
-    fprintf(fp,"      <dsig:Reference URI=\"\">\n");
-    fprintf(fp,"        <dsig:Transforms>\n");
-    fprintf(fp,"          <dsig:Transform Algorithm=\"%s\"/>\n",DS_TMA);
-    fprintf(fp,"        </dsig:Transforms>\n");
-    fprintf(fp,"        <dsig:DigestMethod Algorithm=\"%s\"/>\n",DS_DMA);
-    fprintf(fp,"        <dsig:DigestValue/>\n");
-    fprintf(fp,"      </dsig:Reference>\n");
-    fprintf(fp,"    </dsig:SignedInfo>\n");
-    fprintf(fp,"    <dsig:SignatureValue/>\n");
-    fprintf(fp,"    <dsig:KeyInfo>\n");
-    for (i=0;i<3;i++) {
-        fprintf(fp,"      <dsig:X509Data>\n");
-        fprintf(fp,"        <dsig:X509IssuerSerial>\n");
-        fprintf(fp,"          <dsig:X509IssuerName>%s</dsig:X509IssuerName>\n",dn_oneline(issuer_xn[i]));
-        fprintf(fp,"          <dsig:X509SerialNumber>%ld</dsig:X509SerialNumber>\n",ASN1_INTEGER_get(X509_get_serialNumber(x[i])));
-        fprintf(fp,"        </dsig:X509IssuerSerial>\n");
-        fprintf(fp,"        <dsig:X509Certificate>%s</dsig:X509Certificate>\n",cert[i]);
-        fprintf(fp,"      </dsig:X509Data>\n");
-    }
-    fprintf(fp,"    </dsig:KeyInfo>\n");
-    fprintf(fp,"  </dsig:Signature>\n");
 
     return DCP_SUCCESS;
 }

@@ -60,11 +60,13 @@ void dcp_usage() {
     fprintf(fp,"       -h | --help                    - show help\n");
     fprintf(fp,"       -v | --version                 - show version\n");
     fprintf(fp,"       -d | --digest                  - Generates digest (used to validate DCP asset integrity)\n");
+#ifdef XMLSEC
     fprintf(fp,"       -s | --sign                    - Writes XML digital signature\n");
     fprintf(fp,"       -1 | --root                    - root pem certificate used to sign XML files\n");
     fprintf(fp,"       -2 | --ca                      - ca (intermediate) pem certificate used to sign XML files\n");
     fprintf(fp,"       -3 | --signer                  - signer (leaf) pem certificate used to sign XML files\n");
     fprintf(fp,"       -p | --privatekey              - privae (signer) pem key used to sign XML files\n");
+#endif
     fprintf(fp,"       -i | --issuer <issuer>         - Issuer details\n");
     fprintf(fp,"       -c | --creator <creator>       - Creator details\n");
     fprintf(fp,"       -a | --annotation <annotation> - Asset annotations\n");
@@ -83,7 +85,7 @@ void dcp_usage() {
 
 int main (int argc, char **argv) {
     int c,j;
-    int x=0;
+    int reel_count=0;
     char uuid_s[40];
     char buffer[80];
     context_t *context;
@@ -180,7 +182,7 @@ int main (int argc, char **argv) {
             break;
 
             case 'k':
-               sprintf(context->kind,"%.10s",optarg);
+               sprintf(context->kind,"%.15s",optarg);
             break;
 
             case 'l':
@@ -208,14 +210,17 @@ int main (int argc, char **argv) {
                j = 0;
                optind--;
                while ( optind<argc && strncmp("-",argv[optind],1) != 0) {
-				   sprintf(reel_list[x].asset_list[j++].filename,"%s",argv[optind++]);
+				   sprintf(reel_list[reel_count].asset_list[j++].filename,"%s",argv[optind++]);
                }
-               reel_list[x++].asset_count = j--;
+               reel_list[reel_count++].asset_count = j--;
             break;
 
+#ifdef XMLSEC
             case 's':
                 context->xml_sign = 1;
+
             break;
+#endif
 
             case 't':
                sprintf(context->title,"%.80s",optarg);
@@ -255,6 +260,10 @@ int main (int argc, char **argv) {
 
     if (context->log_level > 0) {
         printf("\nOpenDCP XML %s %s\n\n",OPEN_DCP_VERSION,OPEN_DCP_COPYRIGHT);
+    }
+
+    if (reel_count < 1) {
+        dcp_fatal(context,"No reels supplied");
     }
 
     /* check cert files */
@@ -318,7 +327,7 @@ int main (int argc, char **argv) {
     }
 
     /* Add and validate reels */
-    for (c = 0;c<x;c++) {
+    for (c = 0;c<reel_count;c++) {
         if (add_reel(context, reel_list[c]) != DCP_SUCCESS) {
             sprintf(buffer,"Could not add reel %d to DCP\n",c+1); 
             dcp_fatal(context,buffer);
@@ -341,12 +350,12 @@ int main (int argc, char **argv) {
 
     dcp_log(LOG_INFO,"DCP Complete");
 
-    if ( context != NULL) {
-        free(context);
-    }
-
     if (context->log_level > 0) {
         printf("\n");
+    }
+
+    if ( context != NULL) {
+        free(context);
     }
 
     exit(0);

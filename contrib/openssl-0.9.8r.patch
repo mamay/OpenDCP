@@ -1,0 +1,11 @@
+--- Makefile.org	2010-01-27 11:06:36.000000000 -0500
++++ Makefile.org	2011-02-25 01:17:27.000000000 -0500
+@@ -615,7 +615,7 @@
+ dist_pem_h:
+ 	(cd crypto/pem; $(MAKE) -e $(BUILDENV) pem.h; $(MAKE) clean)
+ 
+-install: all install_docs install_sw
++install: all install_sw
+ 
+ install_sw:
+ 	@$(PERL) $(TOP)/util/mkdir-p.pl $(INSTALL_PREFIX)$(INSTALLTOP)/bin \

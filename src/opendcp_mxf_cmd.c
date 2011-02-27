@@ -20,11 +20,9 @@
 #ifdef WIN32
 #include "win32/opendcp_win32_getopt.h"
 #include "win32/opendcp_win32_dirent.h"
-#include <omp-win32.h>
 #else
 #include <getopt.h>
 #include <dirent.h>
-#include <omp.h>
 #endif
 #include <stdlib.h>
 #include <stdio.h>
@@ -342,10 +340,6 @@ int main (int argc, char **argv) {
         printf("Error!\n");
     }
 
-    if ( context != NULL) {
-        free(context);
-    }
-
     if ( filelist != NULL) {
         free(filelist);
     }
@@ -354,6 +348,10 @@ int main (int argc, char **argv) {
 
     if (context->log_level > 0) {
         printf("\n");
+    }
+
+    if ( context != NULL) {
+        free(context);
     }
 
     exit(0);
