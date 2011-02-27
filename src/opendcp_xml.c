@@ -23,6 +23,32 @@
 #include <sys/stat.h>
 #include "opendcp.h"
 
+#ifdef WIN32
+char *strsep (char **stringp, const char *delim) {
+    register char *s;
+    register const char *spanp;
+    register int c, sc;
+    char *tok;
+
+    if ((s = *stringp) == NULL)
+        return (NULL);
+    for (tok = s;;) {
+        c = *s++;
+        spanp = delim;
+        do {
+            if ((sc = *spanp++) == c) {
+                if (c == 0)
+                    s = NULL;
+                else
+                    s[-1] = 0;
+                *stringp = s;
+                return (tok);
+            }
+        } while (sc != 0);
+    }
+}
+#endif
+
 char *get_aspect_ratio(char *dimension_string) {
     char *p, *ratio;
     int n, d;
@@ -222,7 +248,7 @@ int write_pkl(context_t *context) {
             } else {
                 fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Picture");
             }
-	    fprintf(fp,"    </Asset>\n");
+            fprintf(fp,"    </Asset>\n");
         }
         /* Main Sound */
         if ( context->reel[x].MainSound.essence_type ) {
@@ -238,7 +264,7 @@ int write_pkl(context_t *context) {
             } else {
                 fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Sound");
             }
-	    fprintf(fp,"    </Asset>\n");
+            fprintf(fp,"    </Asset>\n");
         }
         /* Main Subtitle */
         if ( context->reel[x].MainSubtitle.essence_type ) {
@@ -254,7 +280,7 @@ int write_pkl(context_t *context) {
             } else {
                 fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Subtitle");
             }
-	    fprintf(fp,"    </Asset>\n");
+            fprintf(fp,"    </Asset>\n");
         }
     }
 
@@ -368,7 +394,7 @@ int write_assetmap(context_t *context) {
             fprintf(fp,"          <Length>%s</Length>\n",context->reel[x].MainPicture.size);
             fprintf(fp,"        </Chunk>\n");
             fprintf(fp,"      </ChunkList>\n");
-	    fprintf(fp,"    </Asset>\n");
+            fprintf(fp,"    </Asset>\n");
         }
         /* Main Sound */
         if ( context->reel[x].MainSound.essence_type ) {
@@ -382,7 +408,7 @@ int write_assetmap(context_t *context) {
             fprintf(fp,"          <Length>%s</Length>\n",context->reel[x].MainSound.size);
             fprintf(fp,"        </Chunk>\n");
             fprintf(fp,"      </ChunkList>\n");
-	    fprintf(fp,"    </Asset>\n");
+            fprintf(fp,"    </Asset>\n");
         }
         /* Main Subtitle */
         if ( context->reel[x].MainSubtitle.essence_type ) {
@@ -396,7 +422,7 @@ int write_assetmap(context_t *context) {
             fprintf(fp,"          <Length>%s</Length>\n",context->reel[x].MainSubtitle.size);
             fprintf(fp,"        </Chunk>\n");
             fprintf(fp,"      </ChunkList>\n");
-	    fprintf(fp,"    </Asset>\n");
+            fprintf(fp,"    </Asset>\n");
         }
     }
 
