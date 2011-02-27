@@ -19,7 +19,11 @@
 #ifdef WIN32
 #include "win32/opendcp_win32_getopt.h"
 #include "win32/opendcp_win32_dirent.h"
-#include <omp-win32.h>
+#  ifdef MSVC
+#    include <omp-win32.h>
+#   else
+#     include <omp.h>
+#  endif
 #else
 #include <getopt.h>
 #include <dirent.h>
@@ -76,7 +80,7 @@ void dcp_usage() {
     fprintf(fp,"       -3 | --3d                      - Adjust frame rate for 3D\n");
     fprintf(fp,"       -t | --threads <threads>       - Set number of threads (default 4)\n");
     fprintf(fp,"       -x | --no_xyz                  - do not perform rgb->xyz color conversion\n");
-    fprintf(fp,"       -e | --encoder <0 | 1>         - jpeg2000 encoder 0:openjpep 1:kakadu^ (default openjpeg)\n");
+    fprintf(fp,"       -e | --encoder <0 | 1>         - jpeg2000 encoder 0:openjpeg 1:kakadu^ (default openjpeg)\n");
     fprintf(fp,"       -q | --quality                 - image quality level 0-100 (default 100)\n");
     fprintf(fp,"       -l | --log_level <level>       - Sets the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
     fprintf(fp,"       -h | --help                    - show help\n");
@@ -208,7 +212,7 @@ int main (int argc, char **argv) {
     context_t *context;
     char *in_path = NULL;
     char *out_path = NULL;
-	char *tmp_path = NULL;
+    char *tmp_path = NULL;
     char dir_str[] = "tmpXXXXXX";
     filelist_t *filelist;
 
@@ -255,7 +259,7 @@ int main (int argc, char **argv) {
             {"threads",        required_argument, 0, 't'},
             {"encoder",        required_argument, 0, 'e'},
             {"no_xyz",         no_argument,       0, 'x'},
-            {"3d", 	       no_argument,       0, '3'},
+            {"3d",             no_argument,       0, '3'},
             {"version",        no_argument,       0, 'v'},
 	    {"tmp_dir",        required_argument, 0, 'm'},
 	    {"gamma",          no_argument,       0, 'g'},
@@ -379,7 +383,7 @@ int main (int argc, char **argv) {
 
     /* adjust frame rate for 3D */
     if (context->stereoscopic) {
-	context->frame_rate *=2;
+        context->frame_rate *=2;
     }
 
     if (context->log_level>0 && context->log_level<3) { progress_bar(0,0); }
@@ -409,10 +413,6 @@ int main (int argc, char **argv) {
 
     if (context->log_level>0 && context->log_level<3) {progress_bar(count,filelist->file_count);}
 
-    if ( context != NULL) {
-        free(context);
-    }
-
     if ( filelist != NULL) {
         free(filelist);
     }
@@ -422,6 +422,10 @@ int main (int argc, char **argv) {
     }
 
     cleanup(context,0);
+
+    if ( context != NULL) {
+        free(context);
+    }
 
     exit(0);
 }

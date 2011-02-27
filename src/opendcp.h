@@ -16,8 +16,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef _OPEN_DCP_H_
 #define _OPEN_DCP_H_
+
 
 #define MAX_REELS    30 /* Soft limit */
 #define MAX_PATH_LENGTH 4096 
@@ -29,7 +34,12 @@
 #define MAX_DCP_JPEG_BITRATE 250000000  /* Maximum DCI compliant bit rate for JPEG2000 */
 #define MAX_DCP_MPEG_BITRATE  80000000  /* Maximum DCI compliant bit rate for MPEG */
 
-static const char *OPEN_DCP_VERSION   = "0.16"; 
+#ifdef OPENDCP_VERSION
+static const char *OPEN_DCP_VERSION   = OPENDCP_VERSION; 
+#else
+static const char *OPEN_DCP_VERSION   = "unknown"; 
+#endif
+
 static const char *OPEN_DCP_NAME      = "OpenDCP"; 
 static const char *OPEN_DCP_COPYRIGHT = "(c) 2010-2011 Terrence Meiczinger, All Rights Reserved."; 
 
@@ -218,7 +228,7 @@ typedef struct {
     int  reel_count;
     cpl_t cpl;
     pkl_t pkl;
-    reel_t reel[MAX_REELS];
+    reel_t reel[MAX_REELS]; 
     int gamma;
 } context_t;
 
@@ -236,3 +246,6 @@ char *base64(const unsigned char *data, int length);
 char *strip_cert(const char *data);
 char *strip_cert_file(char *filename);
 #endif // _OPEN_DCP_H_
+#ifdef __cplusplus
+}
+#endif

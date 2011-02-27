@@ -33,8 +33,8 @@
 
 enum LUT_GAMMA_ENUM {
 	SRGB_GAMMA_SIMPLE = 0,
-	SRGB_GAMMA_COMPLEX = 1,
-        MAX_GAMMA = 2
+	SRGB_GAMMA_COMPLEX,
+        MAX_GAMMA
 };
 
 static float *lut_gamma[MAX_GAMMA];

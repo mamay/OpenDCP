@@ -193,7 +193,7 @@ int rgb_to_xyz(odcp_image_t *image, int gamma) {
         /* clip any color greater than max bit depth (only z component) */
         image->component[0].data[i] = x;
         image->component[1].data[i] = y; 
-        image->component[2].data[i] = z>bpc?bpc:z;
+        image->component[2].data[i] = z;
     }
 
     return DCP_SUCCESS;
