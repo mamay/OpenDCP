@@ -7,11 +7,12 @@ IF(ENABLE_STATIC)
     SET(OPENJPEG -L${LIB_DIR} -lopenjpeg -ltiff)
     SET(EXPAT -L${LIB_DIR} -lexpat)
     IF(ENABLE_XMLSEC)
-        SET(XML_SEC -L${LIB_DIR} -liconv -lxml2 -lxslt -lxmlsec1 -lxmlsec1-openssl)
+        SET(XMLSEC1 -L${LIB_DIR} -liconv -lxml2 -lxslt -lxmlsec1 -lxmlsec1-openssl)
     ENDIF(ENABLE_XMLSEC)
-    SET(CONTRIB_LIBRARIES ${ASDCP} ${OPENJPEG} ${OPENSSL} ${EXPAT} ${XML_SEC} ${Z_LIB})
+    SET(CONTRIB_LIBRARIES ${ASDCP} ${OPENJPEG} ${OPENSSL} ${EXPAT} ${XMLSEC1} ${Z_LIB})
 ELSE()
-    SET(CONTRIB_LIBRARIES ${OPENJPEG_LIBRARIES} ${ASDCP_LIBRARIES} ${OPENSSL_LIBRARIES} ${XMLSEC1_LIBRARIES} ${LIBXML2_LIBRARIES} ${TIFF_LIBRARIES} ${EXPAT_LIBRARIES})
+    SET(CONTRIB_LIBRARIES ${OPENJPEG_LIBRARIES} ${ASDCP_LIBRARIES} ${OPENSSL_LIBRARIES} ${LIBXML2_LIBRARIES} ${XMLSEC1_LIBRARIES} ${TIFF_LIBRARIES} ${EXPAT_LIBRARIES} ${Z_LIB} ${JPEG_LIBRARIES})
+    #SET(CONTRIB_LIBRARIES ${OPENJPEG_LIBRARIES} ${ASDCP_LIBRARIES} ${OPENSSL_LIBRARIES} ${LIBXML2_LIBRARIES} -lxmlsec1 -lxmlsec1-openssl ${TIFF_LIBRARIES} ${EXPAT_LIBRARIES} ${Z_LIB} ${JPEG_LIBRARIES})
 ENDIF()
 #-----------------------------------------------------------------------------
 
@@ -22,7 +23,7 @@ MESSAGE(STATUS "----------------------------------------------------------------
 
 #--Set opendcplib source files------------------------------------------------
 SET(OPENDCP_TARGETS opendcp_xml opendcp_j2k opendcp_mxf)
-SET(OPENDCP_SRC_FILES opendcp_j2k.c opendcp_xml.c  opendcp_utils.c opendcp_log.c asdcp_intf.cpp image/opendcp_tif.c image/opendcp_image.c)
+SET(OPENDCP_SRC_FILES opendcp_j2k.c opendcp_xml.c opendcp_utils.c opendcp_log.c asdcp_intf.cpp image/opendcp_tif.c image/opendcp_image.c)
 IF(ENABLE_XMLSEC)
     SET(OPENDCP_TARGETS ${OPENDCP_TARGETS} opendcp_xml_verify)
     SET(OPENDCP_SEC_FILES opendcp_xml_verify.c opendcp_xml_sign.c)

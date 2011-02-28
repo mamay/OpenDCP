@@ -7,7 +7,7 @@ INCLUDE(ExternalProject)
 IF(MINGW)
     SET(CONFIGURE "mingw32-configure")
     SET(MAKE "mingw32-make")
-    SET(INSTALL_DIR DESTDIR=${PREFIX})
+    #SET(INSTALL_DIR DESTDIR=${PREFIX})
 ELSE()
     SET(CONFIGURE "<SOURCE_DIR>/configure")
     SET(MAKE "make")
@@ -15,7 +15,7 @@ ENDIF()
 
 IF(ENABLE_XMLSEC)
     EXTERNALPROJECT_ADD(00_LTDL
-    URL ${OPENDCP_URL}/libtool-2.4.tar.gz
+    URL http://ftp.gnu.org/gnu/libtool/libtool-2.4.tar.gz
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                       --disable-dependency-tracking --enable-static=yes --enable-shared=no 
@@ -40,6 +40,7 @@ IF(ENABLE_XMLSEC)
         CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                           --disable-dependency-tracking --enable-static=yes --enable-shared=no
                           --with-iconv=${PREFIX}
+                          --with-threads=off
                           ${TARGET}
         BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
         INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}

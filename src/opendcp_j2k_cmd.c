@@ -19,17 +19,13 @@
 #ifdef WIN32
 #include "win32/opendcp_win32_getopt.h"
 #include "win32/opendcp_win32_dirent.h"
-#  ifdef MSVC
-#    include <omp-win32.h>
-#   else
-#     include <omp.h>
-#  endif
 #else
 #include <getopt.h>
 #include <dirent.h>
 #include <omp.h>
 #include <signal.h>
 #endif
+#include <omp.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -382,9 +378,15 @@ int main (int argc, char **argv) {
     }
 
     if (context->log_level>0 && context->log_level<3) { progress_bar(0,0); }
-    omp_set_num_threads(context->threads);
 
-    #pragma omp parallel for
+/* bug in gcc openmp win32, so disable multiple threads */
+#ifdef WIN32
+    omp_set_num_threads(1);
+#else
+    omp_set_num_threads(context->threads);
+#endif
+
+    #pragma omp parallel for private(c)
     for (c=0;c<filelist->file_count;c++) {    
         #pragma omp flush(SIGINT_received)
         if (!SIGINT_received) {
