@@ -22,16 +22,6 @@ IF(ENABLE_XMLSEC)
 ENDIF()
 #-----------------------------------------------------------------------------
 
-#--Options--------------------------------------------------------------------
-OPTION(ENABLE_XMLSEC "Enable XML digital singatures and security features" OFF)
-OPTION(ENABLE_STATIC "Enable static link to libraries" OFF)
-OPTION(ENABLE_OSX386 "Force i386 and OSX10.5 compatibility" ON)
-
-IF(ENABLE_XMLSEC)
-    ADD_DEFINITIONS(-DXMLSEC)
-ENDIF()
-#-----------------------------------------------------------------------------
-
 #--Set Base Compiler Flags----------------------------------------------------
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 -fopenmp")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 -fopenmp")
@@ -44,8 +34,8 @@ IF(APPLE)
     IF(ENABLE_OSX386)
         SET(ARCH "-arch i386")
         SET(TARGET "--target=i386")
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ARCH} -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk -Wl,-search_paths_first")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARCH} -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk -Wl,-search_paths_first")
+        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ARCH} -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARCH} -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk")
         SET(AUTO_CFLAGS "CFLAGS=${ARCH} -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk")
         SET(AUTO_CXXFLAGS "CXXFLAGS=${ARCH} -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk")
         SET(AUTO_LDFLAGS "LDFLAGS=${ARCH} -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk -Wl,-search_paths_first")
@@ -110,10 +100,13 @@ ELSE()
     FIND_PACKAGE(OpenJPEG REQUIRED)
 ENDIF()
 #-----------------------------------------------------------------------------
+
+#--Add xmlsec directories (workaround)----------------------------------------
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${LIBXSLT_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${XMLSEC1_INCLUDE_DIR})
 INCLUDE_DIRECTORIES("/usr/include/xmlsec1")
+
 #--Add source directory-------------------------------------------------------
 ADD_SUBDIRECTORY(src)
 #-----------------------------------------------------------------------------

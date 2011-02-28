@@ -29,14 +29,22 @@ IF(ENABLE_XMLSEC)
     SET(OPENDCP_SEC_FILES opendcp_xml_verify.c opendcp_xml_sign.c)
 ENDIF(ENABLE_XMLSEC)
 #-----------------------------------------------------------------------------
+
+#--Set output targets and paths-----------------------------------------------
+SET(OPENDCP_TARGETS opendcp_xml opendcp_j2k opendcp_mxf)
 SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin/")
 SET(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib/")
 SET(OPENDCP_LIB "${PROJECT_BINARY_DIR}/lib/libopendcp.a")
+#-----------------------------------------------------------------------------
 
+#--opendcplib-----------------------------------------------------------------
 ADD_LIBRARY(opendcp STATIC ${OPENDCP_SEC_FILES} ${OPENDCP_SRC_FILES})
 TARGET_LINK_LIBRARIES(opendcp ${CONTRIB_LIBRARIES})
 INSTALL(TARGETS opendcp DESTINATION lib)
 INSTALL(FILES opendcp.h DESTINATION include)
+#-----------------------------------------------------------------------------
+
+#--opendcp tools--------------------------------------------------------------
 ADD_EXECUTABLE(opendcp_xml opendcp_xml_cmd.c opendcp_force_cpp.cpp)
 TARGET_LINK_LIBRARIES(opendcp_xml ${OPENDCP_LIB} ${CONTRIB_LIBRARIES})
 
@@ -50,7 +58,10 @@ IF(ENABLE_XMLSEC)
     ADD_EXECUTABLE(opendcp_xml_verify opendcp_xml_verify_cmd.c opendcp_force_cpp.cpp)
     TARGET_LINK_LIBRARIES(opendcp_xml_verify ${OPENDCP_LIB} ${CONTRIB_LIBRARIES})
 ENDIF(ENABLE_XMLSEC)
+#-----------------------------------------------------------------------------
 
+#--install tools--------------------------------------------------------------
 INSTALL(TARGETS ${OPENDCP_TARGETS} 
   DESTINATION ${OPENDCP_INSTALL_BIN_DIR} COMPONENT Applications
 )
+#-----------------------------------------------------------------------------

@@ -1,7 +1,6 @@
 # Third Party Libraries
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-
 INCLUDE(ExternalProject)
 
 IF(MINGW)
