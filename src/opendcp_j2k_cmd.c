@@ -22,7 +22,6 @@
 #else
 #include <getopt.h>
 #include <dirent.h>
-#include <omp.h>
 #include <signal.h>
 #endif
 #include <omp.h>
@@ -80,6 +79,7 @@ void dcp_usage() {
     fprintf(fp,"       -q | --quality                 - image quality level 0-100 (default 100)\n");
     fprintf(fp,"       -l | --log_level <level>       - Sets the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
     fprintf(fp,"       -h | --help                    - show help\n");
+    fprintf(fp,"       -g | --gamma                   - select LUT gamma, 0:simple,1:complex\n");
     fprintf(fp,"       -v | --version                 - show version\n");
     fprintf(fp,"       -m | --tmp_dir                 - sets temporary directory (usually tmpfs one) to save there temporary tiffs for Kakadu");
     fprintf(fp,"\n\n");
@@ -257,13 +257,14 @@ int main (int argc, char **argv) {
             {"3d",             no_argument,       0, '3'},
             {"version",        no_argument,       0, 'v'},
             {"tmp_dir",        required_argument, 0, 'm'},
+            {"gamma",          no_argument,       0, 'g'},
             {0, 0, 0, 0}
         };
 
         /* getopt_long stores the option index here. */
         int option_index = 0;
      
-        c = getopt_long (argc, argv, "e:i:o:r:p:q:l:t:m:3hvx",
+        c = getopt_long (argc, argv, "e:i:o:r:p:q:l:t:m:g:3hvx",
                          long_options, &option_index);
      
         /* Detect the end of the options. */
@@ -318,7 +319,7 @@ int main (int argc, char **argv) {
             case 'e':
                context->encoder = atoi(optarg);
                if (context->encoder == J2K_KAKADU) {
-                   result = system("kdu_compress -u >& /dev/null");
+                   result = system("kdu_compress -u >/dev/null 2>&1");
                    if (result>>8 != 0) {
                        dcp_fatal(context,"kdu_compress was not found. Either add to path or remove -e 1 flag");
                    }
@@ -346,6 +347,9 @@ int main (int argc, char **argv) {
 
             case 'm':
                 tmp_path = optarg;
+            break;
+            case 'g':
+                context->gamma = atoi(optarg);
             break;
         }
     }

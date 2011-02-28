@@ -22,6 +22,16 @@ IF(ENABLE_XMLSEC)
 ENDIF()
 #-----------------------------------------------------------------------------
 
+#--Options--------------------------------------------------------------------
+OPTION(ENABLE_XMLSEC "Enable XML digital singatures and security features" OFF)
+OPTION(ENABLE_STATIC "Enable static link to libraries" OFF)
+OPTION(ENABLE_OSX386 "Force i386 and OSX10.5 compatibility" ON)
+
+IF(ENABLE_XMLSEC)
+    ADD_DEFINITIONS(-DXMLSEC)
+ENDIF()
+#-----------------------------------------------------------------------------
+
 #--Set Base Compiler Flags----------------------------------------------------
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 -fopenmp")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 -fopenmp")

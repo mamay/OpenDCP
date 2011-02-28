@@ -126,34 +126,42 @@ int odcp_to_opj(odcp_image_t *odcp, opj_image_t **opj_ptr) {
 /* initialize the lookup table */
 void init_gamma_lut() {
     lut_gamma[SRGB_GAMMA_SIMPLE] = srgb_gamma_simple;
+    lut_gamma[SRGB_GAMMA_COMPLEX] = srgb_gamma_complex;
 }
 
 /* rgb to xyz color conversion */
-int rgb_to_xyz(odcp_image_t *image) {
+int rgb_to_xyz(odcp_image_t *image, int gamma) {
     int i;
     int size;
     float bpc;
-    float in_gamma = 2.2;
+    float in_gamma = 2.4;
     float out_gamma = 1/2.6;
-    float r,g,b,x,y,z;
+    float Koeff = 48.0/52.37;    float r,g,b,x,y,z;
 
-    init_gamma_lut();
+   init_gamma_lut();
    
     bpc = pow(2,image->bpp) - 1;
     size = image->w * image->h;
 
     for (i=0;i<size;i++) {
         /* standard calculations */
-        //r = pow((image->comps[0].data[i]/bpc),in_gamma);
-        //g = pow((image->comps[1].data[i]/bpc),in_gamma);
-        //b = pow((image->comps[2].data[i]/bpc),in_gamma);
+        // r = pow((image->component[0].data[i]/bpc),in_gamma);
+        // g = pow((image->component[1].data[i]/bpc),in_gamma);
+        // b = pow((image->component[2].data[i]/bpc),in_gamma);
 
         /* use lookup table for speed */
-        //r = lut_gamma[SRGB_GAMMA_SIMPLE][image->component[0].data[i]];
-        //g = lut_gamma[SRGB_GAMMA_SIMPLE][image->component[1].data[i]];
-        //b = lut_gamma[SRGB_GAMMA_SIMPLE][image->component[2].data[i]];
-
+        if (gamma == 1) {
+            r = lut_gamma[SRGB_GAMMA_COMPLEX][image->component[0].data[i]];
+            g = lut_gamma[SRGB_GAMMA_COMPLEX][image->component[1].data[i]];
+            b = lut_gamma[SRGB_GAMMA_COMPLEX][image->component[2].data[i]];
+        } else {
+            r = lut_gamma[SRGB_GAMMA_SIMPLE][image->component[0].data[i]];
+            g = lut_gamma[SRGB_GAMMA_SIMPLE][image->component[1].data[i]];
+            b = lut_gamma[SRGB_GAMMA_SIMPLE][image->component[2].data[i]];
+        }
+  
         /* complex sRGB gamma correction */
+        /*
         r = image->component[0].data[i]/bpc;
         g = image->component[1].data[i]/bpc;
         b = image->component[2].data[i]/bpc;
@@ -163,22 +171,24 @@ int rgb_to_xyz(odcp_image_t *image) {
         } else {
             r = r/12.92;
         }
+
         if ( g > 0.04045) {
             g = pow((g+0.055)/1.055,in_gamma);
         } else {
             g = g/12.92;
         }
+
         if ( b > 0.04045) {
             b = pow((b+0.055)/1.055,in_gamma);
         } else {
             b = b/12.92;
         }
+        */        
 
-        x = pow((r*0.4124+g*0.3576+b*0.1805)*48/52.37,out_gamma) * bpc;
-        y = pow((r*0.2126+g*0.7152+b*0.0722)*48/52.37,out_gamma) * bpc;
-        z = pow((r*0.0193+g*0.1192+b*0.9505)*48/52.37,out_gamma) * bpc;
+        x = (pow(((r*0.4124)+(g*0.3576)+(b*0.1805))*Koeff,out_gamma) * bpc);
+        y = (pow(((r*0.2126)+(g*0.7152)+(b*0.0722))*Koeff,out_gamma) * bpc);
+        z =  (pow(((r*0.0193)+(g*0.1192)+(b*0.9505))*Koeff,out_gamma) * bpc);
 
-        /* clip any color greater than max bit depth (only z component) */
         image->component[0].data[i] = x;
         image->component[1].data[i] = y; 
         image->component[2].data[i] = z;

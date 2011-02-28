@@ -168,9 +168,9 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
                         image->component[1].data[index] = ( dat8[i+3] << 8 ) | dat8[i+2]; // G 
                         image->component[2].data[index] = ( dat8[i+5] << 8 ) | dat8[i+4]; // B 
                         /* round to 12 bits dcinema */
-                        image->component[0].data[index] = (image->component[0].data[index] + 0x08) >> 4 ;
-                        image->component[1].data[index] = (image->component[1].data[index] + 0x08) >> 4 ;
-                        image->component[2].data[index] = (image->component[2].data[index] + 0x08) >> 4 ;
+                        image->component[0].data[index] = (image->component[0].data[index]) >> 4 ;
+                        image->component[1].data[index] = (image->component[1].data[index]) >> 4 ;
+                        image->component[2].data[index] = (image->component[2].data[index]) >> 4 ;
                         index++;
                     } else {
                         break;

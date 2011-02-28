@@ -132,7 +132,7 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
     
     if (context->xyz) {
         dcp_log(LOG_INFO,"RGB->XYZ color conversion %s",in_file);
-        if (rgb_to_xyz(odcp_image)) {
+        if (rgb_to_xyz(odcp_image,context->gamma)) {
             dcp_log(LOG_ERROR,"Color conversion failed %s",in_file);
             return DCP_FATAL;
         }
@@ -141,7 +141,7 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
     if ( context->encoder == J2K_KAKADU ) {
         char tempfile[255];
         int n = omp_get_thread_num(); 
-        sprintf(tempfile,"%s/tmp%d%s",tmp_path,n,"file.tif");
+        sprintf(tempfile,"%stmp%d%s",tempnam(tmp_path,"opendcp"),n,"file.tif");
         result = write_tif(odcp_image,tempfile,0);
         
         if (result != DCP_SUCCESS) {
@@ -160,10 +160,9 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
         if (encode_openjpeg(context,odcp_image,out_file) != DCP_SUCCESS) {
             dcp_log(LOG_ERROR,"OpenJPEG JPEG2000 conversion failed %s",in_file);
             return DCP_FATAL;
-        }
-        
-        
+        }        
     }
+
     /* free the image memory */
     odcp_image_free(odcp_image);
     return DCP_SUCCESS;
