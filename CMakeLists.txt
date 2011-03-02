@@ -15,7 +15,7 @@ ADD_DEFINITIONS(-DOPENDCP_VERSION="${OpenDCP_VERSION}")
 #--Options--------------------------------------------------------------------
 OPTION(ENABLE_XMLSEC "Enable XML digital singatures and security features" OFF)
 OPTION(ENABLE_STATIC "Enable static link to libraries" OFF)
-OPTION(ENABLE_OSX386 "Force i386 and OSX10.5 compatibility" ON)
+OPTION(ENABLE_OSX386 "Force i386 and OSX10.5 compatibility" OFF)
 
 IF(ENABLE_XMLSEC)
     ADD_DEFINITIONS(-DXMLSEC)
@@ -64,48 +64,86 @@ MESSAGE(STATUS "================================================================
 MESSAGE(STATUS "OpenDCP Version " ${OpenDCP_VERSION} " CMake - " ${OS})
 MESSAGE(STATUS "===============================================================================")
 
-#--Find standard libaries-----------------------------------------------------
-FIND_LIBRARY(Z_LIB z REQUIRED)
-#-----------------------------------------------------------------------------
-
 #--Set linking mode-----------------------------------------------------------
 IF(ENABLE_STATIC)
+    MESSAGE(STATUS "-------------------------------------------------------------------------------")
+    MESSAGE(STATUS "Find Static Library Dependencies")
+    MESSAGE(STATUS "-------------------------------------------------------------------------------")
+
+    SET(PREFIX "${PROJECT_BINARY_DIR}/contrib")
+    SET(PREFIX_ARG "--prefix=${PREFIX}")
+    ADD_SUBDIRECTORY(contrib)
+
     INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}/contrib/include")
     INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}/contrib/include/libxml2")
     INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}/contrib/include/libxslt")
     INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}/contrib/include/xmlsec1")
-    MESSAGE(STATUS "-------------------------------------------------------------------------------")
-    MESSAGE(STATUS "Find Static Library Dependencies")
-    MESSAGE(STATUS "-------------------------------------------------------------------------------")
-    SET(PREFIX "${PROJECT_BINARY_DIR}/contrib")
-    SET(PREFIX_ARG "--prefix=${PREFIX}")
-    ADD_SUBDIRECTORY(contrib)
-    SET(LIB_DIR "${PROJECT_BINARY_DIR}/contrib/lib")
+
+    SET(LIB_DIR "${PROJECT_BINARY_DIR}/lib")
     MESSAGE(STATUS "LIB_DIR: ${LIB_DIR}")
+    FIND_LIBRARY(Z_LIB z REQUIRED)
+    INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+    SET(LIBS ${LIBS} ${ZLIB_LIBRARIES})
+    SET(LIBS ${LIBS} -L${LIB_DIR} -lssl -lcrypto )
+    SET(LIBS ${LIBS} -L${LIB_DIR} -lasdcp -lkumu)
+    SET(LIBS ${LIBS} -L${LIB_DIR} -lopenjpeg -ltiff)
+    SET(LIBS ${LIBS} -L${LIB_DIR} -lexpat)
+    IF(ENABLE_XMLSEC)
+        SET(LIBS ${LIBS} -L${LIB_DIR} -liconv -lxml2 -lxslt -lxmlsec1 -lxmlsec1-openssl)
+    ENDIF(ENABLE_XMLSEC)
 ELSE()
     MESSAGE(STATUS)
     MESSAGE(STATUS "-------------------------------------------------------------------------------")
     MESSAGE(STATUS "Finding Dynamic Library Dependencies")
     MESSAGE(STATUS "-------------------------------------------------------------------------------")
+
     SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules/")
+
+    FIND_PACKAGE(ZLIB REQUIRED)
+    INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+    SET(LIBS ${LIBS} ${ZLIB_LIBRARIES})
+
     FIND_PACKAGE(ASDCP REQUIRED)
+    INCLUDE_DIRECTORIES(${ASDCP_INCLUDE_DIR})
+    SET(LIBS ${LIBS} ${ASDCP_LIBRARIES})
+
     FIND_PACKAGE(OpenSSL REQUIRED)
+    INCLUDE_DIRECTORIES(${OPENSSL_INCLUDE_DIR})
+    SET(LIBS ${LIBS} ${OPENSSL_LIBRARIES})
+
     IF(ENABLE_XMLSEC)
-        FIND_PACKAGE(XMLSec REQUIRED)
         FIND_PACKAGE(LibXml2 REQUIRED)
+        INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
+        SET(LIBS ${LIBS} ${LIBXML2_LIBRARIES})
+
+        FIND_PACKAGE(LibXslt REQUIRED)
+        INCLUDE_DIRECTORIES(${LIBXSLT_INCLUDE_DIR})
+        SET(LIBS ${LIBS} ${LIBXSLT_LIBRARIES})
+
+        FIND_PACKAGE(XMLSec REQUIRED)
+        INCLUDE_DIRECTORIES(${XMLSEC1_INCLUDE_DIR})
+        INCLUDE_DIRECTORIES(${XMLSEC1-OPENSSL_INCLUDE_DIR})
+        SET(LIBS ${LIBS} ${XMLSEC1_LIBRARIES})
+        SET(LIBS ${LIBS} ${XMLSEC1-OPENSSL_LIBRARIES})
     ENDIF(ENABLE_XMLSEC)
+
     FIND_PACKAGE(EXPAT REQUIRED)
+    INCLUDE_DIRECTORIES(${XMLSEC1_INCLUDE_DIR})
+    SET(LIBS ${LIBS} ${LIBEXPAT_LIBRARIES})
+
     FIND_PACKAGE(TIFF REQUIRED)
-    FIND_PACKAGE(JPEG REQUIRED)
+    INCLUDE_DIRECTORIES(${TIFF_INCLUDE_DIR})
+    SET(LIBS ${LIBS} ${TIFF_LIBRARIES})
+
+    #FIND_PACKAGE(JPEG REQUIRED)
+    #INCLUDE_DIRECTORIES(${JPEG_INCLUDE_DIR})
+    #SET(LIBS ${LIBS} ${JPEG_LIBRARIES})
+
     FIND_PACKAGE(OpenJPEG REQUIRED)
+    INCLUDE_DIRECTORIES(${OPENJPEG_INCLUDE_DIR})
+    SET(LIBS ${LIBS} ${OPENJPEG_LIBRARIES})
 ENDIF()
 #-----------------------------------------------------------------------------
-
-#--Add xmlsec directories (workaround)----------------------------------------
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${LIBXSLT_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${XMLSEC1_INCLUDE_DIR})
-INCLUDE_DIRECTORIES("/usr/include/xmlsec1")
 
 #--Add source directory-------------------------------------------------------
 ADD_SUBDIRECTORY(src)

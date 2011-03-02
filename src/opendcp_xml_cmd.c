@@ -103,7 +103,7 @@ int main (int argc, char **argv) {
     context->reel_count = 0;
     sprintf(context->issuer,"%.80s %.80s",OPEN_DCP_NAME,OPEN_DCP_VERSION);
     sprintf(context->creator,"%.80s %.80s",OPEN_DCP_NAME, OPEN_DCP_VERSION);
-    sprintf(context->annotation,"%.80s",DCP_ANNOTATION);
+    sprintf(context->annotation,"%.128s",DCP_ANNOTATION);
     sprintf(context->title,"%.80s",DCP_TITLE);
     sprintf(context->kind,"%.15s",DCP_KIND);
     get_timestamp(context->timestamp);
@@ -154,7 +154,7 @@ int main (int argc, char **argv) {
             break;
 
             case 'a':
-               sprintf(context->annotation,"%.80s",optarg);
+               sprintf(context->annotation,"%.128s",optarg);
             break;
 
             case 'b':

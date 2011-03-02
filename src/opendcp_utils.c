@@ -176,7 +176,7 @@ int add_reel(context_t *context, asset_list_t reel) {
         init_asset(&asset);
       
         sprintf(asset.filename,"%.128s",filename);
-        sprintf(asset.annotation,"%.80s",filename);
+        sprintf(asset.annotation,"%.256s",filename);
 
         /* check if file exists */
         if ((fp = fopen(filename, "r")) == NULL) {

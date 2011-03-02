@@ -169,7 +169,7 @@ typedef struct {
     int            xml_ns;
     int            stereoscopic;
     char           size[18];
-    char           annotation[80];
+    char           annotation[128];
     char           edit_rate[20];
     char           frame_rate[20];
     char           sample_rate[20];
@@ -221,7 +221,7 @@ typedef struct {
     char timestamp[30];
     char issuer[80];
     char creator[80];
-    char annotation[80];
+    char annotation[128];
     char title[80];
     char kind[15];
     char rating[5];

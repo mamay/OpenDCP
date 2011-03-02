@@ -1,21 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
 
-#--Set Libraries--------------------------------------------------------------
-IF(ENABLE_STATIC)
-    SET(OPENSSL -L${LIB_DIR} -lssl -lcrypto)
-    SET(ASDCP -L${LIB_DIR} -lasdcp -lkumu)
-    SET(OPENJPEG -L${LIB_DIR} -lopenjpeg -ltiff)
-    SET(EXPAT -L${LIB_DIR} -lexpat)
-    IF(ENABLE_XMLSEC)
-        SET(XMLSEC1 -L${LIB_DIR} -liconv -lxml2 -lxslt -lxmlsec1 -lxmlsec1-openssl)
-    ENDIF(ENABLE_XMLSEC)
-    SET(CONTRIB_LIBRARIES ${ASDCP} ${OPENJPEG} ${OPENSSL} ${EXPAT} ${XMLSEC1} ${Z_LIB})
-ELSE()
-    SET(CONTRIB_LIBRARIES ${OPENJPEG_LIBRARIES} ${ASDCP_LIBRARIES} ${OPENSSL_LIBRARIES} ${LIBXML2_LIBRARIES} ${XMLSEC1_LIBRARIES} ${TIFF_LIBRARIES} ${EXPAT_LIBRARIES} ${Z_LIB} ${JPEG_LIBRARIES})
-    #SET(CONTRIB_LIBRARIES ${OPENJPEG_LIBRARIES} ${ASDCP_LIBRARIES} ${OPENSSL_LIBRARIES} ${LIBXML2_LIBRARIES} -lxmlsec1 -lxmlsec1-openssl ${TIFF_LIBRARIES} ${EXPAT_LIBRARIES} ${Z_LIB} ${JPEG_LIBRARIES})
-ENDIF()
-#-----------------------------------------------------------------------------
-
 MESSAGE(STATUS)
 MESSAGE(STATUS "-------------------------------------------------------------------------------")
 MESSAGE(STATUS "Creating Build Files")
@@ -39,24 +23,24 @@ SET(OPENDCP_LIB "${PROJECT_BINARY_DIR}/lib/libopendcp.a")
 
 #--opendcplib-----------------------------------------------------------------
 ADD_LIBRARY(opendcp STATIC ${OPENDCP_SEC_FILES} ${OPENDCP_SRC_FILES})
-TARGET_LINK_LIBRARIES(opendcp ${CONTRIB_LIBRARIES})
+TARGET_LINK_LIBRARIES(opendcp ${LIBS})
 INSTALL(TARGETS opendcp DESTINATION lib)
 INSTALL(FILES opendcp.h DESTINATION include)
 #-----------------------------------------------------------------------------
 
 #--opendcp tools--------------------------------------------------------------
 ADD_EXECUTABLE(opendcp_xml opendcp_xml_cmd.c opendcp_force_cpp.cpp)
-TARGET_LINK_LIBRARIES(opendcp_xml ${OPENDCP_LIB} ${CONTRIB_LIBRARIES})
+TARGET_LINK_LIBRARIES(opendcp_xml ${OPENDCP_LIB} ${LIBS})
 
 ADD_EXECUTABLE(opendcp_j2k opendcp_j2k_cmd.c opendcp_force_cpp.cpp)
-TARGET_LINK_LIBRARIES(opendcp_j2k ${OPENDCP_LIB} ${CONTRIB_LIBRARIES})
+TARGET_LINK_LIBRARIES(opendcp_j2k ${OPENDCP_LIB} ${LIBS})
 
 ADD_EXECUTABLE(opendcp_mxf opendcp_mxf_cmd.c opendcp_force_cpp.cpp)
-TARGET_LINK_LIBRARIES(opendcp_mxf ${OPENDCP_LIB} ${CONTRIB_LIBRARIES})
+TARGET_LINK_LIBRARIES(opendcp_mxf ${OPENDCP_LIB} ${LIBS})
 
 IF(ENABLE_XMLSEC)
     ADD_EXECUTABLE(opendcp_xml_verify opendcp_xml_verify_cmd.c opendcp_force_cpp.cpp)
-    TARGET_LINK_LIBRARIES(opendcp_xml_verify ${OPENDCP_LIB} ${CONTRIB_LIBRARIES})
+    TARGET_LINK_LIBRARIES(opendcp_xml_verify ${OPENDCP_LIB} ${LIBS})
 ENDIF(ENABLE_XMLSEC)
 #-----------------------------------------------------------------------------
 
