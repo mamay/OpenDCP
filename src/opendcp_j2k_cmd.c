@@ -383,12 +383,7 @@ int main (int argc, char **argv) {
 
     if (context->log_level>0 && context->log_level<3) { progress_bar(0,0); }
 
-/* bug in gcc openmp win32, so disable multiple threads */
-#ifdef WIN32
-    omp_set_num_threads(1);
-#else
     omp_set_num_threads(context->threads);
-#endif
 
     #pragma omp parallel for private(c)
     for (c=0;c<filelist->file_count;c++) {    
