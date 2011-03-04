@@ -53,7 +53,7 @@ void dcp_usage() {
     fprintf(fp,"\n");
     fprintf(fp,"Required: At least 1 reel is required:\n");
     fprintf(fp,"       -r | --reel <mxf mxf mxf>      - Creates a reel of MXF elements. The first --reel is reel 1, second --reel is reel 2, etc.\n");
-    fprintf(fp,"                                        The agrument is a space seperated list of the essence elemements.\n");
+    fprintf(fp,"                                        The agrument is a space separated list of the essence elemements.\n");
     fprintf(fp,"                                        Picture/Sound/Subtitle (order of the mxf files in the list doesn't matter)\n");
     fprintf(fp,"                                        *** a picture mxf is required per reel ***\n");
     fprintf(fp,"Options:\n");

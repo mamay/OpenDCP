@@ -19,6 +19,9 @@ OPTION(ENABLE_OSX386 "Force i386 and OSX10.5 compatibility" OFF)
 
 IF(ENABLE_XMLSEC)
     ADD_DEFINITIONS(-DXMLSEC)
+    ADD_DEFINITIONS(-DLIBXML_STATIC)
+    ADD_DEFINITIONS(-DLIBXSLT_STATIC)
+    ADD_DEFINITIONS(-DXMLSEC_STATIC)
 ENDIF()
 #-----------------------------------------------------------------------------
 
@@ -82,9 +85,7 @@ IF(ENABLE_STATIC)
 
     SET(LIB_DIR "${PREFIX}/lib")
     MESSAGE(STATUS "LIB_DIR: ${LIB_DIR}")
-    FIND_PACKAGE(ZLIB REQUIRED)
-    INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
-    SET(LIBS ${LIBS} "${ZLIB_LIBRARIES}")
+    SET(LIBS ${LIBS} "-lz")
     SET(LIBS ${LIBS} "-L${LIB_DIR} -lssl -lcrypto" )
     SET(LIBS ${LIBS} "-L${LIB_DIR} -lasdcp -lkumu" )
     SET(LIBS ${LIBS} "-L${LIB_DIR} -lopenjpeg -ltiff")

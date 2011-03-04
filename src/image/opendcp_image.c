@@ -136,20 +136,22 @@ int rgb_to_xyz(odcp_image_t *image, int gamma) {
     float bpc;
     float in_gamma = 2.4;
     float out_gamma = 1/2.6;
-    float Koeff = 48.0/52.37;    float r,g,b,x,y,z;
+    float Koeff = 48.0/52.37;
+    float r,g,b,x,y,z;
 
-   init_gamma_lut();
+    init_gamma_lut();
    
     bpc = pow(2,image->bpp) - 1;
     size = image->w * image->h;
 
     for (i=0;i<size;i++) {
         /* standard calculations */
-        // r = pow((image->component[0].data[i]/bpc),in_gamma);
-        // g = pow((image->component[1].data[i]/bpc),in_gamma);
-        // b = pow((image->component[2].data[i]/bpc),in_gamma);
+        r = pow((image->component[0].data[i]/bpc),in_gamma);
+        g = pow((image->component[1].data[i]/bpc),in_gamma);
+        b = pow((image->component[2].data[i]/bpc),in_gamma);
 
         /* use lookup table for speed */
+        /*
         if (gamma == 1) {
             r = lut_gamma[SRGB_GAMMA_COMPLEX][image->component[0].data[i]];
             g = lut_gamma[SRGB_GAMMA_COMPLEX][image->component[1].data[i]];
@@ -159,9 +161,9 @@ int rgb_to_xyz(odcp_image_t *image, int gamma) {
             g = lut_gamma[SRGB_GAMMA_SIMPLE][image->component[1].data[i]];
             b = lut_gamma[SRGB_GAMMA_SIMPLE][image->component[2].data[i]];
         }
+        */
   
         /* complex sRGB gamma correction */
-        /*
         r = image->component[0].data[i]/bpc;
         g = image->component[1].data[i]/bpc;
         b = image->component[2].data[i]/bpc;
@@ -183,7 +185,6 @@ int rgb_to_xyz(odcp_image_t *image, int gamma) {
         } else {
             b = b/12.92;
         }
-        */        
 
         x = (pow(((r*0.4124)+(g*0.3576)+(b*0.1805))*Koeff,out_gamma) * bpc);
         y = (pow(((r*0.2126)+(g*0.7152)+(b*0.0722))*Koeff,out_gamma) * bpc);

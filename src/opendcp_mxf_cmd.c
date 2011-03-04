@@ -57,7 +57,7 @@ void dcp_usage() {
     fprintf(fp,"       -o | --output <file>           - output mxf file\n");
     fprintf(fp,"\n");
     fprintf(fp,"Options:\n");
-    fprintf(fp,"       -n | --ns <interop | smpte>    - Generate SMPTE or MXF Interop labels (defualt smpte)\n");
+    fprintf(fp,"       -n | --ns <interop | smpte>    - Generate SMPTE or MXF Interop labels (default smpte)\n");
     fprintf(fp,"       -r | --rate <rate>             - frame rate (default 24)\n");
     fprintf(fp,"       -l | --log_level <level>       - Sets the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
     fprintf(fp,"       -h | --help                    - show help\n");
