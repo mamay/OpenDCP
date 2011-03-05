@@ -138,6 +138,7 @@ EXTERNALPROJECT_ADD(08_TIFF
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                       --disable-dependency-tracking --enable-static=yes --enable-shared=no
+                      --enable-jpeg=no
                       ${TARGET} 
     BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}

@@ -174,7 +174,7 @@ int write_cpl(context_t *context) {
             if ( context->digest_flag ) {
                 fprintf(fp,"          <Hash>%s</Hash>\n",context->reel[x].MainSubtitle.digest);
             }
-            fprintf(fp,"        </MainSsubtitle>\n");
+            fprintf(fp,"        </MainSubtitle>\n");
         }
 
         fprintf(fp,"      </AssetList>\n");
