@@ -53,19 +53,19 @@ void dcp_usage() {
     fprintf(fp,"\n");
     fprintf(fp,"Required: At least 1 reel is required:\n");
     fprintf(fp,"       -r | --reel <mxf mxf mxf>      - Creates a reel of MXF elements. The first --reel is reel 1, second --reel is reel 2, etc.\n");
-    fprintf(fp,"                                        The agrument is a space separated list of the essence elemements.\n");
+    fprintf(fp,"                                        The argument is a space separated list of the essence elemements.\n");
     fprintf(fp,"                                        Picture/Sound/Subtitle (order of the mxf files in the list doesn't matter)\n");
     fprintf(fp,"                                        *** a picture mxf is required per reel ***\n");
     fprintf(fp,"Options:\n");
-    fprintf(fp,"       -h | --help                    - show help\n");
-    fprintf(fp,"       -v | --version                 - show version\n");
+    fprintf(fp,"       -h | --help                    - Show help\n");
+    fprintf(fp,"       -v | --version                 - Show version\n");
     fprintf(fp,"       -d | --digest                  - Generates digest (used to validate DCP asset integrity)\n");
 #ifdef XMLSEC
     fprintf(fp,"       -s | --sign                    - Writes XML digital signature\n");
-    fprintf(fp,"       -1 | --root                    - root pem certificate used to sign XML files\n");
-    fprintf(fp,"       -2 | --ca                      - ca (intermediate) pem certificate used to sign XML files\n");
-    fprintf(fp,"       -3 | --signer                  - signer (leaf) pem certificate used to sign XML files\n");
-    fprintf(fp,"       -p | --privatekey              - privae (signer) pem key used to sign XML files\n");
+    fprintf(fp,"       -1 | --root                    - Root pem certificate used to sign XML files\n");
+    fprintf(fp,"       -2 | --ca                      - CA (intermediate) pem certificate used to sign XML files\n");
+    fprintf(fp,"       -3 | --signer                  - Signer (leaf) pem certificate used to sign XML files\n");
+    fprintf(fp,"       -p | --privatekey              - Privae (signer) pem key used to sign XML files\n");
 #endif
     fprintf(fp,"       -i | --issuer <issuer>         - Issuer details\n");
     fprintf(fp,"       -c | --creator <creator>       - Creator details\n");
@@ -76,7 +76,7 @@ void dcp_usage() {
     fprintf(fp,"       -m | --rating <duration>       - Set DCP MPAA rating G PG PG-13 R NC-17 (default none)\n");
     fprintf(fp,"       -e | --entry <entry point>     - Set asset entry point (offset) frame\n");
     fprintf(fp,"       -k | --kind <kind>             - Content kind (test, feature, trailer, policy, teaser, etc)\n");
-    fprintf(fp,"       -l | --log_level <level>       - Sets the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
+    fprintf(fp,"       -l | --log_level <level>       - Set the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
     fprintf(fp,"\n\n");
 
     fclose(fp);

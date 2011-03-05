@@ -1,24 +1,10 @@
-# - Try to find the LibXMLSec digital siginature library
-# Once done this will define
+#  Find the LibXMLSec digital siginature library
 #
 #  XMLSEC1_FOUND - System has LibXMLSec
 #  XMLSEC1_INCLUDE_DIR - The LibXMLSec include directory
 #  XMLSEC1_LIBRARIES - The libraries needed to use LibXMLSec
 #  XMLSEC1_DEFINITIONS - Compiler switches required for using LibXMLSec
-
 #=============================================================================
-# Copyright 2006-2009 Kitware, Inc.
-# Copyright 2006 Alexander Neundorf <neundorf@kde.org>
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 # use pkg-config to get the directories and then use these values
 # in the FIND_PATH() and FIND_LIBRARY() calls
