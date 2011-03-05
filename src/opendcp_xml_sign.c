@@ -352,7 +352,13 @@ int xml_sign(context_t *context, char *filename) {
     }
 
     /* write the xml file */
-    xmlDocDump(fp, doc);
+    if (xmlDocDump(fp, doc) < 0) {
+        fprintf(stderr,"Error: writing XML document failed\n");
+        goto done;
+    }
+  
+    /* close the file */
+    fclose(fp);
 
     /* success */
     result = 0;
