@@ -23,7 +23,6 @@ extern "C" {
 #ifndef _OPEN_DCP_H_
 #define _OPEN_DCP_H_
 
-
 #define MAX_REELS    30 /* Soft limit */
 #define MAX_PATH_LENGTH 4096 
 #define MAX_FILENAME_LENGTH 256 
@@ -169,6 +168,7 @@ typedef struct {
     int            xml_ns;
     int            stereoscopic;
     char           size[18];
+    char           name[128];
     char           annotation[128];
     char           edit_rate[20];
     char           frame_rate[20];
@@ -236,8 +236,13 @@ void dcp_log(int level, const char *fmt, ...);
 void dcp_fatal(context_t *context, char *error);
 void get_timestamp(char *timestamp);
 int get_asset_type(asset_t asset);
+int get_file_essence_class(char *filename);
+char *get_basename(const char *filename);
 int validate_reel(context_t *context, int reel);
 int add_reel(context_t *context, asset_list_t reel);
+void dcp_set_log_level(int log_level);
+
+/* XML Routines */
 int write_cpl(context_t *context);
 int write_pkl(context_t *context);
 int write_assetmap(context_t *context);
@@ -245,6 +250,9 @@ int write_volumeindex(context_t *context);
 char *base64(const unsigned char *data, int length);
 char *strip_cert(const char *data);
 char *strip_cert_file(char *filename);
+
+/* J2K Routines */
+int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_path);
 #endif // _OPEN_DCP_H_
 #ifdef __cplusplus
 }

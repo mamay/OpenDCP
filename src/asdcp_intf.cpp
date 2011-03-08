@@ -84,10 +84,48 @@ extern "C" int calculate_digest(const char *filename, char *digest)
     }
 }
 
+/* get the essence class of a file */
+extern "C" int get_file_essence_class(char *filename) {
+    Result_t      result = RESULT_OK;
+    EssenceType_t essence_type;
+    int essence_class = -1;
+
+    result = ASDCP::EssenceType(filename, essence_type);
+
+    if (ASDCP_FAILURE(result)) {
+        return DCP_FATAL;
+    }
+
+    /* If type is unknown, try reading raw */
+    if ( essence_type == ESS_UNKNOWN) {
+       result = ASDCP::RawEssenceType(filename, essence_type);
+    }
+
+    if (ASDCP_FAILURE(result)) {
+        return DCP_FATAL;
+    }
+
+    switch (essence_type) {
+        case ESS_JPEG_2000:
+        case ESS_JPEG_2000_S:
+            essence_class = ACT_PICTURE;
+            break;
+        case ESS_PCM_24b_48k:
+        case ESS_PCM_24b_96k:
+            essence_class = ACT_SOUND;
+            break;
+        default:
+            essence_class = ACT_UNKNOWN;
+            break;
+    }
+
+    return essence_class;
+}
+
 /* get the essence type of an asset */
 extern "C" int get_file_essence_type(char *filename) {
-    EssenceType_t essence_type;
     Result_t result = RESULT_OK;
+    EssenceType_t essence_type;
 
     result = ASDCP::RawEssenceType(filename, essence_type);
 
@@ -103,8 +141,10 @@ extern "C" int get_file_essence_type(char *filename) {
             return AET_JPEG_2000;
             break;
         case ESS_PCM_24b_48k:
+            return AET_PCM_24b_48k;
+            break;
         case ESS_PCM_24b_96k:
-            return AET_JPEG_2000;
+            return AET_PCM_24b_96k;
             break;
         case ESS_TIMED_TEXT:
             return AET_TIMED_TEXT;
@@ -113,6 +153,8 @@ extern "C" int get_file_essence_type(char *filename) {
             return AET_UNKNOWN;
             break;
     }
+
+    return 0;
 }
 
 /* read asset file information */

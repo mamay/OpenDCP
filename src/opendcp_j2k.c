@@ -22,7 +22,9 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <openjpeg.h>
+#ifdef OPENMP
 #include <omp.h>
+#endif
 #include "opendcp.h"
 #include "image/opendcp_image.h"
 
@@ -114,7 +116,9 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
     }
     dcp_log(LOG_DEBUG,"Reading input file %s",in_file);
      
+    #ifdef OPENMP
     #pragma omp critical
+    #endif
     {
     read_tif(&odcp_image, in_file,0);
     }
@@ -140,8 +144,7 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
 
     if ( context->encoder == J2K_KAKADU ) {
         char tempfile[255];
-        int n = omp_get_thread_num(); 
-        sprintf(tempfile,"%stmp%d%s",tempnam(tmp_path,"opendcp"),n,"file.tif");
+        sprintf(tempfile,"%stmp%s",tempnam(tmp_path,"opendcp"),get_basename(in_file));
         result = write_tif(odcp_image,tempfile,0);
         
         if (result != DCP_SUCCESS) {

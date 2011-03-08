@@ -24,7 +24,9 @@
 #include <dirent.h>
 #include <signal.h>
 #endif
+#ifdef OPENMP
 #include <omp.h>
+#endif
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -113,17 +115,6 @@ int check_extension(char *filename, char *pattern) {
    return 1;
 }
 
-char *get_basename(const char *filename) {
-    char *extension;
-    char *base = 0;
-
-    base = (char *)filename;
-    extension = strrchr(filename,'.');
-    base[(strlen(filename) - strlen(extension))] = '\0';
-
-    return(base);
-}
-
 int get_filelist(context_t *context,char *in_path,char *out_path,filelist_t *filelist) {
     struct dirent **files;
     int x = 0;
@@ -185,7 +176,11 @@ void progress_bar(int val, int total) {
     int x;
     int step = 20;
     float c = (float)step/total * (float)val;
+#ifdef OPENMP
     int nthreads = omp_get_num_threads(); 
+#else
+    int nthreads = 1;
+#endif
     printf("  JPEG2000 Conversion (%d thread",nthreads);
     if (nthreads > 1) {
         printf("s");
@@ -383,8 +378,9 @@ int main (int argc, char **argv) {
 
     if (context->log_level>0 && context->log_level<3) { progress_bar(0,0); }
 
+#ifdef OPENMP
     omp_set_num_threads(context->threads);
-
+#endif
     #pragma omp parallel for private(c)
     for (c=0;c<filelist->file_count;c++) {    
         #pragma omp flush(SIGINT_received)

@@ -39,6 +39,17 @@ void dcp_fatal(context_t *context, char *error) {
     exit(DCP_FATAL);
 }
 
+char *get_basename(const char *filename) {
+    char *extension;
+    char *base = 0;
+
+    base = (char *)filename;
+    extension = strrchr(filename,'.');
+    base[(strlen(filename) - strlen(extension))] = '\0';
+
+    return(base);
+}
+
 char *base64(const unsigned char *data, int length) {
     int len; 
     char *b_ptr;

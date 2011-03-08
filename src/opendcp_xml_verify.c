@@ -16,9 +16,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define LIBXML_STATIC
-#define LIBXSLT_STATIC
-#define XMLSEC_STATIC
 #define XMLSEC_CRYPTO_OPENSSL
 
 #include <string.h>

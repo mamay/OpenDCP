@@ -7,7 +7,7 @@ SET(CMAKE_BUILD_TYPE Release)
 
 #--Version--------------------------------------------------------------------
 SET(OpenDCP_VERSION_MAJOR 0)
-SET(OpenDCP_VERSION_MINOR 17)
+SET(OpenDCP_VERSION_MINOR 18)
 SET(OpenDCP_VERSION "${OpenDCP_VERSION_MAJOR}.${OpenDCP_VERSION_MINOR}")
 ADD_DEFINITIONS(-DOPENDCP_VERSION="${OpenDCP_VERSION}")
 #-----------------------------------------------------------------------------
@@ -16,6 +16,7 @@ ADD_DEFINITIONS(-DOPENDCP_VERSION="${OpenDCP_VERSION}")
 OPTION(ENABLE_XMLSEC "Enable XML digital singatures and security features" OFF)
 OPTION(ENABLE_STATIC "Enable static link to libraries" OFF)
 OPTION(ENABLE_OSX386 "Force i386 and OSX10.5 compatibility" OFF)
+OPTION(ENABLE_OPENMP "Enable OPENMP multithreading" ON)
 
 IF(ENABLE_XMLSEC)
     ADD_DEFINITIONS(-DXMLSEC)
@@ -23,13 +24,20 @@ IF(ENABLE_XMLSEC)
     ADD_DEFINITIONS(-DLIBXSLT_STATIC)
     ADD_DEFINITIONS(-DXMLSEC_STATIC)
 ENDIF()
+
+IF(ENABLE_OPENMP)
+    ADD_DEFINITIONS(-DOPENMP)
+    SET(OPENMP "-fopenmp")
+ENDIF()
 #-----------------------------------------------------------------------------
 
 #--Set Base Compiler Flags----------------------------------------------------
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 -fopenmp")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 -fopenmp")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 ${OPENMP}")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 ${OPENMP}")
 SET(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
 #-----------------------------------------------------------------------------
+
+
 
 #--Set OS Specific Compiler Flags---------------------------------------------
 IF(APPLE)
