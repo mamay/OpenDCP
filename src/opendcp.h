@@ -242,6 +242,9 @@ int validate_reel(context_t *context, int reel);
 int add_reel(context_t *context, asset_list_t reel);
 void dcp_set_log_level(int log_level);
 
+/* MXF Routines */
+int write_mxf(context_t *context, filelist_t *filelist, char *output);
+
 /* XML Routines */
 int write_cpl(context_t *context);
 int write_pkl(context_t *context);
