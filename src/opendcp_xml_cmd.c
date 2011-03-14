@@ -49,7 +49,7 @@ void dcp_usage() {
     fprintf(fp,"       opendcp_xml --reel picture.mxf sound.mxf\n");
     fprintf(fp,"       opendcp_xml --reel picture.mxf sound.mxf --reel picture.mxf sound.mxf\n");
     fprintf(fp,"       opendcp_xml --reel picture.mxf sound.mxf subtitle.mxf --reel picture.mxf sound.mxf\n");
-    fprintf(fp,"       opendcp_xml --reel picture.mxf sound.mxf --digest --creator OpenDCP --kind trailer\n");
+    fprintf(fp,"       opendcp_xml --reel picture.mxf sound.mxf --digest OpenDCP --kind trailer\n");
     fprintf(fp,"\n");
     fprintf(fp,"Required: At least 1 reel is required:\n");
     fprintf(fp,"       -r | --reel <mxf mxf mxf>      - Creates a reel of MXF elements. The first --reel is reel 1, second --reel is reel 2, etc.\n");
@@ -68,7 +68,6 @@ void dcp_usage() {
     fprintf(fp,"       -p | --privatekey              - Privae (signer) pem key used to sign XML files\n");
 #endif
     fprintf(fp,"       -i | --issuer <issuer>         - Issuer details\n");
-    fprintf(fp,"       -c | --creator <creator>       - Creator details\n");
     fprintf(fp,"       -a | --annotation <annotation> - Asset annotations\n");
     fprintf(fp,"       -t | --title <title>           - DCP content title\n");
     fprintf(fp,"       -b | --base <basename>         - Prepend CPL/PKL filenames with basename rather than UUID\n");
@@ -115,7 +114,6 @@ int main (int argc, char **argv) {
         {
             {"annotation",     required_argument, 0, 'a'},
             {"base",           required_argument, 0, 'b'},
-            {"creator",        required_argument, 0, 'c'},
             {"digest",         no_argument,       0, 'd'},
             {"duration",       required_argument, 0, 'n'},
             {"entry",          required_argument, 0, 'e'},
@@ -138,7 +136,7 @@ int main (int argc, char **argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
      
-        c = getopt_long (argc, argv, "a:b:c:e:svdhi:k:r:l:m:n:t:p:1:2:3:",
+        c = getopt_long (argc, argv, "a:b:e:svdhi:k:r:l:m:n:t:p:1:2:3:",
                          long_options, &option_index);
 
         /* Detect the end of the options. */
@@ -161,10 +159,6 @@ int main (int argc, char **argv) {
                sprintf(context->basename,"%.80s",optarg);
             break;
 
-            case 'c':
-               sprintf(context->creator,"%.80s",optarg);
-            break;
-     
             case 'd':
                context->digest_flag = 1;
             break;

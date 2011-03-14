@@ -164,6 +164,7 @@ typedef struct {
     char           uuid[40];
     int            essence_type;
     int            duration;
+    int            intrinsic_duration;
     int            entry_point;
     int            xml_ns;
     int            stereoscopic;
@@ -179,6 +180,7 @@ typedef struct {
 } asset_t;
 
 typedef struct {
+    char    annotation[128];
     asset_t MainPicture;
     asset_t MainSound;
     asset_t MainSubtitle;
@@ -222,7 +224,7 @@ typedef struct {
     char issuer[80];
     char creator[80];
     char annotation[128];
-    char title[80];
+    char title[40];
     char kind[15];
     char rating[5];
     int  reel_count;
@@ -241,6 +243,9 @@ char *get_basename(const char *filename);
 int validate_reel(context_t *context, int reel);
 int add_reel(context_t *context, asset_list_t reel);
 void dcp_set_log_level(int log_level);
+
+/* ASDCPLIB Routines */
+int read_asset_info(asset_t *asset);
 
 /* MXF Routines */
 int write_mxf(context_t *context, filelist_t *filelist, char *output);

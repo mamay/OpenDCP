@@ -114,6 +114,9 @@ extern "C" int get_file_essence_class(char *filename) {
         case ESS_PCM_24b_96k:
             essence_class = ACT_SOUND;
             break;
+        case ESS_TIMED_TEXT:
+            return ACT_TIMED_TEXT;
+            break;
         default:
             essence_class = ACT_UNKNOWN;
             break;
@@ -187,8 +190,9 @@ extern "C" int read_asset_info(asset_t *asset)
 	    reader.FillVideoDescriptor(desc);
             reader.FillWriterInfo(info);
 
-            asset->essence_type   = essence_type;
-            asset->duration       = desc.ContainerDuration;
+            asset->essence_type       = essence_type;
+            asset->duration           = desc.ContainerDuration;
+            asset->intrinsic_duration  = desc.ContainerDuration;
             asset->entry_point    = 0;
             asset->xml_ns         = info.LabelSetType;
             sprintf(asset->uuid,"%.36s", Kumu::bin2UUIDhex(info.AssetUUID,16,uuid_buffer, 64));
@@ -211,9 +215,10 @@ extern "C" int read_asset_info(asset_t *asset)
             reader.FillPictureDescriptor(desc);
             reader.FillWriterInfo(info);
 
-            asset->stereoscopic   = 1;
-            asset->essence_type   = essence_type;
-            asset->duration       = desc.ContainerDuration;
+            asset->stereoscopic       = 1;
+            asset->essence_type       = essence_type;
+            asset->duration           = desc.ContainerDuration;
+            asset->intrinsic_duration  = desc.ContainerDuration;
             asset->entry_point    = 0;
             asset->xml_ns         = info.LabelSetType;
             sprintf(asset->uuid,"%.36s", Kumu::bin2UUIDhex(info.AssetUUID,16,uuid_buffer, 64));
@@ -246,6 +251,7 @@ extern "C" int read_asset_info(asset_t *asset)
 
             asset->essence_type   = essence_type;
             asset->duration       = desc.ContainerDuration;
+            asset->intrinsic_duration  = desc.ContainerDuration;
             asset->entry_point    = 0;
             asset->xml_ns         = info.LabelSetType;
             sprintf(asset->uuid,"%.36s", Kumu::bin2UUIDhex(info.AssetUUID,16,uuid_buffer, 64));
@@ -271,6 +277,7 @@ extern "C" int read_asset_info(asset_t *asset)
 
             asset->essence_type   = essence_type;
             asset->duration       = desc.ContainerDuration;
+            asset->intrinsic_duration  = desc.ContainerDuration;
             asset->entry_point    = 0;
             asset->xml_ns         = info.LabelSetType;
             sprintf(asset->uuid,"%.36s", Kumu::bin2UUIDhex(info.AssetUUID,16,uuid_buffer, 64));
@@ -293,6 +300,7 @@ extern "C" int read_asset_info(asset_t *asset)
   
             asset->essence_type   = essence_type;
             asset->duration       = desc.ContainerDuration;
+            asset->intrinsic_duration  = desc.ContainerDuration;
             asset->entry_point    = 0;
             asset->xml_ns         = info.LabelSetType;
             sprintf(asset->uuid,"%.36s", Kumu::bin2UUIDhex(info.AssetUUID,16,uuid_buffer, 64));
