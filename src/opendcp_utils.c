@@ -154,7 +154,7 @@ int validate_reel(context_t *context, int reel) {
         }
     }
 
-    if (context->reel[reel].MainSubtitle.duration && context->reel[reel].MainSubtitle.duration !=d) {
+    if (context->reel[reel].MainSubtitle.duration && context->reel[reel].MainSubtitle.duration != d) {
         duration_mismatch = 1;
         if (context->reel[reel].MainSubtitle.duration < d) {
             d = context->reel[reel].MainSubtitle.duration;
@@ -162,7 +162,7 @@ int validate_reel(context_t *context, int reel) {
     }
 
     if (duration_mismatch) {
-            dcp_log(LOG_WARN,"Asset duration mismatch, adjusting all durations to shortest asset");
+            dcp_log(LOG_WARN,"Asset duration mismatch picture: %d / sound: %d, adjusting all durations to shortest asset", context->reel[reel].MainPicture.duration, context->reel[reel].MainSound.duration);
             context->reel[reel].MainPicture.duration = d;
             context->reel[reel].MainSound.duration = d;
             context->reel[reel].MainSubtitle.duration = d;
@@ -186,12 +186,12 @@ int add_reel(context_t *context, asset_list_t reel) {
         filename=reel.asset_list[x].filename;
         init_asset(&asset);
       
-        sprintf(asset.filename,"%.128s",filename);
-        sprintf(asset.annotation,"%.256s",filename);
+        sprintf(asset.filename,"%s",filename);
+        sprintf(asset.annotation,"%s",filename);
 
         /* check if file exists */
         if ((fp = fopen(filename, "r")) == NULL) {
-            dcp_log(LOG_ERROR,"Could not open file: %.128s",filename);
+            dcp_log(LOG_ERROR,"add_reel: Could not open file: %s",filename);
             return DCP_FATAL;
         } else {
             fclose (fp);
@@ -202,11 +202,11 @@ int add_reel(context_t *context, asset_list_t reel) {
         sprintf(asset.size,"%lld", st.st_size);
 
         /* read asset information */
-        dcp_log(LOG_INFO,"Reading %.128s asset information",filename);
+        dcp_log(LOG_INFO,"Reading %s asset information",filename);
 
         result = read_asset_info(&asset);
         if (result == DCP_FATAL) {
-            dcp_log(LOG_ERROR,"%.128s is not a proper essence file",filename);
+            dcp_log(LOG_ERROR,"%s is not a proper essence file",filename);
             return DCP_FATAL;
         }
 
@@ -229,9 +229,7 @@ int add_reel(context_t *context, asset_list_t reel) {
         }
 
         /* calculate digest */
-        if (context->digest_flag) {
-            calculate_digest(filename,asset.digest);
-        }
+        calculate_digest(filename,asset.digest);
    
         /* get asset type */
         result = get_asset_type(asset);
@@ -243,7 +241,7 @@ int add_reel(context_t *context, asset_list_t reel) {
         } else if (result == ACT_TIMED_TEXT) {
             context->reel[context->reel_count].MainSubtitle = asset;
         } else {
-            dcp_log(LOG_ERROR,"%.128s is not an unknown essence type",filename);
+            dcp_log(LOG_ERROR,"%s is not an unknown essence type",filename);
             return DCP_FATAL;
         }
     }

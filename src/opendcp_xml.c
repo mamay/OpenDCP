@@ -74,18 +74,18 @@ int write_cpl(context_t *context) {
     int x;
     struct stat st;
     char uuid_s[40];
-    char filename[128];
+    char filename[MAX_PATH_LENGTH];
 
-    sprintf(filename,"%.128s",context->cpl.filename);
+    sprintf(filename,"%s",context->cpl.filename);
 
     fp = fopen(filename, "w");
 
     if ( fp == NULL ) {
-        dcp_log(LOG_ERROR,"Could not open file %.128s for writing",filename);
+        dcp_log(LOG_ERROR,"Could not open file %s for writing",filename);
         return DCP_FATAL;
     }
 
-    dcp_log(LOG_INFO,"Writing CPL file %.128s",filename);
+    dcp_log(LOG_INFO,"Writing CPL file %.256s",filename);
 
     /* CPL XML Start */
     fprintf(fp,"%s\n",XML_HEADER);
@@ -210,17 +210,18 @@ int write_pkl(context_t *context) {
     FILE *fp;
     int x;
     struct stat st;
-    char filename[128];
+    char filename[MAX_PATH_LENGTH];
 
-    sprintf(filename,"%.128s",context->pkl.filename);
+    sprintf(filename,"%s",context->pkl.filename);
+
     fp = fopen(filename, "w");
 
     if ( fp == NULL ) {
-        dcp_log(LOG_ERROR,"Could not open file %.128s for writing",filename);
+        dcp_log(LOG_ERROR,"Could not open file %.256s for writing",filename);
         return DCP_FATAL;
     }
 
-    dcp_log(LOG_INFO,"Writing PKL file %.128s",filename);
+    dcp_log(LOG_INFO,"Writing PKL file %.256s",filename);
 
     /* PKL XML Start */
     fprintf(fp,"%s\n",XML_HEADER);
@@ -239,9 +240,7 @@ int write_pkl(context_t *context) {
             fprintf(fp,"    <Asset>\n");
             fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainPicture.uuid);
             fprintf(fp,"      <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainPicture.annotation);
-            if ( context->digest_flag ) {
-                fprintf(fp,"      <Hash>%s</Hash>\n",context->reel[x].MainPicture.digest);
-            }
+            fprintf(fp,"      <Hash>%s</Hash>\n",context->reel[x].MainPicture.digest);
             fprintf(fp,"      <Size>%s</Size>\n",context->reel[x].MainPicture.size);
             if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
                 fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
@@ -255,9 +254,7 @@ int write_pkl(context_t *context) {
             fprintf(fp,"    <Asset>\n");
             fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSound.uuid);
             fprintf(fp,"      <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainSound.annotation);
-            if ( context->digest_flag ) {
-                fprintf(fp,"      <Hash>%s</Hash>\n",context->reel[x].MainSound.digest);
-            }
+            fprintf(fp,"      <Hash>%s</Hash>\n",context->reel[x].MainSound.digest);
             fprintf(fp,"      <Size>%s</Size>\n",context->reel[x].MainSound.size);
             if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
                 fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
@@ -271,9 +268,7 @@ int write_pkl(context_t *context) {
             fprintf(fp,"    <Asset>\n");
             fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSubtitle.uuid);
             fprintf(fp,"      <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainSubtitle.annotation);
-            if ( context->digest_flag ) {
-                fprintf(fp,"      <Hash>%s</Hash>\n",context->reel[x].MainSubtitle.digest);
-            }
+            fprintf(fp,"      <Hash>%s</Hash>\n",context->reel[x].MainSubtitle.digest);
             fprintf(fp,"      <Size>%s</Size>\n",context->reel[x].MainSubtitle.size);
             if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
                 fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
@@ -287,9 +282,7 @@ int write_pkl(context_t *context) {
     /* CPL */
     fprintf(fp,"    <Asset>\n");
     fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->cpl.uuid);
-    if ( context->digest_flag ) {
-        fprintf(fp,"      <Hash>%s</Hash>\n",context->cpl.digest);
-    }
+    fprintf(fp,"      <Hash>%s</Hash>\n",context->cpl.digest);
     fprintf(fp,"      <Size>%s</Size>\n",context->cpl.size);
     if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
         fprintf(fp,"      <Type>%s</Type>\n","text/xml");
@@ -326,19 +319,19 @@ int write_pkl(context_t *context) {
 int write_assetmap(context_t *context) {
     FILE *fp;
     int x;
-    char filename[MAX_FILENAME_LENGTH];
+    char filename[MAX_PATH_LENGTH];
     char uuid_s[40];
 
-    sprintf(filename,"ASSETMAP");
+    sprintf(filename,"%s",context->assetmap.filename);
 
     fp = fopen(filename, "w");
 
     if ( fp == NULL ) {
-        dcp_log(LOG_ERROR,"Could not open file %.128s for writing",filename);
+        dcp_log(LOG_ERROR,"Could not open file %.256s for writing",filename);
         return DCP_FATAL;
     }
 
-    dcp_log(LOG_INFO,"Writing ASSETMAP file %.128s",filename);
+    dcp_log(LOG_INFO,"Writing ASSETMAP file %.256s",filename);
 
     /* Generate Assetmap UUID */
     uuid_random(uuid_s);
@@ -436,18 +429,18 @@ int write_assetmap(context_t *context) {
 
 int write_volumeindex(context_t *context) {
     FILE *fp;
-    char filename[MAX_FILENAME_LENGTH];
+    char filename[MAX_PATH_LENGTH];
 
-    sprintf(filename,"VOLINDEX");
+    sprintf(filename,"%s",context->volindex.filename);
 
     fp = fopen(filename, "w");
 
     if ( fp == NULL ) {
-       dcp_log(LOG_ERROR,"Could not open file %.128s for writing",filename);
+       dcp_log(LOG_ERROR,"Could not open file %.256s for writing",filename);
        return DCP_FATAL;
     }
 
-    dcp_log(LOG_INFO,"Writing VOLINDEX file %.128s",filename);
+    dcp_log(LOG_INFO,"Writing VOLINDEX file %.256s",filename);
 
     /* Volumeindex XML Start */
     fprintf(fp,"%s\n",XML_HEADER);

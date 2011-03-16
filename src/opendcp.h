@@ -26,6 +26,7 @@ extern "C" {
 #define MAX_REELS    30 /* Soft limit */
 #define MAX_PATH_LENGTH 4096 
 #define MAX_FILENAME_LENGTH 256 
+#define MAX_BASENAME_LENGTH 256 
 #ifdef WIN32
 #define stat _stati64 
 #endif
@@ -151,14 +152,23 @@ typedef struct {
     char           uuid[40];
     char           size[18];
     char           digest[40];
-    char           filename[128];
+    char           filename[MAX_FILENAME_LENGTH];
 } cpl_t;
 
 typedef struct {
     char           uuid[40];
     char           size[18];
-    char           filename[128];
+    char           filename[MAX_FILENAME_LENGTH];
 } pkl_t;
+
+typedef struct {
+    char           filename[MAX_FILENAME_LENGTH];
+} assetmap_t;
+
+typedef struct {
+    char           filename[MAX_FILENAME_LENGTH];
+} volindex_t;
+
 
 typedef struct {
     char           uuid[40];
@@ -220,16 +230,19 @@ typedef struct {
     char *signer_cert_file;
     char *private_key_file; 
     char basename[40];
+    char dcp_path[MAX_BASENAME_LENGTH];
     char timestamp[30];
     char issuer[80];
     char creator[80];
     char annotation[128];
-    char title[40];
+    char title[80];
     char kind[15];
     char rating[5];
     int  reel_count;
     cpl_t cpl;
     pkl_t pkl;
+    assetmap_t assetmap;
+    volindex_t volindex;
     reel_t reel[MAX_REELS]; 
     int gamma;
 } context_t;
@@ -246,6 +259,8 @@ void dcp_set_log_level(int log_level);
 
 /* ASDCPLIB Routines */
 int read_asset_info(asset_t *asset);
+void uuid_random(char *uuid);
+int calculate_digest(const char *filename, char *digest);
 
 /* MXF Routines */
 int write_mxf(context_t *context, filelist_t *filelist, char *output);

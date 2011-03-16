@@ -105,6 +105,8 @@ int main (int argc, char **argv) {
     sprintf(context->annotation,"%.128s",DCP_ANNOTATION);
     sprintf(context->title,"%.80s",DCP_TITLE);
     sprintf(context->kind,"%.15s",DCP_KIND);
+    sprintf(context->assetmap.filename,"%.128s","ASSETMAP");
+    sprintf(context->volindex.filename,"%.128s","VOLINDEX");
     get_timestamp(context->timestamp);
 
     /* parse options */
