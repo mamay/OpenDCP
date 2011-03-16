@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <libgen.h>
 #include <time.h>
 #include <sys/stat.h>
 #include "opendcp.h"
@@ -352,7 +353,7 @@ int write_assetmap(context_t *context) {
     fprintf(fp,"      <PackingList>true</PackingList>\n");
     fprintf(fp,"      <ChunkList>\n");
     fprintf(fp,"        <Chunk>\n");
-    fprintf(fp,"          <Path>%s</Path>\n",context->pkl.filename);
+    fprintf(fp,"          <Path>%s</Path>\n",basename(context->pkl.filename));
     fprintf(fp,"          <VolumeIndex>1</VolumeIndex>\n");
     fprintf(fp,"          <Offset>0</Offset>\n");
     fprintf(fp,"          <Length>%s</Length>\n",context->pkl.size);
@@ -365,7 +366,7 @@ int write_assetmap(context_t *context) {
     fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->cpl.uuid);
     fprintf(fp,"      <ChunkList>\n");
     fprintf(fp,"        <Chunk>\n");
-    fprintf(fp,"          <Path>%s</Path>\n",context->cpl.filename);
+    fprintf(fp,"          <Path>%s</Path>\n",basename(context->cpl.filename));
     fprintf(fp,"          <VolumeIndex>1</VolumeIndex>\n");
     fprintf(fp,"          <Offset>0</Offset>\n");
     fprintf(fp,"          <Length>%s</Length>\n",context->cpl.size);
@@ -381,7 +382,7 @@ int write_assetmap(context_t *context) {
             fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainPicture.uuid);
             fprintf(fp,"      <ChunkList>\n");
             fprintf(fp,"        <Chunk>\n");
-            fprintf(fp,"          <Path>%s</Path>\n",context->reel[x].MainPicture.filename);
+            fprintf(fp,"          <Path>%s</Path>\n",basename(context->reel[x].MainPicture.filename));
             fprintf(fp,"          <VolumeIndex>1</VolumeIndex>\n");
             fprintf(fp,"          <Offset>0</Offset>\n");
             fprintf(fp,"          <Length>%s</Length>\n",context->reel[x].MainPicture.size);
@@ -395,7 +396,7 @@ int write_assetmap(context_t *context) {
             fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSound.uuid);
             fprintf(fp,"      <ChunkList>\n");
             fprintf(fp,"        <Chunk>\n");
-            fprintf(fp,"          <Path>%s</Path>\n",context->reel[x].MainSound.filename);
+            fprintf(fp,"          <Path>%s</Path>\n",basename(context->reel[x].MainSound.filename));
             fprintf(fp,"          <VolumeIndex>1</VolumeIndex>\n");
             fprintf(fp,"          <Offset>0</Offset>\n");
             fprintf(fp,"          <Length>%s</Length>\n",context->reel[x].MainSound.size);
@@ -409,7 +410,7 @@ int write_assetmap(context_t *context) {
             fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSubtitle.uuid);
             fprintf(fp,"      <ChunkList>\n");
             fprintf(fp,"        <Chunk>\n");
-            fprintf(fp,"          <Path>%s</Path>\n",context->reel[x].MainSubtitle.filename);
+            fprintf(fp,"          <Path>%s</Path>\n",basename(context->reel[x].MainSubtitle.filename));
             fprintf(fp,"          <VolumeIndex>1</VolumeIndex>\n");
             fprintf(fp,"          <Offset>0</Offset>\n");
             fprintf(fp,"          <Length>%s</Length>\n",context->reel[x].MainSubtitle.size);

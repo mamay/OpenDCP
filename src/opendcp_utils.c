@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <libgen.h>
 #include <sys/stat.h>
 #include <time.h>
 #include <openssl/x509.h>
@@ -176,6 +177,7 @@ int add_reel(context_t *context, asset_list_t reel) {
     int x;
     FILE *fp;
     char *filename;
+    int bp;
     asset_t asset;
     struct stat st;
 
@@ -187,7 +189,7 @@ int add_reel(context_t *context, asset_list_t reel) {
         init_asset(&asset);
       
         sprintf(asset.filename,"%s",filename);
-        sprintf(asset.annotation,"%s",filename);
+        sprintf(asset.annotation,"%s",basename(filename));
 
         /* check if file exists */
         if ((fp = fopen(filename, "r")) == NULL) {
