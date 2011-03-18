@@ -20,7 +20,7 @@ Cmake
 ------------
 CMake is used to build this application. You may need to install CMake.
 Most linux distributions have CMake installed or have it available through the package manager.
-On Mac OSX, CMake is easily installed with MacPorts.
+On Mac OSX and Windows, CMake is easily installed from http://www.cmake.org/
 
 Compile
 ------------
@@ -32,7 +32,7 @@ For example, if the OpenDCP source is in /home/opendcp, but you want to build in
 # cd /home/opendcp-build
 # cmake /home/opendcp/
 
-By default XMLSEC libraries are not enabled, to enabled add the ENABLE_XMLSEC flag
+By default XMLSEC libraries are not enabled, to enable add the ENABLE_XMLSEC flag
 
 # cmake -DENABLE_XMLSEC=ON /home/opendcp
 
