@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <libgen.h>
 #include <sys/stat.h>
+#include <inttypes.h>
 #include <time.h>
 #include <openssl/x509.h>
 #include <openssl/bio.h>
@@ -201,7 +202,7 @@ int add_reel(context_t *context, asset_list_t reel) {
 
         /* get file size */
         stat(filename, &st);
-        sprintf(asset.size,SSIZE_T, st.st_size);
+        sprintf(asset.size,"%"PRIu64, st.st_size);
 
         /* read asset information */
         dcp_log(LOG_INFO,"Reading %s asset information",filename);

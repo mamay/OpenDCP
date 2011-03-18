@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <libgen.h>
 #include <time.h>
+#include <inttypes.h>
 #include <sys/stat.h>
 #include "opendcp.h"
 
@@ -201,7 +202,7 @@ int write_cpl(context_t *context) {
 
     /* Store CPL file size */
     stat(filename, &st);
-    sprintf(context->cpl.size,SSIZE_T,st.st_size);
+    sprintf(context->cpl.size,"%"PRIu64,st.st_size);
     calculate_digest(filename,context->cpl.digest);
 
     return DCP_SUCCESS;
@@ -312,7 +313,7 @@ int write_pkl(context_t *context) {
 
     /* Store PKL file size */
     stat(filename, &st);
-    sprintf(context->pkl.size,SSIZE_T,st.st_size);
+    sprintf(context->pkl.size,"%"PRIu64,st.st_size);
 
     return DCP_SUCCESS;
 }

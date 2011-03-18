@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <libgen.h>
+#include <inttypes.h>
 #include <time.h>
 #include <sys/stat.h>
 #include "opendcp.h"
@@ -20,7 +21,7 @@ int main (int argc, char **argv)
 
     char *filename = argv[1];
     stat(filename, &st);
-    printf("file: %s size: " SSIZE_T "\n",filename,st.st_size);
+    printf("file: %s size: %"PRIu64 "\n",filename,st.st_size);
 
     return 0;
 }
