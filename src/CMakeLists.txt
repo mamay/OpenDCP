@@ -15,7 +15,7 @@ ENDIF(ENABLE_XMLSEC)
 #-----------------------------------------------------------------------------
 
 #--Set output targets and paths-----------------------------------------------
-SET(OPENDCP_TARGETS opendcp_xml opendcp_j2k opendcp_mxf)
+SET(OPENDCP_TARGETS opendcp_xml opendcp_j2k opendcp_mxf opendcp_largefile)
 SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin/")
 SET(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib/")
 SET(OPENDCP_LIB "${PROJECT_BINARY_DIR}/lib/libopendcp.a")
@@ -29,6 +29,9 @@ INSTALL(FILES opendcp.h DESTINATION include)
 #-----------------------------------------------------------------------------
 
 #--opendcp tools--------------------------------------------------------------
+ADD_EXECUTABLE(opendcp_largefile opendcp_largefile.c opendcp_force_cpp.cpp)
+TARGET_LINK_LIBRARIES(opendcp_largefile ${OPENDCP_LIB} ${LIBS})
+
 ADD_EXECUTABLE(opendcp_xml opendcp_xml_cmd.c opendcp_force_cpp.cpp)
 TARGET_LINK_LIBRARIES(opendcp_xml ${OPENDCP_LIB} ${LIBS})
 
