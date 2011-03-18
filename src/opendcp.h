@@ -27,8 +27,12 @@ extern "C" {
 #define MAX_PATH_LENGTH 4096 
 #define MAX_FILENAME_LENGTH 256 
 #define MAX_BASENAME_LENGTH 256 
+
+/* handle large file support */
 #ifdef WIN32
-#define stat _stati64 
+#define SSIZE_T "%lu"
+#else
+#define SSIZE_T "%lld"
 #endif
 
 #define MAX_DCP_JPEG_BITRATE 250000000  /* Maximum DCI compliant bit rate for JPEG2000 */

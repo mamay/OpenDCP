@@ -201,7 +201,7 @@ int add_reel(context_t *context, asset_list_t reel) {
 
         /* get file size */
         stat(filename, &st);
-        sprintf(asset.size,"%lld", st.st_size);
+        sprintf(asset.size,SSIZE_T, st.st_size);
 
         /* read asset information */
         dcp_log(LOG_INFO,"Reading %s asset information",filename);
