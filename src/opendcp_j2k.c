@@ -133,7 +133,7 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
 
     /* verify image is dci compliant */
     if (check_image_compliance(context, odcp_image) != DCP_SUCCESS) {
-        dcp_log(LOG_ERROR,"Image %s is not DCI Compliant",in_file);
+        dcp_log(LOG_WARN,"The image resolution of %s is not DCI Compliant",in_file);
         //return DCP_FATAL;
     }
     
@@ -246,14 +246,14 @@ int encode_openjpeg(context_t *context, odcp_image_t *odcp_image, char *out_file
                               (max_cs_len * 8 * odcp_image->dx * odcp_image->dy);
 
     /* get a J2K compressor handle */
-    dcp_log(LOG_DEBUG,"Creating Compressor %s",out_file);
+    dcp_log(LOG_DEBUG,"Creating compressor %s",out_file);
     cinfo = opj_create_compress(CODEC_J2K);
 
     /* convert opendcp to openjpeg image */
     odcp_to_opj(odcp_image, &opj_image); 
 
     /* setup the encoder parameters using the current image and user parameters */
-    dcp_log(LOG_DEBUG,"Setup J2k Encoder %s",out_file);
+    dcp_log(LOG_DEBUG,"Setup J2k encoder %s",out_file);
     opj_setup_encoder(cinfo, &parameters, opj_image);
 
     /* open a byte stream for writing */
