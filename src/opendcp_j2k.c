@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <libgen.h>
 #include <sys/stat.h>
 #include <openjpeg.h>
 #ifdef OPENMP
@@ -120,10 +121,11 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
     #pragma omp critical
     #endif
     {
-    if (read_tif(&odcp_image, in_file,0) != DCP_SUCCESS) {
+    result = read_tif(&odcp_image, in_file,0);
+    }
+    if (result != DCP_SUCCESS) {
         dcp_log(LOG_ERROR,"Unable to read tiff file %s",in_file);
         return DCP_FATAL;
-    }
     }
 
     if (!odcp_image) {
@@ -147,7 +149,8 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
 
     if ( context->encoder == J2K_KAKADU ) {
         char tempfile[255];
-        sprintf(tempfile,"%stmp%s",tempnam(tmp_path,"opendcp"),get_basename(in_file));
+        sprintf(tempfile,"%s/tmp_%s",tmp_path,basename(in_file));
+        dcp_log(LOG_INFO,"Writing temporary tif %s",tempfile);
         result = write_tif(odcp_image,tempfile,0);
         
         if (result != DCP_SUCCESS) {
