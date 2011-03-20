@@ -120,7 +120,10 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
     #pragma omp critical
     #endif
     {
-    read_tif(&odcp_image, in_file,0);
+    if (read_tif(&odcp_image, in_file,0) != DCP_SUCCESS) {
+        dcp_log(LOG_ERROR,"Unable to read tiff file %s",in_file);
+        return DCP_FATAL;
+    }
     }
 
     if (!odcp_image) {

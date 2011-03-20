@@ -34,7 +34,7 @@ void dcp_log_callback(int level, const char* fmt, va_list vl)
     char msg[1024];
 
     if (dcp_log_level>=level) {
-        snprintf(msg, sizeof(msg), "[%s] ", DCP_LOG[level]);
+        snprintf(msg, sizeof(msg), "[%5.5s] ", DCP_LOG[level]);
         vsnprintf(msg + strlen(msg), sizeof(msg) - strlen(msg), fmt, vl);
         fprintf(stderr,"%s\n",msg);
     }

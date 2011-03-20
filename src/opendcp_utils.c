@@ -29,14 +29,13 @@
 
 void cleanup(context_t *context, int exit_flag) {
     int result; 
-    fprintf(stderr,"\nCleaning up temporary files... \n");
     if (exit_flag) {
         exit(1);
     }
 }
 
 void dcp_fatal(context_t *context, char *error) {
-    fprintf(stderr, "[FATAL] %s\n",error);
+    dcp_log(LOG_ERROR, "%s",error);
     cleanup(context,0);
     exit(DCP_FATAL);
 }

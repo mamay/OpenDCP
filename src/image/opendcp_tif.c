@@ -46,6 +46,7 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
     odcp_image_t *image = 00;
 
     /* open tiff using filename or file descriptor */
+    dcp_log(LOG_DEBUG,"Opening tiff file %s",infile);
     if (fd == 0) {
         tif = TIFFOpen(infile, "r");
     } else {
@@ -53,7 +54,7 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
     }
 
     if (!tif) {
-        dcp_log(LOG_ERROR,"Failed to open %s for reading\n", infile);
+        dcp_log(LOG_ERROR,"Failed to open %s for reading", infile);
         return DCP_FATAL;
     }
 
@@ -66,12 +67,13 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
     image_size = w * h;
    
     /* create the image */
-    dcp_log(LOG_DEBUG,"allocating odcp image\n");
+    dcp_log(LOG_DEBUG,"Allocating odcp image");
     image = odcp_image_create(3,image_size);
+    dcp_log(LOG_DEBUG,"Image allocated");
     
     if(!image) {
         TIFFClose(tif);
-        dcp_log(LOG_ERROR,"Failed to create image %s\n", infile);
+        dcp_log(LOG_ERROR,"Failed to create image %s", infile);
         return DCP_FATAL;
     }
 
@@ -95,12 +97,18 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
         int r,c;
         uint32* raster;
 
+        dcp_log(LOG_ERROR,"YUV/YCbCr images not currently supported");
+        return DCP_FATAL ; 
+ 
+        dcp_log(LOG_DEBUG,"Photometric: 6, YUV");
+        dcp_log(LOG_DEBUG,"TIFFmalloc");
         raster = (uint32*) _TIFFmalloc(image_size * 2 * sizeof (uint32));
         if (raster == NULL) {
             dcp_log(LOG_ERROR,"could not allocate memory for raster");
             return(DCP_FATAL);
         }
 
+        dcp_log(LOG_DEBUG,"TIFFReadRGBAImage");
         if (!TIFFReadRGBAImage(tif, w*2, h, raster, 0)) {
             dcp_log(LOG_ERROR,"could not read tiff into memory");
             return(DCP_FATAL);
@@ -133,6 +141,7 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
     }
 
     if (photo == 2) {
+        dcp_log(LOG_DEBUG,"Photometric: 2, RGB");
         buf = _TIFFmalloc(TIFFStripSize(tif));
         strip_size=0;
         strip_size=TIFFStripSize(tif);
