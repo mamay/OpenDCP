@@ -371,11 +371,6 @@ int main (int argc, char **argv) {
 
     get_filelist(context,in_path,out_path,filelist);
 
-    /* adjust frame rate for 3D */
-    if (context->stereoscopic) {
-        context->frame_rate *=2;
-    }
-
     if (context->log_level>0 && context->log_level<3) { progress_bar(0,0); }
 
 #ifdef OPENMP

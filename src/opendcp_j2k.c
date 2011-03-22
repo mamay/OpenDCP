@@ -188,6 +188,12 @@ int encode_kakadu(context_t *context, char *in_file, char *out_file) {
 
     /* set the max image and component sizes based on frame_rate */
     max_cs_len = ((float)MAX_DCP_JPEG_BITRATE)/8/context->frame_rate;
+    
+    /* adjust cs for 3D */
+    if (context->stereoscopic) {
+        max_cs_len = max_cs_len/2;
+    } 
+
     max_comp_size = ((float)max_cs_len)/1.25;
 
     sprintf(k_lengths,"Creslengths=%d",max_cs_len);
@@ -219,9 +225,17 @@ int encode_openjpeg(context_t *context, odcp_image_t *odcp_image, char *out_file
 
     /* set the max image and component sizes based on frame_rate */
     max_cs_len = ((float)MAX_DCP_JPEG_BITRATE)/8/context->frame_rate;
+ 
+    /* adjust cs for quality value */
     if (context->quality) {
         max_cs_len = max_cs_len * ((float)context->quality/100.00);
     }
+
+    /* adjust cs for 3D */
+    if (context->stereoscopic) {
+        max_cs_len = max_cs_len/2;
+    } 
+ 
     max_comp_size = ((float)max_cs_len)/1.25;
 
     /* set encoding parameters to default values */
