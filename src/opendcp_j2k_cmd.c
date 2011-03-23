@@ -232,7 +232,9 @@ int main (int argc, char **argv) {
     context->log_level = LOG_WARN;
     context->cinema_profile = DCP_CINEMA2K;
     context->frame_rate = 24;
-    context->threads = 4;
+#ifdef OPENMP
+    context->threads = omp_get_num_procs();
+#endif
  
     /* parse options */
     while (1)
