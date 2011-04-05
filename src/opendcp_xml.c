@@ -132,7 +132,7 @@ int write_cpl(context_t *context) {
             fprintf(fp,"          <Id>urn:uuid:%s</Id>\n",context->reel[x].MainPicture.uuid);
             fprintf(fp,"          <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainPicture.annotation);
             fprintf(fp,"          <EditRate>%s</EditRate>\n",context->reel[x].MainPicture.edit_rate);
-            fprintf(fp,"          <IntrinsicDuration>%d</IntrinsicDuration>\n",context->reel[x].MainPicture.duration);
+            fprintf(fp,"          <IntrinsicDuration>%d</IntrinsicDuration>\n",context->reel[x].MainPicture.intrinsic_duration);
             fprintf(fp,"          <EntryPoint>%d</EntryPoint>\n",context->reel[x].MainPicture.entry_point);
             fprintf(fp,"          <Duration>%d</Duration>\n",context->reel[x].MainPicture.duration);
             if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
@@ -156,7 +156,7 @@ int write_cpl(context_t *context) {
             fprintf(fp,"          <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSound.uuid);
             fprintf(fp,"          <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainSound.annotation);
             fprintf(fp,"          <EditRate>%s</EditRate>\n",context->reel[x].MainSound.edit_rate);
-            fprintf(fp,"          <IntrinsicDuration>%d</IntrinsicDuration>\n",context->reel[x].MainSound.duration);
+            fprintf(fp,"          <IntrinsicDuration>%d</IntrinsicDuration>\n",context->reel[x].MainSound.intrinsic_duration);
             fprintf(fp,"          <EntryPoint>%d</EntryPoint>\n",context->reel[x].MainSound.entry_point);
             fprintf(fp,"          <Duration>%d</Duration>\n",context->reel[x].MainSound.duration);
             if ( context->digest_flag ) {
@@ -170,7 +170,7 @@ int write_cpl(context_t *context) {
             fprintf(fp,"          <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSubtitle.uuid);
             fprintf(fp,"          <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainSubtitle.annotation);
             fprintf(fp,"          <EditRate>%s</EditRate>\n",context->reel[x].MainSubtitle.edit_rate);
-            fprintf(fp,"          <IntrinsicDuration>%d</IntrinsicDuration>\n",context->reel[x].MainSubtitle.duration);
+            fprintf(fp,"          <IntrinsicDuration>%d</IntrinsicDuration>\n",context->reel[x].MainSubtitle.intrinsic_duration);
             fprintf(fp,"          <EntryPoint>%d</EntryPoint>\n",context->reel[x].MainSubtitle.entry_point);
             fprintf(fp,"          <Duration>%d</Duration>\n",context->reel[x].MainSubtitle.duration);
             if ( context->digest_flag ) {
