@@ -143,6 +143,7 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
         dcp_log(LOG_INFO,"RGB->XYZ color conversion %s",in_file);
         if (rgb_to_xyz(odcp_image,context->gamma)) {
             dcp_log(LOG_ERROR,"Color conversion failed %s",in_file);
+            odcp_image_free(odcp_image);
             return DCP_FATAL;
         }
     }
@@ -155,6 +156,7 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
         
         if (result != DCP_SUCCESS) {
             dcp_log(LOG_ERROR,"Writing temporary tif failed");
+            odcp_image_free(odcp_image);
             return DCP_FATAL;
         }
 
@@ -162,12 +164,14 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
         if ( result != DCP_SUCCESS) {
             dcp_log(LOG_ERROR,"Kakadu JPEG2000 conversion failed %s",in_file);
             remove(tempfile);
+            odcp_image_free(odcp_image);
             return DCP_FATAL;
         }
         remove(tempfile);
     } else {
         if (encode_openjpeg(context,odcp_image,out_file) != DCP_SUCCESS) {
             dcp_log(LOG_ERROR,"OpenJPEG JPEG2000 conversion failed %s",in_file);
+            odcp_image_free(odcp_image);
             return DCP_FATAL;
         }        
     }
