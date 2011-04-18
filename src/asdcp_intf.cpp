@@ -108,6 +108,7 @@ extern "C" int get_file_essence_class(char *filename) {
     switch (essence_type) {
         case ESS_JPEG_2000:
         case ESS_JPEG_2000_S:
+        case ESS_MPEG2_VES:
             essence_class = ACT_PICTURE;
             break;
         case ESS_PCM_24b_48k:

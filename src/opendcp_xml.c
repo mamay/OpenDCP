@@ -65,7 +65,11 @@ char *get_aspect_ratio(char *dimension_string) {
     if (d>0) {
         a = (n * 1.00) / (d * 1.00);
     }
-    
+
+    if ( a >= 1.77 && a <= 1.78) {
+        a = 1.77;
+    }
+
     sprintf(ratio,"%-3.2f",a);
 
     return(ratio);

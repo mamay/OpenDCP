@@ -35,12 +35,14 @@ lipo -create $bld_dir/bin/opendcp_j2k $bld64_dir/bin/opendcp_j2k -output $cdir/o
 lipo -create $bld_dir/bin/opendcp_mxf $bld64_dir/bin/opendcp_mxf -output $cdir/opendcp_mxf 
 lipo -create $bld_dir/bin/opendcp_xml $bld64_dir/bin/opendcp_xml -output $cdir/opendcp_xml
 lipo -create $bld_dir/bin/opendcp_xml_verify $bld64_dir/bin/opendcp_xml_verify -output $cdir/opendcp_xml_verify 
+lipo -create $bld_dir/bin/opendcp_largefile $bld64_dir/bin/opendcp_largefile -output $cdir/opendcp_largefile
 
 mv $cdir/libopendcp.a $bld_dir/lib/libopendcp.a
 mv $cdir/opendcp_j2k  $bld_dir/bin/opendcp_j2k
 mv $cdir/opendcp_mxf  $bld_dir/bin/opendcp_mxf
 mv $cdir/opendcp_xml  $bld_dir/bin/opendcp_xml
 mv $cdir/opendcp_xml_verify $bld_dir/bin/opendcp_xml_verify
+mv $cdir/opendcp_largefile $bld_dir/bin/opendcp_largefile
 
 cd $bld_dir
 sudo make install
