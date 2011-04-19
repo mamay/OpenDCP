@@ -13,7 +13,7 @@ then
     mkdir -p $bld_dir
 fi 
 cd $bld_dir 
-cmake -DENABLE_STATIC=ON -DENABLE_XMLSEC=ON -DENABLE_OSX386=ON -DENABLE_OPENMP=OFF ../
+cmake -DENABLE_STATIC=ON -DENABLE_XMLSEC=ON -DENABLE_OSX386=ON -DENABLE_OPENMP=ON ../
 make
 cd $dir
 
@@ -25,7 +25,7 @@ then
     mkdir -p $bld64_dir
 fi
 cd $bld64_dir
-cmake -DENABLE_STATIC=ON -DENABLE_XMLSEC=ON -DENABLE_OPENMP=OFF ../
+cmake -DENABLE_STATIC=ON -DENABLE_XMLSEC=ON -DENABLE_OPENMP=ON ../
 make
 cd $dir
 

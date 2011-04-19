@@ -7,7 +7,7 @@ SET(CMAKE_BUILD_TYPE Release)
 
 #--Version--------------------------------------------------------------------
 SET(OpenDCP_VERSION_MAJOR 0)
-SET(OpenDCP_VERSION_MINOR 18)
+SET(OpenDCP_VERSION_MINOR 19)
 SET(OpenDCP_VERSION "${OpenDCP_VERSION_MAJOR}.${OpenDCP_VERSION_MINOR}")
 ADD_DEFINITIONS(-DOPENDCP_VERSION="${OpenDCP_VERSION}")
 #-----------------------------------------------------------------------------

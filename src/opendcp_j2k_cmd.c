@@ -199,6 +199,7 @@ void progress_bar(int val, int total) {
 
 int main (int argc, char **argv) {
     int c, result, count = 0, abort = 0;
+    int openmp_flag = 0;
     context_t *context;
     char *in_path = NULL;
     char *out_path = NULL;
@@ -233,6 +234,7 @@ int main (int argc, char **argv) {
     context->cinema_profile = DCP_CINEMA2K;
     context->frame_rate = 24;
 #ifdef OPENMP
+    openmp_flag = 1;
     context->threads = omp_get_num_procs();
 #endif
  
@@ -382,7 +384,7 @@ int main (int argc, char **argv) {
     for (c=0;c<filelist->file_count;c++) {    
         #pragma omp flush(SIGINT_received)
         if (!SIGINT_received) {
-            dcp_log(LOG_INFO,"JPEG2000 conversion %s started",filelist->in[c]);
+            dcp_log(LOG_INFO,"JPEG2000 conversion %s started OPENMP: %d",filelist->in[c],openmp_flag);
             result = convert_to_j2k(context,filelist->in[c],filelist->out[c], tmp_path);
             if (count) {
                if (context->log_level>0 && context->log_level<3) {progress_bar(count,filelist->file_count);}

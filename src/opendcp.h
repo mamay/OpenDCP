@@ -34,7 +34,7 @@ extern "C" {
 #ifdef OPENDCP_VERSION
 static const char *OPEN_DCP_VERSION   = OPENDCP_VERSION; 
 #else
-static const char *OPEN_DCP_VERSION   = "unknown"; 
+static const char *OPEN_DCP_VERSION   = "0.19"; 
 #endif
 
 static const char *OPEN_DCP_NAME      = "OpenDCP"; 
