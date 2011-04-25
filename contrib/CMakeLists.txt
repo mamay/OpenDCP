@@ -12,15 +12,24 @@ ELSE()
     SET(MAKE "make")
 ENDIF()
 
+#EXTERNALPROJECT_ADD(00_ZLIB
+#    URL http://zlib.net/zlib-1.2.5.tar.gz 
+#    BUILD_IN_SOURCE 1
+#    PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/zlib-1.2.5.patch
+#    CONFIGURE_COMMAND sh <SOURCE_DIR>/mkzlib.sh ${PREFIX} ${AUTO_CFLAGS} ${AUTO_LDFLAGS}
+#    BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
+#    INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+#)
+
 IF(ENABLE_XMLSEC)
     EXTERNALPROJECT_ADD(00_LTDL
-    URL http://ftp.gnu.org/gnu/libtool/libtool-2.4.tar.gz
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
-                      --disable-dependency-tracking --enable-static=yes --enable-shared=no 
-                       ${TARGET}
-    BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
-    INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+        URL http://ftp.gnu.org/gnu/libtool/libtool-2.4.tar.gz
+        BUILD_IN_SOURCE 1
+        CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
+                          --disable-dependency-tracking --enable-static=yes --enable-shared=no 
+                           ${TARGET}
+        BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
+        INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
     )
 
     EXTERNALPROJECT_ADD(01_ICONV
@@ -87,11 +96,11 @@ EXTERNALPROJECT_ADD(04_EXPAT
     INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
 )
 
+SET(OPENSSL_MAKE make)
 IF(APPLE)
     IF(ENABLE_OSX386)
-        SET(OPENSSL_CONFIGURE <SOURCE_DIR>/config ${PREFIX_ARG})
-        SET(OPENSSL_CFLAGS "CFLAG=-arch i386 -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk")
-        SET(OPENSSL_LDFLAGS "LDFLAG=-arch i386 -mmacosx-version-min=10.5 -Wl,-search_paths_first")
+        SET(OPENSSL_CONFIGURE sh <SOURCE_DIR>/util/mkuniversal.sh ${PREFIX_ARG} configure)
+        SET(OPENSSL_MAKE sh <SOURCE_DIR>/util/mkuniversal.sh ${PREFIX_ARG})
     ELSE()
         SET(OPENSSL_CONFIGURE <SOURCE_DIR>/Configure darwin64-x86_64-cc ${PREFIX_ARG})
     ENDIF()
@@ -106,7 +115,7 @@ EXTERNALPROJECT_ADD(05_OPENSSL
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/openssl-0.9.8r.patch
     CONFIGURE_COMMAND ${OPENSSL_CONFIGURE}
-    BUILD_COMMAND ${MAKE} ${OPENSSL_CFLAGS} ${OPENSSL_LDFLAGS} -f <SOURCE_DIR>/Makefile
+    BUILD_COMMAND ${OPENSSL_MAKE} -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
 )
 

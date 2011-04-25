@@ -15,7 +15,7 @@ ADD_DEFINITIONS(-DOPENDCP_VERSION="${OpenDCP_VERSION}")
 #--Options--------------------------------------------------------------------
 OPTION(ENABLE_XMLSEC "Enable XML digital singatures and security features" OFF)
 OPTION(ENABLE_STATIC "Enable static link to libraries" OFF)
-OPTION(ENABLE_OSX386 "Force i386 and OSX10.5 compatibility" OFF)
+OPTION(ENABLE_OSX386 "Force i386 and OSX10.5 compatibility" ON)
 OPTION(ENABLE_OPENMP "Enable OPENMP multithreading" ON)
 
 IF(ENABLE_XMLSEC)
@@ -37,20 +37,18 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 ${OPENMP}")
 SET(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
 #-----------------------------------------------------------------------------
 
-
-
 #--Set OS Specific Compiler Flags---------------------------------------------
 IF(APPLE)
     SET(OS "APPLE")
     IF(ENABLE_OSX386)
-        SET(ARCH "-arch i386")
-        SET(TARGET "--target=i386")
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ARCH} -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARCH} -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk")
+        SET(ARCH "-arch i386 -arch x86_64")
+        SET(CMAKE_OSX_ARCHITECTURES i386;x86_64)
+        SET(CMAKE_OSX_SYSROOT /Developer/SDKs/MacOSX10.5.sdk)
+        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mmacosx-version-min=10.5")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.5")
         SET(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} "-Wl,-search_paths_first")
         SET(AUTO_CFLAGS "CFLAGS=${ARCH} -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk")
         SET(AUTO_CXXFLAGS "CXXFLAGS=${ARCH} -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk")
-        SET(AUTO_LDFLAGS "LDFLAGS=${ARCH} -mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk -Wl,-search_paths_first")
     ENDIF()
 ELSEIF(WIN32)
     SET(OS "WIN32")
