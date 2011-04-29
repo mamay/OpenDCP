@@ -26,4 +26,5 @@ extern "C" int calculate_digest(const char *filename, char *digest);
 Kumu::Result_t write_j2k_mxf(context_t *context, filelist_t *filelist, char *output_file);
 Kumu::Result_t write_j2k_s_mxf(context_t *context, filelist_t *filelist, char *output_file);
 Kumu::Result_t write_pcm_mxf(context_t *context, filelist_t *filelist, char *output_file);
+Kumu::Result_t write_tt_mxf(context_t *context, filelist_t *filelist, char *output_file);
 Kumu::Result_t write_mpeg2_mxf(context_t *context, filelist_t *filelist, char *output_file);

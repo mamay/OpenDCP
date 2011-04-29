@@ -341,6 +341,9 @@ extern "C" int write_mxf(context_t *context, filelist_t *filelist, char *output_
         case ESS_MPEG2_VES:
             result = write_mpeg2_mxf(context,filelist,output_file);
             break;
+        case ESS_TIMED_TEXT:
+            result = write_tt_mxf(context,filelist,output_file);
+            break;
     }
 
     if (ASDCP_FAILURE(result)) {
@@ -749,6 +752,129 @@ Result_t write_pcm_mxf(context_t *context, filelist_t *filelist, char *output_fi
             }
             result = mxf_writer.WriteFrame(frame_buffer, aes_context, hmac_context);
         }
+    }
+
+    if (result == RESULT_ENDOFFILE) {
+        result = RESULT_OK;
+    }
+
+    if (ASDCP_FAILURE(result)) {
+        printf("not end of file\n");
+        return result;
+    }
+
+    result = mxf_writer.Finalize();
+
+    if (ASDCP_FAILURE(result)) {
+        printf("failed to finalize\n");
+        return result;
+    }
+
+    return result;
+}
+
+/* write out timed text mxf file */
+Result_t write_tt_mxf(context_t *context, filelist_t *filelist, char *output_file) {
+    AESEncContext*                 aes_context = 0;
+    HMACContext*                   hmac_context = 0;
+    TimedText::DCSubtitleParser    tt_parser;
+    TimedText::MXFWriter           mxf_writer;
+    TimedText::FrameBuffer         frame_buffer(FRAME_BUFFER_SIZE);
+    TimedText::TimedTextDescriptor tt_desc;
+    TimedText::ResourceList_t::const_iterator resource_iterator;
+    WriterInfo                     writer_info;
+    std::string                    xml_doc;
+    byte_t                         iv_buf[CBC_BLOCK_SIZE];
+    Kumu::FortunaRNG               rng;
+    Result_t                       result = RESULT_OK;
+    ui32_t                         mxf_duration;
+
+    result = tt_parser.OpenRead(filelist->in[0]);
+ 
+    if (ASDCP_FAILURE(result)) {
+        printf("Failed to open file %s\n",filelist->in[0]);
+        return result;
+    }
+
+    tt_parser.FillTimedTextDescriptor(tt_desc);
+
+    writer_info.ProductVersion = OPEN_DCP_VERSION;
+    writer_info.CompanyName = OPEN_DCP_NAME;
+    writer_info.ProductName = OPEN_DCP_NAME;
+
+    /* set the label type */
+    if (context->ns == XML_NS_INTEROP) {
+        writer_info.LabelSetType = LS_MXF_INTEROP;
+    } else if ( context->ns == XML_NS_SMPTE ) {
+        writer_info.LabelSetType = LS_MXF_SMPTE;
+    } else {
+        writer_info.LabelSetType = LS_MXF_UNKNOWN;
+    }
+
+    /* generate a random UUID for this essence */
+    Kumu::GenRandomUUID(writer_info.AssetUUID);
+
+    /* start encryption, if set */
+    if (context->key_flag) {
+        Kumu::GenRandomUUID(writer_info.ContextID);
+        writer_info.EncryptedEssence = true;
+
+        if (context->key_id) {
+            memcpy(writer_info.CryptographicKeyID, context->key_id, UUIDlen);
+        } else {
+            rng.FillRandom(writer_info.CryptographicKeyID, UUIDlen);
+        }
+
+        aes_context = new AESEncContext;
+        result = aes_context->InitKey(context->key_value);
+
+        if (ASDCP_FAILURE(result)) {
+            return result;
+        }
+
+        result = aes_context->SetIVec(rng.FillRandom(iv_buf, CBC_BLOCK_SIZE));
+
+        if (ASDCP_FAILURE(result)) {
+            return result;
+        }
+
+        if (context->write_hmac) {
+            writer_info.UsesHMAC = true;
+            hmac_context = new HMACContext;
+            result = hmac_context->InitKey(context->key_value, writer_info.LabelSetType);
+
+            if (ASDCP_FAILURE(result)) {
+                return result;
+            }
+        }
+    }
+
+    result = mxf_writer.OpenWrite(output_file, writer_info, tt_desc);
+    result = tt_parser.ReadTimedTextResource(xml_doc);
+
+    if (ASDCP_FAILURE(result)) {
+        printf("Could not read Time Text Resource\n");
+        return result;
+    }
+
+    result = mxf_writer.WriteTimedTextResource(xml_doc, aes_context, hmac_context);
+
+    if (ASDCP_FAILURE(result)) {
+        printf("Could not write Time Text Resource\n");
+        return result;
+    }
+
+    resource_iterator = tt_desc.ResourceList.begin();
+
+    while (ASDCP_SUCCESS(result) && resource_iterator != tt_desc.ResourceList.end()) {
+        result = tt_parser.ReadAncillaryResource((*resource_iterator++).ResourceID, frame_buffer);
+
+        if (ASDCP_FAILURE(result)) {
+          printf("Could not read Time Text Resource\n");
+          return result;
+        }
+
+        result = mxf_writer.WriteAncillaryResource(frame_buffer, aes_context, hmac_context);
     }
 
     if (result == RESULT_ENDOFFILE) {
