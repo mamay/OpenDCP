@@ -1,6 +1,6 @@
 --- util/mkuniversal.sh    1969-12-31 19:00:00.000000000 -0500
 +++ util/mkuniversal.sh      2011-04-24 18:50:47.000000000 -0400
-@@ -0,0 +1,32 @@
+@@ -0,0 +1,38 @@
 +#!/bin/sh
 +
 +PREFIX_ARG=$1
@@ -30,11 +30,14 @@
 +make install -f Makefile
 +
 +echo "Making Universal"
-PREFIX_ARG=${PREFIX_ARG//--prefix=}
++PREFIX_ARG=${PREFIX_ARG//--prefix=}
 +PREFIX_ARG_386=${PREFIX_ARG_386//--prefix=}
 +PREFIX_ARG_x86_64=${PREFIX_ARG_x86_64//--prefix=}
++echo "lipo -create $PREFIX_ARG_386/lib/libssl.a $PREFIX_ARG_x86_64/lib/libssl.a -output $PREFIX_ARG/lib/libssl.a"
 +lipo -create $PREFIX_ARG_386/lib/libssl.a $PREFIX_ARG_x86_64/lib/libssl.a -output $PREFIX_ARG/lib/libssl.a
++echo "lipo -create $PREFIX_ARG_386/lib/libssl.a $PREFIX_ARG_x86_64/lib/libcrypto.a -output $PREFIX_ARG/lib/libcrypto.a"
 +lipo -create $PREFIX_ARG_386/lib/libcrypto.a $PREFIX_ARG_x86_64/lib/libcrypto.a -output $PREFIX_ARG/lib/libcrypto.a
++echo "cp -r $PREFIX_ARG_x86_64/include/openssl $PREFIX_ARG/include"
 +cp -r $PREFIX_ARG_x86_64/include/openssl $PREFIX_ARG/include
 
 --- Makefile.org	2010-01-27 11:06:36.000000000 -0500

@@ -270,6 +270,9 @@ int encode_openjpeg(context_t *context, odcp_image_t *odcp_image, char *out_file
     dcp_log(LOG_DEBUG,"Creating compressor %s",out_file);
     cinfo = opj_create_compress(CODEC_J2K);
 
+    /* set event manager to null (openjpeg 1.3 bug)  */
+    cinfo->event_mgr = NULL;
+
     /* convert opendcp to openjpeg image */
     odcp_to_opj(odcp_image, &opj_image); 
 
