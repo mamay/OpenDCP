@@ -226,7 +226,6 @@ int encode_openjpeg(context_t *context, odcp_image_t *odcp_image, char *out_file
     opj_image_t *opj_image;
     FILE *f = NULL; 
 
-
     /* set the max image and component sizes based on frame_rate */
     max_cs_len = ((float)MAX_DCP_JPEG_BITRATE)/8/context->frame_rate;
  
@@ -270,7 +269,7 @@ int encode_openjpeg(context_t *context, odcp_image_t *odcp_image, char *out_file
     dcp_log(LOG_DEBUG,"Creating compressor %s",out_file);
     cinfo = opj_create_compress(CODEC_J2K);
 
-    /* set event manager to null (openjpeg 1.3 bug)  */
+    /* set event manager to null (openjpeg 1.3 bug) */
     cinfo->event_mgr = NULL;
 
     /* convert opendcp to openjpeg image */
