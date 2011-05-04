@@ -7,7 +7,7 @@
 
 # Include dir
 find_path(OPENJPEG_INCLUDE_DIR
-  NAMES openjpeg.h
+  NAMES openjpeg.h PATH_SUFFIXES openjpeg-1.4
 )
 
 # Finally the library itself
