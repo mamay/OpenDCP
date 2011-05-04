@@ -34,7 +34,7 @@ extern "C" {
 #ifdef OPENDCP_VERSION
 static const char *OPEN_DCP_VERSION   = OPENDCP_VERSION; 
 #else
-static const char *OPEN_DCP_VERSION   = "0.19"; 
+static const char *OPEN_DCP_VERSION   = "0.20"; 
 #endif
 
 static const char *OPEN_DCP_NAME      = "OpenDCP"; 
@@ -214,11 +214,12 @@ typedef struct {
     int  encrypt_header_flag;
     int  key_flag;
     int  delete_intermediate;
+    int  lut;
     byte_t key_id[16];
     byte_t key_value[16];
     int  write_hmac;
     int  xyz;
-    int  quality;
+    int  bw;
     int  threads;
     int  xml_sign;
     int  xml_sign_certs;
@@ -241,7 +242,6 @@ typedef struct {
     assetmap_t assetmap;
     volindex_t volindex;
     reel_t reel[MAX_REELS]; 
-    int gamma;
 } context_t;
 
 void dcp_log(int level, const char *fmt, ...);

@@ -78,10 +78,10 @@ void dcp_usage() {
     fprintf(fp,"       -t | --threads <threads>       - Set number of threads (default 4)\n");
     fprintf(fp,"       -x | --no_xyz                  - do not perform rgb->xyz color conversion\n");
     fprintf(fp,"       -e | --encoder <0 | 1>         - jpeg2000 encoder 0:openjpeg 1:kakadu^ (default openjpeg)\n");
-    fprintf(fp,"       -q | --quality                 - image quality level 0-100 (default 100)\n");
+    fprintf(fp,"       -b | --bw                      - Max Mbps bandwitdh (default: 250)\n");
     fprintf(fp,"       -l | --log_level <level>       - Sets the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
     fprintf(fp,"       -h | --help                    - show help\n");
-    fprintf(fp,"       -g | --gamma                   - select LUT gamma, 0:simple,1:complex\n");
+    fprintf(fp,"       -g | --lut                     - select color conversion LUT, 0:rec709,1:srgb\n");
     fprintf(fp,"       -v | --version                 - show version\n");
     fprintf(fp,"       -m | --tmp_dir                 - sets temporary directory (usually tmpfs one) to save there temporary tiffs for Kakadu");
     fprintf(fp,"\n\n");
@@ -246,7 +246,7 @@ int main (int argc, char **argv) {
             {"help",           required_argument, 0, 'h'},
             {"input",          required_argument, 0, 'i'},
             {"output",         required_argument, 0, 'o'},
-            {"quality",        required_argument, 0, 'q'},
+            {"bw     ",        required_argument, 0, 'b'},
             {"rate",           required_argument, 0, 'r'},
             {"profile",        required_argument, 0, 'p'},
             {"log_level",      required_argument, 0, 'l'},
@@ -256,14 +256,14 @@ int main (int argc, char **argv) {
             {"3d",             no_argument,       0, '3'},
             {"version",        no_argument,       0, 'v'},
             {"tmp_dir",        required_argument, 0, 'm'},
-            {"gamma",          no_argument,       0, 'g'},
+            {"lut",            required_argument,       0, 'g'},
             {0, 0, 0, 0}
         };
 
         /* getopt_long stores the option index here. */
         int option_index = 0;
      
-        c = getopt_long (argc, argv, "e:i:o:r:p:q:l:t:m:g:3hvx",
+        c = getopt_long (argc, argv, "b:e:i:o:r:p:l:t:m:g:3hvx",
                          long_options, &option_index);
      
         /* Detect the end of the options. */
@@ -325,10 +325,10 @@ int main (int argc, char **argv) {
                }
             break;
 
-            case 'q':
-               context->quality = atoi(optarg);
-               if (context->quality < 1 || context->quality > 100) {
-                   dcp_fatal(context,"Quality modifier must be between 1 and 100");
+            case 'b':
+               context->bw = atoi(optarg);
+               if (context->bw < 50 || context->bw > 250) {
+                   dcp_fatal(context,"Bandwidth must be between 50 and 250");
                }
             break;
 
@@ -348,7 +348,7 @@ int main (int argc, char **argv) {
                 tmp_path = optarg;
             break;
             case 'g':
-                context->gamma = atoi(optarg);
+                context->lut = atoi(optarg);
             break;
         }
     }

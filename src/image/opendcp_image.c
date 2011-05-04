@@ -113,57 +113,71 @@ int odcp_to_opj(odcp_image_t *odcp, opj_image_t **opj_ptr) {
 
     size = odcp->w * odcp->h;
 
+    memcpy(opj->comps[0].data,odcp->component[0].data,size*sizeof(int));
+    memcpy(opj->comps[1].data,odcp->component[1].data,size*sizeof(int));
+    memcpy(opj->comps[2].data,odcp->component[2].data,size*sizeof(int));
+
+    /*
     for (j=0;j<size;j++) {
        opj->comps[0].data[j] = odcp->component[0].data[j];
        opj->comps[1].data[j] = odcp->component[1].data[j];
        opj->comps[2].data[j] = odcp->component[2].data[j];
     }
+    */
 
     *opj_ptr = opj;
     return DCP_SUCCESS;
 }
 
 /* initialize the lookup table */
-void init_gamma_lut() {
-    lut_gamma[SRGB_GAMMA_SIMPLE] = srgb_gamma_simple;
-    lut_gamma[SRGB_GAMMA_COMPLEX] = srgb_gamma_complex;
+void init_lut() {
+    lut[SRGB] = srgb;
+    lut[REC709] = rec709;
 }
 
-/* rgb to xyz color conversion */
-int rgb_to_xyz(odcp_image_t *image, int gamma) {
+/* rgb to xyz color conversion 12-bit LUT */
+int rgb_to_xyz(odcp_image_t *image, int index) {
+    int i;
+    int size;
+    float r,g,b;
+    int x,y,z;
+    int bpc = 4095;
+    float dci_gamma = 1/2.6;
+    float dci_coeff = 48.0/52.37;
+
+    init_lut();
+   
+    size = image->w * image->h;
+
+    for (i=0;i<size;i++) {
+        /* Nominalization LUT */
+        r = lut[index][image->component[0].data[i]];
+        g = lut[index][image->component[1].data[i]];
+        b = lut[index][image->component[2].data[i]];
+  
+        /* XYZ DCI */
+        image->component[0].data[i] = (pow(((r*0.4124)+(g*0.3576)+(b*0.1805))*dci_coeff,dci_gamma) * bpc);
+        image->component[1].data[i] = (pow(((r*0.2126)+(g*0.7152)+(b*0.0722))*dci_coeff,dci_gamma) * bpc);
+        image->component[2].data[i] = (pow(((r*0.0193)+(g*0.1192)+(b*0.9505))*dci_coeff,dci_gamma) * bpc);
+    }
+
+    return DCP_SUCCESS;
+}
+
+/* rgb to xyz color conversion hard calculations */
+int rgb_to_xyz_calculate(odcp_image_t *image, int index) {
     int i;
     int size;
     float bpc;
     float in_gamma = 2.4;
     float out_gamma = 1/2.6;
-    float Koeff = 48.0/52.37;
-    float r,g,b,x,y,z;
+    float dci_coeff = 48.0/52.37;
+    float r,g,b;
 
-    init_gamma_lut();
-   
     bpc = pow(2,image->bpp) - 1;
     size = image->w * image->h;
 
     for (i=0;i<size;i++) {
-        /* standard calculations */
-        r = pow((image->component[0].data[i]/bpc),in_gamma);
-        g = pow((image->component[1].data[i]/bpc),in_gamma);
-        b = pow((image->component[2].data[i]/bpc),in_gamma);
-
-        /* use lookup table for speed */
-        /*
-        if (gamma == 1) {
-            r = lut_gamma[SRGB_GAMMA_COMPLEX][image->component[0].data[i]];
-            g = lut_gamma[SRGB_GAMMA_COMPLEX][image->component[1].data[i]];
-            b = lut_gamma[SRGB_GAMMA_COMPLEX][image->component[2].data[i]];
-        } else {
-            r = lut_gamma[SRGB_GAMMA_SIMPLE][image->component[0].data[i]];
-            g = lut_gamma[SRGB_GAMMA_SIMPLE][image->component[1].data[i]];
-            b = lut_gamma[SRGB_GAMMA_SIMPLE][image->component[2].data[i]];
-        }
-        */
-  
-        /* complex sRGB gamma correction */
         r = image->component[0].data[i]/bpc;
         g = image->component[1].data[i]/bpc;
         b = image->component[2].data[i]/bpc;
@@ -185,14 +199,9 @@ int rgb_to_xyz(odcp_image_t *image, int gamma) {
         } else {
             b = b/12.92;
         }
-
-        x = (pow(((r*0.4124)+(g*0.3576)+(b*0.1805))*Koeff,out_gamma) * bpc);
-        y = (pow(((r*0.2126)+(g*0.7152)+(b*0.0722))*Koeff,out_gamma) * bpc);
-        z =  (pow(((r*0.0193)+(g*0.1192)+(b*0.9505))*Koeff,out_gamma) * bpc);
-
-        image->component[0].data[i] = x;
-        image->component[1].data[i] = y; 
-        image->component[2].data[i] = z;
+        image->component[0].data[i] = (pow(((r*0.4124)+(g*0.3576)+(b*0.1805))*dci_coeff,out_gamma) * bpc);
+        image->component[1].data[i] = (pow(((r*0.2126)+(g*0.7152)+(b*0.0722))*dci_coeff,out_gamma) * bpc);
+        image->component[2].data[i] = (pow(((r*0.0193)+(g*0.1192)+(b*0.9505))*dci_coeff,out_gamma) * bpc);
     }
 
     return DCP_SUCCESS;

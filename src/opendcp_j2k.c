@@ -123,6 +123,7 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
     {
     result = read_tif(&odcp_image, in_file,0);
     }
+
     if (result != DCP_SUCCESS) {
         dcp_log(LOG_ERROR,"Unable to read tiff file %s",in_file);
         return DCP_FATAL;
@@ -141,7 +142,7 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
     
     if (context->xyz) {
         dcp_log(LOG_INFO,"RGB->XYZ color conversion %s",in_file);
-        if (rgb_to_xyz(odcp_image,context->gamma)) {
+        if (rgb_to_xyz(odcp_image,context->lut)) {
             dcp_log(LOG_ERROR,"Color conversion failed %s",in_file);
             odcp_image_free(odcp_image);
             return DCP_FATAL;
@@ -153,10 +154,10 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
         sprintf(tempfile,"%s/tmp_%s",tmp_path,basename(in_file));
         dcp_log(LOG_INFO,"Writing temporary tif %s",tempfile);
         result = write_tif(odcp_image,tempfile,0);
+        odcp_image_free(odcp_image);
         
         if (result != DCP_SUCCESS) {
             dcp_log(LOG_ERROR,"Writing temporary tif failed");
-            odcp_image_free(odcp_image);
             return DCP_FATAL;
         }
 
@@ -164,20 +165,22 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
         if ( result != DCP_SUCCESS) {
             dcp_log(LOG_ERROR,"Kakadu JPEG2000 conversion failed %s",in_file);
             remove(tempfile);
-            odcp_image_free(odcp_image);
             return DCP_FATAL;
         }
         remove(tempfile);
     } else {
-        if (encode_openjpeg(context,odcp_image,out_file) != DCP_SUCCESS) {
+        opj_image_t *opj_image;
+        odcp_to_opj(odcp_image, &opj_image); 
+        odcp_image_free(odcp_image);
+        if (encode_openjpeg(context,opj_image,out_file) != DCP_SUCCESS) {
             dcp_log(LOG_ERROR,"OpenJPEG JPEG2000 conversion failed %s",in_file);
-            odcp_image_free(odcp_image);
+            opj_image_destroy(opj_image);
             return DCP_FATAL;
         }        
+        opj_image_destroy(opj_image);
     }
 
     /* free the image memory */
-    odcp_image_free(odcp_image);
     return DCP_SUCCESS;
 }
 
@@ -189,9 +192,16 @@ int encode_kakadu(context_t *context, char *in_file, char *out_file) {
     char k_lengths[128];
     char cmd[512];
     FILE *cmdfp = NULL;
+    int bw;
+
+    if (context->bw) {
+        bw = context->bw * 1000000;
+    } else {
+        bw = MAX_DCP_JPEG_BITRATE;
+    }
 
     /* set the max image and component sizes based on frame_rate */
-    max_cs_len = ((float)MAX_DCP_JPEG_BITRATE)/8/context->frame_rate;
+    max_cs_len = ((float)bw)/8/context->frame_rate;
     
     /* adjust cs for 3D */
     if (context->stereoscopic) {
@@ -215,7 +225,7 @@ int encode_kakadu(context_t *context, char *in_file, char *out_file) {
     return DCP_SUCCESS;
 }
 
-int encode_openjpeg(context_t *context, odcp_image_t *odcp_image, char *out_file) {
+int encode_openjpeg(context_t *context, opj_image_t *opj_image, char *out_file) {
     bool result;
     int codestream_length;
     int max_comp_size;
@@ -223,17 +233,18 @@ int encode_openjpeg(context_t *context, odcp_image_t *odcp_image, char *out_file
     opj_cparameters_t parameters;
     opj_cio_t *cio = NULL;
     opj_cinfo_t *cinfo = NULL;
-    opj_image_t *opj_image;
     FILE *f = NULL; 
-
-    /* set the max image and component sizes based on frame_rate */
-    max_cs_len = ((float)MAX_DCP_JPEG_BITRATE)/8/context->frame_rate;
- 
-    /* adjust cs for quality value */
-    if (context->quality) {
-        max_cs_len = max_cs_len * ((float)context->quality/100.00);
+    int bw;
+   
+    if (context->bw) {
+        bw = context->bw * 1000000;
+    } else {
+        bw = MAX_DCP_JPEG_BITRATE;
     }
 
+    /* set the max image and component sizes based on frame_rate */
+    max_cs_len = ((float)bw)/8/context->frame_rate;
+ 
     /* adjust cs for 3D */
     if (context->stereoscopic) {
         max_cs_len = max_cs_len/2;
@@ -258,12 +269,12 @@ int encode_openjpeg(context_t *context, odcp_image_t *odcp_image, char *out_file
     }
 
     /* Decide if MCT should be used */
-    parameters.tcp_mct = odcp_image->n_components == 3 ? 1 : 0;
+    parameters.tcp_mct = opj_image->numcomps == 3 ? 1 : 0;
 
     /* set max image */
     parameters.max_comp_size = max_comp_size;
-    parameters.tcp_rates[0]= ((float) (odcp_image->n_components * odcp_image->w * odcp_image->h * odcp_image->precision))/
-                              (max_cs_len * 8 * odcp_image->dx * odcp_image->dy);
+    parameters.tcp_rates[0]= ((float) (opj_image->numcomps * opj_image->comps[0].w * opj_image->comps[0].h * opj_image->comps[0].prec))/
+                              (max_cs_len * 8 * opj_image->comps[0].dx * opj_image->comps[0].dy);
 
     /* get a J2K compressor handle */
     dcp_log(LOG_DEBUG,"Creating compressor %s",out_file);
@@ -271,9 +282,6 @@ int encode_openjpeg(context_t *context, odcp_image_t *odcp_image, char *out_file
 
     /* set event manager to null (openjpeg 1.3 bug) */
     cinfo->event_mgr = NULL;
-
-    /* convert opendcp to openjpeg image */
-    odcp_to_opj(odcp_image, &opj_image); 
 
     /* setup the encoder parameters using the current image and user parameters */
     dcp_log(LOG_DEBUG,"Setup J2k encoder %s",out_file);
@@ -291,7 +299,6 @@ int encode_openjpeg(context_t *context, odcp_image_t *odcp_image, char *out_file
     if (!result) {
         dcp_log(LOG_ERROR,"Unable to encode jpeg2000 file %s",out_file);
         opj_cio_close(cio);
-        opj_image_destroy(opj_image);
         opj_destroy_compress(cinfo);
         return DCP_FATAL;
     }
@@ -303,7 +310,6 @@ int encode_openjpeg(context_t *context, odcp_image_t *odcp_image, char *out_file
     if (!f) {
         dcp_log(LOG_ERROR,"Unable to write jpeg2000 file %s",out_file);
         opj_cio_close(cio);
-        opj_image_destroy(opj_image);
         opj_destroy_compress(cinfo);
         return DCP_FATAL;
     }
@@ -314,7 +320,6 @@ int encode_openjpeg(context_t *context, odcp_image_t *odcp_image, char *out_file
     /* free openjpeg structure */
     opj_cio_close(cio);
     opj_destroy_compress(cinfo);
-    opj_image_destroy(opj_image);
 
     /* free user parameters structure */
     if(parameters.cp_comment) free(parameters.cp_comment);
