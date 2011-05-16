@@ -178,7 +178,7 @@ int xml_verify(char *filename) {
     dsig_ctx = xmlSecDSigCtxCreate(key_manager);
 
     if (dsig_ctx == NULL) {
-        dcp_log(LOG_ERROR,"create signature context failed");
+        dcp_log(LOG_ERROR,"create signature opendcp failed");
         goto done;
     }
 

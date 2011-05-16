@@ -116,7 +116,7 @@ extern "C" int get_file_essence_class(char *filename) {
             essence_class = ACT_SOUND;
             break;
         case ESS_TIMED_TEXT:
-            return ACT_TIMED_TEXT;
+            essence_class = ACT_TIMED_TEXT;
             break;
         default:
             essence_class = ACT_UNKNOWN;
@@ -192,8 +192,9 @@ extern "C" int read_asset_info(asset_t *asset)
             reader.FillWriterInfo(info);
 
             asset->essence_type       = essence_type;
+            asset->essence_class      = ACT_PICTURE;
             asset->duration           = desc.ContainerDuration;
-            asset->intrinsic_duration  = desc.ContainerDuration;
+            asset->intrinsic_duration = desc.ContainerDuration;
             asset->entry_point    = 0;
             asset->xml_ns         = info.LabelSetType;
             sprintf(asset->uuid,"%.36s", Kumu::bin2UUIDhex(info.AssetUUID,16,uuid_buffer, 64));
@@ -218,8 +219,9 @@ extern "C" int read_asset_info(asset_t *asset)
 
             asset->stereoscopic       = 1;
             asset->essence_type       = essence_type;
+            asset->essence_class      = ACT_PICTURE;
             asset->duration           = desc.ContainerDuration;
-            asset->intrinsic_duration  = desc.ContainerDuration;
+            asset->intrinsic_duration = desc.ContainerDuration;
             asset->entry_point    = 0;
             asset->xml_ns         = info.LabelSetType;
             sprintf(asset->uuid,"%.36s", Kumu::bin2UUIDhex(info.AssetUUID,16,uuid_buffer, 64));
@@ -250,8 +252,9 @@ extern "C" int read_asset_info(asset_t *asset)
                 reader.FillWriterInfo(info);
             }
 
-            asset->essence_type   = essence_type;
-            asset->duration       = desc.ContainerDuration;
+            asset->essence_type        = essence_type;
+            asset->essence_class       = ACT_PICTURE;
+            asset->duration            = desc.ContainerDuration;
             asset->intrinsic_duration  = desc.ContainerDuration;
             asset->entry_point    = 0;
             asset->xml_ns         = info.LabelSetType;
@@ -276,9 +279,10 @@ extern "C" int read_asset_info(asset_t *asset)
             reader.FillAudioDescriptor(desc);
             reader.FillWriterInfo(info);
 
-            asset->essence_type   = essence_type;
-            asset->duration       = desc.ContainerDuration;
-            asset->intrinsic_duration  = desc.ContainerDuration;
+            asset->essence_type       = essence_type;
+            asset->essence_class      = ACT_SOUND;
+            asset->duration           = desc.ContainerDuration;
+            asset->intrinsic_duration = desc.ContainerDuration;
             asset->entry_point    = 0;
             asset->xml_ns         = info.LabelSetType;
             sprintf(asset->uuid,"%.36s", Kumu::bin2UUIDhex(info.AssetUUID,16,uuid_buffer, 64));
@@ -299,9 +303,10 @@ extern "C" int read_asset_info(asset_t *asset)
             reader.FillTimedTextDescriptor(desc);
             reader.FillWriterInfo(info);
   
-            asset->essence_type   = essence_type;
-            asset->duration       = desc.ContainerDuration;
-            asset->intrinsic_duration  = desc.ContainerDuration;
+            asset->essence_type       = essence_type;
+            asset->essence_class      = ACT_TIMED_TEXT;
+            asset->duration           = desc.ContainerDuration;
+            asset->intrinsic_duration = desc.ContainerDuration;
             asset->entry_point    = 0;
             asset->xml_ns         = info.LabelSetType;
             sprintf(asset->uuid,"%.36s", Kumu::bin2UUIDhex(info.AssetUUID,16,uuid_buffer, 64));
@@ -316,7 +321,7 @@ extern "C" int read_asset_info(asset_t *asset)
 }
 
 /* write the asset to an mxf file */
-extern "C" int write_mxf(context_t *context, filelist_t *filelist, char *output_file) {
+extern "C" int write_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     Result_t      result = RESULT_OK; 
     EssenceType_t essence_type;
 
@@ -329,20 +334,20 @@ extern "C" int write_mxf(context_t *context, filelist_t *filelist, char *output_
 
     switch (essence_type) {
         case ESS_JPEG_2000:
-            if ( context->stereoscopic )
-                result = write_j2k_s_mxf(context,filelist,output_file);
+            if ( opendcp->stereoscopic )
+                result = write_j2k_s_mxf(opendcp,filelist,output_file);
             else
-                result = write_j2k_mxf(context,filelist,output_file);
+                result = write_j2k_mxf(opendcp,filelist,output_file);
             break;
         case ESS_PCM_24b_48k:
         case ESS_PCM_24b_96k:
-            result = write_pcm_mxf(context,filelist,output_file);
+            result = write_pcm_mxf(opendcp,filelist,output_file);
             break;
         case ESS_MPEG2_VES:
-            result = write_mpeg2_mxf(context,filelist,output_file);
+            result = write_mpeg2_mxf(opendcp,filelist,output_file);
             break;
         case ESS_TIMED_TEXT:
-            result = write_tt_mxf(context,filelist,output_file);
+            result = write_tt_mxf(opendcp,filelist,output_file);
             break;
     }
 
@@ -353,17 +358,77 @@ extern "C" int write_mxf(context_t *context, filelist_t *filelist, char *output_
     return DCP_SUCCESS; 
 }
 
+typedef struct {
+    WriterInfo    info;
+    AESEncContext *aes_context;
+    HMACContext   *hmac_context;
+} writer_info_t;
+
+Result_t fill_writer_info(opendcp_t *opendcp, writer_info_t *writer_info) {
+    Kumu::FortunaRNG        rng;
+    byte_t                  iv_buf[CBC_BLOCK_SIZE];
+    Result_t                result = RESULT_OK; 
+
+    writer_info->info.ProductVersion = OPEN_DCP_VERSION;
+    writer_info->info.CompanyName = OPEN_DCP_NAME;
+    writer_info->info.ProductName = OPEN_DCP_NAME;
+
+    /* set the label type */
+    if (opendcp->ns == XML_NS_INTEROP) {
+        writer_info->info.LabelSetType = LS_MXF_INTEROP;
+    } else if (opendcp->ns == XML_NS_SMPTE) {
+        writer_info->info.LabelSetType = LS_MXF_SMPTE;
+    } else {
+        writer_info->info.LabelSetType = LS_MXF_UNKNOWN;
+    }
+
+    /* generate a random UUID for this essence */
+    Kumu::GenRandomUUID(writer_info->info.AssetUUID);
+
+    /* start encryption, if set */
+    if (opendcp->key_flag) {
+        Kumu::GenRandomUUID(writer_info->info.ContextID);
+        writer_info->info.EncryptedEssence = true;
+
+        if (opendcp->key_id) {
+            memcpy(writer_info->info.CryptographicKeyID, opendcp->key_id, UUIDlen);
+        } else {
+            rng.FillRandom(writer_info->info.CryptographicKeyID, UUIDlen);
+        }
+
+        writer_info->aes_context = new AESEncContext;
+        result = writer_info->aes_context->InitKey(opendcp->key_value);
+
+        if (ASDCP_FAILURE(result)) {
+            return result;
+        }
+
+        result = writer_info->aes_context->SetIVec(rng.FillRandom(iv_buf, CBC_BLOCK_SIZE));
+
+        if (ASDCP_FAILURE(result)) {
+            return result;
+        }
+
+        if (opendcp->write_hmac) {
+            writer_info->info.UsesHMAC = true;
+            writer_info->hmac_context = new HMACContext;
+            result = writer_info->hmac_context->InitKey(opendcp->key_value, writer_info->info.LabelSetType);
+
+            if (ASDCP_FAILURE(result)) {
+                return result;
+            }
+        }
+    }
+
+}
+
 /* write out j2k mxf file */
-Result_t write_j2k_mxf(context_t *context, filelist_t *filelist, char *output_file) {
-    AESEncContext*          aes_context = 0;
-    HMACContext*            hmac_context = 0;
+Result_t write_j2k_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     JP2K::MXFWriter         mxf_writer;
     JP2K::PictureDescriptor picture_desc;
     JP2K::CodestreamParser  j2k_parser;
     JP2K::FrameBuffer       frame_buffer(FRAME_BUFFER_SIZE);
-    Kumu::FortunaRNG        rng;
-    WriterInfo              writer_info;
-    byte_t                  iv_buf[CBC_BLOCK_SIZE];
+    writer_info_t           writer_info;
     Result_t                result = RESULT_OK; 
     ui32_t                  mxf_duration;
 
@@ -374,62 +439,13 @@ Result_t write_j2k_mxf(context_t *context, filelist_t *filelist, char *output_fi
         return result;
     }
 
-    Rational edit_rate(context->frame_rate,1);
+    Rational edit_rate(opendcp->frame_rate,1);
     j2k_parser.FillPictureDescriptor(picture_desc);
     picture_desc.EditRate = edit_rate; 
 
-    writer_info.ProductVersion = OPEN_DCP_VERSION; 
-    writer_info.CompanyName = OPEN_DCP_NAME; 
-    writer_info.ProductName = OPEN_DCP_NAME; 
+    fill_writer_info(opendcp, &writer_info);
 
-    /* set the label type */
-    if (context->ns == XML_NS_INTEROP) {
-        writer_info.LabelSetType = LS_MXF_INTEROP;
-    } else if ( context->ns == XML_NS_SMPTE ) {
-        writer_info.LabelSetType = LS_MXF_SMPTE;
-    } else {
-        writer_info.LabelSetType = LS_MXF_UNKNOWN;
-    }
-
-    /* generate a random UUID for this essence */
-    Kumu::GenRandomUUID(writer_info.AssetUUID);
-
-    /* start encryption, if set */
-    if (context->key_flag) {
-        Kumu::GenRandomUUID(writer_info.ContextID);
-        writer_info.EncryptedEssence = true;
-
-        if (context->key_id) {
-            memcpy(writer_info.CryptographicKeyID, context->key_id, UUIDlen);
-        } else {
-            rng.FillRandom(writer_info.CryptographicKeyID, UUIDlen);
-        }
-
-        aes_context = new AESEncContext;
-        result = aes_context->InitKey(context->key_value);
-
-        if (ASDCP_FAILURE(result)) {
-            return result;
-        }
-
-        result = aes_context->SetIVec(rng.FillRandom(iv_buf, CBC_BLOCK_SIZE));
-
-        if (ASDCP_FAILURE(result)) {
-            return result;
-        }
-
-        if (context->write_hmac) {
-            writer_info.UsesHMAC = true;
-            hmac_context = new HMACContext;
-            result = hmac_context->InitKey(context->key_value, writer_info.LabelSetType);
-
-            if (ASDCP_FAILURE(result)) {
-                return result;
-            }
-        }
-    }
-
-    result = mxf_writer.OpenWrite(output_file, writer_info, picture_desc);
+    result = mxf_writer.OpenWrite(output_file, writer_info.info, picture_desc);
 
     if (ASDCP_FAILURE(result)) {
         printf("failed to open output file %s\n",output_file);
@@ -437,19 +453,19 @@ Result_t write_j2k_mxf(context_t *context, filelist_t *filelist, char *output_fi
     }
    
     /* set the duration of the output mxf */
-    if (filelist->file_count < context->duration || !context->duration) {
+    if (filelist->file_count < opendcp->duration || !opendcp->duration) {
         mxf_duration = filelist->file_count;
     } else {
-        mxf_duration = context->duration;
+        mxf_duration = opendcp->duration;
     }
 
     ui32_t i = 0;
     /* read each input frame and write to the output mxf until duration is reached */
     while (ASDCP_SUCCESS(result) && mxf_duration--) {
-        if (context->slide == 0 || i == 0) {
+        if (opendcp->slide == 0 || i == 0) {
             result = j2k_parser.OpenReadFrame(filelist->in[i], frame_buffer);
 
-            if (context->delete_intermediate) {
+            if (opendcp->delete_intermediate) {
                 unlink(filelist->in[i]);
             }
 
@@ -458,12 +474,12 @@ Result_t write_j2k_mxf(context_t *context, filelist_t *filelist, char *output_fi
                 return result;
             }
 
-            if (context->encrypt_header_flag) {
+            if (opendcp->encrypt_header_flag) {
                 frame_buffer.PlaintextOffset(0);
             }
             i++;
         }
-        result = mxf_writer.WriteFrame(frame_buffer, aes_context, hmac_context);
+        result = mxf_writer.WriteFrame(frame_buffer, writer_info.aes_context, writer_info.hmac_context);
     }
 
     if (result == RESULT_ENDOFFILE) {
@@ -486,18 +502,14 @@ Result_t write_j2k_mxf(context_t *context, filelist_t *filelist, char *output_fi
 }
 
 /* write out 3D j2k mxf file */
-Result_t write_j2k_s_mxf(context_t *context, filelist_t *filelist, char *output_file) {
-    AESEncContext*          aes_context = 0;
-    HMACContext*            hmac_context = 0;
+Result_t write_j2k_s_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     JP2K::MXFSWriter         mxf_writer;
     JP2K::PictureDescriptor picture_desc;
     JP2K::CodestreamParser  j2k_parser_left;
     JP2K::CodestreamParser  j2k_parser_right;
     JP2K::FrameBuffer       frame_buffer_left(FRAME_BUFFER_SIZE);
     JP2K::FrameBuffer       frame_buffer_right(FRAME_BUFFER_SIZE);
-    Kumu::FortunaRNG        rng;
-    WriterInfo              writer_info;
-    byte_t                  iv_buf[CBC_BLOCK_SIZE];
+    writer_info_t           writer_info;
     Result_t                result = RESULT_OK;
     ui32_t                  mxf_duration;
 
@@ -515,61 +527,13 @@ Result_t write_j2k_s_mxf(context_t *context, filelist_t *filelist, char *output_
         return result;
     }
 
-    Rational edit_rate(context->frame_rate,1);
+    Rational edit_rate(opendcp->frame_rate,1);
     j2k_parser_left.FillPictureDescriptor(picture_desc);
     picture_desc.EditRate = edit_rate;
 
-    writer_info.ProductVersion = OPEN_DCP_VERSION;
-    writer_info.CompanyName = OPEN_DCP_NAME;
-    writer_info.ProductName = OPEN_DCP_NAME;
+    fill_writer_info(opendcp, &writer_info);
 
-    /* set the label type */
-    if (context->ns == XML_NS_INTEROP) {
-        writer_info.LabelSetType = LS_MXF_INTEROP;
-    } else if ( context->ns == XML_NS_SMPTE ) {
-        writer_info.LabelSetType = LS_MXF_SMPTE;
-    } else {
-        writer_info.LabelSetType = LS_MXF_UNKNOWN;
-    }
-
-    /* generate a random UUID for this essence */
-    Kumu::GenRandomUUID(writer_info.AssetUUID);
-
-    /* start encryption, if set */
-    if (context->key_flag) {
-        Kumu::GenRandomUUID(writer_info.ContextID);
-        writer_info.EncryptedEssence = true;
-
-        if (context->key_id) {
-            memcpy(writer_info.CryptographicKeyID, context->key_id, UUIDlen);
-        } else {
-            rng.FillRandom(writer_info.CryptographicKeyID, UUIDlen);
-        }
-
-        aes_context = new AESEncContext;
-        result = aes_context->InitKey(context->key_value);
-
-        if (ASDCP_FAILURE(result)) {
-            return result;
-        }
-
-        result = aes_context->SetIVec(rng.FillRandom(iv_buf, CBC_BLOCK_SIZE));
-        if (ASDCP_FAILURE(result)) {
-            return result;
-        }
-
-        if (context->write_hmac) {
-            writer_info.UsesHMAC = true;
-            hmac_context = new HMACContext;
-            result = hmac_context->InitKey(context->key_value, writer_info.LabelSetType);
-
-            if (ASDCP_FAILURE(result)) {
-                return result;
-            }
-        }
-    }
-
-    result = mxf_writer.OpenWrite(output_file, writer_info, picture_desc);
+    result = mxf_writer.OpenWrite(output_file, writer_info.info, picture_desc);
 
     if (ASDCP_FAILURE(result)) {
         printf("failed to open output file %s\n",output_file);
@@ -577,19 +541,19 @@ Result_t write_j2k_s_mxf(context_t *context, filelist_t *filelist, char *output_
     }
      
     /* set the duration of the output mxf, set to half the filecount since it is 3D */
-    if ((filelist->file_count/2) < context->duration || !context->duration) {
+    if ((filelist->file_count/2) < opendcp->duration || !opendcp->duration) {
         mxf_duration = filelist->file_count/2;
     } else {
-        mxf_duration = context->duration;
+        mxf_duration = opendcp->duration;
     }
 
     ui32_t i = 0;
     /* read each input frame and write to the output mxf until duration is reached */
     while (ASDCP_SUCCESS(result) && mxf_duration--) {
-        if (context->slide == 0 || i == 0) {
+        if (opendcp->slide == 0 || i == 0) {
             result = j2k_parser_left.OpenReadFrame(filelist->in[i], frame_buffer_left);
 
-            if (context->delete_intermediate) {
+            if (opendcp->delete_intermediate) {
                 unlink(filelist->in[i]);
             }
 
@@ -601,7 +565,7 @@ Result_t write_j2k_s_mxf(context_t *context, filelist_t *filelist, char *output_
 
             result = j2k_parser_right.OpenReadFrame(filelist->in[i], frame_buffer_right);
 
-            if (context->delete_intermediate) {
+            if (opendcp->delete_intermediate) {
                 unlink(filelist->in[i]);
             }
 
@@ -611,16 +575,16 @@ Result_t write_j2k_s_mxf(context_t *context, filelist_t *filelist, char *output_
             }
             i++;
 
-            if (context->encrypt_header_flag) {
+            if (opendcp->encrypt_header_flag) {
                 frame_buffer_left.PlaintextOffset(0);
             }
 
-            if (context->encrypt_header_flag) {
+            if (opendcp->encrypt_header_flag) {
                 frame_buffer_right.PlaintextOffset(0);
             }
         }
-        result = mxf_writer.WriteFrame(frame_buffer_left, JP2K::SP_LEFT, aes_context, hmac_context);
-        result = mxf_writer.WriteFrame(frame_buffer_right, JP2K::SP_RIGHT, aes_context, hmac_context);
+        result = mxf_writer.WriteFrame(frame_buffer_left, JP2K::SP_LEFT, writer_info.aes_context, writer_info.hmac_context);
+        result = mxf_writer.WriteFrame(frame_buffer_right, JP2K::SP_RIGHT, writer_info.aes_context, writer_info.hmac_context);
     }
 
     if (result == RESULT_ENDOFFILE) {
@@ -643,20 +607,16 @@ Result_t write_j2k_s_mxf(context_t *context, filelist_t *filelist, char *output_
 }
 
 /* write out pcm audio mxf file */
-Result_t write_pcm_mxf(context_t *context, filelist_t *filelist, char *output_file) {
-    AESEncContext*       aes_context = 0;
-    HMACContext*         hmac_context = 0;
+Result_t write_pcm_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     PCMParserList        pcm_parser;
     PCM::MXFWriter       mxf_writer;
     PCM::FrameBuffer     frame_buffer;
     PCM::AudioDescriptor audio_desc;
-    WriterInfo           writer_info;
-    byte_t               iv_buf[CBC_BLOCK_SIZE];
-    Kumu::FortunaRNG     rng;
+    writer_info_t        writer_info;
     Result_t             result = RESULT_OK; 
     ui32_t               mxf_duration;
 
-    Rational edit_rate(context->frame_rate,1);
+    Rational edit_rate(opendcp->frame_rate,1);
 
     result = pcm_parser.OpenRead(filelist->file_count,(const char **)filelist->in, edit_rate);
 
@@ -669,57 +629,9 @@ Result_t write_pcm_mxf(context_t *context, filelist_t *filelist, char *output_fi
     audio_desc.EditRate = edit_rate;
     frame_buffer.Capacity(PCM::CalcFrameBufferSize(audio_desc));
 
-    writer_info.ProductVersion = OPEN_DCP_VERSION;
-    writer_info.CompanyName = OPEN_DCP_NAME;
-    writer_info.ProductName = OPEN_DCP_NAME;
+    fill_writer_info(opendcp, &writer_info);
 
-    /* set the label type */
-    if (context->ns == XML_NS_INTEROP) {
-        writer_info.LabelSetType = LS_MXF_INTEROP;
-    } else if ( context->ns == XML_NS_SMPTE ) {
-        writer_info.LabelSetType = LS_MXF_SMPTE;
-    } else {
-        writer_info.LabelSetType = LS_MXF_UNKNOWN;
-    }
-
-    /* generate a random UUID for this essence */
-    Kumu::GenRandomUUID(writer_info.AssetUUID);
-
-    if (context->key_flag) {
-        Kumu::GenRandomUUID(writer_info.ContextID);
-        writer_info.EncryptedEssence = true;
-
-        if (context->key_id) {
-            memcpy(writer_info.CryptographicKeyID, context->key_id, UUIDlen);
-        } else {
-            rng.FillRandom(writer_info.CryptographicKeyID, UUIDlen);
-        }
-
-        aes_context = new AESEncContext;
-        result = aes_context->InitKey(context->key_value);
-
-        if (ASDCP_FAILURE(result)) {
-            return result;
-        }
-
-        result = aes_context->SetIVec(rng.FillRandom(iv_buf, CBC_BLOCK_SIZE));
-
-        if (ASDCP_FAILURE(result)) {
-            return result;
-        }
-
-        if (context->write_hmac) {
-            writer_info.UsesHMAC = true;
-            hmac_context = new HMACContext;
-            result = hmac_context->InitKey(context->key_value, writer_info.LabelSetType);
-
-            if (ASDCP_FAILURE(result)) {
-                return result;
-            }
-        }
-    }
-
-    result = mxf_writer.OpenWrite(output_file, writer_info, audio_desc);
+    result = mxf_writer.OpenWrite(output_file, writer_info.info, audio_desc);
 
     if (ASDCP_FAILURE(result)) {
         printf("failed to open output file %s\n",output_file);
@@ -733,10 +645,10 @@ Result_t write_pcm_mxf(context_t *context, filelist_t *filelist, char *output_fi
         return result;
     }
 
-    if (!context->duration) {
+    if (!opendcp->duration) {
         mxf_duration = 0xffffffff;
     } else {
-        mxf_duration = context->duration;
+        mxf_duration = opendcp->duration;
     }
 
     while (ASDCP_SUCCESS(result) && mxf_duration--) {
@@ -750,7 +662,7 @@ Result_t write_pcm_mxf(context_t *context, filelist_t *filelist, char *output_fi
                 result = RESULT_ENDOFFILE;
                 continue;
             }
-            result = mxf_writer.WriteFrame(frame_buffer, aes_context, hmac_context);
+            result = mxf_writer.WriteFrame(frame_buffer, writer_info.aes_context, writer_info.hmac_context);
         }
     }
 
@@ -774,18 +686,14 @@ Result_t write_pcm_mxf(context_t *context, filelist_t *filelist, char *output_fi
 }
 
 /* write out timed text mxf file */
-Result_t write_tt_mxf(context_t *context, filelist_t *filelist, char *output_file) {
-    AESEncContext*                 aes_context = 0;
-    HMACContext*                   hmac_context = 0;
+Result_t write_tt_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     TimedText::DCSubtitleParser    tt_parser;
     TimedText::MXFWriter           mxf_writer;
     TimedText::FrameBuffer         frame_buffer(FRAME_BUFFER_SIZE);
     TimedText::TimedTextDescriptor tt_desc;
     TimedText::ResourceList_t::const_iterator resource_iterator;
-    WriterInfo                     writer_info;
+    writer_info_t                  writer_info;
     std::string                    xml_doc;
-    byte_t                         iv_buf[CBC_BLOCK_SIZE];
-    Kumu::FortunaRNG               rng;
     Result_t                       result = RESULT_OK;
     ui32_t                         mxf_duration;
 
@@ -798,58 +706,9 @@ Result_t write_tt_mxf(context_t *context, filelist_t *filelist, char *output_fil
 
     tt_parser.FillTimedTextDescriptor(tt_desc);
 
-    writer_info.ProductVersion = OPEN_DCP_VERSION;
-    writer_info.CompanyName = OPEN_DCP_NAME;
-    writer_info.ProductName = OPEN_DCP_NAME;
+    fill_writer_info(opendcp, &writer_info);
 
-    /* set the label type */
-    if (context->ns == XML_NS_INTEROP) {
-        writer_info.LabelSetType = LS_MXF_INTEROP;
-    } else if ( context->ns == XML_NS_SMPTE ) {
-        writer_info.LabelSetType = LS_MXF_SMPTE;
-    } else {
-        writer_info.LabelSetType = LS_MXF_UNKNOWN;
-    }
-
-    /* generate a random UUID for this essence */
-    Kumu::GenRandomUUID(writer_info.AssetUUID);
-
-    /* start encryption, if set */
-    if (context->key_flag) {
-        Kumu::GenRandomUUID(writer_info.ContextID);
-        writer_info.EncryptedEssence = true;
-
-        if (context->key_id) {
-            memcpy(writer_info.CryptographicKeyID, context->key_id, UUIDlen);
-        } else {
-            rng.FillRandom(writer_info.CryptographicKeyID, UUIDlen);
-        }
-
-        aes_context = new AESEncContext;
-        result = aes_context->InitKey(context->key_value);
-
-        if (ASDCP_FAILURE(result)) {
-            return result;
-        }
-
-        result = aes_context->SetIVec(rng.FillRandom(iv_buf, CBC_BLOCK_SIZE));
-
-        if (ASDCP_FAILURE(result)) {
-            return result;
-        }
-
-        if (context->write_hmac) {
-            writer_info.UsesHMAC = true;
-            hmac_context = new HMACContext;
-            result = hmac_context->InitKey(context->key_value, writer_info.LabelSetType);
-
-            if (ASDCP_FAILURE(result)) {
-                return result;
-            }
-        }
-    }
-
-    result = mxf_writer.OpenWrite(output_file, writer_info, tt_desc);
+    result = mxf_writer.OpenWrite(output_file, writer_info.info, tt_desc);
     result = tt_parser.ReadTimedTextResource(xml_doc);
 
     if (ASDCP_FAILURE(result)) {
@@ -857,7 +716,7 @@ Result_t write_tt_mxf(context_t *context, filelist_t *filelist, char *output_fil
         return result;
     }
 
-    result = mxf_writer.WriteTimedTextResource(xml_doc, aes_context, hmac_context);
+    result = mxf_writer.WriteTimedTextResource(xml_doc, writer_info.aes_context, writer_info.hmac_context);
 
     if (ASDCP_FAILURE(result)) {
         printf("Could not write Time Text Resource\n");
@@ -874,7 +733,7 @@ Result_t write_tt_mxf(context_t *context, filelist_t *filelist, char *output_fil
           return result;
         }
 
-        result = mxf_writer.WriteAncillaryResource(frame_buffer, aes_context, hmac_context);
+        result = mxf_writer.WriteAncillaryResource(frame_buffer, writer_info.aes_context, writer_info.hmac_context);
     }
 
     if (result == RESULT_ENDOFFILE) {
@@ -897,16 +756,12 @@ Result_t write_tt_mxf(context_t *context, filelist_t *filelist, char *output_fil
 }
 
 /* write out mpeg2 mxf file */
-Result_t write_mpeg2_mxf(context_t *context, filelist_t *filelist, char *output_file) {
-    AESEncContext*         aes_context = 0;
-    HMACContext*           hmac_context = 0;
+Result_t write_mpeg2_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     MPEG2::FrameBuffer     frame_buffer(FRAME_BUFFER_SIZE);
     MPEG2::Parser          mpeg2_parser;
     MPEG2::MXFWriter       mxf_writer;
     MPEG2::VideoDescriptor video_desc;
-    WriterInfo             writer_info;
-    byte_t                 iv_buf[CBC_BLOCK_SIZE];
-    Kumu::FortunaRNG       rng;
+    writer_info_t          writer_info;
     Result_t               result = RESULT_OK; 
     ui32_t                 mxf_duration;
 
@@ -919,58 +774,9 @@ Result_t write_mpeg2_mxf(context_t *context, filelist_t *filelist, char *output_
 
     mpeg2_parser.FillVideoDescriptor(video_desc);
 
-    writer_info.ProductVersion = OPEN_DCP_VERSION;
-    writer_info.CompanyName = OPEN_DCP_NAME;
-    writer_info.ProductName = OPEN_DCP_NAME;
+    fill_writer_info(opendcp, &writer_info);
 
-     /* set the label type */
-    if (context->ns == XML_NS_INTEROP) {
-        writer_info.LabelSetType = LS_MXF_INTEROP;
-    } else if ( context->ns == XML_NS_SMPTE ) {
-        writer_info.LabelSetType = LS_MXF_SMPTE;
-    } else {
-        writer_info.LabelSetType = LS_MXF_UNKNOWN;
-    }
-
-    /* generate a random UUID for this essence */
-    Kumu::GenRandomUUID(writer_info.AssetUUID);
-
-    /* start encryption, if set */
-    if (context->key_flag) {
-        Kumu::GenRandomUUID(writer_info.ContextID);
-        writer_info.EncryptedEssence = true;
-
-        if (context->key_id) {
-            memcpy(writer_info.CryptographicKeyID, context->key_id, UUIDlen);
-        } else {
-            rng.FillRandom(writer_info.CryptographicKeyID, UUIDlen);
-        }
-
-        aes_context = new AESEncContext;
-        result = aes_context->InitKey(context->key_value);
-
-        if (ASDCP_FAILURE(result)) {
-            return result;
-        }
-
-        result = aes_context->SetIVec(rng.FillRandom(iv_buf, CBC_BLOCK_SIZE));
-
-        if (ASDCP_FAILURE(result)) {
-            return result;
-        }
-
-        if (context->write_hmac) {
-            writer_info.UsesHMAC = true;
-            hmac_context = new HMACContext;
-            result = hmac_context->InitKey(context->key_value, writer_info.LabelSetType);
-
-            if (ASDCP_FAILURE(result)) {
-                return result;
-            }
-        }
-    }
-
-    result = mxf_writer.OpenWrite(output_file, writer_info, video_desc);
+    result = mxf_writer.OpenWrite(output_file, writer_info.info, video_desc);
 
     if (ASDCP_FAILURE(result)) {
         printf("failed to open output file %s\n",output_file);
@@ -984,10 +790,10 @@ Result_t write_mpeg2_mxf(context_t *context, filelist_t *filelist, char *output_
         return result;
     }
 
-    if (!context->duration) {
+    if (!opendcp->duration) {
         mxf_duration = 0xffffffff;
     } else {
-        mxf_duration = context->duration;
+        mxf_duration = opendcp->duration;
     }
 
     while (ASDCP_SUCCESS(result) && mxf_duration--) {
@@ -997,11 +803,11 @@ Result_t write_mpeg2_mxf(context_t *context, filelist_t *filelist, char *output_
             continue;
         }
 
-        if (context->encrypt_header_flag) {
+        if (opendcp->encrypt_header_flag) {
             frame_buffer.PlaintextOffset(0);
         }
 
-        result = mxf_writer.WriteFrame(frame_buffer, aes_context, hmac_context);
+        result = mxf_writer.WriteFrame(frame_buffer, writer_info.aes_context, writer_info.hmac_context);
     }
 
     if (result == RESULT_ENDOFFILE) {

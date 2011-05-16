@@ -38,7 +38,7 @@
 #define strnicmp strncasecmp
 #endif
 
-context_t *context_ptr;
+opendcp_t *opendcp_ptr;
 
 #ifndef _WIN32
 sig_atomic_t SIGINT_received = 0;
@@ -115,7 +115,7 @@ int check_extension(char *filename, char *pattern) {
    return 1;
 }
 
-int get_filelist(context_t *context,char *in_path,char *out_path,filelist_t *filelist) {
+int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *filelist) {
     struct dirent **files;
     int x = 0;
     struct stat st_in;
@@ -200,7 +200,7 @@ void progress_bar(int val, int total) {
 int main (int argc, char **argv) {
     int c, result, count = 0, abort = 0;
     int openmp_flag = 0;
-    context_t *context;
+    opendcp_t *opendcp;
     char *in_path = NULL;
     char *out_path = NULL;
     char *tmp_path = NULL;
@@ -220,22 +220,22 @@ int main (int argc, char **argv) {
         dcp_usage();
     }
 
-    context = malloc(sizeof(context_t));
-    context_ptr = context;
+    opendcp = malloc(sizeof(opendcp_t));
+    opendcp_ptr = opendcp;
 
-    memset(context,0,sizeof (context_t));
+    memset(opendcp,0,sizeof (opendcp_t));
 
     filelist = malloc(sizeof(filelist_t));
     memset(filelist,0,sizeof (filelist_t));
 
     /* set initial values */
-    context->xyz = 1;
-    context->log_level = LOG_WARN;
-    context->cinema_profile = DCP_CINEMA2K;
-    context->frame_rate = 24;
+    opendcp->xyz = 1;
+    opendcp->log_level = LOG_WARN;
+    opendcp->cinema_profile = DCP_CINEMA2K;
+    opendcp->frame_rate = 24;
 #ifdef OPENMP
     openmp_flag = 1;
-    context->threads = omp_get_num_procs();
+    opendcp->threads = omp_get_num_procs();
 #endif
  
     /* parse options */
@@ -279,16 +279,16 @@ int main (int argc, char **argv) {
             break;
 
             case '3':
-               context->stereoscopic = 1;
+               opendcp->stereoscopic = 1;
             break;
 
             case 'p':
                if (!strcmp(optarg,"cinema2k")) {
-                   context->cinema_profile = DCP_CINEMA2K;
+                   opendcp->cinema_profile = DCP_CINEMA2K;
                } else if (!strcmp(optarg,"cinema4k")) {
-                   context->cinema_profile = DCP_CINEMA4K;
+                   opendcp->cinema_profile = DCP_CINEMA4K;
                } else {
-                   dcp_fatal(context,"Invalid profile argument, must be cinema2k or cinema4k");
+                   dcp_fatal(opendcp,"Invalid profile argument, must be cinema2k or cinema4k");
                }
             break;
 
@@ -297,7 +297,7 @@ int main (int argc, char **argv) {
             break;
 
             case 'l':
-               context->log_level = atoi(optarg);
+               opendcp->log_level = atoi(optarg);
             break;
 
             case 'o':
@@ -309,35 +309,35 @@ int main (int argc, char **argv) {
             break;
 
             case 'r':
-               context->frame_rate = atoi(optarg);
-               if (context->frame_rate > 60 || context->frame_rate < 1 ) {
-                   dcp_fatal(context,"Invalid frame rate. Must be between 1 and 60.");
+               opendcp->frame_rate = atoi(optarg);
+               if (opendcp->frame_rate > 60 || opendcp->frame_rate < 1 ) {
+                   dcp_fatal(opendcp,"Invalid frame rate. Must be between 1 and 60.");
                }
             break;
 
             case 'e':
-               context->encoder = atoi(optarg);
-               if (context->encoder == J2K_KAKADU) {
+               opendcp->encoder = atoi(optarg);
+               if (opendcp->encoder == J2K_KAKADU) {
                    result = system("kdu_compress -u >/dev/null 2>&1");
                    if (result>>8 != 0) {
-                       dcp_fatal(context,"kdu_compress was not found. Either add to path or remove -e 1 flag");
+                       dcp_fatal(opendcp,"kdu_compress was not found. Either add to path or remove -e 1 flag");
                    }
                }
             break;
 
             case 'b':
-               context->bw = atoi(optarg);
-               if (context->bw < 50 || context->bw > 250) {
-                   dcp_fatal(context,"Bandwidth must be between 50 and 250");
+               opendcp->bw = atoi(optarg);
+               if (opendcp->bw < 50 || opendcp->bw > 250) {
+                   dcp_fatal(opendcp,"Bandwidth must be between 50 and 250");
                }
             break;
 
             case 't':
-               context->threads = atoi(optarg);
+               opendcp->threads = atoi(optarg);
             break;
 
             case 'x':
-               context->xyz = 0;
+               opendcp->xyz = 0;
             break;
      
             case 'v':
@@ -348,17 +348,17 @@ int main (int argc, char **argv) {
                 tmp_path = optarg;
             break;
             case 'g':
-                context->lut = atoi(optarg);
+                opendcp->lut = atoi(optarg);
             break;
         }
     }
 
     /* set log level */
-    dcp_set_log_level(context->log_level);
+    dcp_set_log_level(opendcp->log_level);
 
-    if (context->log_level > 0) {
+    if (opendcp->log_level > 0) {
         printf("\nOpenDCP J2K %s %s\n",OPEN_DCP_VERSION,OPEN_DCP_COPYRIGHT);
-        if (context->encoder == J2K_KAKADU) {
+        if (opendcp->encoder == J2K_KAKADU) {
             printf("  Encoder: Kakadu\n");
         } else {
             printf("  Encoder: OpenJPEG\n");
@@ -366,56 +366,56 @@ int main (int argc, char **argv) {
     }
 
     if (in_path == NULL) {
-        dcp_fatal(context,"Missing input file");
+        dcp_fatal(opendcp,"Missing input file");
     }
 
     if (out_path == NULL) {
-        dcp_fatal(context,"Missing output file");
+        dcp_fatal(opendcp,"Missing output file");
     }
 
-    get_filelist(context,in_path,out_path,filelist);
+    get_filelist(opendcp,in_path,out_path,filelist);
 
-    if (context->log_level>0 && context->log_level<3) { progress_bar(0,0); }
+    if (opendcp->log_level>0 && opendcp->log_level<3) { progress_bar(0,0); }
 
 #ifdef OPENMP
-    omp_set_num_threads(context->threads);
+    omp_set_num_threads(opendcp->threads);
 #endif
     #pragma omp parallel for private(c)
     for (c=0;c<filelist->file_count;c++) {    
         #pragma omp flush(SIGINT_received)
         if (!SIGINT_received) {
             dcp_log(LOG_INFO,"JPEG2000 conversion %s started OPENMP: %d",filelist->in[c],openmp_flag);
-            result = convert_to_j2k(context,filelist->in[c],filelist->out[c], tmp_path);
+            result = convert_to_j2k(opendcp,filelist->in[c],filelist->out[c], tmp_path);
             if (count) {
-               if (context->log_level>0 && context->log_level<3) {progress_bar(count,filelist->file_count);}
+               if (opendcp->log_level>0 && opendcp->log_level<3) {progress_bar(count,filelist->file_count);}
             }
 
             if (result == DCP_FATAL) {
                 dcp_log(LOG_ERROR,"JPEG200 conversion %s failed",filelist->in[c]);
-                dcp_fatal(context,"Exiting...");
+                dcp_fatal(opendcp,"Exiting...");
             } else {
                 dcp_log(LOG_INFO,"JPEG2000 conversion %s complete",filelist->in[c]);
             }
             count++;
         } else {
-            cleanup(context, 1);
+            cleanup(opendcp, 1);
         }
     }
 
-    if (context->log_level>0 && context->log_level<3) {progress_bar(count,filelist->file_count);}
+    if (opendcp->log_level>0 && opendcp->log_level<3) {progress_bar(count,filelist->file_count);}
 
     if ( filelist != NULL) {
         free(filelist);
     }
 
-    if (context->log_level > 0) {
+    if (opendcp->log_level > 0) {
         printf("\n");
     }
 
-    cleanup(context,0);
+    cleanup(opendcp,0);
 
-    if ( context != NULL) {
-        free(context);
+    if ( opendcp != NULL) {
+        free(opendcp);
     }
 
     exit(0);

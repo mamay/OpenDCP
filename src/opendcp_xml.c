@@ -75,14 +75,14 @@ char *get_aspect_ratio(char *dimension_string) {
     return(ratio);
 }
 
-int write_cpl(context_t *context) {
+int write_cpl(opendcp_t *opendcp, cpl_t *cpl) {
     FILE *fp;
-    int x;
+    int a,r;
     struct stat st;
     char uuid_s[40];
     char filename[MAX_PATH_LENGTH];
 
-    sprintf(filename,"%s",context->cpl.filename);
+    sprintf(filename,"%s",cpl->filename);
 
     fp = fopen(filename, "w");
 
@@ -95,25 +95,25 @@ int write_cpl(context_t *context) {
 
     /* CPL XML Start */
     fprintf(fp,"%s\n",XML_HEADER);
-    fprintf(fp,"<CompositionPlaylist xmlns=\"%s\" xmlns:dsig=\"%s\">\n",NS_CPL[context->reel[0].MainPicture.xml_ns],DS_DSIG);
-    fprintf(fp,"  <Id>urn:uuid:%s</Id>\n",context->cpl.uuid);
-    fprintf(fp,"  <IssueDate>%s</IssueDate>\n",context->timestamp);
-    fprintf(fp,"  <Issuer>%s</Issuer>\n",context->issuer);
-    fprintf(fp,"  <Creator>%s</Creator>\n",context->creator);
-    fprintf(fp,"  <ContentTitleText>%s</ContentTitleText>\n",context->title);
-    fprintf(fp,"  <ContentKind>%s</ContentKind>\n",context->kind);
+    fprintf(fp,"<CompositionPlaylist xmlns=\"%s\" xmlns:dsig=\"%s\">\n",NS_CPL[opendcp->ns],DS_DSIG);
+    fprintf(fp,"  <Id>urn:uuid:%s</Id>\n",cpl->uuid);
+    fprintf(fp,"  <IssueDate>%s</IssueDate>\n",cpl->timestamp);
+    fprintf(fp,"  <Issuer>%s</Issuer>\n",cpl->issuer);
+    fprintf(fp,"  <Creator>%s</Creator>\n",cpl->creator);
+    fprintf(fp,"  <ContentTitleText>%s</ContentTitleText>\n",cpl->title);
+    fprintf(fp,"  <ContentKind>%s</ContentKind>\n",cpl->kind);
 
-    if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
+    if (opendcp->ns == XML_NS_SMPTE) {
         fprintf(fp,"  <ContentVersion>\n");
-        fprintf(fp,"    <Id>urn:uri:%s_%s</Id>\n",context->cpl.uuid,context->timestamp);
-        fprintf(fp,"    <LabelText>%s_%s</LabelText>\n",context->cpl.uuid,context->timestamp);
+        fprintf(fp,"    <Id>urn:uri:%s_%s</Id>\n",cpl->uuid,cpl->timestamp);
+        fprintf(fp,"    <LabelText>%s_%s</LabelText>\n",cpl->uuid,cpl->timestamp);
         fprintf(fp,"  </ContentVersion>\n");
     }
 
-    if (strcmp(context->rating,"")) {
+    if (strcmp(cpl->rating,"")) {
         fprintf(fp,"  <RatingList>\n");
         fprintf(fp,"    <Agency>%s</Agency>\n",RATING_AGENCY[1]);
-        fprintf(fp,"    <Label>%s</Label>\n",context->rating);
+        fprintf(fp,"    <Label>%s</Label>\n",cpl->rating);
         fprintf(fp,"  </RatingList>\n");
     } else {
         fprintf(fp,"  <RatingList/>\n");
@@ -121,76 +121,68 @@ int write_cpl(context_t *context) {
 
     /* Reel(s) Start */
     fprintf(fp,"  <ReelList>\n");
-    for (x=0;x<context->reel_count;x++) {
+    for (r=0;r<cpl->reel_count;r++) {
+        reel_t reel = cpl->reel[r];
         fprintf(fp,"    <Reel>\n");
-        uuid_random(uuid_s);
-        fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",uuid_s);
+        fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",cpl->reel[r].uuid);
         fprintf(fp,"      <AssetList>\n");
-        /* Main Picture */
-        if ( context->reel[x].MainPicture.essence_type ) {
-            if ( context->reel[x].MainPicture.stereoscopic ) {
-                fprintf(fp,"        <msp-cpl:MainStereoscopicPicture xmlns:msp-cpl=\"%s\">\n",NS_CPL_3D[context->reel[0].MainPicture.xml_ns]);
-            } else {
-                fprintf(fp,"        <MainPicture>\n");
+
+        /* Asset(s) Start */
+        for (a=0;a<cpl->reel[r].asset_count;a++) {
+            asset_t asset = cpl->reel[r].asset[a];
+
+            if (asset.essence_class == ACT_PICTURE) {
+                if (asset.stereoscopic) {
+                    fprintf(fp,"        <msp-cpl:MainStereoscopicPicture xmlns:msp-cpl=\"%s\">\n",NS_CPL_3D[opendcp->ns]);
+                } else {
+                    fprintf(fp,"        <MainPicture>\n");
+                }
+            } 
+            if (asset.essence_class == ACT_SOUND) {
+                fprintf(fp,"        <MainSound>\n");
             }
-            fprintf(fp,"          <Id>urn:uuid:%s</Id>\n",context->reel[x].MainPicture.uuid);
-            fprintf(fp,"          <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainPicture.annotation);
-            fprintf(fp,"          <EditRate>%s</EditRate>\n",context->reel[x].MainPicture.edit_rate);
-            fprintf(fp,"          <IntrinsicDuration>%d</IntrinsicDuration>\n",context->reel[x].MainPicture.intrinsic_duration);
-            fprintf(fp,"          <EntryPoint>%d</EntryPoint>\n",context->reel[x].MainPicture.entry_point);
-            fprintf(fp,"          <Duration>%d</Duration>\n",context->reel[x].MainPicture.duration);
-            if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
-                fprintf(fp,"          <ScreenAspectRatio>%s</ScreenAspectRatio>\n",context->reel[x].MainPicture.aspect_ratio);
-            } else {
-                fprintf(fp,"          <ScreenAspectRatio>%s</ScreenAspectRatio>\n",get_aspect_ratio(context->reel[x].MainPicture.aspect_ratio));
+            if (asset.essence_class == ACT_TIMED_TEXT) {
+                fprintf(fp,"        <MainSubtitle\n");
             }
-            fprintf(fp,"          <FrameRate>%s</FrameRate>\n",context->reel[x].MainPicture.frame_rate);
-            if ( context->digest_flag ) {
-                fprintf(fp,"          <Hash>%s</Hash>\n",context->reel[x].MainPicture.digest);
+            fprintf(fp,"          <Id>urn:uuid:%s</Id>\n",asset.uuid);
+            fprintf(fp,"          <AnnotationText>%s</AnnotationText>\n",asset.annotation);
+            fprintf(fp,"          <EditRate>%s</EditRate>\n",asset.edit_rate);
+            fprintf(fp,"          <IntrinsicDuration>%d</IntrinsicDuration>\n",asset.intrinsic_duration);
+            fprintf(fp,"          <EntryPoint>%d</EntryPoint>\n",asset.entry_point);
+            fprintf(fp,"          <Duration>%d</Duration>\n",asset.duration);
+            if (asset.essence_class == ACT_PICTURE) {
+                if (opendcp->ns == XML_NS_SMPTE) {
+                    fprintf(fp,"          <ScreenAspectRatio>%s</ScreenAspectRatio>\n",asset.aspect_ratio);
+                } else {
+                    fprintf(fp,"          <ScreenAspectRatio>%s</ScreenAspectRatio>\n",get_aspect_ratio(asset.aspect_ratio));
+                }
+                fprintf(fp,"          <FrameRate>%s</FrameRate>\n",asset.frame_rate);
             }
-            if ( context->reel[x].MainPicture.stereoscopic ) {
-                fprintf(fp,"        </msp-cpl:MainStereoscopicPicture>\n");
-            } else {
-                fprintf(fp,"        </MainPicture>\n");
+            if ( opendcp->digest_flag ) {
+                fprintf(fp,"          <Hash>%s</Hash>\n",asset.digest);
+            }
+            if (asset.essence_class == ACT_PICTURE) {
+                if (asset.stereoscopic) {
+                    fprintf(fp,"        </msp-cpl:MainStereoscopicPicture>\n");
+                } else {
+                    fprintf(fp,"        </MainPicture>\n");
+                }
+            }
+            if (asset.essence_class == ACT_SOUND) {
+                fprintf(fp,"        </MainSound>\n");
+            }
+            if (asset.essence_class == ACT_TIMED_TEXT) {
+                fprintf(fp,"        </MainSubtitle\n");
             }
          }
-        /* Main Sound */
-        if ( context->reel[x].MainSound.essence_type ) {
-            fprintf(fp,"        <MainSound>\n");
-            fprintf(fp,"          <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSound.uuid);
-            fprintf(fp,"          <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainSound.annotation);
-            fprintf(fp,"          <EditRate>%s</EditRate>\n",context->reel[x].MainSound.edit_rate);
-            fprintf(fp,"          <IntrinsicDuration>%d</IntrinsicDuration>\n",context->reel[x].MainSound.intrinsic_duration);
-            fprintf(fp,"          <EntryPoint>%d</EntryPoint>\n",context->reel[x].MainSound.entry_point);
-            fprintf(fp,"          <Duration>%d</Duration>\n",context->reel[x].MainSound.duration);
-            if ( context->digest_flag ) {
-                fprintf(fp,"          <Hash>%s</Hash>\n",context->reel[x].MainSound.digest);
-            }
-            fprintf(fp,"        </MainSound>\n");
-        }
-        /* Subtitle */
-        if ( context->reel[x].MainSubtitle.essence_type ) {
-            fprintf(fp,"        <MainSubtitle>\n");
-            fprintf(fp,"          <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSubtitle.uuid);
-            fprintf(fp,"          <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainSubtitle.annotation);
-            fprintf(fp,"          <EditRate>%s</EditRate>\n",context->reel[x].MainSubtitle.edit_rate);
-            fprintf(fp,"          <IntrinsicDuration>%d</IntrinsicDuration>\n",context->reel[x].MainSubtitle.intrinsic_duration);
-            fprintf(fp,"          <EntryPoint>%d</EntryPoint>\n",context->reel[x].MainSubtitle.entry_point);
-            fprintf(fp,"          <Duration>%d</Duration>\n",context->reel[x].MainSubtitle.duration);
-            if ( context->digest_flag ) {
-                fprintf(fp,"          <Hash>%s</Hash>\n",context->reel[x].MainSubtitle.digest);
-            }
-            fprintf(fp,"        </MainSubtitle>\n");
-        }
-
         fprintf(fp,"      </AssetList>\n");
         fprintf(fp,"    </Reel>\n");
     }
     fprintf(fp,"  </ReelList>\n");
 
 #ifdef XMLSEC
-    if (context->xml_sign) {
-        write_dsig_template(context, fp);
+    if (opendcp->xml_sign) {
+        write_dsig_template(opendcp, fp);
     }
 #endif
 
@@ -199,26 +191,34 @@ int write_cpl(context_t *context) {
 
 #ifdef XMLSEC
     /* sign the XML file */
-    if (context->xml_sign) {
-        xml_sign(context, filename);
+    if (opendcp->xml_sign) {
+        xml_sign(opendcp, filename);
     }
 #endif
 
     /* Store CPL file size */
     stat(filename, &st);
-    sprintf(context->cpl.size,"%"PRIu64,st.st_size);
-    calculate_digest(filename,context->cpl.digest);
+    sprintf(cpl->size,"%"PRIu64,st.st_size);
+    calculate_digest(filename,cpl->digest);
 
     return DCP_SUCCESS;
 }
 
-int write_pkl(context_t *context) {
+int write_cpl_list(opendcp_t *opendcp) {
+   int placeholder;
+}
+
+int write_pkl_list(opendcp_t *opendcp) {
+   int placeholder;
+}
+
+int write_pkl(opendcp_t *opendcp, pkl_t *pkl) {
     FILE *fp;
-    int x;
+    int a,c,r;
     struct stat st;
     char filename[MAX_PATH_LENGTH];
 
-    sprintf(filename,"%s",context->pkl.filename);
+    sprintf(filename,"%s",pkl->filename);
 
     fp = fopen(filename, "w");
 
@@ -231,76 +231,65 @@ int write_pkl(context_t *context) {
 
     /* PKL XML Start */
     fprintf(fp,"%s\n",XML_HEADER);
-    fprintf(fp,"<PackingList xmlns=\"%s\" xmlns:dsig=\"%s\">\n",NS_PKL[context->reel[0].MainPicture.xml_ns],DS_DSIG);
-    fprintf(fp,"  <Id>urn:uuid:%s</Id>\n",context->pkl.uuid);
-    fprintf(fp,"  <AnnotationText>%s</AnnotationText>\n",context->annotation);
-    fprintf(fp,"  <IssueDate>%s</IssueDate>\n",context->timestamp);
-    fprintf(fp,"  <Issuer>%s</Issuer>\n",context->issuer);
-    fprintf(fp,"  <Creator>%s</Creator>\n",context->creator);
+    fprintf(fp,"<PackingList xmlns=\"%s\" xmlns:dsig=\"%s\">\n",NS_PKL[opendcp->ns],DS_DSIG);
+    fprintf(fp,"  <Id>urn:uuid:%s</Id>\n",pkl->uuid);
+    fprintf(fp,"  <AnnotationText>%s</AnnotationText>\n",pkl->annotation);
+    fprintf(fp,"  <IssueDate>%s</IssueDate>\n",opendcp->timestamp);
+    fprintf(fp,"  <Issuer>%s</Issuer>\n",opendcp->issuer);
+    fprintf(fp,"  <Creator>%s</Creator>\n",opendcp->creator);
     fprintf(fp,"  <AssetList>\n");
 
-    /* Asset(s) Start */
-    for (x=0;x<context->reel_count;x++) {
-        /* Main Picture */
-        if ( context->reel[x].MainPicture.essence_type ) {
-            fprintf(fp,"    <Asset>\n");
-            fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainPicture.uuid);
-            fprintf(fp,"      <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainPicture.annotation);
-            fprintf(fp,"      <Hash>%s</Hash>\n",context->reel[x].MainPicture.digest);
-            fprintf(fp,"      <Size>%s</Size>\n",context->reel[x].MainPicture.size);
-            if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
-                fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
-            } else {
-                fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Picture");
-            }
-            fprintf(fp,"    </Asset>\n");
-        }
-        /* Main Sound */
-        if ( context->reel[x].MainSound.essence_type ) {
-            fprintf(fp,"    <Asset>\n");
-            fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSound.uuid);
-            fprintf(fp,"      <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainSound.annotation);
-            fprintf(fp,"      <Hash>%s</Hash>\n",context->reel[x].MainSound.digest);
-            fprintf(fp,"      <Size>%s</Size>\n",context->reel[x].MainSound.size);
-            if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
-                fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
-            } else {
-                fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Sound");
-            }
-            fprintf(fp,"    </Asset>\n");
-        }
-        /* Main Subtitle */
-        if ( context->reel[x].MainSubtitle.essence_type ) {
-            fprintf(fp,"    <Asset>\n");
-            fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSubtitle.uuid);
-            fprintf(fp,"      <AnnotationText>%s</AnnotationText>\n",context->reel[x].MainSubtitle.annotation);
-            fprintf(fp,"      <Hash>%s</Hash>\n",context->reel[x].MainSubtitle.digest);
-            fprintf(fp,"      <Size>%s</Size>\n",context->reel[x].MainSubtitle.size);
-            if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
-                fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
-            } else {
-                fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Subtitle");
-            }
-            fprintf(fp,"    </Asset>\n");
-        }
-    }
 
-    /* CPL */
-    fprintf(fp,"    <Asset>\n");
-    fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->cpl.uuid);
-    fprintf(fp,"      <Hash>%s</Hash>\n",context->cpl.digest);
-    fprintf(fp,"      <Size>%s</Size>\n",context->cpl.size);
-    if (context->reel[0].MainPicture.xml_ns == XML_NS_SMPTE) {
-        fprintf(fp,"      <Type>%s</Type>\n","text/xml");
-    } else {
-        fprintf(fp,"      <Type>%s</Type>\n","text/xml;asdcpKind=CPL");
+    dcp_log(LOG_INFO,"CPLS: %d",pkl->cpl_count);
+
+    /* Asset(s) Start */
+    for (c=0;c<pkl->cpl_count;c++) {
+        cpl_t cpl = pkl->cpl[c];
+        dcp_log(LOG_INFO,"REELS: %d",cpl.reel_count);
+        for (r=0;r<cpl.reel_count;r++) {
+            reel_t reel = cpl.reel[r];
+
+            for (a=0;a<reel.asset_count;a++) {
+                asset_t asset = reel.asset[a];
+                fprintf(fp,"    <Asset>\n");
+                fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",asset.uuid);
+                fprintf(fp,"      <AnnotationText>%s</AnnotationText>\n",asset.annotation);
+                fprintf(fp,"      <Hash>%s</Hash>\n",asset.digest);
+                fprintf(fp,"      <Size>%s</Size>\n",asset.size);
+                if (opendcp->ns == XML_NS_SMPTE) {
+                    fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
+                } else {
+                    if (asset.essence_class == ACT_PICTURE) {
+                        fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Picture");
+                    }
+                    if (asset.essence_class == ACT_SOUND) {
+                        fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Sound");
+                    }
+                    if (asset.essence_class == ACT_TIMED_TEXT) {
+                        fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Subtitle");
+                    }
+                }
+                fprintf(fp,"    </Asset>\n");
+            }
+        }
+
+        /* CPL */
+        fprintf(fp,"    <Asset>\n");
+        fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",cpl.uuid);
+        fprintf(fp,"      <Hash>%s</Hash>\n",cpl.digest);
+        fprintf(fp,"      <Size>%s</Size>\n",cpl.size);
+        if (opendcp->ns == XML_NS_SMPTE) {
+            fprintf(fp,"      <Type>%s</Type>\n","text/xml");
+        } else {
+            fprintf(fp,"      <Type>%s</Type>\n","text/xml;asdcpKind=CPL");
+        }
+        fprintf(fp,"    </Asset>\n");
     }
-    fprintf(fp,"    </Asset>\n");
     fprintf(fp,"  </AssetList>\n");
 
 #ifdef XMLSEC
-    if (context->xml_sign) {
-        write_dsig_template(context, fp);
+    if (opendcp->xml_sign) {
+        write_dsig_template(opendcp, fp);
     }
 #endif
 
@@ -310,25 +299,25 @@ int write_pkl(context_t *context) {
 
 #ifdef XMLSEC
     /* sign the XML file */
-    if (context->xml_sign) {
-        xml_sign(context, filename);
+    if (opendcp->xml_sign) {
+        xml_sign(opendcp, filename);
     }
 #endif
 
     /* Store PKL file size */
     stat(filename, &st);
-    sprintf(context->pkl.size,"%"PRIu64,st.st_size);
+    sprintf(pkl->size,"%"PRIu64,st.st_size);
 
     return DCP_SUCCESS;
 }
 
-int write_assetmap(context_t *context) {
+int write_assetmap(opendcp_t *opendcp) {
     FILE *fp;
-    int x;
+    int a,c,r;
     char filename[MAX_PATH_LENGTH];
     char uuid_s[40];
 
-    sprintf(filename,"%s",context->assetmap.filename);
+    sprintf(filename,"%s",opendcp->assetmap.filename);
 
     fp = fopen(filename, "w");
 
@@ -344,84 +333,60 @@ int write_assetmap(context_t *context) {
 
     /* Assetmap XML Start */
     fprintf(fp,"%s\n",XML_HEADER);
-    fprintf(fp,"<AssetMap xmlns=\"%s\">\n",NS_AM[context->reel[0].MainPicture.xml_ns]);
+    fprintf(fp,"<AssetMap xmlns=\"%s\">\n",NS_AM[opendcp->ns]);
     fprintf(fp,"  <Id>urn:uuid:%s</Id>\n",uuid_s);
-    fprintf(fp,"  <Creator>%s</Creator>\n",context->creator);
+    fprintf(fp,"  <Creator>%s</Creator>\n",opendcp->creator);
     fprintf(fp,"  <VolumeCount>1</VolumeCount>\n");
-    fprintf(fp,"  <IssueDate>%s</IssueDate>\n",context->timestamp);
-    fprintf(fp,"  <Issuer>%s</Issuer>\n",context->issuer);
+    fprintf(fp,"  <IssueDate>%s</IssueDate>\n",opendcp->timestamp);
+    fprintf(fp,"  <Issuer>%s</Issuer>\n",opendcp->issuer);
     fprintf(fp,"  <AssetList>\n");
  
     /* PKL */
     fprintf(fp,"    <Asset>\n");
-    fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->pkl.uuid);
+    fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",opendcp->pkl[0].uuid);
     fprintf(fp,"      <PackingList>true</PackingList>\n");
     fprintf(fp,"      <ChunkList>\n");
     fprintf(fp,"        <Chunk>\n");
-    fprintf(fp,"          <Path>%s</Path>\n",basename(context->pkl.filename));
+    fprintf(fp,"          <Path>%s</Path>\n",basename(opendcp->pkl[0].filename));
     fprintf(fp,"          <VolumeIndex>1</VolumeIndex>\n");
     fprintf(fp,"          <Offset>0</Offset>\n");
-    fprintf(fp,"          <Length>%s</Length>\n",context->pkl.size);
+    fprintf(fp,"          <Length>%s</Length>\n",opendcp->pkl[0].size);
     fprintf(fp,"        </Chunk>\n");
     fprintf(fp,"      </ChunkList>\n");
     fprintf(fp,"    </Asset>\n");
 
     /* CPL */
-    fprintf(fp,"    <Asset>\n");
-    fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->cpl.uuid);
-    fprintf(fp,"      <ChunkList>\n");
-    fprintf(fp,"        <Chunk>\n");
-    fprintf(fp,"          <Path>%s</Path>\n",basename(context->cpl.filename));
-    fprintf(fp,"          <VolumeIndex>1</VolumeIndex>\n");
-    fprintf(fp,"          <Offset>0</Offset>\n");
-    fprintf(fp,"          <Length>%s</Length>\n",context->cpl.size);
-    fprintf(fp,"        </Chunk>\n");
-    fprintf(fp,"      </ChunkList>\n");
-    fprintf(fp,"    </Asset>\n");
+    for (c=0;c<opendcp->pkl[0].cpl_count;c++) {
+        cpl_t cpl = opendcp->pkl[0].cpl[c];
+        fprintf(fp,"    <Asset>\n");
+        fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",cpl.uuid);
+        fprintf(fp,"      <ChunkList>\n");
+        fprintf(fp,"        <Chunk>\n");
+        fprintf(fp,"          <Path>%s</Path>\n",basename(cpl.filename));
+        fprintf(fp,"          <VolumeIndex>1</VolumeIndex>\n");
+        fprintf(fp,"          <Offset>0</Offset>\n");
+        fprintf(fp,"          <Length>%s</Length>\n",cpl.size);
+        fprintf(fp,"        </Chunk>\n");
+        fprintf(fp,"      </ChunkList>\n");
+        fprintf(fp,"    </Asset>\n");
 
-    /* Assets(s) Start */
-    for (x=0;x<context->reel_count;x++) {
-        /* Main Picture */
-        if ( context->reel[x].MainPicture.essence_type ) {
-            fprintf(fp,"    <Asset>\n");
-            fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainPicture.uuid);
-            fprintf(fp,"      <ChunkList>\n");
-            fprintf(fp,"        <Chunk>\n");
-            fprintf(fp,"          <Path>%s</Path>\n",basename(context->reel[x].MainPicture.filename));
-            fprintf(fp,"          <VolumeIndex>1</VolumeIndex>\n");
-            fprintf(fp,"          <Offset>0</Offset>\n");
-            fprintf(fp,"          <Length>%s</Length>\n",context->reel[x].MainPicture.size);
-            fprintf(fp,"        </Chunk>\n");
-            fprintf(fp,"      </ChunkList>\n");
-            fprintf(fp,"    </Asset>\n");
-        }
-        /* Main Sound */
-        if ( context->reel[x].MainSound.essence_type ) {
-            fprintf(fp,"    <Asset>\n");
-            fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSound.uuid);
-            fprintf(fp,"      <ChunkList>\n");
-            fprintf(fp,"        <Chunk>\n");
-            fprintf(fp,"          <Path>%s</Path>\n",basename(context->reel[x].MainSound.filename));
-            fprintf(fp,"          <VolumeIndex>1</VolumeIndex>\n");
-            fprintf(fp,"          <Offset>0</Offset>\n");
-            fprintf(fp,"          <Length>%s</Length>\n",context->reel[x].MainSound.size);
-            fprintf(fp,"        </Chunk>\n");
-            fprintf(fp,"      </ChunkList>\n");
-            fprintf(fp,"    </Asset>\n");
-        }
-        /* Main Subtitle */
-        if ( context->reel[x].MainSubtitle.essence_type ) {
-            fprintf(fp,"    <Asset>\n");
-            fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",context->reel[x].MainSubtitle.uuid);
-            fprintf(fp,"      <ChunkList>\n");
-            fprintf(fp,"        <Chunk>\n");
-            fprintf(fp,"          <Path>%s</Path>\n",basename(context->reel[x].MainSubtitle.filename));
-            fprintf(fp,"          <VolumeIndex>1</VolumeIndex>\n");
-            fprintf(fp,"          <Offset>0</Offset>\n");
-            fprintf(fp,"          <Length>%s</Length>\n",context->reel[x].MainSubtitle.size);
-            fprintf(fp,"        </Chunk>\n");
-            fprintf(fp,"      </ChunkList>\n");
-            fprintf(fp,"    </Asset>\n");
+        /* Assets(s) Start */
+        for (r=0;r<cpl.reel_count;r++) {
+            reel_t reel = cpl.reel[r];
+            for (a=0;a<reel.asset_count;a++) {
+                asset_t asset = reel.asset[a];
+                fprintf(fp,"    <Asset>\n");
+                fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",asset.uuid);
+                fprintf(fp,"      <ChunkList>\n");
+                fprintf(fp,"        <Chunk>\n");
+                fprintf(fp,"          <Path>%s</Path>\n",basename(asset.filename));
+                fprintf(fp,"          <VolumeIndex>1</VolumeIndex>\n");
+                fprintf(fp,"          <Offset>0</Offset>\n");
+                fprintf(fp,"          <Length>%s</Length>\n",asset.size);
+                fprintf(fp,"        </Chunk>\n");
+                fprintf(fp,"      </ChunkList>\n");
+                fprintf(fp,"    </Asset>\n");
+            }
         }
     }
 
@@ -433,11 +398,11 @@ int write_assetmap(context_t *context) {
     return DCP_SUCCESS;
 }
 
-int write_volumeindex(context_t *context) {
+int write_volumeindex(opendcp_t *opendcp) {
     FILE *fp;
     char filename[MAX_PATH_LENGTH];
 
-    sprintf(filename,"%s",context->volindex.filename);
+    sprintf(filename,"%s",opendcp->volindex.filename);
 
     fp = fopen(filename, "w");
 
@@ -450,7 +415,7 @@ int write_volumeindex(context_t *context) {
 
     /* Volumeindex XML Start */
     fprintf(fp,"%s\n",XML_HEADER);
-    fprintf(fp,"<VolumeIndex xmlns=\"%s\">\n",NS_AM[context->reel[0].MainPicture.xml_ns]);
+    fprintf(fp,"<VolumeIndex xmlns=\"%s\">\n",NS_AM[opendcp->ns]);
     fprintf(fp,"  <Index>1</Index>\n");
     fprintf(fp,"</VolumeIndex>\n");
 

@@ -23,7 +23,10 @@ extern "C" {
 #ifndef _OPEN_DCP_H_
 #define _OPEN_DCP_H_
 
+#define MAX_ASSETS   10 /* Soft limit */
 #define MAX_REELS    30 /* Soft limit */
+#define MAX_PKL       1 /* Soft limit */
+#define MAX_CPL       5 /* Soft limit */
 #define MAX_PATH_LENGTH 4096 
 #define MAX_FILENAME_LENGTH 256 
 #define MAX_BASENAME_LENGTH 256 
@@ -140,23 +143,10 @@ enum J2K_ENCODER {
 };
 
 typedef struct filelist_t {
-    char **in;
-    char **out;
-    int file_count;
+    char           **in;
+    char           **out;
+    int            file_count;
 } filelist_t;
-
-typedef struct {
-    char           uuid[40];
-    char           size[18];
-    char           digest[40];
-    char           filename[MAX_FILENAME_LENGTH];
-} cpl_t;
-
-typedef struct {
-    char           uuid[40];
-    char           size[18];
-    char           filename[MAX_FILENAME_LENGTH];
-} pkl_t;
 
 typedef struct {
     char           filename[MAX_FILENAME_LENGTH];
@@ -166,9 +156,9 @@ typedef struct {
     char           filename[MAX_FILENAME_LENGTH];
 } volindex_t;
 
-
 typedef struct {
     char           uuid[40];
+    int            essence_class;
     int            essence_type;
     int            duration;
     int            intrinsic_duration;
@@ -187,72 +177,104 @@ typedef struct {
 } asset_t;
 
 typedef struct {
-    char    annotation[128];
-    asset_t MainPicture;
-    asset_t MainSound;
-    asset_t MainSubtitle;
+    asset_t        asset_list[3];
+    int            asset_count;
+} asset_list_t;
+
+typedef struct {
+    char           uuid[40];
+    char           annotation[128];
+    int            asset_count; 
+    asset_t        asset[MAX_ASSETS];
+    asset_t        MainPicture;
+    asset_t        MainSound;
+    asset_t        MainSubtitle;
 } reel_t;
 
 typedef struct {
-    asset_t asset_list[3];
-    int     asset_count;
-} asset_list_t;
+    char           uuid[40];
+    char           size[18];
+    char           digest[40];
+    int            duration;
+    int            entry_point;
+    char           issuer[80];
+    char           creator[80];
+    char           title[80];
+    char           timestamp[30];
+    char           kind[15];
+    char           rating[5];
+    char           filename[MAX_FILENAME_LENGTH];
+    int            reel_count;
+    reel_t         reel[MAX_REELS]; 
+} cpl_t;
+
+typedef struct {
+    char           uuid[40];
+    char           size[18];
+    char           issuer[80];
+    char           creator[80];
+    char           annotation[128];
+    char           timestamp[30];
+    char           filename[MAX_FILENAME_LENGTH];
+    int            cpl_count;
+    cpl_t          cpl[MAX_CPL]; 
+} pkl_t;
 
 typedef unsigned char byte_t; 
 
 typedef struct {
-    int  cinema_profile;
-    int  encoder;
-    int  frame_rate;
-    int  stereoscopic;
-    int  slide;
-    int  log_level;
-    int  entry_point;
-    int  duration;
-    int  digest_flag;
-    int  ns;
-    int  encrypt_header_flag;
-    int  key_flag;
-    int  delete_intermediate;
-    int  lut;
-    byte_t key_id[16];
-    byte_t key_value[16];
-    int  write_hmac;
-    int  xyz;
-    int  bw;
-    int  threads;
-    int  xml_sign;
-    int  xml_sign_certs;
-    char *root_cert_file;
-    char *ca_cert_file;
-    char *signer_cert_file;
-    char *private_key_file; 
-    char basename[40];
-    char dcp_path[MAX_BASENAME_LENGTH];
-    char timestamp[30];
-    char issuer[80];
-    char creator[80];
-    char annotation[128];
-    char title[80];
-    char kind[15];
-    char rating[5];
-    int  reel_count;
-    cpl_t cpl;
-    pkl_t pkl;
-    assetmap_t assetmap;
-    volindex_t volindex;
-    reel_t reel[MAX_REELS]; 
-} context_t;
+    int            cinema_profile;
+    int            encoder;
+    int            frame_rate;
+    int            duration;
+    int            entry_point;
+    int            stereoscopic;
+    int            slide;
+    int            log_level;
+    int            digest_flag;
+    int            ns;
+    int            encrypt_header_flag;
+    int            key_flag;
+    int            delete_intermediate;
+    int            lut;
+    byte_t         key_id[16];
+    byte_t         key_value[16];
+    int            write_hmac;
+    int            xyz;
+    int            bw;
+    int            threads;
+    int            xml_sign;
+    int            xml_use_internal_certs;
+    char           *root_cert_file;
+    char           *ca_cert_file;
+    char           *signer_cert_file;
+    char           *private_key_file; 
+    char           basename[40];
+    char           dcp_path[MAX_BASENAME_LENGTH];
+    char           issuer[80];
+    char           creator[80];
+    char           timestamp[30];
+    char           annotation[128];
+    char           title[80];
+    char           kind[15];
+    char           rating[5];
+    assetmap_t     assetmap;
+    volindex_t     volindex;
+    int            pkl_count;
+    pkl_t          pkl[MAX_PKL];
+} opendcp_t;
 
 void dcp_log(int level, const char *fmt, ...);
-void dcp_fatal(context_t *context, char *error);
+void dcp_fatal(opendcp_t *opendcp, char *error);
 void get_timestamp(char *timestamp);
 int get_asset_type(asset_t asset);
 int get_file_essence_class(char *filename);
 char *get_basename(const char *filename);
-int validate_reel(context_t *context, int reel);
-int add_reel(context_t *context, asset_list_t reel);
+int validate_reel(opendcp_t *opendcp, cpl_t *cpl, int reel);
+int add_reel(opendcp_t *opendcp, cpl_t *cpl, asset_list_t reel);
 void dcp_set_log_level(int log_level);
+opendcp_t *create_opendcp();
+int delete_opendcp(opendcp_t *opendcp);
 
 /* ASDCPLIB Routines */
 int read_asset_info(asset_t *asset);
@@ -260,19 +282,19 @@ void uuid_random(char *uuid);
 int calculate_digest(const char *filename, char *digest);
 
 /* MXF Routines */
-int write_mxf(context_t *context, filelist_t *filelist, char *output);
+int write_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output);
 
 /* XML Routines */
-int write_cpl(context_t *context);
-int write_pkl(context_t *context);
-int write_assetmap(context_t *context);
-int write_volumeindex(context_t *context);
+int write_cpl(opendcp_t *opendcp, cpl_t *cpl);
+int write_pkl(opendcp_t *opendcp, pkl_t *pkl);
+int write_assetmap(opendcp_t *opendcp);
+int write_volumeindex(opendcp_t *opendcp);
 char *base64(const unsigned char *data, int length);
 char *strip_cert(const char *data);
 char *strip_cert_file(char *filename);
 
 /* J2K Routines */
-int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_path);
+int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_path);
 #endif // _OPEN_DCP_H_
 #ifdef __cplusplus
 }

@@ -87,27 +87,14 @@ int main (int argc, char **argv) {
     int reel_count=0;
     char uuid_s[40];
     char buffer[80];
-    context_t *context;
+    opendcp_t *opendcp;
     asset_list_t reel_list[MAX_REELS];
 
     if ( argc <= 1 ) {
         dcp_usage();
     }
 
-    context = malloc(sizeof(context_t));
-    memset(context,0,sizeof (context_t));
-
-    /* initialize context */
-    context->log_level = LOG_WARN;
-    context->reel_count = 0;
-    sprintf(context->issuer,"%.80s %.80s",OPEN_DCP_NAME,OPEN_DCP_VERSION);
-    sprintf(context->creator,"%.80s %.80s",OPEN_DCP_NAME, OPEN_DCP_VERSION);
-    sprintf(context->annotation,"%.128s",DCP_ANNOTATION);
-    sprintf(context->title,"%.80s",DCP_TITLE);
-    sprintf(context->kind,"%.15s",DCP_KIND);
-    sprintf(context->assetmap.filename,"%.128s","ASSETMAP");
-    sprintf(context->volindex.filename,"%.128s","VOLINDEX");
-    get_timestamp(context->timestamp);
+    opendcp = create_opendcp();
 
     /* parse options */
     while (1)
@@ -154,19 +141,19 @@ int main (int argc, char **argv) {
             break;
 
             case 'a':
-               sprintf(context->annotation,"%.128s",optarg);
+               sprintf(opendcp->annotation,"%.128s",optarg);
             break;
 
             case 'b':
-               sprintf(context->basename,"%.80s",optarg);
+               sprintf(opendcp->basename,"%.80s",optarg);
             break;
 
             case 'd':
-               context->digest_flag = 1;
+               opendcp->digest_flag = 1;
             break;
 
             case 'e':
-               context->entry_point = atoi(optarg);
+               opendcp->entry_point = atoi(optarg);
             break;
 
             case 'h':
@@ -174,15 +161,15 @@ int main (int argc, char **argv) {
             break;
      
             case 'i':
-               sprintf(context->issuer,"%.80s",optarg);
+               sprintf(opendcp->issuer,"%.80s",optarg);
             break;
 
             case 'k':
-               sprintf(context->kind,"%.15s",optarg);
+               sprintf(opendcp->kind,"%.15s",optarg);
             break;
 
             case 'l':
-               context->log_level = atoi(optarg);
+               opendcp->log_level = atoi(optarg);
             break;
 
             case 'm':
@@ -191,15 +178,15 @@ int main (int argc, char **argv) {
                     || !strcmp(optarg,"PG-13")
                     || !strcmp(optarg,"R")
                     || !strcmp(optarg,"NC-17") ) {
-                   sprintf(context->rating,"%.5s",optarg);
+                   sprintf(opendcp->rating,"%.5s",optarg);
                } else {
                    sprintf(buffer,"Invalid rating %s\n",optarg);
-                   dcp_fatal(context,buffer);
+                   dcp_fatal(opendcp,buffer);
                }
             break;
 
             case 'n':
-               context->duration = atoi(optarg);
+               opendcp->duration = atoi(optarg);
             break;
      
             case 'r':
@@ -213,33 +200,33 @@ int main (int argc, char **argv) {
 
 #ifdef XMLSEC
             case 's':
-                context->xml_sign = 1;
+                opendcp->xml_sign = 1;
 
             break;
 #endif
 
             case 't':
-               sprintf(context->title,"%.80s",optarg);
+               sprintf(opendcp->title,"%.80s",optarg);
             break;
 
             case '1':
-               context->root_cert_file = optarg;
-               context->xml_sign_certs = 1;
+               opendcp->root_cert_file = optarg;
+               opendcp->xml_use_internal_certs = 1;
             break;
 
             case '2':
-               context->ca_cert_file = optarg;
-               context->xml_sign_certs = 1;
+               opendcp->ca_cert_file = optarg;
+               opendcp->xml_use_internal_certs = 1;
             break;
 
             case '3':
-               context->signer_cert_file = optarg;
-               context->xml_sign_certs = 1;
+               opendcp->signer_cert_file = optarg;
+               opendcp->xml_use_internal_certs = 1;
             break;
 
             case 'p':
-               context->private_key_file = optarg;
-               context->xml_sign_certs = 1;
+               opendcp->private_key_file = optarg;
+               opendcp->xml_use_internal_certs = 1;
             break;
 
             case 'v':
@@ -252,107 +239,96 @@ int main (int argc, char **argv) {
     }
 
     /* set log level */
-    dcp_set_log_level(context->log_level);
+    dcp_set_log_level(opendcp->log_level);
 
-    if (context->log_level > 0) {
+    if (opendcp->log_level > 0) {
         printf("\nOpenDCP XML %s %s\n\n",OPEN_DCP_VERSION,OPEN_DCP_COPYRIGHT);
     }
 
     if (reel_count < 1) {
-        dcp_fatal(context,"No reels supplied");
+        dcp_fatal(opendcp,"No reels supplied");
     }
 
     /* check cert files */
-    if (context->xml_sign_certs) {
+    if (opendcp->xml_use_internal_certs) {
         FILE *tp;
-        if (context->root_cert_file) {
-            tp = fopen(context->root_cert_file,"rb");
+        if (opendcp->root_cert_file) {
+            tp = fopen(opendcp->root_cert_file,"rb");
             if (tp) {
                 fclose(tp);
             } else {
-                dcp_fatal(context,"Could not read root certificate");
+                dcp_fatal(opendcp,"Could not read root certificate");
             }
         } else {
-            dcp_fatal(context,"XML digital signature certifcates enabled, but root certificate file not specified");
+            dcp_fatal(opendcp,"XML digital signature certifcates enabled, but root certificate file not specified");
         }
-        if (context->ca_cert_file) {
-            tp = fopen(context->ca_cert_file,"rb");
+        if (opendcp->ca_cert_file) {
+            tp = fopen(opendcp->ca_cert_file,"rb");
             if (tp) {
                 fclose(tp);
             } else {
-                dcp_fatal(context,"Could not read ca certificate");
+                dcp_fatal(opendcp,"Could not read ca certificate");
             }
         } else {
-            dcp_fatal(context,"XML digital signature certifcates enabled, but ca certificate file not specified");
+            dcp_fatal(opendcp,"XML digital signature certifcates enabled, but ca certificate file not specified");
         }
-        if (context->signer_cert_file) {
-            tp = fopen(context->signer_cert_file,"rb");
+        if (opendcp->signer_cert_file) {
+            tp = fopen(opendcp->signer_cert_file,"rb");
             if (tp) {
                 fclose(tp);
             } else {
-                dcp_fatal(context,"Could not read signer certificate");
+                dcp_fatal(opendcp,"Could not read signer certificate");
             }
         } else {
-            dcp_fatal(context,"XML digital signature certifcates enabled, but signer certificate file not specified");
+            dcp_fatal(opendcp,"XML digital signature certifcates enabled, but signer certificate file not specified");
         }
-        if (context->private_key_file) {
-            tp = fopen(context->private_key_file,"rb");
+        if (opendcp->private_key_file) {
+            tp = fopen(opendcp->private_key_file,"rb");
             if (tp) {
                 fclose(tp);
             } else {
-                dcp_fatal(context,"Could not read private key file");
+                dcp_fatal(opendcp,"Could not read private key file");
             }
         } else {
-            dcp_fatal(context,"XML digital signature certifcates enabled, but private key file not specified");
+            dcp_fatal(opendcp,"XML digital signature certifcates enabled, but private key file not specified");
         }
     }
 
-    /* Generate UUIDs */
-    uuid_random(uuid_s);
-    sprintf(context->cpl.uuid,"%.36s",uuid_s);
-    uuid_random(uuid_s);
-    sprintf(context->pkl.uuid,"%.36s",uuid_s);
+    /* add pkl to the DCP (only one PKL currently support) */
+    add_pkl(opendcp);
 
-    /* Generate XML filenames */
-    if ( !strcmp(context->basename,"") ) {
-        sprintf(context->cpl.filename,"%.40s_cpl.xml",context->cpl.uuid);
-        sprintf(context->pkl.filename,"%.40s_pkl.xml",context->pkl.uuid);
-    } else {
-        sprintf(context->cpl.filename,"%.40s_cpl.xml",context->basename);
-        sprintf(context->pkl.filename,"%.40s_pkl.xml",context->basename);
-    }
+    /* add cpl to the DCP/PKL (only one CPL currently support) */
+    add_cpl(opendcp, &opendcp->pkl[0]);
 
     /* Add and validate reels */
     for (c = 0;c<reel_count;c++) {
-        if (add_reel(context, reel_list[c]) != DCP_SUCCESS) {
+        if (add_reel(opendcp, &opendcp->pkl[0].cpl[0], reel_list[c]) != DCP_SUCCESS) {
             sprintf(buffer,"Could not add reel %d to DCP\n",c+1); 
-            dcp_fatal(context,buffer);
+            dcp_fatal(opendcp,buffer);
         }
-       if (validate_reel(context, c) != DCP_SUCCESS) {
+       if (validate_reel(opendcp, &opendcp->pkl[0].cpl[0], c) != DCP_SUCCESS) {
             sprintf(buffer,"Could validate reel %d\n",c+1); 
-            dcp_fatal(context,buffer);
+            dcp_fatal(opendcp,buffer);
        }
     }
 
     /* Write XML Files */
-    if (write_cpl(context) != DCP_SUCCESS)
-        dcp_fatal(context,"Writing composition playlist failed");
-    if (write_pkl(context) != DCP_SUCCESS)
-        dcp_fatal(context,"Writing packing list failed");
-    if (write_volumeindex(context) != DCP_SUCCESS)
-        dcp_fatal(context,"Writing volume index failed");
-    if (write_assetmap(context) != DCP_SUCCESS)
-        dcp_fatal(context,"Writing asset map failed");
+    if (write_cpl(opendcp, &opendcp->pkl[0].cpl[0]) != DCP_SUCCESS)
+        dcp_fatal(opendcp,"Writing composition playlist failed");
+    if (write_pkl(opendcp, &opendcp->pkl[0]) != DCP_SUCCESS)
+        dcp_fatal(opendcp,"Writing packing list failed");
+    if (write_volumeindex(opendcp) != DCP_SUCCESS)
+        dcp_fatal(opendcp,"Writing volume index failed");
+    if (write_assetmap(opendcp) != DCP_SUCCESS)
+        dcp_fatal(opendcp,"Writing asset map failed");
 
     dcp_log(LOG_INFO,"DCP Complete");
 
-    if (context->log_level > 0) {
+    if (opendcp->log_level > 0) {
         printf("\n");
     }
 
-    if ( context != NULL) {
-        free(context);
-    }
+    delete_opendcp(opendcp);
 
     exit(0);
 }

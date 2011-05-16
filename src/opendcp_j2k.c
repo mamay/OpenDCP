@@ -47,7 +47,7 @@ static int initialize_4K_poc(opj_poc_t *POC, int numres){
     return 2;
 }
 
-void set_cinema_encoder_parameters(context_t *context, opj_cparameters_t *parameters){
+void set_cinema_encoder_parameters(opendcp_t *opendcp, opj_cparameters_t *parameters){
     parameters->tile_size_on = false;
     parameters->cp_tdx=1;
     parameters->cp_tdy=1;
@@ -83,14 +83,14 @@ void set_cinema_encoder_parameters(context_t *context, opj_cparameters_t *parame
     parameters->tcp_numlayers++;
     parameters->cp_disto_alloc = 1;
 
-    parameters->cp_rsiz = context->cinema_profile;
-    if ( context->cinema_profile == DCP_CINEMA4K ) {
+    parameters->cp_rsiz = opendcp->cinema_profile;
+    if ( opendcp->cinema_profile == DCP_CINEMA4K ) {
             parameters->numpocs = initialize_4K_poc(parameters->POC,parameters->numresolution);
     }
 }
 
-int check_image_compliance(context_t *context, odcp_image_t *image) {
-    switch (context->cinema_profile) {
+int check_image_compliance(opendcp_t *opendcp, odcp_image_t *image) {
+    switch (opendcp->cinema_profile) {
         case DCP_CINEMA2K:
             if (!((image->w == 2048) | (image->h == 1080))) {
                 return DCP_FATAL;
@@ -108,7 +108,7 @@ int check_image_compliance(context_t *context, odcp_image_t *image) {
     return DCP_SUCCESS;
 }
 
-int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_path) {
+int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_path) {
     odcp_image_t *odcp_image;
     int result;
 
@@ -135,21 +135,21 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
     }
 
     /* verify image is dci compliant */
-    if (check_image_compliance(context, odcp_image) != DCP_SUCCESS) {
+    if (check_image_compliance(opendcp, odcp_image) != DCP_SUCCESS) {
         dcp_log(LOG_WARN,"The image resolution of %s is not DCI Compliant",in_file);
         //return DCP_FATAL;
     }
     
-    if (context->xyz) {
+    if (opendcp->xyz) {
         dcp_log(LOG_INFO,"RGB->XYZ color conversion %s",in_file);
-        if (rgb_to_xyz(odcp_image,context->lut)) {
+        if (rgb_to_xyz(odcp_image,opendcp->lut)) {
             dcp_log(LOG_ERROR,"Color conversion failed %s",in_file);
             odcp_image_free(odcp_image);
             return DCP_FATAL;
         }
     }
 
-    if ( context->encoder == J2K_KAKADU ) {
+    if ( opendcp->encoder == J2K_KAKADU ) {
         char tempfile[255];
         sprintf(tempfile,"%s/tmp_%s",tmp_path,basename(in_file));
         dcp_log(LOG_INFO,"Writing temporary tif %s",tempfile);
@@ -161,7 +161,7 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
             return DCP_FATAL;
         }
 
-        result = encode_kakadu(context, tempfile, out_file, tmp_path);
+        result = encode_kakadu(opendcp, tempfile, out_file, tmp_path);
         if ( result != DCP_SUCCESS) {
             dcp_log(LOG_ERROR,"Kakadu JPEG2000 conversion failed %s",in_file);
             remove(tempfile);
@@ -172,7 +172,7 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
         opj_image_t *opj_image;
         odcp_to_opj(odcp_image, &opj_image); 
         odcp_image_free(odcp_image);
-        if (encode_openjpeg(context,opj_image,out_file) != DCP_SUCCESS) {
+        if (encode_openjpeg(opendcp,opj_image,out_file) != DCP_SUCCESS) {
             dcp_log(LOG_ERROR,"OpenJPEG JPEG2000 conversion failed %s",in_file);
             opj_image_destroy(opj_image);
             return DCP_FATAL;
@@ -184,7 +184,7 @@ int convert_to_j2k(context_t *context, char *in_file, char *out_file, char *tmp_
     return DCP_SUCCESS;
 }
 
-int encode_kakadu(context_t *context, char *in_file, char *out_file) {
+int encode_kakadu(opendcp_t *opendcp, char *in_file, char *out_file) {
     FILE *f = NULL;
     int j,result;
     int max_cs_len;
@@ -194,17 +194,17 @@ int encode_kakadu(context_t *context, char *in_file, char *out_file) {
     FILE *cmdfp = NULL;
     int bw;
 
-    if (context->bw) {
-        bw = context->bw * 1000000;
+    if (opendcp->bw) {
+        bw = opendcp->bw * 1000000;
     } else {
         bw = MAX_DCP_JPEG_BITRATE;
     }
 
     /* set the max image and component sizes based on frame_rate */
-    max_cs_len = ((float)bw)/8/context->frame_rate;
+    max_cs_len = ((float)bw)/8/opendcp->frame_rate;
     
     /* adjust cs for 3D */
-    if (context->stereoscopic) {
+    if (opendcp->stereoscopic) {
         max_cs_len = max_cs_len/2;
     } 
 
@@ -225,7 +225,7 @@ int encode_kakadu(context_t *context, char *in_file, char *out_file) {
     return DCP_SUCCESS;
 }
 
-int encode_openjpeg(context_t *context, opj_image_t *opj_image, char *out_file) {
+int encode_openjpeg(opendcp_t *opendcp, opj_image_t *opj_image, char *out_file) {
     bool result;
     int codestream_length;
     int max_comp_size;
@@ -236,17 +236,17 @@ int encode_openjpeg(context_t *context, opj_image_t *opj_image, char *out_file) 
     FILE *f = NULL; 
     int bw;
    
-    if (context->bw) {
-        bw = context->bw * 1000000;
+    if (opendcp->bw) {
+        bw = opendcp->bw * 1000000;
     } else {
         bw = MAX_DCP_JPEG_BITRATE;
     }
 
     /* set the max image and component sizes based on frame_rate */
-    max_cs_len = ((float)bw)/8/context->frame_rate;
+    max_cs_len = ((float)bw)/8/opendcp->frame_rate;
  
     /* adjust cs for 3D */
-    if (context->stereoscopic) {
+    if (opendcp->stereoscopic) {
         max_cs_len = max_cs_len/2;
     } 
  
@@ -256,13 +256,13 @@ int encode_openjpeg(context_t *context, opj_image_t *opj_image, char *out_file) 
     opj_set_default_encoder_parameters(&parameters);
 
     /* set default cinema parameters */
-    set_cinema_encoder_parameters(context, &parameters);
+    set_cinema_encoder_parameters(opendcp, &parameters);
 
     parameters.cp_comment = (char*)malloc(strlen(OPEN_DCP_NAME)+1);
     sprintf(parameters.cp_comment,"%s", OPEN_DCP_NAME);
 
     /* adjust cinema enum type */
-    if (context->cinema_profile == DCP_CINEMA4K) {
+    if (opendcp->cinema_profile == DCP_CINEMA4K) {
         parameters.cp_cinema = CINEMA4K_24;
     } else {
         parameters.cp_cinema = CINEMA2K_24;

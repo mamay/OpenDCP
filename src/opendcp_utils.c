@@ -27,16 +27,16 @@
 #include <openssl/bio.h>
 #include "opendcp.h"
 
-void cleanup(context_t *context, int exit_flag) {
+void cleanup(opendcp_t *opendcp, int exit_flag) {
     int result; 
     if (exit_flag) {
         exit(1);
     }
 }
 
-void dcp_fatal(context_t *context, char *error) {
+void dcp_fatal(opendcp_t *opendcp, char *error) {
     dcp_log(LOG_ERROR, "%s",error);
-    cleanup(context,0);
+    cleanup(opendcp,0);
     exit(DCP_FATAL);
 }
 
@@ -127,61 +127,161 @@ int get_asset_type(asset_t asset) {
     }
 }
 
-int init_asset( asset_t *asset) {
+opendcp_t *create_opendcp() {
+    opendcp_t *opendcp;
+
+    /* allocation opendcp memory */
+    opendcp = malloc(sizeof(opendcp_t));
+    memset(opendcp,0,sizeof (opendcp_t));
+
+    /* initialize opendcp */
+    opendcp->log_level = LOG_WARN;
+    sprintf(opendcp->issuer,"%.80s %.80s",OPEN_DCP_NAME,OPEN_DCP_VERSION);
+    sprintf(opendcp->creator,"%.80s %.80s",OPEN_DCP_NAME, OPEN_DCP_VERSION);
+    sprintf(opendcp->annotation,"%.128s",DCP_ANNOTATION);
+    sprintf(opendcp->title,"%.80s",DCP_TITLE);
+    sprintf(opendcp->kind,"%.15s",DCP_KIND);
+    get_timestamp(opendcp->timestamp);
+    sprintf(opendcp->assetmap.filename,"%.128s","ASSETMAP");
+    sprintf(opendcp->volindex.filename,"%.128s","VOLINDEX");
+
+    return opendcp;
+}
+
+int delete_opendcp(opendcp_t *opendcp) {
+    if ( opendcp != NULL) {
+        free(opendcp);
+    }
+    return DCP_SUCCESS;
+}
+
+int add_pkl(opendcp_t *opendcp) {
+    char uuid_s[40];
+    int i = opendcp->pkl_count++;
+
+    strcpy(opendcp->pkl[i].issuer,     opendcp->issuer);
+    strcpy(opendcp->pkl[i].creator,    opendcp->creator);
+    strcpy(opendcp->pkl[i].annotation, opendcp->annotation);
+    strcpy(opendcp->pkl[i].timestamp,  opendcp->timestamp);
+
+    /* Generate UUIDs */
+    uuid_random(uuid_s);
+    sprintf(opendcp->pkl[i].uuid,"%.36s",uuid_s);
+
+    /* Generate XML filename */
+    if ( !strcmp(opendcp->basename,"") ) {
+        sprintf(opendcp->pkl[i].filename,"%.40s_pkl.xml",opendcp->pkl[i].uuid);
+    } else {
+        sprintf(opendcp->pkl[i].filename,"%.40s_pkl.xml",opendcp->basename);
+    }
+
+    opendcp->pkl_count++;
+
+    return DCP_SUCCESS;
+}
+
+int add_cpl(opendcp_t *opendcp, pkl_t *pkl) {
+    char uuid_s[40];
+    int i = pkl->cpl_count;
+
+    strcpy(pkl->cpl[i].issuer,    opendcp->issuer);
+    strcpy(pkl->cpl[i].creator,   opendcp->creator);
+    strcpy(pkl->cpl[i].title,     opendcp->title);
+    strcpy(pkl->cpl[i].kind,      opendcp->kind);
+    strcpy(pkl->cpl[i].rating,    opendcp->rating);
+    strcpy(pkl->cpl[i].timestamp, opendcp->timestamp);
+
+    uuid_random(uuid_s);
+    sprintf(pkl->cpl[i].uuid,"%.36s",uuid_s);
+
+    /* Generate XML filename */
+    if ( !strcmp(opendcp->basename,"") ) {
+        sprintf(pkl->cpl[i].filename,"%.40s_cpl.xml",pkl->cpl[i].uuid);
+    } else {
+        sprintf(pkl->cpl[i].filename,"%.40s_cpl.xml",opendcp->basename);
+    }
+
+    pkl->cpl_count++;
+
+    return DCP_SUCCESS;
+}
+
+int init_asset(asset_t *asset) {
     memset(asset,0,sizeof(asset_t));
 
     return DCP_SUCCESS;
 }
 
-int validate_reel(context_t *context, int reel) {
+int validate_reel(opendcp_t *opendcp, cpl_t *cpl, int reel) {
     int d = 0;
+    int x,a;
     int result = 0;
+    int picture = 0;
     int duration_mismatch = 0;
 
     dcp_log(LOG_INFO,"Validating Reel %d\n",reel+1);
 
-    if (context->reel[reel].MainPicture.duration) {
-        d = context->reel[reel].MainPicture.duration;
-    } else {
-        dcp_log(LOG_ERROR,"Main picture asset has no duration");
-        return DCP_FATAL;
-    }
+    a = cpl->reel[reel].asset_count; 
 
-    /* Validate Duration */
-    if (context->reel[reel].MainSound.duration && context->reel[reel].MainSound.duration != d) {
-        duration_mismatch = 1;
-        if (context->reel[reel].MainSound.duration < d) {
-            d = context->reel[reel].MainSound.duration;
+    /* check if reel has a picture track */ 
+    for (x=0;x<a;x++) {
+        if (cpl->reel[reel].asset[x].essence_class == ACT_PICTURE) {
+            picture++;
         }
     }
 
-    if (context->reel[reel].MainSubtitle.duration && context->reel[reel].MainSubtitle.duration != d) {
-        duration_mismatch = 1;
-        if (context->reel[reel].MainSubtitle.duration < d) {
-            d = context->reel[reel].MainSubtitle.duration;
+    if (picture < 1) {
+        dcp_log(LOG_ERROR,"Reel %d has no picture track",reel);
+        return DCP_FATAL;
+    } else if (picture > 1) {
+        dcp_log(LOG_ERROR,"Reel %d has multiple picture tracks",reel);
+        return DCP_FATAL;
+    }
+
+    d = cpl->reel[reel].asset[0].duration;
+
+    /* check durations */
+    for (x=0;x<a;x++) {
+        if (cpl->reel[reel].asset[x].duration) {
+            if (cpl->reel[reel].asset[x].duration != d) {
+                duration_mismatch = 1;
+                if (cpl->reel[reel].asset[x].duration < d) {
+                   d = cpl->reel[reel].asset[x].duration;
+                }
+            }
+        } else {
+            dcp_log(LOG_ERROR,"Asset %s has no duration",cpl->reel[reel].asset[x].filename);
+           return DCP_FATAL;
         }
     }
 
     if (duration_mismatch) {
-            dcp_log(LOG_WARN,"Asset duration mismatch picture: %d / sound: %d, adjusting all durations to shortest asset", context->reel[reel].MainPicture.duration, context->reel[reel].MainSound.duration);
-            context->reel[reel].MainPicture.duration = d;
-            context->reel[reel].MainSound.duration = d;
-            context->reel[reel].MainSubtitle.duration = d;
+       dcp_log(LOG_WARN,"Asset duration mismatch, adjusting all durations to shortest asset duration of %d frames", d);
+        for (x=0;x<a;x++) {
+            cpl->reel[reel].asset[x].duration = d;
+        }
     }
           
     return result;
 }
 
-int add_reel(context_t *context, asset_list_t reel) {
+int add_reel(opendcp_t *opendcp, cpl_t *cpl, asset_list_t reel) {
     int result;
-    int x;
+    int x,r;
     FILE *fp;
     char *filename;
     int bp;
     asset_t asset;
     struct stat st;
+    char uuid_s[40];
 
     dcp_log(LOG_INFO,"Adding Reel");
+
+    r = cpl->reel_count; 
+
+    /* add reel uuid */
+    uuid_random(uuid_s);
+    sprintf(cpl->reel[r].uuid,"%.36s",uuid_s);
 
     /* parse argument and read asset information */
     for (x=0;x<reel.asset_count;x++) {
@@ -207,26 +307,36 @@ int add_reel(context_t *context, asset_list_t reel) {
         dcp_log(LOG_INFO,"Reading %s asset information",filename);
 
         result = read_asset_info(&asset);
+
         if (result == DCP_FATAL) {
             dcp_log(LOG_ERROR,"%s is not a proper essence file",filename);
             return DCP_FATAL;
         }
 
+        if (x == 0) {
+            opendcp->ns = asset.xml_ns;
+        } else {
+            if (opendcp->ns != asset.xml_ns) {
+                dcp_log(LOG_ERROR,"Warning DCP specification mismatch in assets. Please make sure all assets are MXF Interop or SMPTE");
+                return DCP_FATAL;
+            }
+        }
+
         /* Set duration, if specified */
-        if (context->duration) {
-            if  (context->duration<asset.duration) {
-                asset.duration = context->duration;
+        if (opendcp->duration) {
+            if  (opendcp->duration<asset.duration) {
+                asset.duration = opendcp->duration;
             } else {
-                dcp_log(LOG_WARN,"Desired duration %d cannot be greater than assset duration %d, ignoring value",context->duration,asset.duration);
+                dcp_log(LOG_WARN,"Desired duration %d cannot be greater than assset duration %d, ignoring value",opendcp->duration,asset.duration);
             }
         }
 
         /* Set entry point, if specified */
-        if (context->entry_point) {
-            if (context->entry_point<asset.duration) {
-                asset.entry_point = context->entry_point;
+        if (opendcp->entry_point) {
+            if (opendcp->entry_point<asset.duration) {
+                asset.entry_point = opendcp->entry_point;
             } else {
-                dcp_log(LOG_WARN,"Desired entry point %d cannot be greater than assset duration %d, ignoring value",context->entry_point,asset.duration);
+                dcp_log(LOG_WARN,"Desired entry point %d cannot be greater than assset duration %d, ignoring value",opendcp->entry_point,asset.duration);
             }
         }
 
@@ -236,19 +346,12 @@ int add_reel(context_t *context, asset_list_t reel) {
         /* get asset type */
         result = get_asset_type(asset);
 
-        if (result == ACT_PICTURE) {
-            context->reel[context->reel_count].MainPicture = asset;
-        } else if (result == ACT_SOUND) {
-            context->reel[context->reel_count].MainSound = asset;
-        } else if (result == ACT_TIMED_TEXT) {
-            context->reel[context->reel_count].MainSubtitle = asset;
-        } else {
-            dcp_log(LOG_ERROR,"%s is not an unknown essence type",filename);
-            return DCP_FATAL;
-        }
+        /* add asset to cpl */
+        cpl->reel[r].asset[x] = asset;
+        cpl->reel[r].asset_count++;
     }
 
-    context->reel_count++;
+    cpl->reel_count++;
 
     return DCP_SUCCESS;
 }

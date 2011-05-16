@@ -107,7 +107,7 @@ int check_extension(char *filename, char *pattern) {
    return 1;
 }
 
-int get_filelist_3d(context_t *context,char *in_path_left,char *in_path_right,filelist_t *filelist) {
+int get_filelist_3d(opendcp_t *opendcp,char *in_path_left,char *in_path_right,filelist_t *filelist) {
     filelist_t  *filelist_left;
     filelist_t  *filelist_right;
     int x,y;
@@ -115,8 +115,8 @@ int get_filelist_3d(context_t *context,char *in_path_left,char *in_path_right,fi
     filelist_left = malloc(sizeof(filelist_t));
     filelist_right = malloc(sizeof(filelist_t));
 
-    get_filelist(context,in_path_left,filelist_left);
-    get_filelist(context,in_path_right,filelist_right);
+    get_filelist(opendcp,in_path_left,filelist_left);
+    get_filelist(opendcp,in_path_right,filelist_right);
 
     if (filelist_left->file_count != filelist_right->file_count) {
         dcp_log(LOG_ERROR,"Mismatching file count for 3D images left: %d right: %d\n",filelist_left->file_count,filelist_right->file_count);
@@ -144,7 +144,7 @@ int get_filelist_3d(context_t *context,char *in_path_left,char *in_path_right,fi
     return DCP_SUCCESS;
 }
 
-int get_filelist(context_t *context,char *in_path,filelist_t *filelist) {
+int get_filelist(opendcp_t *opendcp,char *in_path,filelist_t *filelist) {
     struct dirent **files;
     struct stat st_in;
     struct stat st_out;
@@ -185,7 +185,7 @@ int main (int argc, char **argv) {
     int count;
     int image_nb = 0;
     int result;
-    context_t *context;
+    opendcp_t *opendcp;
     char *in_path = NULL;
     char *in_path_left = NULL;
     char *in_path_right = NULL;
@@ -197,18 +197,18 @@ int main (int argc, char **argv) {
         dcp_usage();
     }
 
-    context = malloc(sizeof(context_t));
-    memset(context,0,sizeof (context_t));
+    opendcp = malloc(sizeof(opendcp_t));
+    memset(opendcp,0,sizeof (opendcp_t));
 
     filelist = malloc(sizeof(filelist_t));
     memset(filelist,0,sizeof (filelist_t));
 
     /* set initial values */
-    context->xyz = 1;
-    context->log_level = LOG_WARN;
-    context->ns = XML_NS_SMPTE;
-    context->frame_rate = 24;
-    context->threads = 4;
+    opendcp->xyz = 1;
+    opendcp->log_level = LOG_WARN;
+    opendcp->ns = XML_NS_SMPTE;
+    opendcp->frame_rate = 24;
+    opendcp->threads = 4;
 
     /* parse options */
     while (1)
@@ -251,16 +251,16 @@ int main (int argc, char **argv) {
             break;
 
             case '3':
-               context->stereoscopic = 1;
+               opendcp->stereoscopic = 1;
             break;
 
             case 'n':
                if (!strcmp(optarg,"smpte")) {
-                   context->ns = XML_NS_SMPTE;
+                   opendcp->ns = XML_NS_SMPTE;
                } else if (!strcmp(optarg,"interop")) {
-                   context->ns = XML_NS_INTEROP;
+                   opendcp->ns = XML_NS_INTEROP;
                } else {
-                   dcp_fatal(context,"Invalid profile argument, must be smpte or interop");
+                   dcp_fatal(opendcp,"Invalid profile argument, must be smpte or interop");
                }
             break;
 
@@ -270,16 +270,16 @@ int main (int argc, char **argv) {
 
             case '1':
                in_path_left = optarg;
-               context->stereoscopic = 1;
+               opendcp->stereoscopic = 1;
             break;
 
             case '2':
                in_path_right = optarg;
-               context->stereoscopic = 1;
+               opendcp->stereoscopic = 1;
             break;
 
             case 'l':
-               context->log_level = atoi(optarg);
+               opendcp->log_level = atoi(optarg);
             break;
 
             case 'o':
@@ -291,9 +291,9 @@ int main (int argc, char **argv) {
             break;
 
             case 'r':
-               context->frame_rate = atoi(optarg);
-               if (context->frame_rate > 60 || context->frame_rate < 1 ) {
-                   dcp_fatal(context,"Invalid frame rate. Must be between 1 and 60.");
+               opendcp->frame_rate = atoi(optarg);
+               if (opendcp->frame_rate > 60 || opendcp->frame_rate < 1 ) {
+                   dcp_fatal(opendcp,"Invalid frame rate. Must be between 1 and 60.");
                }
             break;
 
@@ -304,39 +304,39 @@ int main (int argc, char **argv) {
     }
 
     /* set log level */
-    dcp_set_log_level(context->log_level);
+    dcp_set_log_level(opendcp->log_level);
 
-    if (context->log_level > 0) {
+    if (opendcp->log_level > 0) {
         printf("\nOpenDCP MXF %s %s\n",OPEN_DCP_VERSION,OPEN_DCP_COPYRIGHT);
     }
 
-    if (context->stereoscopic) {
+    if (opendcp->stereoscopic) {
         if (in_path_left == NULL) {
-            dcp_fatal(context,"3D input detected, but missing left image input path");
+            dcp_fatal(opendcp,"3D input detected, but missing left image input path");
         } else if (in_path_right == NULL) {
-            dcp_fatal(context,"3D input detected, but missing right image input path");
+            dcp_fatal(opendcp,"3D input detected, but missing right image input path");
         }
     } else {
         if (in_path == NULL) {
-            dcp_fatal(context,"Missing input file");
+            dcp_fatal(opendcp,"Missing input file");
         }
     }
 
     if (out_path == NULL) {
-        dcp_fatal(context,"Missing output file");
+        dcp_fatal(opendcp,"Missing output file");
     }
 
-    if (context->stereoscopic) {
-        get_filelist_3d(context,in_path_left,in_path_right,filelist);
+    if (opendcp->stereoscopic) {
+        get_filelist_3d(opendcp,in_path_left,in_path_right,filelist);
     } else {
-        get_filelist(context,in_path,filelist);
+        get_filelist(opendcp,in_path,filelist);
     }
   
     if (filelist->file_count < 1) {
-        dcp_fatal(context,"No input files located");
+        dcp_fatal(opendcp,"No input files located");
     }
 
-    if (write_mxf(context,filelist,out_path) != 0 )  {
+    if (write_mxf(opendcp,filelist,out_path) != 0 )  {
         printf("Error!\n");
     }
 
@@ -346,12 +346,12 @@ int main (int argc, char **argv) {
 
     dcp_log(LOG_INFO,"MXF creation complete");
 
-    if (context->log_level > 0) {
+    if (opendcp->log_level > 0) {
         printf("\n");
     }
 
-    if ( context != NULL) {
-        free(context);
+    if ( opendcp != NULL) {
+        free(opendcp);
     }
 
     exit(0);
