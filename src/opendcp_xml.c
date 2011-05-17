@@ -317,7 +317,11 @@ int write_assetmap(opendcp_t *opendcp) {
     char filename[MAX_PATH_LENGTH];
     char uuid_s[40];
 
-    sprintf(filename,"%s",opendcp->assetmap.filename);
+    if (opendcp->ns == XML_NS_INTEROP) {
+        sprintf(filename,"%s","ASSETMAP");
+    } else {
+        sprintf(filename,"%s","ASSETMAP.xml");
+    }
 
     fp = fopen(filename, "w");
 
@@ -402,7 +406,11 @@ int write_volumeindex(opendcp_t *opendcp) {
     FILE *fp;
     char filename[MAX_PATH_LENGTH];
 
-    sprintf(filename,"%s",opendcp->volindex.filename);
+    if (opendcp->ns == XML_NS_INTEROP) {
+        sprintf(filename,"%s","VOLINDEX");
+    } else {
+        sprintf(filename,"%s","VOLINDEX.xml");
+    }
 
     fp = fopen(filename, "w");
 

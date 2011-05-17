@@ -142,8 +142,8 @@ opendcp_t *create_opendcp() {
     sprintf(opendcp->title,"%.80s",DCP_TITLE);
     sprintf(opendcp->kind,"%.15s",DCP_KIND);
     get_timestamp(opendcp->timestamp);
-    sprintf(opendcp->assetmap.filename,"%.128s","ASSETMAP");
-    sprintf(opendcp->volindex.filename,"%.128s","VOLINDEX");
+    sprintf(opendcp->assetmap.filename,"%.128s","ASSETMAP.xml");
+    sprintf(opendcp->volindex.filename,"%.128s","VOLINDEX.xml");
 
     return opendcp;
 }
