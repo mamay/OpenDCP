@@ -108,6 +108,74 @@ void get_timestamp(char *timestamp) {
     sprintf(timestamp,"%.30s",buffer);
 }  
 
+int find_seq_offset (char str1[], char str2[]) {
+    int i = 0;
+    while(1) {
+        if(str1[i] != str2[i])
+		return i;
+	if(str1[i] == '\0' || str2[i] == '\0')
+		return 0;
+	i++;
+    }
+}
+
+int find_ext_offset(char str[]) {
+    int i = strlen(str);
+    while(i) {
+        if(str[i] == '.')
+            return i;
+        i--;
+    }
+  
+    return 0;
+}
+
+int check_increment(char *str[], int index,int str_size) {
+    int x;
+    int array_size, offset, ext_offset, diff_len;
+
+    offset     = find_seq_offset(str[str_size-1],str[0]);
+    ext_offset = find_ext_offset(str[0]);
+    diff_len   = ext_offset - offset;;
+
+    char *seq = (char *)malloc(diff_len+1);
+    strncpy(seq,str[index]+offset,diff_len);
+    x = atoi(seq);
+
+    if (x == index) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+int check_sequence(char str1[],char str2[]) {
+    int x,y;
+    int offset, ext_offset, diff_len;
+
+    offset     = find_seq_offset(str2,str1);
+    ext_offset = find_ext_offset(str1);
+    diff_len   = ext_offset - offset;;
+
+    char *seq = (char *)malloc(diff_len+1);
+
+    strncpy(seq,str1+offset,diff_len);
+    x = atoi(seq);
+
+    strncpy(seq,str2+offset,diff_len);
+    y = atoi(seq);
+
+    if (seq) {
+        free(seq);
+    }
+
+    if ((y - x) == 1) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
 int get_asset_type(asset_t asset) {
     switch (asset.essence_type) {
        case AET_MPEG2_VES:

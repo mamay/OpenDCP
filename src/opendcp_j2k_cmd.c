@@ -79,6 +79,7 @@ void dcp_usage() {
     fprintf(fp,"       -x | --no_xyz                  - do not perform rgb->xyz color conversion\n");
     fprintf(fp,"       -e | --encoder <0 | 1>         - jpeg2000 encoder 0:openjpeg 1:kakadu^ (default openjpeg)\n");
     fprintf(fp,"       -b | --bw                      - Max Mbps bandwitdh (default: 250)\n");
+    fprintf(fp,"       -n | --no_overwrite            - do not overwrite existing jpeg2000 files\n");
     fprintf(fp,"       -l | --log_level <level>       - Sets the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
     fprintf(fp,"       -h | --help                    - show help\n");
     fprintf(fp,"       -g | --lut                     - select color conversion LUT, 0:rec709,1:srgb\n");
@@ -253,6 +254,7 @@ int main (int argc, char **argv) {
             {"threads",        required_argument, 0, 't'},
             {"encoder",        required_argument, 0, 'e'},
             {"no_xyz",         no_argument,       0, 'x'},
+            {"no_overwrite",   no_argument,       0, 'n'},
             {"3d",             no_argument,       0, '3'},
             {"version",        no_argument,       0, 'v'},
             {"tmp_dir",        required_argument, 0, 'm'},
@@ -263,7 +265,7 @@ int main (int argc, char **argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
      
-        c = getopt_long (argc, argv, "b:e:i:o:r:p:l:t:m:g:3hvx",
+        c = getopt_long (argc, argv, "b:e:i:o:r:p:l:t:m:g:3hvxn",
                          long_options, &option_index);
      
         /* Detect the end of the options. */
@@ -339,6 +341,10 @@ int main (int argc, char **argv) {
             case 'x':
                opendcp->xyz = 0;
             break;
+
+            case 'n':
+               opendcp->no_overwrite = 1;
+            break;
      
             case 'v':
                version();
@@ -385,7 +391,11 @@ int main (int argc, char **argv) {
         #pragma omp flush(SIGINT_received)
         if (!SIGINT_received) {
             dcp_log(LOG_INFO,"JPEG2000 conversion %s started OPENMP: %d",filelist->in[c],openmp_flag);
-            result = convert_to_j2k(opendcp,filelist->in[c],filelist->out[c], tmp_path);
+            if(access( filelist->out[c], F_OK ) != 0 || opendcp->no_overwrite == 0) {
+                result = convert_to_j2k(opendcp,filelist->in[c],filelist->out[c], tmp_path);
+            } else {
+                result = DCP_SUCCESS;
+            }
             if (count) {
                if (opendcp->log_level>0 && opendcp->log_level<3) {progress_bar(count,filelist->file_count);}
             }

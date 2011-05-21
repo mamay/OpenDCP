@@ -241,6 +241,7 @@ typedef struct {
     byte_t         key_value[16];
     int            write_hmac;
     int            xyz;
+    int            no_overwrite;
     int            bw;
     int            threads;
     int            xml_sign;
