@@ -328,7 +328,7 @@ int xml_sign(opendcp_t *opendcp, char *filename) {
 
     /* create signature opendcp */
     dsig_ctx = xmlSecDSigCtxCreate(key_manager);
-
+ 
     if(dsig_ctx == NULL) {
         fprintf(stderr,"Error: failed to create signature opendcp\n");
         goto done;

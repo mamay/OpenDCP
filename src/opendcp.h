@@ -273,6 +273,8 @@ int get_file_essence_class(char *filename);
 char *get_basename(const char *filename);
 int validate_reel(opendcp_t *opendcp, cpl_t *cpl, int reel);
 int add_reel(opendcp_t *opendcp, cpl_t *cpl, asset_list_t reel);
+int add_cpl(opendcp_t *opendcp, pkl_t *pkl);
+int add_pkl(opendcp_t *opendcp);
 void dcp_set_log_level(int log_level);
 opendcp_t *create_opendcp();
 int delete_opendcp(opendcp_t *opendcp);

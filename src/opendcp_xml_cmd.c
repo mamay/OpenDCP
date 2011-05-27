@@ -250,7 +250,7 @@ int main (int argc, char **argv) {
     }
 
     /* check cert files */
-    if (opendcp->xml_use_internal_certs) {
+    if (opendcp->xml_sign && opendcp->xml_use_internal_certs == 1) {
         FILE *tp;
         if (opendcp->root_cert_file) {
             tp = fopen(opendcp->root_cert_file,"rb");

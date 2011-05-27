@@ -197,6 +197,7 @@ int write_cpl(opendcp_t *opendcp, cpl_t *cpl) {
 #endif
 
     /* Store CPL file size */
+    dcp_log(LOG_INFO,"Writing CPL file info");
     stat(filename, &st);
     sprintf(cpl->size,"%"PRIu64,st.st_size);
     calculate_digest(filename,cpl->digest);
