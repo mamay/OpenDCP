@@ -331,6 +331,8 @@ int main (int argc, char **argv) {
                opendcp->bw = atoi(optarg);
                if (opendcp->bw < 50 || opendcp->bw > 250) {
                    dcp_fatal(opendcp,"Bandwidth must be between 50 and 250");
+               } else {
+                   opendcp->bw *= 1000000;
                }
             break;
 
