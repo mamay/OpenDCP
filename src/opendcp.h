@@ -265,6 +265,7 @@ typedef struct {
     pkl_t          pkl[MAX_PKL];
 } opendcp_t;
 
+/* Common Routines */
 void dcp_log(int level, const char *fmt, ...);
 void dcp_fatal(opendcp_t *opendcp, char *error);
 void get_timestamp(char *timestamp);
@@ -298,6 +299,7 @@ char *strip_cert_file(char *filename);
 
 /* J2K Routines */
 int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_path);
+
 #endif // _OPEN_DCP_H_
 #ifdef __cplusplus
 }
