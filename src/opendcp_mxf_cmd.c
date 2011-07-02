@@ -59,6 +59,8 @@ void dcp_usage() {
     fprintf(fp,"Options:\n");
     fprintf(fp,"       -n | --ns <interop | smpte>    - Generate SMPTE or MXF Interop labels (default smpte)\n");
     fprintf(fp,"       -r | --rate <rate>             - frame rate (default 24)\n");
+    fprintf(fp,"       -s | --start <frame>           - start frame\n");
+    fprintf(fp,"       -d | --end  <frame>            - end frame\n");
     fprintf(fp,"       -l | --log_level <level>       - Sets the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
     fprintf(fp,"       -h | --help                    - show help\n");
     fprintf(fp,"       -v | --version                 - show version\n");
@@ -221,6 +223,8 @@ int main (int argc, char **argv) {
             {"right",          required_argument, 0, '2'},
             {"ns",             required_argument, 0, 'n'},
             {"output",         required_argument, 0, 'o'},
+            {"start",          required_argument, 0, 's'},
+            {"end",            required_argument, 0, 'd'},
             {"rate",           required_argument, 0, 'r'},
             {"profile",        required_argument, 0, 'p'},
             {"log_level",      required_argument, 0, 'l'},
@@ -231,7 +235,7 @@ int main (int argc, char **argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
      
-        c = getopt_long (argc, argv, "1:2:i:n:o:r:p:l:3hv",
+        c = getopt_long (argc, argv, "1:2:d:i:n:o:r:s:p:l:3hv",
                          long_options, &option_index);
      
         /* Detect the end of the options. */
@@ -252,6 +256,20 @@ int main (int argc, char **argv) {
 
             case '3':
                opendcp->stereoscopic = 1;
+            break;
+
+            case 'd':
+               opendcp->mxf.end_frame = atoi(optarg);
+               if (opendcp->mxf.end_frame < 1) {
+                   dcp_fatal(opendcp,"End frame  must be greater than 0");
+               }
+            break;
+
+            case 's':
+               opendcp->mxf.start_frame = atoi(optarg);
+               if (opendcp->mxf.start_frame < 1) {
+                   dcp_fatal(opendcp,"Start frame must be greater than 0");
+               }
             break;
 
             case 'n':
@@ -334,6 +352,28 @@ int main (int argc, char **argv) {
   
     if (filelist->file_count < 1) {
         dcp_fatal(opendcp,"No input files located");
+    }
+  
+    if (opendcp->mxf.end_frame) {
+        if (opendcp->mxf.end_frame > filelist->file_count) {
+            dcp_fatal(opendcp,"End frame is greater than the actual frame count");
+        }
+    } else {
+        opendcp->mxf.end_frame = filelist->file_count;
+    }
+
+    if (opendcp->mxf.start_frame) {
+        if (opendcp->mxf.start_frame > opendcp->mxf.end_frame) {
+            dcp_fatal(opendcp,"Start frame must be less than end frame");
+        }
+    } else {
+        opendcp->mxf.start_frame = 1;
+    }
+
+    opendcp->mxf.duration = opendcp->mxf.end_frame - (opendcp->mxf.start_frame-1);  
+
+    if (opendcp->mxf.duration < 1) {
+        dcp_fatal(opendcp,"Duration must be at least 1 frame");
     }
 
     if (write_mxf(opendcp,filelist,out_path) != 0 )  {

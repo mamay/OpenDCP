@@ -83,6 +83,8 @@ void dcp_usage() {
     fprintf(fp,"       -l | --log_level <level>       - Sets the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
     fprintf(fp,"       -h | --help                    - show help\n");
     fprintf(fp,"       -g | --lut                     - select color conversion LUT, 0:rec709,1:srgb\n");
+    fprintf(fp,"       -s | --start                   - start frame\n");
+    fprintf(fp,"       -d | --end                     - end frame\n");
     fprintf(fp,"       -v | --version                 - show version\n");
     fprintf(fp,"       -m | --tmp_dir                 - sets temporary directory (usually tmpfs one) to save there temporary tiffs for Kakadu");
     fprintf(fp,"\n\n");
@@ -253,19 +255,21 @@ int main (int argc, char **argv) {
             {"log_level",      required_argument, 0, 'l'},
             {"threads",        required_argument, 0, 't'},
             {"encoder",        required_argument, 0, 'e'},
+            {"start",          required_argument, 0, 's'},
+            {"end",            required_argument, 0, 'e'},
             {"no_xyz",         no_argument,       0, 'x'},
             {"no_overwrite",   no_argument,       0, 'n'},
             {"3d",             no_argument,       0, '3'},
             {"version",        no_argument,       0, 'v'},
             {"tmp_dir",        required_argument, 0, 'm'},
-            {"lut",            required_argument,       0, 'g'},
+            {"lut",            required_argument, 0, 'g'},
             {0, 0, 0, 0}
         };
 
         /* getopt_long stores the option index here. */
         int option_index = 0;
      
-        c = getopt_long (argc, argv, "b:e:i:o:r:p:l:t:m:g:3hvxn",
+        c = getopt_long (argc, argv, "b:d:e:i:o:r:s:p:l:t:m:g:3hvxn",
                          long_options, &option_index);
      
         /* Detect the end of the options. */
@@ -282,6 +286,20 @@ int main (int argc, char **argv) {
 
             case '3':
                opendcp->stereoscopic = 1;
+            break;
+
+            case 'd':
+               opendcp->j2k.end_frame = atoi(optarg);
+               if (opendcp->j2k.end_frame < 1) {
+                   dcp_fatal(opendcp,"End frame  must be greater than 0");
+               }
+            break;
+
+            case 's':
+               opendcp->j2k.start_frame = atoi(optarg);
+               if (opendcp->j2k.start_frame < 1) {
+                   dcp_fatal(opendcp,"Start frame must be greater than 0");
+               }
             break;
 
             case 'p':
@@ -383,13 +401,33 @@ int main (int argc, char **argv) {
 
     get_filelist(opendcp,in_path,out_path,filelist);
 
+    if (opendcp->j2k.end_frame) {
+        if (opendcp->j2k.end_frame > filelist->file_count) {
+            dcp_fatal(opendcp,"End frame is greater than the actual frame count");
+        }
+    } else {
+        opendcp->j2k.end_frame = filelist->file_count;
+    }
+
+    if (opendcp->j2k.start_frame) {
+        if (opendcp->j2k.start_frame > opendcp->j2k.end_frame) {
+            dcp_fatal(opendcp,"Start frame must be less than end frame");
+        }
+    } else {
+        opendcp->j2k.start_frame = 1;
+    }
+
+
     if (opendcp->log_level>0 && opendcp->log_level<3) { progress_bar(0,0); }
 
 #ifdef OPENMP
     omp_set_num_threads(opendcp->threads);
 #endif
+
+    count = opendcp->j2k.start_frame;
+
     #pragma omp parallel for private(c)
-    for (c=0;c<filelist->file_count;c++) {    
+    for (c=opendcp->j2k.start_frame-1;c<opendcp->j2k.end_frame;c++) {    
         #pragma omp flush(SIGINT_received)
         if (!SIGINT_received) {
             dcp_log(LOG_INFO,"JPEG2000 conversion %s started OPENMP: %d",filelist->in[c],openmp_flag);
@@ -399,7 +437,7 @@ int main (int argc, char **argv) {
                 result = DCP_SUCCESS;
             }
             if (count) {
-               if (opendcp->log_level>0 && opendcp->log_level<3) {progress_bar(count,filelist->file_count);}
+               if (opendcp->log_level>0 && opendcp->log_level<3) {progress_bar(count,opendcp->j2k.end_frame);}
             }
 
             if (result == DCP_FATAL) {
@@ -414,7 +452,7 @@ int main (int argc, char **argv) {
         }
     }
 
-    if (opendcp->log_level>0 && opendcp->log_level<3) {progress_bar(count,filelist->file_count);}
+    if (opendcp->log_level>0 && opendcp->log_level<3) {progress_bar(count-1,opendcp->j2k.end_frame);}
 
     if ( filelist != NULL) {
         free(filelist);

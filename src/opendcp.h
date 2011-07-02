@@ -220,6 +220,18 @@ typedef struct {
     cpl_t          cpl[MAX_CPL]; 
 } pkl_t;
 
+typedef struct {
+    int            start_frame;
+    int            end_frame;
+    int            duration;
+} j2k_options_t;
+
+typedef struct {
+    int            start_frame;
+    int            end_frame;
+    int            duration;
+} mxf_options_t;
+
 typedef unsigned char byte_t; 
 
 typedef struct {
@@ -259,6 +271,8 @@ typedef struct {
     char           title[80];
     char           kind[15];
     char           rating[5];
+    j2k_options_t  j2k;
+    mxf_options_t  mxf;
     assetmap_t     assetmap;
     volindex_t     volindex;
     int            pkl_count;

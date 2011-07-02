@@ -430,12 +430,20 @@ Result_t write_j2k_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_fi
     JP2K::FrameBuffer       frame_buffer(FRAME_BUFFER_SIZE);
     writer_info_t           writer_info;
     Result_t                result = RESULT_OK; 
+    ui32_t                  start_frame;
     ui32_t                  mxf_duration;
 
-    result = j2k_parser.OpenReadFrame(filelist->in[0], frame_buffer);
+    /* set the starting frame */
+    if (opendcp->mxf.start_frame && filelist->file_count >= (opendcp->mxf.start_frame-1)) {
+        start_frame = opendcp->mxf.start_frame - 1; // adjust for zero base
+    } else {
+        start_frame = 0;
+    }
+
+    result = j2k_parser.OpenReadFrame(filelist->in[start_frame], frame_buffer);
 
     if (ASDCP_FAILURE(result)) {
-        printf("Failed to open file %s\n",filelist->in[0]);
+        printf("Failed to open file %s\n",filelist->in[start_frame]);
         return result;
     }
 
@@ -453,16 +461,16 @@ Result_t write_j2k_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_fi
     }
    
     /* set the duration of the output mxf */
-    if (filelist->file_count < opendcp->duration || !opendcp->duration) {
-        mxf_duration = filelist->file_count;
+    if (opendcp->mxf.duration && filelist->file_count >= opendcp->mxf.duration) {
+        mxf_duration = opendcp->mxf.duration;
     } else {
-        mxf_duration = opendcp->duration;
+        mxf_duration = filelist->file_count;
     }
 
-    ui32_t i = 0;
+    ui32_t i = start_frame;
     /* read each input frame and write to the output mxf until duration is reached */
     while (ASDCP_SUCCESS(result) && mxf_duration--) {
-        if (opendcp->slide == 0 || i == 0) {
+        if (opendcp->slide == 0 || i == start_frame) {
             result = j2k_parser.OpenReadFrame(filelist->in[i], frame_buffer);
 
             if (opendcp->delete_intermediate) {
