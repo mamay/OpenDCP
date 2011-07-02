@@ -83,7 +83,7 @@ void dcp_usage() {
     fprintf(fp,"       -n | --no_overwrite            - do not overwrite existing jpeg2000 files\n");
     fprintf(fp,"       -l | --log_level <level>       - Sets the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
     fprintf(fp,"       -h | --help                    - show help\n");
-    fprintf(fp,"       -g | --lut                     - select color conversion LUT, 0:rec709,1:srgb\n");
+    fprintf(fp,"       -g | --lut                     - select color conversion LUT, 0:srgb, 1:rec709\n");
     fprintf(fp,"       -s | --start                   - start frame\n");
     fprintf(fp,"       -d | --end                     - end frame\n");
     fprintf(fp,"       -v | --version                 - show version\n");
