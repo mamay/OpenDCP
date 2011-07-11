@@ -48,6 +48,7 @@ ENDIF(ENABLE_XMLSEC)
 #-----------------------------------------------------------------------------
 
 #--install tools--------------------------------------------------------------
+SET_TARGET_PROPERTIES(${OPENDCP_TARGETS} PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 INSTALL(TARGETS ${OPENDCP_TARGETS} 
   DESTINATION ${OPENDCP_INSTALL_BIN_DIR} COMPONENT Applications
 )
