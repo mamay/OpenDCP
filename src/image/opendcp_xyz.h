@@ -34,11 +34,11 @@
 #define DCI_DEGAMMA    (1/DCI_GAMMA)
 #define DCI_COEFFICENT (48.0/52.37)
 
-enum COLOR_MATRIX_ENUM {
-    CM_SRGB = 0,
-    CM_REC709,
-    CM_DC28,
-    CM_MAX
+enum COLOR_PROFILE_ENUM {
+    CP_SRGB = 0,
+    CP_REC709,
+    CP_DC28,
+    CP_MAX
 };
 
 enum LUT_IN_ENUM {
@@ -50,6 +50,11 @@ enum LUT_IN_ENUM {
 enum LUT_OUT_ENUM {
     LO_DCI    = 0,
     LO_MAX 
+};
+
+static float GAMMA[2] = {
+    2.2,    /* SRGB */
+    2.4     /* REC709 */
 };
 
 /* Color Matrices */
