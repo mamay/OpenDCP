@@ -17,6 +17,18 @@
 */
 
 typedef struct {
+    float r;
+    float g;
+    float b;
+} rgb_pixel_t;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+} xyz_pixel_t;
+
+typedef struct {
     int component_number;
     int *data;
 } odcp_image_component_t;
