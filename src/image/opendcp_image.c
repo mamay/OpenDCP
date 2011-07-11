@@ -1,6 +1,6 @@
 /*
     OpenDCP: Builds Digital Cinema Packages
-    Copyright (c) 2010 Terrence Meiczinger, All Rights Reserved
+    Copyright (c) 2010-2011 Terrence Meiczinger, All Rights Reserved
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -133,71 +133,70 @@ int odcp_to_opj(odcp_image_t *odcp, opj_image_t **opj_ptr) {
 int rgb_to_xyz(odcp_image_t *image, int index) {
     int i;
     int size;
-    rgb_pixel_t p_in;
-    xyz_pixel_t p_out;
+    rgb_pixel_t s;
+    xyz_pixel_t d;
 
     size = image->w * image->h;
 
     for (i=0;i<size;i++) {
-        /* In Gamma LUT */
-        p_in.r = lut_in[index][image->component[0].data[i]];
-        p_in.g = lut_in[index][image->component[1].data[i]];
-        p_in.b = lut_in[index][image->component[2].data[i]];
+        /* In gamma LUT */
+        s.r = lut_in[index][image->component[0].data[i]];
+        s.g = lut_in[index][image->component[1].data[i]];
+        s.b = lut_in[index][image->component[2].data[i]];
 
         /* RGB to XYZ Matrix */
-        p_out.x = ((p_in.r * color_matrix[index][0][0]) + (p_in.g * color_matrix[index][0][1]) + (p_in.b * color_matrix[index][0][2]));
-        p_out.y = ((p_in.r * color_matrix[index][1][0]) + (p_in.g * color_matrix[index][1][1]) + (p_in.b * color_matrix[index][1][2]));
-        p_out.z = ((p_in.r * color_matrix[index][2][0]) + (p_in.g * color_matrix[index][2][1]) + (p_in.b * color_matrix[index][2][2]));
+        d.x = ((s.r * color_matrix[index][0][0]) + (s.g * color_matrix[index][0][1]) + (s.b * color_matrix[index][0][2]));
+        d.y = ((s.r * color_matrix[index][1][0]) + (s.g * color_matrix[index][1][1]) + (s.b * color_matrix[index][1][2]));
+        d.z = ((s.r * color_matrix[index][2][0]) + (s.g * color_matrix[index][2][1]) + (s.b * color_matrix[index][2][2]));
 
         /* DCI Companding */
-        p_out.x = ((p_out.x > 1) ? 1.0 : p_out.x) * (DCI_COEFFICENT) * (DCI_LUT_SIZE - 1);
-        p_out.y = ((p_out.y > 1) ? 1.0 : p_out.y) * (DCI_COEFFICENT) * (DCI_LUT_SIZE - 1);
-        p_out.z = ((p_out.z > 1) ? 1.0 : p_out.z) * (DCI_COEFFICENT) * (DCI_LUT_SIZE - 1);
+        d.x = ((d.x > 1) ? 1.0 : d.x) * (DCI_COEFFICENT) * (DCI_LUT_SIZE - 1);
+        d.y = ((d.y > 1) ? 1.0 : d.y) * (DCI_COEFFICENT) * (DCI_LUT_SIZE - 1);
+        d.z = ((d.z > 1) ? 1.0 : d.z) * (DCI_COEFFICENT) * (DCI_LUT_SIZE - 1);
 
-        /* Out Gamma LUT */
-        image->component[0].data[i] = lut_out[LO_DCI][(int)p_out.x];
-        image->component[1].data[i] = lut_out[LO_DCI][(int)p_out.y];
-        image->component[2].data[i] = lut_out[LO_DCI][(int)p_out.z];
+        /* Out gamma LUT */
+        image->component[0].data[i] = lut_out[LO_DCI][(int)d.x];
+        image->component[1].data[i] = lut_out[LO_DCI][(int)d.y];
+        image->component[2].data[i] = lut_out[LO_DCI][(int)d.z];
     }
 
     return DCP_SUCCESS;
+}
+
+/* complex gamma function */
+float complex_gamma(float p, float gamma) {
+    float v;
+
+    if ( p > 0.04045) {
+        v = pow((p+0.055)/1.055,gamma);
+    } else {
+        v = p/12.92;
+    }
+
+    return v;
 }
 
 /* rgb to xyz color conversion hard calculations */
 int rgb_to_xyz_calculate(odcp_image_t *image, int index) {
     int i;
     int size;
-    float bpc;
-    float in_gamma = 2.4;
-    rgb_pixel_t p_in;
+    rgb_pixel_t s;
+    xyz_pixel_t d;
 
     size = image->w * image->h;
 
     for (i=0;i<size;i++) {
-        p_in.r = image->component[0].data[i]/COLOR_DEPTH;
-        p_in.g = image->component[1].data[i]/COLOR_DEPTH;
-        p_in.b = image->component[2].data[i]/COLOR_DEPTH;
+        s.r = complex_gamma(image->component[0].data[i]/COLOR_DEPTH, GAMMA[index]);
+        s.g = complex_gamma(image->component[1].data[i]/COLOR_DEPTH, GAMMA[index]);
+        s.b = complex_gamma(image->component[2].data[i]/COLOR_DEPTH, GAMMA[index]);
 
-        if ( p_in.r > 0.04045) {
-            p_in.r = pow((p_in.r+0.055)/1.055,in_gamma);
-        } else {
-            p_in.r = p_in.r/12.92;
-        }
+        d.x = ((s.r * color_matrix[index][0][0]) + (s.g * color_matrix[index][0][1]) + (s.b * color_matrix[index][0][2]));
+        d.y = ((s.r * color_matrix[index][1][0]) + (s.g * color_matrix[index][1][1]) + (s.b * color_matrix[index][1][2]));
+        d.z = ((s.r * color_matrix[index][2][0]) + (s.g * color_matrix[index][2][1]) + (s.b * color_matrix[index][2][2]));
 
-        if ( p_in.g > 0.04045) {
-            p_in.g = pow((p_in.g+0.055)/1.055,in_gamma);
-        } else {
-            p_in.g = p_in.g/12.92;
-        }
-
-        if ( p_in.b > 0.04045) {
-            p_in.b = pow((p_in.b+0.055)/1.055,in_gamma);
-        } else {
-            p_in.b = p_in.b/12.92;
-        }
-        image->component[0].data[i] = (pow(((p_in.r*0.4124)+(p_in.g*0.3576)+(p_in.b*0.1805))*DCI_COEFFICENT,DCI_DEGAMMA) * COLOR_DEPTH);
-        image->component[1].data[i] = (pow(((p_in.r*0.2126)+(p_in.g*0.7152)+(p_in.b*0.0722))*DCI_COEFFICENT,DCI_DEGAMMA) * COLOR_DEPTH);
-        image->component[2].data[i] = (pow(((p_in.r*0.0193)+(p_in.g*0.1192)+(p_in.b*0.9505))*DCI_COEFFICENT,DCI_DEGAMMA) * COLOR_DEPTH);
+        image->component[0].data[i] = (pow((d.x*DCI_COEFFICENT),DCI_DEGAMMA) * COLOR_DEPTH);
+        image->component[1].data[i] = (pow((d.y*DCI_COEFFICENT),DCI_DEGAMMA) * COLOR_DEPTH);
+        image->component[2].data[i] = (pow((d.y*DCI_COEFFICENT),DCI_DEGAMMA) * COLOR_DEPTH);
     }
 
     return DCP_SUCCESS;
