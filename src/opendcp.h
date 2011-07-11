@@ -23,11 +23,11 @@ extern "C" {
 #ifndef _OPEN_DCP_H_
 #define _OPEN_DCP_H_
 
-#define MAX_ASSETS   10 /* Soft limit */
-#define MAX_REELS    30 /* Soft limit */
-#define MAX_PKL       1 /* Soft limit */
-#define MAX_CPL       5 /* Soft limit */
-#define MAX_PATH_LENGTH 4096 
+#define MAX_ASSETS          10   /* Soft limit */
+#define MAX_REELS           30   /* Soft limit */
+#define MAX_PKL             1    /* Soft limit */
+#define MAX_CPL             5    /* Soft limit */
+#define MAX_PATH_LENGTH     4096 
 #define MAX_FILENAME_LENGTH 256 
 #define MAX_BASENAME_LENGTH 256 
 
@@ -89,7 +89,7 @@ static const char *DCP_LOG[] = { "NONE",
                                  "INFO",
                                  "DEBUG"};
 
-/* defaults */
+/* Defaults */
 static const char *DCP_ANNOTATION = "OPENDCP-FILM";
 static const char *DCP_TITLE      = "OPENDCP-FILM-TITLE";
 static const char *DCP_KIND       = "feature";
