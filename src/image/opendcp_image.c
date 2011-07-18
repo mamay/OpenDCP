@@ -196,8 +196,94 @@ int rgb_to_xyz_calculate(odcp_image_t *image, int index) {
 
         image->component[0].data[i] = (pow((d.x*DCI_COEFFICENT),DCI_DEGAMMA) * COLOR_DEPTH);
         image->component[1].data[i] = (pow((d.y*DCI_COEFFICENT),DCI_DEGAMMA) * COLOR_DEPTH);
-        image->component[2].data[i] = (pow((d.y*DCI_COEFFICENT),DCI_DEGAMMA) * COLOR_DEPTH);
+        image->component[2].data[i] = (pow((d.z*DCI_COEFFICENT),DCI_DEGAMMA) * COLOR_DEPTH);
     }
 
     return DCP_SUCCESS;
+}
+
+float b_spline(float x) {
+    float c = (float)1/(float)6;
+
+    if (x > 2.0 || x < -2.0) {
+        return 0.0f;
+    }
+
+    if (x < -1.0) {
+        return(((x+2.0f) * (x+2.0f) * (x+2.0f)) * c);
+    }
+
+    if (x < 0.0) {
+        return(((x+4.0f) * (x) * (-6.0f-3.0f*x)) * c);
+    }
+
+    if (x < 1.0) {
+        return(((x+4.0f) * (x) * (-6.0f+3.0f*x)) * c);
+    }
+
+    if (x< 2.0) {
+        return(((2.0f-x) * (2.0f-x) * (2.0f-x)) * c);
+    }
+}
+
+rgb_pixel_t get_pixel(odcp_image_t *image, int x, int y) {
+    rgb_pixel_t p;
+    int i;
+
+    i = (image->w * y) + (x*3);
+
+    p.r = image->component[0].data[i];
+    p.b = image->component[1].data[i];
+    p.g = image->component[2].data[i];
+    
+    return p;
+} 
+
+int resize(odcp_image_t **image,int w,int h,int method) {
+    int image_size;
+    int num_components = 3;
+    odcp_image_t *ptr = *image;
+    rgb_pixel_t p;
+
+    image_size = w * h;
+
+    printf("resize image\n");
+    /* create the image */
+    odcp_image_t *d_image = odcp_image_create(num_components,image_size);
+
+    if (!d_image) {
+        return -1;
+    }
+    
+    if (method == NEAREST_PIXEL) {
+        int x,y,i;
+        float tx, ty, dx, dy;
+
+        printf("original: %d x %d\n",ptr->w,ptr->h);
+        tx = (float)ptr->w / w;
+        ty = (float)ptr->h / h;
+        printf("ratio: %f | %f\n",tx,ty);
+
+
+        for(y=0; y<h; y++) {
+            dy = y * ty; 
+            for(x=0; x<w; x++) {
+                dx = x * tx;
+                //printf("getting pixel %d,%d\n",dx,dy);
+                p = get_pixel(ptr, dx, dy);
+                i = (w * y) + (x*3);
+                d_image->component[0].data[i] = p.r;
+                d_image->component[1].data[i] = p.g;
+                d_image->component[2].data[i] = p.b;
+             }
+         }
+    }
+
+    printf("free image\n");
+    odcp_image_free(*image);
+    *image = d_image; 
+
+    printf("resize complete\n");
+
+    return 0;
 }

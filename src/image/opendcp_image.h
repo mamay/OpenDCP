@@ -16,6 +16,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+enum SAMPLE_METHOD {
+    NEAREST_PIXEL = 0,
+    BICUBIC
+};
+
 typedef struct {
     float r;
     float g;
