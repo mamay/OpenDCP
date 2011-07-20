@@ -135,12 +135,12 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
     }
 
     /* resize image */
-    //resize(&odcp_image,1600,156,0);
+    //resize(&odcp_image,999,540,0);
 
     /* verify image is dci compliant */
     if (check_image_compliance(opendcp, odcp_image) != DCP_SUCCESS) {
         dcp_log(LOG_WARN,"The image resolution of %s is not DCI Compliant",in_file);
-        return DCP_FATAL;
+        //return DCP_FATAL;
     }
     
     if (opendcp->xyz) {
