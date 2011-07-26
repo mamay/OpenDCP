@@ -143,7 +143,7 @@ int rgb_to_xyz(odcp_image_t *image, int index) {
         s.r = lut_in[index][image->component[0].data[i]];
         s.g = lut_in[index][image->component[1].data[i]];
         s.b = lut_in[index][image->component[2].data[i]];
-
+ 
         /* RGB to XYZ Matrix */
         d.x = ((s.r * color_matrix[index][0][0]) + (s.g * color_matrix[index][0][1]) + (s.b * color_matrix[index][0][2]));
         d.y = ((s.r * color_matrix[index][1][0]) + (s.g * color_matrix[index][1][1]) + (s.b * color_matrix[index][1][2]));
@@ -230,11 +230,11 @@ rgb_pixel_t get_pixel(odcp_image_t *image, int x, int y) {
     rgb_pixel_t p;
     int i;
 
-    i = (image->w * y) + (x*3);
+    i = (x+y) + ((image->w-1)*y);
 
     p.r = image->component[0].data[i];
-    p.b = image->component[1].data[i];
-    p.g = image->component[2].data[i];
+    p.g = image->component[1].data[i];
+    p.b = image->component[2].data[i];
     
     return p;
 } 
@@ -247,43 +247,48 @@ int resize(odcp_image_t **image,int w,int h,int method) {
 
     image_size = w * h;
 
-    printf("resize image\n");
     /* create the image */
     odcp_image_t *d_image = odcp_image_create(num_components,image_size);
 
     if (!d_image) {
         return -1;
     }
+
+    d_image->bpp          = 12;
+    d_image->precision    = 12;
+    d_image->n_components = 3;
+    d_image->signed_bit   = 0;
+    d_image->dx           = 1;
+    d_image->dy           = 1;
+    d_image->w            = w;
+    d_image->h            = h;
+    d_image->x0           = 0;
+    d_image->y0           = 0;
+    d_image->x1 = !d_image->x0 ? (w - 1) * d_image->dx + 1 : d_image->x0 + (w - 1) * d_image->dx + 1;
+    d_image->y1 = !d_image->y0 ? (h - 1) * d_image->dy + 1 : d_image->y0 + (h - 1) * d_image->dy + 1;
     
     if (method == NEAREST_PIXEL) {
-        int x,y,i;
-        float tx, ty, dx, dy;
+        int x,y,i,dx,dy;
+        float tx, ty;
 
-        printf("original: %d x %d\n",ptr->w,ptr->h);
         tx = (float)ptr->w / w;
         ty = (float)ptr->h / h;
-        printf("ratio: %f | %f\n",tx,ty);
-
 
         for(y=0; y<h; y++) {
             dy = y * ty; 
             for(x=0; x<w; x++) {
                 dx = x * tx;
-                //printf("getting pixel %d,%d\n",dx,dy);
                 p = get_pixel(ptr, dx, dy);
-                i = (w * y) + (x*3);
-                d_image->component[0].data[i] = p.r;
-                d_image->component[1].data[i] = p.g;
-                d_image->component[2].data[i] = p.b;
+                i = (x+y) + ((w-1)*y);
+                d_image->component[0].data[i] = (int)p.r;
+                d_image->component[1].data[i] = (int)p.g;
+                d_image->component[2].data[i] = (int)p.b;
              }
          }
     }
 
-    printf("free image\n");
     odcp_image_free(*image);
     *image = d_image; 
-
-    printf("resize complete\n");
 
     return 0;
 }
