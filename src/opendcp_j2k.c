@@ -29,6 +29,10 @@
 #include "opendcp.h"
 #include "image/opendcp_image.h"
 
+#ifndef WIN32
+#define strnicmp strncasecmp
+#endif
+
 static int initialize_4K_poc(opj_poc_t *POC, int numres){
     POC[0].tile  = 1; 
     POC[0].resno0  = 0; 
@@ -109,6 +113,7 @@ int check_image_compliance(opendcp_t *opendcp, odcp_image_t *image) {
 }
 
 int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_path) {
+    char *extension;
     odcp_image_t *odcp_image;
     int result;
 
@@ -117,11 +122,20 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
     }
     dcp_log(LOG_DEBUG,"Reading input file %s",in_file);
      
+    extension = strrchr(in_file,'.');
+    extension++;
+
+    printf("extension: |%s|\n",extension);
+
     #ifdef OPENMP
     #pragma omp critical
     #endif
     {
-    result = read_tif(&odcp_image, in_file,0);
+    if (strnicmp(extension,"tif",3) == 0) {
+        result = read_tif(&odcp_image, in_file,0);
+    } else if (strnicmp(extension,"dpx",3) == 0) {
+        result = read_dpx(&odcp_image, in_file,0);
+    }
     }
 
     if (result != DCP_SUCCESS) {

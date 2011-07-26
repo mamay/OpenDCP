@@ -54,8 +54,6 @@ typedef struct {
     int n_components;
 } odcp_image_t;
 
-int tif_to_image(opj_image_t **image, const char *infile, int fd);
-int image_to_tif(opj_image_t *image, const char *outfile, int fd);
 int read_tif(odcp_image_t **image_ptr, const char *infile, int fd);
 int write_tif(odcp_image_t *image, const char *outfile, int fd);
 odcp_image_t *odcp_image_create(int n_components, int image_size);
