@@ -20,12 +20,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <sys/stat.h>
-#include <openjpeg.h>
 #include <tiffio.h>
 #include "../opendcp.h"
 #include "opendcp_image.h"
-#include "opendcp_xyz.h"
 
 static inline int clip8(int value)
 {
@@ -160,18 +157,18 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
             if (bps==12) {
                 for (i=0; i<ssize; i+=(3*spp)) {
                     if((index < image_size)&(index+1 < image_size)) {
-                        image->component[0].data[index]   = ( dat8[i+0]<<4 )        |(dat8[i+1]>>4);
-                        image->component[1].data[index]   = ((dat8[i+1]& 0x0f)<< 8) | dat8[i+2];
-                        image->component[2].data[index]   = ( dat8[i+3]<<4)         |(dat8[i+4]>>4);
+                        image->component[0].data[index]   = ( dat8[i+0]<<4 )        |(dat8[i+1]>>4); // R
+                        image->component[1].data[index]   = ((dat8[i+1]& 0x0f)<< 8) | dat8[i+2];     // G
+                        image->component[2].data[index]   = ( dat8[i+3]<<4)         |(dat8[i+4]>>4); // B
                         if (spp == 4) {
                             /* skip alpha channel */
-                            image->component[0].data[index+1] = ( dat8[i+6]<<4)        |(dat8[i+7]>>4);
-                            image->component[1].data[index+1] = ((dat8[i+7]& 0x0f)<< 8) | dat8[i+8];
-                            image->component[2].data[index+1] = ( dat8[i+9]<<4)        |(dat8[i+10]>>4);
+                            image->component[0].data[index+1] = ( dat8[i+6]<<4)        |(dat8[i+7]>>4);  // R
+                            image->component[1].data[index+1] = ((dat8[i+7]& 0x0f)<< 8) | dat8[i+8];     // G
+                            image->component[2].data[index+1] = ( dat8[i+9]<<4)        |(dat8[i+10]>>4); // B
                         } else {
-                            image->component[0].data[index+1] = ((dat8[i+4]& 0x0f)<< 8) | dat8[i+5];
-                            image->component[1].data[index+1] = ( dat8[i+6]<<4)        |(dat8[i+7]>>4);
-                            image->component[2].data[index+1] = ((dat8[i+7]& 0x0f)<< 8) | dat8[i+8];
+                            image->component[0].data[index+1] = ((dat8[i+4]& 0x0f)<< 8) | dat8[i+5];     // R
+                            image->component[1].data[index+1] = ( dat8[i+6]<<4)        |(dat8[i+7]>>4);  // G
+                            image->component[2].data[index+1] = ((dat8[i+7]& 0x0f)<< 8) | dat8[i+8];     // B
                         }
                         index+=2;
                     } else {
