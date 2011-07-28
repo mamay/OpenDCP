@@ -211,6 +211,7 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
 
     fseek(dpx, r_32(dpx_info->offset, endian), SEEK_SET);
 
+    printf("%dx%d (%d)\n",w,h,sizeof(uint32_t));
     /* 8 bits per pixel */
     if (bps == 8) {
         uint8_t  data;
@@ -222,14 +223,36 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
                 } 
             }
         }
+    /* 10 bits per pixel */
     } else if (bps == 10) {
-        uint8_t data[4];
+        uint32_t data;
         for (i=0; i<image_size; i++) { 
-            fread(&data,4,1,dpx);
-            image->component[0].data[i] = data[0] << 2 | data[1]>>6;
-            image->component[1].data[i] = data[1] << 2;
-            image->component[2].data[i] = data[3] << 2;
+            for (j=0; j<spp; j++) {
+                fread(&data,sizeof(data),1,dpx);
+                if (j==0) {
+                    data = r_32(data, endian) >> 16;
+                    image->component[j].data[i] = (uint16_t)((data & 0xFFF0) >> 4); 
+                    //image->component[j].data[i] = (uint16_t)((data & 0xFFF0) >> 4) | ((data & 0x00CF) >> 6); 
+                } else if (j==1) {
+                    data = r_32(data, endian) >> 6;
+                    image->component[j].data[i] = (uint16_t)((data & 0xFFF0) >> 4); 
+                    //image->component[j].data[i] = ((data & 0xFFF0) >> 4) | ((data & 0x00CF) >> 6); 
+                } else if (j==2) {
+                    data = r_32(data, endian) << 4;
+                    image->component[j].data[i] = (uint16_t)((data & 0xFFF0) >> 4); 
+                    //image->component[j].data[i] = ((data & 0xFFF0) >> 4) | ((data & 0x00CF) >> 6); 
+                }
+             }
+                 
+        //for (i=0; i<image_size; i++) { 
+            //fread(&data,4,1,dpx);
+            //image->component[0].data[i] = (data[0] << 2 | (data[1] & 0xC0)) << 2;
+            //image->component[1].data[i] = ((data[1] & 0x3F) << 4 | (data[2] & 0xF0) >> 6) << 2;
+            //image->component[2].data[i] = ((data[2] & 0x0F) << 6 | (data[3] & 0xFC) << 2) << 2;
+            //printf("%x|%x|%x|%x -> ",data[0],data[1],data[2],data[3]);
+            //printf("%x|%x|%x|\n",image->component[0].data[i],image->component[1].data[i],image->component[2].data[i]);
         }
+        printf("(%d,%d):\n",i,j); 
     /* 12 bits per pixel */
     } else if (bps == 12) {
         uint8_t  data[2];
@@ -238,7 +261,7 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
                 data[0] = fgetc(dpx);
                 data[1] = fgetc(dpx);
                 if (j < 3) {
-                    image->component[j].data[i] = (data[0]<<4) | (data[1]>>4);
+                    image->component[j].data[i] = (data[!endian]<<4) | (data[!endian]>>4);
                 }
             }
         }
@@ -250,7 +273,7 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
                 data[0] = fgetc(dpx);
                 data[1] = fgetc(dpx);
                 if (j < 3) { // Skip alpha channel
-                    image->component[j].data[i] = ( data[1] << 8 ) | data[0];
+                    image->component[j].data[i] = ( data[!endian] << 8 ) | data[!endian];
                     image->component[j].data[i] = (image->component[j].data[i]) >> 4; 
                 }
             }
