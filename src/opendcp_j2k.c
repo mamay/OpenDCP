@@ -178,7 +178,7 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
             return DCP_FATAL;
         }
 
-        result = encode_kakadu(opendcp, tempfile, out_file, tmp_path);
+        result = encode_kakadu(opendcp, tempfile, out_file);
         if ( result != DCP_SUCCESS) {
             dcp_log(LOG_ERROR,"Kakadu JPEG2000 conversion failed %s",in_file);
             remove(tempfile);
