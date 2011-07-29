@@ -23,6 +23,7 @@
 #include <libgen.h>
 #include <sys/stat.h>
 #include <openjpeg.h>
+#include <stdbool.h>
 #ifdef OPENMP
 #include <omp.h>
 #endif
@@ -125,8 +126,6 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
     extension = strrchr(in_file,'.');
     extension++;
 
-    printf("extension: |%s|\n",extension);
-
     #ifdef OPENMP
     #pragma omp critical
     #endif
@@ -197,7 +196,6 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
         opj_image_destroy(opj_image);
     }
 
-    /* free the image memory */
     return DCP_SUCCESS;
 }
 

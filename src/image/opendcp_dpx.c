@@ -96,7 +96,7 @@ typedef struct {
     uint8_t     reserved[28];           /* reserved for future use (padding) */
 } dpx_image_orientation_t;
 
-uint8_t  r_8(uint8_t value, int endian) {
+static inline uint8_t  r_8(uint8_t value, int endian) {
     if (endian) {
         return (value << 8) | (value >> 8);
     } else {
@@ -104,7 +104,7 @@ uint8_t  r_8(uint8_t value, int endian) {
     }
 }
 
-uint16_t r_16(uint16_t value, int endian) {
+static inline uint16_t r_16(uint16_t value, int endian) {
     if (endian) {
         return (uint16_t)((value & 0xFFU) << 8 | (value & 0xFF00U) >> 8);
     } else {
@@ -112,18 +112,13 @@ uint16_t r_16(uint16_t value, int endian) {
     }
 }
 
-uint32_t r_32(uint32_t value, int endian) {
+static inline uint32_t r_32(uint32_t value, int endian) {
   if (endian) {
       return (value & 0x000000FFU) << 24 | (value & 0x0000FF00U) << 8 |
              (value & 0x00FF0000U) >> 8 | (value & 0xFF000000U) >> 24;
   } else {
       return value;
   }
-}
-
-static inline unsigned make_16bit(unsigned value) {
-    value &= 0xFFC0;
-    return value + (value >> 10);
 }
 
 int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
@@ -172,10 +167,10 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
     bps = dpx_header->image_element[0].bit_size;
 
     switch (dpx_header->image_element[0].descriptor) {
-        case 50:      // RGB
+        case DPX_RGB:      // RGB
             spp = 3;
             break;
-        case 51:      // RGBA
+        case DPX_RGBA:      // RGBA
             spp = 4;
             break;
         default:
@@ -231,15 +226,12 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
             for (j=0; j<spp; j++) {
                 if (j==0) {
                     comp = r_32(data, endian) >> 16;
-                    //image->component[j].data[i] = (uint16_t)((comp & 0xFFF0) >> 4); 
-                    image->component[j].data[i] = (uint16_t)((comp & 0xFFF0) >> 4) | ((comp & 0x00CF) >> 6); 
+                    image->component[j].data[i] = ((comp & 0xFFF0) >> 4) | ((comp & 0x00CF) >> 6); 
                 } else if (j==1) {
                     comp = r_32(data, endian) >> 6;
-                    //image->component[j].data[i] = (uint16_t)((comp & 0xFFF0) >> 4); 
                     image->component[j].data[i] = ((comp & 0xFFF0) >> 4) | ((comp & 0x00CF) >> 6); 
                 } else if (j==2) {
                     comp = r_32(data, endian) << 4;
-                    //image->component[j].data[i] = (uint16_t)((comp & 0xFFF0) >> 4); 
                     image->component[j].data[i] = ((comp & 0xFFF0) >> 4) | ((comp & 0x00CF) >> 6); 
                 }
             }

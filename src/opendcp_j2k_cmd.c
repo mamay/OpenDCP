@@ -215,7 +215,6 @@ int main (int argc, char **argv) {
     char *in_path = NULL;
     char *out_path = NULL;
     char *tmp_path = NULL;
-    char dir_str[] = "tmpXXXXXX";
     filelist_t *filelist;
 
 #ifndef _WIN32
@@ -240,12 +239,15 @@ int main (int argc, char **argv) {
     memset(filelist,0,sizeof (filelist_t));
 
     /* set initial values */
-    opendcp->xyz = 1;
-    opendcp->log_level = LOG_WARN;
-    opendcp->cinema_profile = DCP_CINEMA2K;
-    opendcp->frame_rate = 24;
+    opendcp->xyz             = 1;
+    opendcp->log_level       = LOG_WARN;
+    opendcp->cinema_profile  = DCP_CINEMA2K;
+    opendcp->encoder         = J2K_OPENJPEG;
+    opendcp->frame_rate      = 24;
+    opendcp->j2k.start_frame = 1;
+    opendcp->bw              = 250;
 #ifdef OPENMP
-    openmp_flag = 1;
+    openmp_flag              = 1;
     opendcp->threads = omp_get_num_procs();
 #endif
  
@@ -288,102 +290,65 @@ int main (int argc, char **argv) {
         {
             case 0:
                 /* If this option set a flag, do nothing else now. */
-                if (long_options[option_index].flag != 0)
-                   break;
-            break;
-
-            case '3':
-               opendcp->stereoscopic = 1;
-            break;
-
+                if (long_options[option_index].flag != 0) {
+                    break;
+                }
+                break;
+            case '3': 
+                opendcp->stereoscopic = 1;
+                break;
             case 'd':
-               opendcp->j2k.end_frame = atoi(optarg);
-               if (opendcp->j2k.end_frame < 1) {
-                   dcp_fatal(opendcp,"End frame  must be greater than 0");
-               }
-            break;
-
+                opendcp->j2k.end_frame = atoi(optarg);
+                break;
             case 's':
-               opendcp->j2k.start_frame = atoi(optarg);
-               if (opendcp->j2k.start_frame < 1) {
-                   dcp_fatal(opendcp,"Start frame must be greater than 0");
-               }
-            break;
-
+                opendcp->j2k.start_frame = atoi(optarg);
+                break;
             case 'p':
-               if (!strcmp(optarg,"cinema2k")) {
-                   opendcp->cinema_profile = DCP_CINEMA2K;
-               } else if (!strcmp(optarg,"cinema4k")) {
-                   opendcp->cinema_profile = DCP_CINEMA4K;
-               } else {
-                   dcp_fatal(opendcp,"Invalid profile argument, must be cinema2k or cinema4k");
-               }
-            break;
-
+                if (!strcmp(optarg,"cinema2k")) {
+                    opendcp->cinema_profile = DCP_CINEMA2K;
+                } else if (!strcmp(optarg,"cinema4k")) {
+                    opendcp->cinema_profile = DCP_CINEMA4K;
+                }
+                break;
             case 'i':
-               in_path = optarg;
-            break;
-
+                in_path = optarg;
+                break;
             case 'l':
-               opendcp->log_level = atoi(optarg);
-            break;
-
+                opendcp->log_level = atoi(optarg);
+                break;
             case 'o':
-               out_path = optarg;
-            break;
-
+                out_path = optarg;
+                break;
             case 'h':
-               dcp_usage();
-            break;
-
+                 dcp_usage();
+                 break;
             case 'r':
-               opendcp->frame_rate = atoi(optarg);
-               if (opendcp->frame_rate > 60 || opendcp->frame_rate < 1 ) {
-                   dcp_fatal(opendcp,"Invalid frame rate. Must be between 1 and 60.");
-               }
-            break;
-
+                opendcp->frame_rate = atoi(optarg);
+                break;
             case 'e':
-               opendcp->encoder = atoi(optarg);
-               if (opendcp->encoder == J2K_KAKADU) {
-                   result = system("kdu_compress -u >/dev/null 2>&1");
-                   if (result>>8 != 0) {
-                       dcp_fatal(opendcp,"kdu_compress was not found. Either add to path or remove -e 1 flag");
-                   }
-               }
-            break;
-
+                opendcp->encoder = atoi(optarg);
+                break;
             case 'b':
-               opendcp->bw = atoi(optarg);
-               if (opendcp->bw < 50 || opendcp->bw > 250) {
-                   dcp_fatal(opendcp,"Bandwidth must be between 50 and 250");
-               } else {
-                   opendcp->bw *= 1000000;
-               }
-            break;
-
+                opendcp->bw = atoi(optarg);
+                break;
             case 't':
-               opendcp->threads = atoi(optarg);
-            break;
-
+                opendcp->threads = atoi(optarg);
+                break;
             case 'x':
-               opendcp->xyz = 0;
-            break;
-
+                opendcp->xyz = 0;
+                break;
             case 'n':
-               opendcp->no_overwrite = 1;
-            break;
-     
+                opendcp->no_overwrite = 1;
+                break;
             case 'v':
-               version();
-            break;
-
+                version();
+                break;
             case 'm':
                 tmp_path = optarg;
-            break;
+                break;
             case 'g':
                 opendcp->lut = atoi(optarg);
-            break;
+                break;
         }
     }
 
@@ -399,16 +364,55 @@ int main (int argc, char **argv) {
         }
     }
 
+    /* cinema profile check */
+    if (opendcp->cinema_profile != DCP_CINEMA4K && opendcp->cinema_profile != DCP_CINEMA2K) {
+        dcp_fatal(opendcp,"Invalid profile argument, must be cinema2k or cinema4k");
+    }
+
+    /* end frame check */
+    if (opendcp->j2k.end_frame < 0) {
+        dcp_fatal(opendcp,"End frame  must be greater than 0");
+    }
+
+    /* start frame check */
+    if (opendcp->j2k.start_frame < 1) {
+        dcp_fatal(opendcp,"Start frame must be greater than 0");
+    }
+
+    /* frame rate check */
+    if (opendcp->frame_rate > 60 || opendcp->frame_rate < 1 ) {
+        dcp_fatal(opendcp,"Invalid frame rate. Must be between 1 and 60.");
+    }
+
+    /* encoder check */
+    if (opendcp->encoder == J2K_KAKADU) {
+        result = system("kdu_compress -u >/dev/null 2>&1");
+        if (result>>8 != 0) {
+            dcp_fatal(opendcp,"kdu_compress was not found. Either add to path or remove -e 1 flag");
+        }
+    }
+
+    /* bandwidth check */
+    if (opendcp->bw < 50 || opendcp->bw > 250) {
+        dcp_fatal(opendcp,"Bandwidth must be between 50 and 250");
+    } else {
+        opendcp->bw *= 1000000;
+    }
+
+    /* input path check */
     if (in_path == NULL) {
         dcp_fatal(opendcp,"Missing input file");
     }
 
+    /* output path check */
     if (out_path == NULL) {
         dcp_fatal(opendcp,"Missing output file");
     }
 
+    /* get file list */
     get_filelist(opendcp,in_path,out_path,filelist);
 
+    /* end frame check */
     if (opendcp->j2k.end_frame) {
         if (opendcp->j2k.end_frame > filelist->file_count) {
             dcp_fatal(opendcp,"End frame is greater than the actual frame count");
@@ -417,14 +421,10 @@ int main (int argc, char **argv) {
         opendcp->j2k.end_frame = filelist->file_count;
     }
 
-    if (opendcp->j2k.start_frame) {
-        if (opendcp->j2k.start_frame > opendcp->j2k.end_frame) {
-            dcp_fatal(opendcp,"Start frame must be less than end frame");
-        }
-    } else {
-        opendcp->j2k.start_frame = 1;
+    /* start frame check */
+    if (opendcp->j2k.start_frame > opendcp->j2k.end_frame) {
+        dcp_fatal(opendcp,"Start frame must be less than end frame");
     }
-
 
     if (opendcp->log_level>0 && opendcp->log_level<3) { progress_bar(0,0); }
 
