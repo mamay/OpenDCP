@@ -98,11 +98,11 @@ void dcp_usage() {
 }
 
 static int file_filter(struct dirent *filename) {
-    int return_code = 1;
-    
-    if (check_extension(filename->d_name,"tif") == 0 ||
-        check_extension(filename->d_name,"dpx") == 0) {
-        return_code = 0;
+    int return_code = 0;
+
+    if (check_extension(filename->d_name,"tif") ||
+        check_extension(filename->d_name,"dpx")) {
+        return_code = 1;
     }
 
     return return_code;
@@ -172,7 +172,6 @@ int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *fil
         if (strnicmp(++extension,"tif",3) == 0 || strnicmp(++extension,"dpx",3)) {
             filelist->file_count = 1;
             filelist->in = (char**) malloc(filelist->file_count*sizeof(char*));
-            filelist->out = (char**) malloc(filelist->file_count*sizeof(char*));
             filelist->in[0] = (char *) malloc(MAX_FILENAME_LENGTH);
             filelist->out[0] = (char *) malloc(MAX_FILENAME_LENGTH);
             filelist->in[0] = in_path;
@@ -420,7 +419,7 @@ int main (int argc, char **argv) {
     } else {
         opendcp->j2k.end_frame = filelist->file_count;
     }
-
+   
     /* start frame check */
     if (opendcp->j2k.start_frame > opendcp->j2k.end_frame) {
         dcp_fatal(opendcp,"Start frame must be less than end frame");
