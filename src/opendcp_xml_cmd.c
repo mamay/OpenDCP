@@ -65,7 +65,7 @@ void dcp_usage() {
     fprintf(fp,"       -1 | --root                    - Root pem certificate used to sign XML files\n");
     fprintf(fp,"       -2 | --ca                      - CA (intermediate) pem certificate used to sign XML files\n");
     fprintf(fp,"       -3 | --signer                  - Signer (leaf) pem certificate used to sign XML files\n");
-    fprintf(fp,"       -p | --privatekey              - Privae (signer) pem key used to sign XML files\n");
+    fprintf(fp,"       -p | --privatekey              - Private (signer) pem key used to sign XML files\n");
 #endif
     fprintf(fp,"       -i | --issuer <issuer>         - Issuer details\n");
     fprintf(fp,"       -a | --annotation <annotation> - Asset annotations\n");
