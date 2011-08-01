@@ -162,6 +162,7 @@ int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *fil
             return DCP_FATAL;
         }
     } else {
+        dcp_log(LOG_DEBUG,"Input is a single file %s",in_path);
         if (stat(out_path, &st_out) == 0 ) {
             if (st_out.st_mode & S_IFDIR) {
                 dcp_log(LOG_ERROR,"If input is a file, output must be as well");
@@ -172,6 +173,7 @@ int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *fil
         if (strnicmp(++extension,"tif",3) == 0 || strnicmp(++extension,"dpx",3)) {
             filelist->file_count = 1;
             filelist->in = (char**) malloc(filelist->file_count*sizeof(char*));
+            filelist->out = (char**) malloc(filelist->file_count*sizeof(char*));
             filelist->in[0] = (char *) malloc(MAX_FILENAME_LENGTH);
             filelist->out[0] = (char *) malloc(MAX_FILENAME_LENGTH);
             filelist->in[0] = in_path;
@@ -409,6 +411,7 @@ int main (int argc, char **argv) {
     }
 
     /* get file list */
+    dcp_log(LOG_DEBUG,"Getting files in %s",in_path);
     get_filelist(opendcp,in_path,out_path,filelist);
 
     /* end frame check */
