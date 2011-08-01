@@ -43,6 +43,7 @@ odcp_image_t *odcp_image_create(int n_components, int image_size) {
             odcp_image_free(image);
             return 00;
         }
+
         memset(image->component,0,n_components * sizeof(odcp_image_component_t));
        
         for (x=0;x<n_components;x++) {
@@ -117,15 +118,28 @@ int odcp_to_opj(odcp_image_t *odcp, opj_image_t **opj_ptr) {
     memcpy(opj->comps[1].data,odcp->component[1].data,size*sizeof(int));
     memcpy(opj->comps[2].data,odcp->component[2].data,size*sizeof(int));
 
-    /*
-    for (j=0;j<size;j++) {
-       opj->comps[0].data[j] = odcp->component[0].data[j];
-       opj->comps[1].data[j] = odcp->component[1].data[j];
-       opj->comps[2].data[j] = odcp->component[2].data[j];
-    }
-    */
-
     *opj_ptr = opj;
+    return DCP_SUCCESS;
+}
+
+int odcp_image_readline(odcp_image_t *image, int y, unsigned char *data) {
+    int x,i;
+    int d = 0;
+
+    for (x = 0; x<image->w; x+=2) {
+        i = (x+y+0) + ((image->w-1)*y);
+        data[d+0] = (image->component[0].data[i] >> 4);
+        data[d+1] = ((image->component[0].data[i] & 0x0f) << 4 )|((image->component[1].data[i] >> 8)& 0x0f);
+        data[d+2] = image->component[1].data[i];
+        data[d+3] = (image->component[2].data[i] >> 4);
+        data[d+4] = ((image->component[2].data[i] & 0x0f) << 4 )|((image->component[0].data[i+1] >> 8)& 0x0f);
+        data[d+5] = image->component[0].data[i+1];
+        data[d+6] = (image->component[1].data[i+1] >> 4);
+        data[d+7] = ((image->component[1].data[i+1] & 0x0f)<< 4 )|((image->component[2].data[i+1] >> 8)& 0x0f);
+        data[d+8] = image->component[2].data[i+1];
+        d+=9;
+    }
+
     return DCP_SUCCESS;
 }
 
@@ -133,8 +147,8 @@ int odcp_to_opj(odcp_image_t *odcp, opj_image_t **opj_ptr) {
 int rgb_to_xyz(odcp_image_t *image, int index) {
     int i;
     int size;
-    rgb_pixel_t s;
-    xyz_pixel_t d;
+    rgb_pixel_float_t s;
+    xyz_pixel_float_t d;
 
     size = image->w * image->h;
 
@@ -180,8 +194,8 @@ float complex_gamma(float p, float gamma) {
 int rgb_to_xyz_calculate(odcp_image_t *image, int index) {
     int i;
     int size;
-    rgb_pixel_t s;
-    xyz_pixel_t d;
+    rgb_pixel_float_t s;
+    xyz_pixel_float_t d;
 
     size = image->w * image->h;
 
@@ -226,8 +240,9 @@ float b_spline(float x) {
     }
 }
 
-rgb_pixel_t get_pixel(odcp_image_t *image, int x, int y) {
-    rgb_pixel_t p;
+/* get the pixel index based on x,y */
+rgb_pixel_float_t get_pixel(odcp_image_t *image, int x, int y) {
+    rgb_pixel_float_t p;
     int i;
 
     i = (x+y) + ((image->w-1)*y);
@@ -239,11 +254,12 @@ rgb_pixel_t get_pixel(odcp_image_t *image, int x, int y) {
     return p;
 } 
 
+/* resize image */
 int resize(odcp_image_t **image,int w,int h,int method) {
     int image_size;
     int num_components = 3;
     odcp_image_t *ptr = *image;
-    rgb_pixel_t p;
+    rgb_pixel_float_t p;
 
     image_size = w * h;
 
@@ -254,6 +270,7 @@ int resize(odcp_image_t **image,int w,int h,int method) {
         return -1;
     }
 
+    /* new image parameters */
     d_image->bpp          = 12;
     d_image->precision    = 12;
     d_image->n_components = 3;
@@ -267,6 +284,7 @@ int resize(odcp_image_t **image,int w,int h,int method) {
     d_image->x1 = !d_image->x0 ? (w - 1) * d_image->dx + 1 : d_image->x0 + (w - 1) * d_image->dx + 1;
     d_image->y1 = !d_image->y0 ? (h - 1) * d_image->dy + 1 : d_image->y0 + (h - 1) * d_image->dy + 1;
     
+    /* simple resize - pixel double */
     if (method == NEAREST_PIXEL) {
         int x,y,i,dx,dy;
         float tx, ty;
@@ -290,5 +308,5 @@ int resize(odcp_image_t **image,int w,int h,int method) {
     odcp_image_free(*image);
     *image = d_image; 
 
-    return 0;
+    return DCP_SUCCESS;
 }

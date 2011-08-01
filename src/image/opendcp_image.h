@@ -25,13 +25,13 @@ typedef struct {
     float r;
     float g;
     float b;
-} rgb_pixel_t;
+} rgb_pixel_float_t;
 
 typedef struct {
     float x;
     float y;
     float z;
-} xyz_pixel_t;
+} xyz_pixel_float_t;
 
 typedef struct {
     int component_number;
@@ -54,8 +54,10 @@ typedef struct {
     int n_components;
 } odcp_image_t;
 
-int read_tif(odcp_image_t **image_ptr, const char *infile, int fd);
-int write_tif(odcp_image_t *image, const char *outfile, int fd);
+int  read_tif(odcp_image_t **image_ptr, const char *infile, int fd);
+int  write_tif(odcp_image_t *image, const char *outfile, int fd);
+int  read_dpx(odcp_image_t **image_ptr, const char *infile, int fd);
 odcp_image_t *odcp_image_create(int n_components, int image_size);
 void odcp_image_free(odcp_image_t *image);
-int rgb_to_xyz(odcp_image_t *image, int gamma);
+int  odcp_image_readline(odcp_image_t *image, int y, unsigned char *buf); 
+int  rgb_to_xyz(odcp_image_t *image, int gamma);

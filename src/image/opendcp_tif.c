@@ -26,9 +26,9 @@
 
 static inline int clip8(int value)
 {
-    if      (value < 0) return 0;
+    if      (value < 0)   return 0;
     else if (value > 255) return 255;
-    else               return value;
+    else                  return value;
 }
 
 int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
@@ -68,7 +68,6 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
     /* create the image */
     dcp_log(LOG_DEBUG,"Allocating odcp image");
     image = odcp_image_create(3,image_size);
-    dcp_log(LOG_DEBUG,"Image allocated");
     
     if(!image) {
         TIFFClose(tif);
@@ -140,7 +139,7 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
     }
 
     if (photo == 2) {
-        dcp_log(LOG_DEBUG,"Photometric: 2, RGB");
+        dcp_log(LOG_DEBUG,"Photometric: RGB (2)");
         buf = _TIFFmalloc(TIFFStripSize(tif));
         strip_size=0;
         strip_size=TIFFStripSize(tif);
@@ -218,128 +217,55 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
 
     dcp_log(LOG_DEBUG,"TIFF read complete");
     *image_ptr = image;
-    return 0;
+
+    return DCP_SUCCESS;
 }
-    
+
 int write_tif(odcp_image_t *image, const char *outfile, int fd) {
-    int image_size;
-    int index,adjust = 0;
-    int last_i=0;
+    int y, image_size;
     TIFF *tif;
     tdata_t buf;
-    tstrip_t strip;
-    tsize_t strip_size;
 
-    if (image->n_components == 3) {
-        /* open tiff using filename or file descriptor */
-        if (fd == 0) {
-            tif = TIFFOpen(outfile, "wb");
-        } else {
-            tif = TIFFFdOpen(fd, outfile, "wb");
-        }
-
-        if (tif == NULL) {
-            dcp_log(LOG_ERROR, "Failed to open %s for writing", outfile);
-            return DCP_FATAL;
-        }
-
-        image_size = image->w * image->h;
-
-        /* Set tags */
-        TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, image->w);
-        TIFFSetField(tif, TIFFTAG_IMAGELENGTH, image->h);
-        TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, 3);
-        TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, image->precision);
-        TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-        TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-        TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-        TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1);
-
-        /* Get a buffer for the data */
-        strip_size=TIFFStripSize(tif);
-        buf = _TIFFmalloc(strip_size);
-        index=0;
-        adjust = image->signed_bit ? 1 << (image->precision - 1) : 0;
-        for (strip = 0; strip < TIFFNumberOfStrips(tif); strip++) {
-            unsigned char *dat8;
-            int i, ssize;
-            ssize = TIFFStripSize(tif);
-            dat8 = (unsigned char*)buf;
-            /* 12 bits per pixel */
-            for (i=0; i<ssize-8; i+=9) {    // 12 bits per pixel 
-                int r = 0,g = 0,b = 0;
-                int r1 = 0,g1 = 0,b1 = 0;
-                if ((index < image_size)&(index+1 < image_size)) {
-                    r  = image->component[0].data[index];
-                    g  = image->component[1].data[index];
-                    b  = image->component[2].data[index];
-                    r1 = image->component[0].data[index+1];
-                    g1 = image->component[1].data[index+1];
-                    b1 = image->component[2].data[index+1];
-                    if (image->signed_bit) {                                        
-                        r  += adjust;
-                        g  += adjust;
-                        b  += adjust;
-                        r1 += adjust;
-                        g1 += adjust;
-                        b1 += adjust;
-                    }
-                    dat8[i+0] = (r >> 4);
-                    dat8[i+1] = ((r & 0x0f) << 4 )|((g >> 8)& 0x0f);
-                    dat8[i+2] = g ;
-                    dat8[i+3] = (b >> 4);
-                    dat8[i+4] = ((b & 0x0f) << 4 )|((r1 >> 8)& 0x0f);
-                    dat8[i+5] = r1;
-                    dat8[i+6] = (g1 >> 4);
-                    dat8[i+7] = ((g1 & 0x0f)<< 4 )|((b1 >> 8)& 0x0f);
-                    dat8[i+8] = b1;
-                    index+=2;
-                    last_i = i+9;
-                } else {
-                    break;
-                }
-            }
-            if (last_i < ssize) {
-                for (i=last_i; i<ssize; i+=9) {
-                    int r = 0,g = 0,b = 0;
-                    int r1 = 0,g1 = 0,b1 = 0;
-                    if ((index < image_size)&(index+1 < image_size)) {
-                        r  = image->component[0].data[index];
-                        g  = image->component[1].data[index];
-                        b  = image->component[2].data[index];
-                        r1 = image->component[0].data[index+1];
-                        g1 = image->component[1].data[index+1];
-                        b1 = image->component[2].data[index+1];
-                        if (image->signed_bit) {                                
-                            r  += adjust;
-                            g  += adjust;
-                            b  += adjust;
-                            r1 += adjust;
-                            g1 += adjust;
-                            b1 += adjust;
-                        }
-                        dat8[i+0] = (r >> 4);
-                        if (i+1 <ssize) dat8[i+1] = ((r & 0x0f) << 4 )|((g >> 8)& 0x0f); else break;
-                        if (i+2 <ssize) dat8[i+2] = g; else break;
-                        if (i+3 <ssize) dat8[i+3] = (b >> 4); else break;
-                        if (i+4 <ssize) dat8[i+4] = ((b & 0x0f) << 4 )|((r1 >> 8)& 0x0f);else break;
-                        if (i+5 <ssize) dat8[i+5] = r1; else break;
-                        if (i+6 <ssize) dat8[i+6] = (g1 >> 4); else break;
-                        if (i+7 <ssize) dat8[i+7] = ((g1 & 0x0f)<< 4 )|((b1 >> 8)& 0x0f); else break;
-                        if (i+8 <ssize) dat8[i+8] = b1; else break;
-                        index+=2;
-                    } else {
-                        break;
-                    }
-                }
-            }
-            TIFFWriteEncodedStrip(tif, strip, buf, strip_size);
-        }
-        _TIFFfree(buf);
-        TIFFClose(tif);
+    /* open tiff using filename or file descriptor */
+    if (fd == 0) {
+        tif = TIFFOpen(outfile, "wb");
     } else {
-        dcp_log(LOG_ERROR,"Failed TIFF file %s creation. Bad color format. Only RGB & Grayscale has been implemented",outfile);
+        tif = TIFFFdOpen(fd, outfile, "wb");
+    }
+
+    if (tif == NULL) {
+        dcp_log(LOG_ERROR, "Failed to open %s for writing", outfile);
         return DCP_FATAL;
     }
-    return 0;
+
+    image_size = image->w * image->h;
+
+    /* Set tags */
+    TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, image->w);
+    TIFFSetField(tif, TIFFTAG_IMAGELENGTH, image->h);
+    TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, 3);
+    TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, image->precision);
+    TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+    TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+    TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+    TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1);
+
+    /* allocate memory for read line */
+    buf = _TIFFmalloc(TIFFScanlineSize(tif));
+
+    if (buf == NULL) {
+        dcp_log(LOG_ERROR, "TIFF Memory allocation error: %s", outfile);
+        return DCP_FATAL;
+    }
+
+    /* write each row */
+    for (y = 0; y<image->h; y++) {
+        odcp_image_readline(image, y, buf);
+        TIFFWriteScanline(tif, buf, y, 0);
+    }
+
+    _TIFFfree(buf);
+    TIFFClose(tif);
+
+    return DCP_SUCCESS;
 }
