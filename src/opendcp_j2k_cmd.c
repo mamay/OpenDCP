@@ -412,7 +412,9 @@ int main (int argc, char **argv) {
 
     /* get file list */
     dcp_log(LOG_DEBUG,"Getting files in %s",in_path);
-    get_filelist(opendcp,in_path,out_path,filelist);
+    if (get_filelist(opendcp,in_path,out_path,filelist) != DCP_SUCCESS) {
+         dcp_fatal(opendcp,"No files found");
+    }
 
     /* end frame check */
     if (opendcp->j2k.end_frame) {

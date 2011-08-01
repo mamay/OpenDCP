@@ -167,8 +167,8 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
 
     if ( opendcp->encoder == J2K_KAKADU ) {
         char tempfile[255];
-        sprintf(tempfile,"%s/tmp_%s",tmp_path,basename(in_file));
-        dcp_log(LOG_INFO,"Writing temporary tif %s",tempfile);
+        sprintf(tempfile,"%s/tmp_%s.tif",tmp_path,basename(in_file));
+        dcp_log(LOG_DEBUG,"Writing temporary tif %s",tempfile);
         result = write_tif(odcp_image,tempfile,0);
         odcp_image_free(odcp_image);
         
