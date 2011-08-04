@@ -25,6 +25,9 @@
 #include "opendcp_image.h"
 
 #define MAGIC_NUMBER 0x53445058
+#define DEFAULT_GAMMA 1.0
+#define DEFAULT_BLACK_POINT 380 // 12-bit  
+#define DEFAULT_WHITE_POINT 2739 // 
 
 typedef enum {
     DPX_RGB =  50,
@@ -121,12 +124,39 @@ static inline uint32_t r_32(uint32_t value, int endian) {
   }
 }
 
+static double convertTo(int inp, int white, float gamma) {
+    return pow(10.0, (inp - white) * gamma * 0.002 / 0.6);
+}
+
+int log2lin(int value) {
+    int i;
+    double f_black;
+    double scale;
+
+    f_black = convertTo(DEFAULT_BLACK_POINT, DEFAULT_WHITE_POINT, DEFAULT_GAMMA);
+    scale = 4095.0 / (1.0 - f_black);
+
+    if (value <= DEFAULT_BLACK_POINT) {
+        return 0;
+    }
+
+    if (value < DEFAULT_WHITE_POINT) {
+        double f_i;
+        f_i = convertTo(i, DEFAULT_WHITE_POINT, DEFAULT_GAMMA);
+        return ((int)(scale * (f_i - f_black)));
+    }
+    
+    if (value <= 4095) {
+        return 4095;
+    }
+}
+
 int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
     dpx_file_info_t    *dpx_info;
     dpx_image_header_t *dpx_header;
     FILE *dpx;
     odcp_image_t *image = 00;
-    int index,w,h,image_size,i,j,endian;
+    int w,h,image_size,i,j,endian, logarithmic;
     unsigned short int bps = 0;
     unsigned short int spp = 0;
 
@@ -166,6 +196,11 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
 
     bps = dpx_header->image_element[0].bit_size;
 
+    if (bps < 8 || bps > 16) {
+        dcp_log(LOG_ERROR, "%d-bit depth is not supported\n",bps);
+        return DCP_FATAL;
+    }
+
     switch (dpx_header->image_element[0].descriptor) {
         case DPX_RGB:      // RGB
             spp = 3;
@@ -176,6 +211,21 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
         default:
             dcp_log(LOG_ERROR, "Unsupported image descriptor: %d\n", dpx_header->image_element[0].descriptor);
             return DCP_FATAL;
+            break;
+    }
+
+    switch (dpx_header->image_element[0].transfer) {
+        case 1:
+        case 2:
+            logarithmic = 0;
+            break;
+        case 3:
+            logarithmic = 1;
+            break;
+        default:
+            dcp_log(LOG_ERROR, "Unsupported transfer characteristic: %d\n", dpx_header->image_element[0].transfer);
+            return DCP_FATAL;
+            break;
     }
 
     w = r_32(dpx_header->pixels_per_line, endian);
