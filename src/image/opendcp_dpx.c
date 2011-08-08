@@ -35,7 +35,35 @@ typedef enum {
     DPX_ABGR = 52,
     DPX_YUV422 = 100,
     DPX_YUV444 = 102,
-} dpx_color_enum;
+} dpx_descriptor_enum;
+
+typedef enum {
+    DPX_TRANSFER_USER = 0,
+    DPX_TRANSFER_PRINT_DENSITY,
+    DPX_TRANSFER_LINEAR,
+    DPX_TRANSFER_LOG,
+    DPX_TRANSFER_UNSPECIFIED_VIDEO,
+    DPX_TRANSFER_SMPTE240,
+    DPX_TRANSFER_CCIR709,
+    DPX_TRANSFER_CCIR601BG,
+    DPX_TRANSFER_CCIR601M,
+    DPX_TRANSFER_NTSC,
+    DPX_TRANSFER_PAL,
+    DPX_TRANSFER_ZLINEAR,
+    DPX_TRANSFER_ZHOMOGENOUS
+} dpx_transfer_enum;
+
+typedef enum {
+    DPX_COLORIMETRIC_USER = 0,
+    DPX_COLORIMETRIC_PRINT_DENSITY,
+    DPX_COLORIMETRIC_UNSPECIFIED_VIDEO = 4,
+    DPX_COLORIMETRIC_SMPTE240,
+    DPX_COLORIMETRIC_CCIR709,
+    DPX_COLORIMETRIC_CCIR601BG,
+    DPX_COLORIMETRIC_CCIR601M,
+    DPX_COLORIMETRIC_NTSC,
+    DPX_COLORIMETRIC_PAL
+} dpx_colorimetric_enum;
 
 typedef struct {
     uint32_t magic_num;        /* magic number 0x53445058 (SDPX) or 0x58504453 (XPDS) */
@@ -135,6 +163,14 @@ typedef struct {
     float       integration_times;   /* integration time(s) */
     char        reserved[76];        /* reserved for future use (padding) */
 } dpx_tv_header_t;
+
+typedef struct {
+    dpx_file_header_t        file;
+    dpx_image_header_t       image;
+    dpx_image_orientation_t  origin;
+    dpx_film_header_t        film;
+    dpx_tv_header_t          tv;
+} dpx_image_t;
 
 int lut[1024] = {
    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0, 
@@ -259,60 +295,98 @@ void buildLut() {
     }
 }
 
+void print_header(dpx_image_t *dpx, int endian) {
+    dcp_log(LOG_DEBUG,"dpx orientation:\t%d",r_16(dpx->image.orientation,endian));
+    dcp_log(LOG_DEBUG,"dpx elem number:\t%d",r_16(dpx->image.element_number,endian));
+    dcp_log(LOG_DEBUG,"dpx pixels_per_line:\t%d",r_32(dpx->image.pixels_per_line,endian));
+    dcp_log(LOG_DEBUG,"dpx line per elem:\t%d",r_32(dpx->image.lines_per_image_ele,endian));
+    dcp_log(LOG_DEBUG,"dpx desc:\t%d",dpx->image.image_element[0].descriptor);
+    dcp_log(LOG_DEBUG,"dpx transfer:\t%d",dpx->image.image_element[0].transfer);
+    dcp_log(LOG_DEBUG,"dpx color:\t%d",dpx->image.image_element[0].colorimetric);
+    dcp_log(LOG_DEBUG,"dpx bit size:\t%d",dpx->image.image_element[0].bit_size);
+    dcp_log(LOG_DEBUG,"dpx packing:\t%d",r_16(dpx->image.image_element[0].packing,endian));
+    dcp_log(LOG_DEBUG,"dpx encoding:\t%d",r_16(dpx->image.image_element[0].encoding,endian));
+    dcp_log(LOG_DEBUG,"dpx data offset:\t%d",r_32(dpx->image.image_element[0].data_offset,endian));
+    dcp_log(LOG_DEBUG,"dpx eol padding:\t%d",r_32(dpx->image.image_element[0].eol_padding,endian));
+    dcp_log(LOG_DEBUG,"dpx eo image padding:\t%d",r_32(dpx->image.image_element[0].eo_image_padding,endian));
+
+    dcp_log(LOG_DEBUG,"dpx x offset:\t%d",r_32(dpx->origin.x_offset,endian));
+    dcp_log(LOG_DEBUG,"dpx y offset:\t%d",r_32(dpx->origin.y_offset,endian));
+    dcp_log(LOG_DEBUG,"dpx x center:\t%f",dpx->origin.x_center);
+    dcp_log(LOG_DEBUG,"dpx y center:\t%f",dpx->origin.y_center);
+    dcp_log(LOG_DEBUG,"dpx x origin size:\t%d",r_32(dpx->origin.x_orig_size,endian));
+    dcp_log(LOG_DEBUG,"dpx y origin size:\t%d",r_32(dpx->origin.y_orig_size,endian));
+    dcp_log(LOG_DEBUG,"dpx filename:\t%s",dpx->origin.file_name);
+    dcp_log(LOG_DEBUG,"dpx creation time:\t%s",dpx->origin.creation_time);
+    dcp_log(LOG_DEBUG,"dpx input dev:\t%s",dpx->origin.input_dev);
+    dcp_log(LOG_DEBUG,"dpx input serial:\t%s",dpx->origin.input_serial);
+    dcp_log(LOG_DEBUG,"dpx border:\t[%d,%d,%d,%d]",r_16(dpx->origin.border[0],endian),
+                                                   r_16(dpx->origin.border[1],endian),
+                                                   r_16(dpx->origin.border[2],endian),
+                                                   r_16(dpx->origin.border[3],endian));
+    dcp_log(LOG_DEBUG,"dpx pixel aspect:\t%dx%d",r_32(dpx->origin.pixel_aspect[0],endian),r_32(dpx->origin.pixel_aspect[1],endian));
+
+    dcp_log(LOG_DEBUG,"dpx film mfg:\t%s",dpx->film.film_mfg_id);
+    dcp_log(LOG_DEBUG,"dpx film type:\t%s",dpx->film.film_type);
+    dcp_log(LOG_DEBUG,"dpx offset:\t%s",dpx->film.offset);
+    dcp_log(LOG_DEBUG,"dpx prefix:\t%s",dpx->film.prefix);
+    dcp_log(LOG_DEBUG,"dpx count:\t%s",dpx->film.count);
+    dcp_log(LOG_DEBUG,"dpx format:\t%s",dpx->film.format);
+    dcp_log(LOG_DEBUG,"dpx frame position:\t%d",r_32(dpx->film.frame_position,endian));
+    dcp_log(LOG_DEBUG,"dpx sequence len:\t%d",r_32(dpx->film.sequence_len,endian));
+    dcp_log(LOG_DEBUG,"dpx held count:\t%d",r_32(dpx->film.held_count,endian));
+    dcp_log(LOG_DEBUG,"dpx frame rate:\t%f",dpx->film.frame_rate);
+    dcp_log(LOG_DEBUG,"dpx held count:\t%f",dpx->film.shutter_angle);
+    dcp_log(LOG_DEBUG,"dpx frame id:\t%s",dpx->film.frame_id);
+    dcp_log(LOG_DEBUG,"dpx slate info:\t%s",dpx->film.slate_info);
+
+    dcp_log(LOG_DEBUG,"dpx time code:\t%d",r_32(dpx->tv.time_code,endian));
+    dcp_log(LOG_DEBUG,"dpx interlace:\t%d",dpx->tv.interlace);
+    dcp_log(LOG_DEBUG,"dpx field num:\t%d",dpx->tv.field_num);
+    dcp_log(LOG_DEBUG,"dpx video signal:\t%d",dpx->tv.video_signal);
+    dcp_log(LOG_DEBUG,"dpx tv gamma:\t%f",dpx->tv.gamma);
+}
+
 int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
-    dpx_file_header_t         *dpx_file;
-    dpx_image_header_t        *dpx_image;
-    dpx_image_orientation_t   *dpx_origin;
-    dpx_film_header_t         *dpx_film;
-    dpx_tv_header_t           *dpx_tv;
-    FILE *dpx;
+    dpx_image_t               dpx;
+    FILE *dpx_fp;
     odcp_image_t *image = 00;
     int w,h,image_size,i,j,endian, logarithmic;
     unsigned short int bps = 0;
     unsigned short int spp = 0;
 
-    dpx_file   = malloc(sizeof(dpx_file_header_t)+1);
-    dpx_image  = malloc(sizeof(dpx_image_header_t)+1);
-    dpx_origin = malloc(sizeof(dpx_image_orientation_t)+1);
-    dpx_film   = malloc(sizeof(dpx_film_header_t)+1);
-    dpx_tv     = malloc(sizeof(dpx_tv_header_t)+1);
-
-    /* open tiff using filename or file descriptor */
+    /* open dpx using filename or file descriptor */
     dcp_log(LOG_DEBUG,"Opening dpx file %s",infile);
     if (fd == 0) {
-        dpx = fopen(infile, "rb");
+        dpx_fp = fopen(infile, "rb");
     } else {
-        dpx = (FILE *)infile;
+        dpx_fp = (FILE *)infile;
     }
 
-    if (!dpx) {
+    if (!dpx_fp) {
         dcp_log(LOG_ERROR,"Failed to open %s for reading", infile);
         return DCP_FATAL;
     }
 
-    fread(dpx_file,sizeof(dpx_file_header_t),1,dpx);
-    fread(dpx_image,sizeof(dpx_image_header_t),1,dpx);
-    fread(dpx_origin,sizeof(dpx_image_orientation_t),1,dpx);
-    fread(dpx_film,sizeof(dpx_film_header_t),1,dpx);
-    fread(dpx_tv,sizeof(dpx_tv_header_t),1,dpx);
+    fread(&dpx,sizeof(dpx_image_t),1,dpx_fp);
     
-    if (dpx_file->magic_num == MAGIC_NUMBER) {
+    if (dpx.file.magic_num == MAGIC_NUMBER) {
         endian = 0;
-    } else if (r_32(dpx_file->magic_num, 1) == MAGIC_NUMBER) {
+    } else if (r_32(dpx.file.magic_num, 1) == MAGIC_NUMBER) {
         endian = 1;
     } else {
          dcp_log(LOG_ERROR,"%s is not a valid DPX file", infile);
          return DCP_FATAL;
     }
 
-    bps = dpx_image->image_element[0].bit_size;
+    bps = dpx.image.image_element[0].bit_size;
 
     if (bps < 8 || bps > 16) {
         dcp_log(LOG_ERROR, "%d-bit depth is not supported\n",bps);
         return DCP_FATAL;
     }
 
-    switch (dpx_image->image_element[0].descriptor) {
+    switch (dpx.image.image_element[0].descriptor) {
         case DPX_RGB:      // RGB
             spp = 3;
             break;
@@ -320,17 +394,12 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
             spp = 4;
             break;
         default:
-            dcp_log(LOG_ERROR, "Unsupported image descriptor: %d\n", dpx_image->image_element[0].descriptor);
+            dcp_log(LOG_ERROR, "Unsupported image descriptor: %d\n", dpx.image.image_element[0].descriptor);
             return DCP_FATAL;
             break;
     }
 
-    dcp_log(LOG_DEBUG,"dpx desc:\t%x",dpx_image->image_element[0].descriptor);
-    dcp_log(LOG_DEBUG,"dpx color:\t%x",dpx_image->image_element[0].colorimetric);
-    dcp_log(LOG_DEBUG,"dpx transfer:\t%x",dpx_image->image_element[0].transfer);
-
-    dcp_log(LOG_DEBUG,"dpx film type:\t%s",dpx_film->film_type);
-    dcp_log(LOG_DEBUG,"dpx tv gamma:\t%f",dpx_tv->gamma);
+    print_header(&dpx,endian);
 
     double gain = 4095.0 / (1 - dpx_log(DEFAULT_BLACK_POINT, DEFAULT_WHITE_POINT, DEFAULT_GAMMA));
     double offset = gain - 4095;
@@ -338,9 +407,9 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
     dcp_log(LOG_DEBUG,"dpx gain:\t%f",gain);
     dcp_log(LOG_DEBUG,"dpx offset:\t%f",offset);
 
-    switch (dpx_image->image_element[0].transfer) {
+    switch (dpx.image.image_element[0].transfer) {
         case 0:
-            logarithmic = 1;
+            logarithmic = 1;    // asume logarithmic
             break;
         case 1:
         case 2:
@@ -350,14 +419,13 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
             logarithmic = 1;
             break;
         default:
-            dcp_log(LOG_ERROR, "Unsupported transfer characteristic: %d\n", dpx_image->image_element[0].transfer);
+            dcp_log(LOG_ERROR, "Unsupported transfer characteristic: %d\n", dpx.image.image_element[0].transfer);
             //return DCP_FATAL;
             break;
     }
-            logarithmic = 1;
 
-    w = r_32(dpx_image->pixels_per_line, endian);
-    h = r_32(dpx_image->lines_per_image_ele, endian);
+    w = r_32(dpx.image.pixels_per_line, endian);
+    h = r_32(dpx.image.lines_per_image_ele, endian);
 
     image_size = w * h;
 
@@ -382,14 +450,14 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
     image->x1 = !image->x0 ? (w - 1) * image->dx + 1 : image->x0 + (w - 1) * image->dx + 1;
     image->y1 = !image->y0 ? (h - 1) * image->dy + 1 : image->y0 + (h - 1) * image->dy + 1;
 
-    fseek(dpx, r_32(dpx_file->offset, endian), SEEK_SET);
+    fseek(dpx_fp, r_32(dpx.file.offset, endian), SEEK_SET);
 
     /* 8 bits per pixel */
     if (bps == 8) {
         uint8_t  data;
         for (i=0; i<image_size; i++) { 
             for (j=0; j<spp; j++) {
-                data = fgetc(dpx);
+                data = fgetc(dpx_fp);
                 if (j < 3) { // Skip alpha channel 
                     image->component[j].data[i] = data << 4;
                 } 
@@ -400,7 +468,7 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
         uint32_t data;
         uint32_t comp;
         for (i=0; i<image_size; i++) { 
-            fread(&data,sizeof(data),1,dpx);
+            fread(&data,sizeof(data),1,dpx_fp);
             for (j=0; j<spp; j++) {
                 if (j==0) {
                     comp = r_32(data, endian) >> 16;
@@ -422,8 +490,8 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
         uint8_t  data[2];
         for (i=0; i<image_size; i++) { 
             for (j=0; j<spp; j++) {
-                data[0] = fgetc(dpx);
-                data[1] = fgetc(dpx);
+                data[0] = fgetc(dpx_fp);
+                data[1] = fgetc(dpx_fp);
                 if (j < 3) {
                     image->component[j].data[i] = (data[!endian]<<4) | (data[!endian]>>4);
                 }
@@ -434,8 +502,8 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
         uint8_t  data[2];
         for (i=0; i<image_size; i++) { 
             for (j=0; j<spp; j++) {
-                data[0] = fgetc(dpx);
-                data[1] = fgetc(dpx);
+                data[0] = fgetc(dpx_fp);
+                data[1] = fgetc(dpx_fp);
                 if (j < 3) { // Skip alpha channel
                     image->component[j].data[i] = ( data[!endian] << 8 ) | data[!endian];
                     image->component[j].data[i] = (image->component[j].data[i]) >> 4; 
@@ -444,12 +512,7 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
         }
     }
 
-    fclose(dpx);
-    free(dpx_file);
-    free(dpx_image);
-    free(dpx_origin);
-    free(dpx_film);
-    free(dpx_tv);
+    fclose(dpx_fp);
 
     dcp_log(LOG_DEBUG,"DPX read complete");
     *image_ptr = image;
