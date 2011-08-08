@@ -241,7 +241,7 @@ float b_spline(float x) {
 }
 
 /* get the pixel index based on x,y */
-rgb_pixel_float_t get_pixel(odcp_image_t *image, int x, int y) {
+static inline rgb_pixel_float_t get_pixel(odcp_image_t *image, int x, int y) {
     rgb_pixel_float_t p;
     int i;
 
