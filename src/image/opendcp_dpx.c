@@ -30,40 +30,50 @@
 #define DEFAULT_WHITE_POINT 685 
 
 typedef enum {
-    DPX_RGB =  50,
-    DPX_RGBA = 51,
-    DPX_ABGR = 52,
-    DPX_YUV422 = 100,
-    DPX_YUV444 = 102,
+    DPX_DESCRIPTOR_RGB     = 50,
+    DPX_DESCRIPTOR_RGBA    = 51,
+    DPX_DESCRIPTOR_ABGR    = 52,
+    DPX_DESCRIPTOR_YUV422  = 100,
+    DPX_DESCRIPTOR_YUV4224 = 101,
+    DPX_DESCRIPTOR_YUV444  = 102,
+    DPX_DESCRIPTOR_YUV4444 = 103,
 } dpx_descriptor_enum;
 
 typedef enum {
-    DPX_TRANSFER_USER = 0,
-    DPX_TRANSFER_PRINT_DENSITY,
-    DPX_TRANSFER_LINEAR,
-    DPX_TRANSFER_LOG,
-    DPX_TRANSFER_UNSPECIFIED_VIDEO,
-    DPX_TRANSFER_SMPTE240,
-    DPX_TRANSFER_CCIR709,
-    DPX_TRANSFER_CCIR601BG,
-    DPX_TRANSFER_CCIR601M,
-    DPX_TRANSFER_NTSC,
-    DPX_TRANSFER_PAL,
-    DPX_TRANSFER_ZLINEAR,
-    DPX_TRANSFER_ZHOMOGENOUS
+    DPX_TRANSFER_USER               = 0,
+    DPX_TRANSFER_PRINT_DENSITY      = 1,
+    DPX_TRANSFER_LINEAR             = 2,
+    DPX_TRANSFER_LOG                = 3,
+    DPX_TRANSFER_UNSPECIFIED_VIDEO  = 4,
+    DPX_TRANSFER_SMPTE240           = 5,
+    DPX_TRANSFER_REC709             = 6,
+    DPX_TRANSFER_REC601_625         = 7,
+    DPX_TRANSFER_REC601_525         = 8,
+    DPX_TRANSFER_NTSC               = 9,
+    DPX_TRANSFER_PAL                = 10,
+    DPX_TRANSFER_ZLINEAR            = 11,
+    DPX_TRANSFER_ZHOMOGENOUS        = 12
 } dpx_transfer_enum;
 
 typedef enum {
-    DPX_COLORIMETRIC_USER = 0,
-    DPX_COLORIMETRIC_PRINT_DENSITY,
+    DPX_COLORIMETRIC_USER              = 0,
+    DPX_COLORIMETRIC_PRINT_DENSITY     = 1,
+    DPX_COLORIMETRIC_LINEAR            = 2,
     DPX_COLORIMETRIC_UNSPECIFIED_VIDEO = 4,
-    DPX_COLORIMETRIC_SMPTE240,
-    DPX_COLORIMETRIC_CCIR709,
-    DPX_COLORIMETRIC_CCIR601BG,
-    DPX_COLORIMETRIC_CCIR601M,
-    DPX_COLORIMETRIC_NTSC,
-    DPX_COLORIMETRIC_PAL
+    DPX_COLORIMETRIC_SMPTE240          = 5,
+    DPX_COLORIMETRIC_REC709            = 6,
+    DPX_COLORIMETRIC_REC601_625        = 7,
+    DPX_COLORIMETRIC_REC601_525        = 8,
+    DPX_COLORIMETRIC_NTSC              = 9,
+    DPX_COLORIMETRIC_PAL               = 10
 } dpx_colorimetric_enum;
+
+typedef enum
+{
+  DPX_PACKING_PACKED = 0,
+  DPX_PACKING_LSB    = 1,
+  DPX_PACKING_MSB    = 2
+} dpx_packing_method_enum;
 
 typedef struct {
     uint32_t magic_num;        /* magic number 0x53445058 (SDPX) or 0x58504453 (XPDS) */
@@ -387,10 +397,22 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
     }
 
     switch (dpx.image.image_element[0].descriptor) {
-        case DPX_RGB:      // RGB
+        case DPX_DESCRIPTOR_RGB:
             spp = 3;
             break;
-        case DPX_RGBA:      // RGBA
+        case DPX_DESCRIPTOR_RGBA:
+            spp = 4;
+            break;
+        case DPX_DESCRIPTOR_YUV422:
+            spp = 2;
+            break;
+        case DPX_DESCRIPTOR_YUV4224:
+            spp = 3;
+            break;
+        case DPX_DESCRIPTOR_YUV444:
+            spp = 3;
+            break;
+        case DPX_DESCRIPTOR_YUV4444:
             spp = 4;
             break;
         default:
@@ -401,14 +423,14 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
 
     print_header(&dpx,endian);
 
-    double gain = 4095.0 / (1 - dpx_log(DEFAULT_BLACK_POINT, DEFAULT_WHITE_POINT, DEFAULT_GAMMA));
-    double offset = gain - 4095;
+    //double gain = 4095.0 / (1 - dpx_log(DEFAULT_BLACK_POINT, DEFAULT_WHITE_POINT, DEFAULT_GAMMA));
+    //double offset = gain - 4095;
 
-    dcp_log(LOG_DEBUG,"dpx gain:\t%f",gain);
-    dcp_log(LOG_DEBUG,"dpx offset:\t%f",offset);
+    //dcp_log(LOG_DEBUG,"dpx gain:\t%f",gain);
+    //dcp_log(LOG_DEBUG,"dpx offset:\t%f",offset);
 
     switch (dpx.image.image_element[0].transfer) {
-        case 0:
+        case DPX_TRANSFER_USER:
             logarithmic = 1;    // asume logarithmic
             break;
         case 1:
