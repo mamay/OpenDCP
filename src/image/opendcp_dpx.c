@@ -270,15 +270,16 @@ static inline uint32_t r_32(uint32_t value, int endian) {
 }
 
 static double dpx_log(int in, int white, float gamma) {
-    return (pow((pow(10.0, (in - white) * (0.002 / 1.7))),1.0/1.7));
+    return (pow(10.0,((in - white) * 0.002 / gamma * 1.0/1.7)));
 }
 
-int dpx_log_to_lin(int value) {
+int dpx_log_to_lin(int value, float gamma) {
     double gain;
     double offset;
     double scale;
+    int value2;
 
-    gain = 4095.0 / (1 - dpx_log(DEFAULT_BLACK_POINT, DEFAULT_WHITE_POINT, DEFAULT_GAMMA));
+    gain = 4095.0 / (1 - dpx_log(DEFAULT_BLACK_POINT, DEFAULT_WHITE_POINT, gamma));
     offset = gain - 4095;
 
     if (value <= DEFAULT_BLACK_POINT) {
@@ -287,8 +288,8 @@ int dpx_log_to_lin(int value) {
 
     if (value < DEFAULT_WHITE_POINT) {
         double f_i;
-        f_i = dpx_log(value, DEFAULT_WHITE_POINT, DEFAULT_GAMMA);
-        printf("%f\n",f_i);
+        f_i = dpx_log(value, DEFAULT_WHITE_POINT, gamma);
+        value2 = (int)((f_i*gain)-offset);
         return ((int)((f_i*gain)-offset));
     }
     
@@ -301,11 +302,18 @@ void buildLut() {
     int x;
 
     for (x=0;x<1024;x++) {
-       dpx_log_to_lin(x);
+       dpx_log_to_lin(x, 1.7);
     }
 }
 
 void print_header(dpx_image_t *dpx, int endian) {
+    dcp_log(LOG_DEBUG,"dpx magic num:\t%d",r_32(dpx->file.magic_num,endian));
+    dcp_log(LOG_DEBUG,"dpx offset:\t%d",r_32(dpx->file.offset,endian));
+    dcp_log(LOG_DEBUG,"dpx version:\t%s",dpx->file.version);
+    dcp_log(LOG_DEBUG,"dpx file size:\t%d",r_32(dpx->file.file_size,endian));
+    dcp_log(LOG_DEBUG,"dpx file name:\t%s",dpx->file.file_name);
+    dcp_log(LOG_DEBUG,"dpx creator:\t%s",dpx->file.creator);
+
     dcp_log(LOG_DEBUG,"dpx orientation:\t%d",r_16(dpx->image.orientation,endian));
     dcp_log(LOG_DEBUG,"dpx elem number:\t%d",r_16(dpx->image.element_number,endian));
     dcp_log(LOG_DEBUG,"dpx pixels_per_line:\t%d",r_32(dpx->image.pixels_per_line,endian));
@@ -361,7 +369,8 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
     dpx_image_t               dpx;
     FILE *dpx_fp;
     odcp_image_t *image = 00;
-    int w,h,image_size,i,j,endian, logarithmic;
+    int w,h,image_size,i,j,endian,logarithmic;
+    float gamma;
     unsigned short int bps = 0;
     unsigned short int spp = 0;
 
@@ -433,17 +442,30 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
         case DPX_TRANSFER_USER:
             logarithmic = 1;    // asume logarithmic
             break;
-        case 1:
-        case 2:
+        case DPX_TRANSFER_PRINT_DENSITY: 
+        case DPX_TRANSFER_LINEAR: 
             logarithmic = 0;
             break;
-        case 3:
+        case DPX_TRANSFER_LOG: 
+            logarithmic = 1;
+            break;
+        case DPX_TRANSFER_REC709:
             logarithmic = 1;
             break;
         default:
             dcp_log(LOG_ERROR, "Unsupported transfer characteristic: %d\n", dpx.image.image_element[0].transfer);
-            //return DCP_FATAL;
             break;
+    }
+
+    /* try and guess correct gamma */
+    if (logarithmic) {
+        if (strstr(dpx.file.creator,"Nuke")) {
+            gamma = 1.7;
+        } else if (strstr(dpx.file.creator,"Adobe After Effects Cineon Format")) {
+            gamma = 0.6;
+        } else {
+            gamma = 0.6;
+        }
     }
 
     w = r_32(dpx.image.pixels_per_line, endian);
@@ -474,65 +496,88 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
 
     fseek(dpx_fp, r_32(dpx.file.offset, endian), SEEK_SET);
 
-    /* 8 bits per pixel */
-    if (bps == 8) {
-        uint8_t  data;
-        for (i=0; i<image_size; i++) { 
-            for (j=0; j<spp; j++) {
-                data = fgetc(dpx_fp);
-                if (j < 3) { // Skip alpha channel 
-                    image->component[j].data[i] = data << 4;
-                } 
-            }
-        }
-    /* 10 bits per pixel */
-    } else if (bps == 10) {
-        uint32_t data;
-        uint32_t comp;
-        for (i=0; i<image_size; i++) { 
-            fread(&data,sizeof(data),1,dpx_fp);
-            for (j=0; j<spp; j++) {
-                if (j==0) {
-                    comp = r_32(data, endian) >> 16;
-                    image->component[j].data[i] = ((comp & 0xFFF0) >> 4) | ((comp & 0x00CF) >> 6); 
-                } else if (j==1) {
-                    comp = r_32(data, endian) >> 6;
-                    image->component[j].data[i] = ((comp & 0xFFF0) >> 4) | ((comp & 0x00CF) >> 6); 
-                } else if (j==2) {
-                    comp = r_32(data, endian) << 4;
-                    image->component[j].data[i] = ((comp & 0xFFF0) >> 4) | ((comp & 0x00CF) >> 6); 
-                }
-                if (logarithmic) {
-                    image->component[j].data[i] = lut[((image->component[j].data[i] >> 2))]; 
-                }
-            }
-        }
-    /* 12 bits per pixel */
-    } else if (bps == 12) {
-        uint8_t  data[2];
-        for (i=0; i<image_size; i++) { 
-            for (j=0; j<spp; j++) {
-                data[0] = fgetc(dpx_fp);
-                data[1] = fgetc(dpx_fp);
-                if (j < 3) {
-                    image->component[j].data[i] = (data[!endian]<<4) | (data[!endian]>>4);
-                }
-            }
-        }
-    /* 16 bits per pixel */
-    } else if ( bps == 16) {
-        uint8_t  data[2];
-        for (i=0; i<image_size; i++) { 
-            for (j=0; j<spp; j++) {
-                data[0] = fgetc(dpx_fp);
-                data[1] = fgetc(dpx_fp);
-                if (j < 3) { // Skip alpha channel
-                    image->component[j].data[i] = ( data[!endian] << 8 ) | data[!endian];
-                    image->component[j].data[i] = (image->component[j].data[i]) >> 4; 
+    /* YUV422 */
+    if (dpx.image.image_element[0].descriptor == DPX_DESCRIPTOR_YUV422) {
+        /* 8 bits per pixel */
+        if (bps == 8) {
+            uint8_t data[4];
+            rgb_pixel_float_t p;
+            for (i=0; i<image_size; i+=2) { 
+                fread(&data,sizeof(data),1,dpx_fp);
+                for (j=0; j<spp; j++) {
+                    p = yuv444toRGB888(data[1+(2*j)], data[0], data[2]);
+                    image->component[0].data[i+j] = dpx_log_to_lin(((int)p.r << 2),gamma);
+                    image->component[1].data[i+j] = dpx_log_to_lin(((int)p.g << 2),gamma);
+                    image->component[2].data[i+j] = dpx_log_to_lin(((int)p.b << 2),gamma);
                 }
             }
         }
     }
+    /* YUV422 */
+
+    /* RGB(A) */
+    if (dpx.image.image_element[0].descriptor == DPX_DESCRIPTOR_RGB || dpx.image.image_element[0].descriptor == DPX_DESCRIPTOR_RGBA) {
+        /* 8 bits per pixel */
+        if (bps == 8) {
+            uint8_t  data;
+            for (i=0; i<image_size; i++) { 
+                for (j=0; j<spp; j++) {
+                    data = fgetc(dpx_fp);
+                    if (j < 3) { // Skip alpha channel 
+                        image->component[j].data[i] = data << 4;
+                    } 
+                }
+            }
+        /* 10 bits per pixel */
+        } else if (bps == 10) {
+            uint32_t data;
+            uint32_t comp;
+            for (i=0; i<image_size; i++) { 
+                fread(&data,sizeof(data),1,dpx_fp);
+                for (j=0; j<spp; j++) {
+                    if (j==0) {
+                        comp = r_32(data, endian) >> 16;
+                        image->component[j].data[i] = ((comp & 0xFFF0) >> 4) | ((comp & 0x00CF) >> 6); 
+                    } else if (j==1) {
+                        comp = r_32(data, endian) >> 6;
+                        image->component[j].data[i] = ((comp & 0xFFF0) >> 4) | ((comp & 0x00CF) >> 6); 
+                    } else if (j==2) {
+                        comp = r_32(data, endian) << 4;
+                        image->component[j].data[i] = ((comp & 0xFFF0) >> 4) | ((comp & 0x00CF) >> 6); 
+                    }
+                    if (logarithmic) {
+                        image->component[j].data[i] = dpx_log_to_lin((image->component[j].data[i] >> 2),gamma); 
+                    }
+                }
+            }
+        /* 12 bits per pixel */
+        } else if (bps == 12) {
+            uint8_t  data[2];
+            for (i=0; i<image_size; i++) { 
+                for (j=0; j<spp; j++) {
+                    data[0] = fgetc(dpx_fp);
+                    data[1] = fgetc(dpx_fp);
+                    if (j < 3) {
+                        image->component[j].data[i] = (data[!endian]<<4) | (data[!endian]>>4);
+                    }
+                }
+            }
+        /* 16 bits per pixel */
+        } else if ( bps == 16) {
+            uint8_t  data[2];
+            for (i=0; i<image_size; i++) { 
+                for (j=0; j<spp; j++) {
+                    data[0] = fgetc(dpx_fp);
+                    data[1] = fgetc(dpx_fp);
+                    if (j < 3) { // Skip alpha channel
+                        image->component[j].data[i] = ( data[!endian] << 8 ) | data[!endian];
+                        image->component[j].data[i] = (image->component[j].data[i]) >> 4; 
+                    }
+                }
+            }
+        }
+    }
+    /* RGB(A) */
 
     fclose(dpx_fp);
 

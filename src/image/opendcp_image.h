@@ -61,3 +61,4 @@ odcp_image_t *odcp_image_create(int n_components, int image_size);
 void odcp_image_free(odcp_image_t *image);
 int odcp_image_readline(odcp_image_t *image, int y, unsigned char *data); 
 int rgb_to_xyz(odcp_image_t *image, int gamma);
+rgb_pixel_float_t yuv444toRGB888(int y, int cb, int cr);

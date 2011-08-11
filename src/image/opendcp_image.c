@@ -27,6 +27,9 @@
 #include "opendcp_image.h"
 #include "opendcp_xyz.h"
 
+#define CLIP(m,max)                                 \
+  (m)<0?0:((m)>max?max:(m))
+
 /* create opendcp image structure */
 odcp_image_t *odcp_image_create(int n_components, int image_size) {
     int x;
@@ -188,6 +191,16 @@ float complex_gamma(float p, float gamma) {
     }
 
     return v;
+}
+
+rgb_pixel_float_t yuv444toRGB888(int y, int cb, int cr) {
+    rgb_pixel_float_t p;
+
+    p.r = CLIP(y+1.402*(cr-128),255);
+    p.g = CLIP(y-0.344*(cb-128)-0.714*(cr-128),255);
+    p.b = CLIP(y+1.772*(cb-128),255);
+
+    return(p);
 }
 
 /* rgb to xyz color conversion hard calculations */
