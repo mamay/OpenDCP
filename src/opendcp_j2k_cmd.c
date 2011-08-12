@@ -162,7 +162,7 @@ int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *fil
             return DCP_FATAL;
         }
     } else {
-        dcp_log(LOG_DEBUG,"Input is a single file %s",in_path);
+        dcp_log(LOG_DEBUG,"%-15.15s: input is a single file %s","get_filelist", in_path);
         if (stat(out_path, &st_out) == 0 ) {
             if (st_out.st_mode & S_IFDIR) {
                 dcp_log(LOG_ERROR,"If input is a file, output must be as well");
@@ -411,7 +411,7 @@ int main (int argc, char **argv) {
     }
 
     /* get file list */
-    dcp_log(LOG_DEBUG,"Getting files in %s",in_path);
+    dcp_log(LOG_DEBUG,"%-15.15s: getting files in %s","opendcp_j2k_cmd",in_path);
     if (get_filelist(opendcp,in_path,out_path,filelist) != DCP_SUCCESS) {
          dcp_fatal(opendcp,"No files found");
     }

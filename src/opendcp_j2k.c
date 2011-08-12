@@ -121,7 +121,7 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
     if (tmp_path == NULL) {
         tmp_path = "./";
     }
-    dcp_log(LOG_DEBUG,"Reading input file %s",in_file);
+    dcp_log(LOG_DEBUG,"%-15.15s: reading input file %s","convert_to_j2k",in_file);
      
     extension = strrchr(in_file,'.');
     extension++;
@@ -168,7 +168,7 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
     if ( opendcp->encoder == J2K_KAKADU ) {
         char tempfile[255];
         sprintf(tempfile,"%s/tmp_%s.tif",tmp_path,basename(in_file));
-        dcp_log(LOG_DEBUG,"Writing temporary tif %s",tempfile);
+        dcp_log(LOG_DEBUG,"%-15.15s: Writing temporary tif %s","convet_to_j2k",tempfile);
         result = write_tif(odcp_image,tempfile,0);
         odcp_image_free(odcp_image);
         
@@ -292,24 +292,24 @@ int encode_openjpeg(opendcp_t *opendcp, opj_image_t *opj_image, char *out_file) 
                               (max_cs_len * 8 * opj_image->comps[0].dx * opj_image->comps[0].dy);
 
     /* get a J2K compressor handle */
-    dcp_log(LOG_DEBUG,"Creating compressor %s",out_file);
+    dcp_log(LOG_DEBUG,"%-15.15s: creating compressor %s","encode_openjpeg",out_file);
     cinfo = opj_create_compress(CODEC_J2K);
 
     /* set event manager to null (openjpeg 1.3 bug) */
     cinfo->event_mgr = NULL;
 
     /* setup the encoder parameters using the current image and user parameters */
-    dcp_log(LOG_DEBUG,"Setup J2k encoder %s",out_file);
+    dcp_log(LOG_DEBUG,"%-15.15s: setup J2k encoder %s","encode_openjpeg",out_file);
     opj_setup_encoder(cinfo, &parameters, opj_image);
 
     /* open a byte stream for writing */
     /* allocate memory for all tiles */
-    dcp_log(LOG_DEBUG,"Opening J2k output stream %s",out_file);
+    dcp_log(LOG_DEBUG,"%-15.15s: opening J2k output stream %s","encode_openjpeg",out_file);
     cio = opj_cio_open((opj_common_ptr)cinfo, NULL, 0);
 
     dcp_log(LOG_INFO,"Encoding file %s",out_file);
     result = opj_encode(cinfo, cio, opj_image, NULL);
-    dcp_log(LOG_DEBUG,"Encoding file %s complete",out_file);
+    dcp_log(LOG_DEBUG,"%-15.15s: encoding file %s complete","encode_openjepg",out_file);
 
     if (!result) {
         dcp_log(LOG_ERROR,"Unable to encode jpeg2000 file %s",out_file);

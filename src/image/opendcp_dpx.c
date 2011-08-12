@@ -432,12 +432,6 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
 
     print_header(&dpx,endian);
 
-    //double gain = 4095.0 / (1 - dpx_log(DEFAULT_BLACK_POINT, DEFAULT_WHITE_POINT, DEFAULT_GAMMA));
-    //double offset = gain - 4095;
-
-    //dcp_log(LOG_DEBUG,"dpx gain:\t%f",gain);
-    //dcp_log(LOG_DEBUG,"dpx offset:\t%f",offset);
-
     switch (dpx.image.image_element[0].transfer) {
         case DPX_TRANSFER_USER:
             logarithmic = 1;    // asume logarithmic
@@ -454,18 +448,8 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
             break;
         default:
             dcp_log(LOG_ERROR, "Unsupported transfer characteristic: %d\n", dpx.image.image_element[0].transfer);
+            return DCP_FATAL;
             break;
-    }
-
-    /* try and guess correct gamma */
-    if (logarithmic) {
-        if (strstr(dpx.file.creator,"Nuke")) {
-            gamma = 1.7;
-        } else if (strstr(dpx.file.creator,"Adobe After Effects Cineon Format")) {
-            gamma = 0.6;
-        } else {
-            gamma = 0.6;
-        }
     }
 
     w = r_32(dpx.image.pixels_per_line, endian);
@@ -506,9 +490,9 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
                 fread(&data,sizeof(data),1,dpx_fp);
                 for (j=0; j<spp; j++) {
                     p = yuv444toRGB888(data[1+(2*j)], data[0], data[2]);
-                    image->component[0].data[i+j] = dpx_log_to_lin(((int)p.r << 2),gamma);
-                    image->component[1].data[i+j] = dpx_log_to_lin(((int)p.g << 2),gamma);
-                    image->component[2].data[i+j] = dpx_log_to_lin(((int)p.b << 2),gamma);
+                    image->component[0].data[i+j] = lut[((int)p.r << 2)];
+                    image->component[1].data[i+j] = lut[((int)p.g << 2)];
+                    image->component[2].data[i+j] = lut[((int)p.b << 2)];
                 }
             }
         }
@@ -546,7 +530,7 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
                         image->component[j].data[i] = ((comp & 0xFFF0) >> 4) | ((comp & 0x00CF) >> 6); 
                     }
                     if (logarithmic) {
-                        image->component[j].data[i] = dpx_log_to_lin((image->component[j].data[i] >> 2),gamma); 
+                        image->component[j].data[i] = lut[(image->component[j].data[i] >> 2)]; 
                     }
                 }
             }

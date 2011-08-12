@@ -20,211 +20,212 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <tiffio.h>
 #include "../opendcp.h"
 #include "opendcp_image.h"
 
-static inline int clip8(int value)
-{
-    if      (value < 0)   return 0;
-    else if (value > 255) return 255;
-    else                  return value;
-}
+typedef struct {
+    TIFF       *fp; 
+    tstrip_t   strip;
+    tdata_t    strip_data;
+    tsize_t    strip_size;
+    tsize_t    read_size;
+    int        strip_num;
+    int        image_size;
+    int        w;
+    int        h;
+    uint16_t   bps;
+    uint16_t   spp;
+    uint16_t   photo;
+    uint16_t   planar;
+    int        supported;
+} tiff_t;
 
 int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
-    TIFF *tif;
-    tdata_t buf;
-    tstrip_t strip;
-    tsize_t strip_size;
-    int index,w,h,image_size;
-    unsigned short int bps = 0;
-    unsigned short int spp = 0;
-    unsigned short int photo = 0;
-    uint16 planar;
+    tiff_t     tif;
+    int        i,index;
     odcp_image_t *image = 00;
 
     /* open tiff using filename or file descriptor */
-    dcp_log(LOG_DEBUG,"Opening tiff file %s",infile);
+    dcp_log(LOG_DEBUG,"%-15.15s: opening tiff file %s","read_tif", infile);
     if (fd == 0) {
-        tif = TIFFOpen(infile, "r");
+        tif.fp = TIFFOpen(infile, "r");
     } else {
-        tif = TIFFFdOpen(fd,infile,"r");
+        tif.fp = TIFFFdOpen(fd,infile,"r");
     }
 
-    if (!tif) {
-        dcp_log(LOG_ERROR,"Failed to open %s for reading", infile);
+    if (!tif.fp) {
+        dcp_log(LOG_ERROR,"%-15.15s: failed to open %s for reading","read_tif", infile);
         return DCP_FATAL;
     }
 
-    TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &w);
-    TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &h);
-    TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bps);
-    TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &spp);
-    TIFFGetField(tif, TIFFTAG_PHOTOMETRIC, &photo);
-    TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &planar);
+    TIFFGetField(tif.fp, TIFFTAG_IMAGEWIDTH, &tif.w);
+    TIFFGetField(tif.fp, TIFFTAG_IMAGELENGTH, &tif.h);
+    TIFFGetField(tif.fp, TIFFTAG_BITSPERSAMPLE, &tif.bps);
+    TIFFGetField(tif.fp, TIFFTAG_SAMPLESPERPIXEL, &tif.spp);
+    TIFFGetField(tif.fp, TIFFTAG_PHOTOMETRIC, &tif.photo);
+    TIFFGetField(tif.fp, TIFFTAG_PLANARCONFIG, &tif.planar);
+    tif.image_size = tif.w * tif.h;
 
-    image_size = w * h;
+    dcp_log(LOG_DEBUG,"%-15.15s: tif attributes photo: %d bps: %d spp: %d planar: %d","read_tif",tif.photo,tif.bps,tif.spp,tif.planar);
+
+    /* check if image is supported */
+    switch (tif.photo) {
+        case PHOTOMETRIC_MINISWHITE:
+        case PHOTOMETRIC_MINISBLACK:
+        case PHOTOMETRIC_RGB:
+            tif.supported = 1;
+            break;
+        case PHOTOMETRIC_YCBCR:
+            tif.supported = 0;
+            dcp_log(LOG_ERROR,"%-15.15s: tif image type YUV/YCbCr not currently supported","read_tif");
+            break;
+        default:
+            tif.supported = 0;
+            dcp_log(LOG_ERROR,"%-15.15s: tif image type not supported","read_tif");
+            break;
+    }
+
+    switch (tif.bps) {
+        case  8:
+        case 12:
+        case 16:
+            tif.supported &= 1; 
+            break;
+        default:
+            tif.supported &= 0;
+            dcp_log(LOG_ERROR,"%-15.15s: rgb tiff conversion failed, bitdepth %d, only 8,12,16 bits are supported","read_tif", tif.bps);
+            break;
+    }
+
+    if (tif.supported == 0) {
+        TIFFClose(tif.fp);
+       return(DCP_FATAL);
+    }
    
     /* create the image */
-    dcp_log(LOG_DEBUG,"Allocating odcp image");
-    image = odcp_image_create(3,image_size);
+    dcp_log(LOG_DEBUG,"%-15.15s: allocating odcp image","read_tif");
+    image = odcp_image_create(3,tif.image_size);
     
-    if(!image) {
-        TIFFClose(tif);
-        dcp_log(LOG_ERROR,"Failed to create image %s", infile);
+    if (!image) {
+        TIFFClose(tif.fp);
+        dcp_log(LOG_ERROR,"%-15.15s: failed to create image %s","read_tif",infile);
         return DCP_FATAL;
     }
 
-    /* RGB color */
+    /* set jpeg200 image properties (RGB 12-bits) */
     image->bpp          = 12;
     image->precision    = 12;
     image->n_components = 3;
     image->signed_bit   = 0;
     image->dx           = 1;
     image->dy           = 1;
-    image->w            = w;
-    image->h            = h;
+    image->w            = tif.w;
+    image->h            = tif.h;
 
     /* set image offset and reference grid */
     image->x0 = 0;
     image->y0 = 0;
-    image->x1 = !image->x0 ? (w - 1) * image->dx + 1 : image->x0 + (w - 1) * image->dx + 1;
-    image->y1 = !image->y0 ? (h - 1) * image->dy + 1 : image->y0 + (h - 1) * image->dy + 1;
+    image->x1 = !image->x0 ? (tif.w - 1) * image->dx + 1 : image->x0 + (tif.w - 1) * image->dx + 1;
+    image->y1 = !image->y0 ? (tif.h - 1) * image->dy + 1 : image->y0 + (tif.h - 1) * image->dy + 1;
 
-    if (photo == 6) {
-        int r,c;
-        uint32* raster;
+    /* start reading tiff */
+    index      = 0;
+    tif.strip_num  = TIFFNumberOfStrips(tif.fp);
+    tif.strip_size = TIFFStripSize(tif.fp);
+    tif.strip_data = _TIFFmalloc(tif.strip_size);
+    unsigned char *data = (unsigned char*) tif.strip_data;
 
-        dcp_log(LOG_ERROR,"YUV/YCbCr images not currently supported");
-        return DCP_FATAL ; 
- 
-        dcp_log(LOG_DEBUG,"Photometric: 6, YUV");
-        dcp_log(LOG_DEBUG,"TIFFmalloc");
-        raster = (uint32*) _TIFFmalloc(image_size * 2 * sizeof (uint32));
-        if (raster == NULL) {
-            dcp_log(LOG_ERROR,"could not allocate memory for raster");
-            return(DCP_FATAL);
-        }
+    /* Read the Image components*/
+    for (tif.strip = 0; tif.strip < tif.strip_num; tif.strip++) {
+        tif.read_size = TIFFReadEncodedStrip(tif.fp, tif.strip, tif.strip_data, tif.strip_size);
 
-        dcp_log(LOG_DEBUG,"TIFFReadRGBAImage");
-        if (!TIFFReadRGBAImage(tif, w*2, h, raster, 0)) {
-            dcp_log(LOG_ERROR,"could not read tiff into memory");
-            return(DCP_FATAL);
-        }
-        TIFFClose(tif);
+        /* BW */
+        if (tif.photo == PHOTOMETRIC_MINISWHITE) {
+            tif.read_size = TIFFReadEncodedStrip(tif.fp, 0, tif.strip_data, tif.strip_size);
 
-        index = 0;
-        unsigned char *img = (unsigned char *) raster;
-        for (r=h;r>0;r--) {
-            for (c=0;c<w;c+=3) {
-                int y,u,v;
-                int c,d,e;
-                int r,g,b;
-                y = img[r*w+c];
-                u = img[(r/2)*(w/2)+(c/2)+image_size];
-                v = img[(r/2)*(w/2)+(c/2)+image_size+(image_size/4)];
-                c = y-16; 
-                d = u-128;
-                e = v-128;
-                r = clip8(((298*c)+(409*e)+128)>>8); 
-                g = clip8(((298*c)-(100*d)-(208*e)+128)>>8);        
-                b = clip8(((298*c)+(516*d)+128)>>8);        
-                image->component[0].data[index] = r << 4; // R 
-                image->component[1].data[index] = g << 4; // G 
-                image->component[2].data[index] = b << 4; // B 
-                index++;
+            for (i=0; i<tif.image_size; i++) {
+                image->component[0].data[i] = data[i] << 4; // R 
+                image->component[1].data[i] = data[i] << 4; // G 
+                image->component[2].data[i] = data[i] << 4; // B 
             }
         }
-        _TIFFfree(raster);
-    }
 
-    if (photo == 2) {
-        dcp_log(LOG_DEBUG,"Photometric: RGB (2)");
-        buf = _TIFFmalloc(TIFFStripSize(tif));
-        strip_size=0;
-        strip_size=TIFFStripSize(tif);
-        index = 0;
+        /* Grayscale */
+        else if (tif.photo == PHOTOMETRIC_MINISBLACK) {
+            /* 8 bits per pixel */
+            if (tif.bps==8) {
+                for (i=0; i<tif.read_size && index<tif.image_size; i+=tif.spp) {
+                    /* rounded to 12 bits */
+                    image->component[0].data[index] = data[i] << 4; // R 
+                    image->component[1].data[index] = data[i] << 4; // G 
+                    image->component[2].data[index] = data[i] << 4; // B 
+                    index++;
+                }
+            }
+        }
 
-        /* Read the Image components*/
-        for (strip = 0; strip < TIFFNumberOfStrips(tif); strip++) {
-            unsigned char *dat8;
-            int i, ssize;
-            ssize = TIFFReadEncodedStrip(tif, strip, buf, strip_size);
-            dat8 = (unsigned char*)buf;
+        /* YUV */
+        else if (tif.photo == PHOTOMETRIC_YCBCR) {
+            TIFFClose(tif.fp);
+        }
 
+        /* RGB(A) */
+        else if (tif.photo == PHOTOMETRIC_RGB) {
             /*12 bits per pixel*/
-            if (bps==12) {
-                for (i=0; i<ssize; i+=(3*spp)) {
-                    if((index < image_size)&(index+1 < image_size)) {
-                        image->component[0].data[index]   = ( dat8[i+0]<<4 )        |(dat8[i+1]>>4); // R
-                        image->component[1].data[index]   = ((dat8[i+1]& 0x0f)<< 8) | dat8[i+2];     // G
-                        image->component[2].data[index]   = ( dat8[i+3]<<4)         |(dat8[i+4]>>4); // B
-                        if (spp == 4) {
-                            /* skip alpha channel */
-                            image->component[0].data[index+1] = ( dat8[i+6]<<4)        |(dat8[i+7]>>4);  // R
-                            image->component[1].data[index+1] = ((dat8[i+7]& 0x0f)<< 8) | dat8[i+8];     // G
-                            image->component[2].data[index+1] = ( dat8[i+9]<<4)        |(dat8[i+10]>>4); // B
-                        } else {
-                            image->component[0].data[index+1] = ((dat8[i+4]& 0x0f)<< 8) | dat8[i+5];     // R
-                            image->component[1].data[index+1] = ( dat8[i+6]<<4)        |(dat8[i+7]>>4);  // G
-                            image->component[2].data[index+1] = ((dat8[i+7]& 0x0f)<< 8) | dat8[i+8];     // B
-                        }
-                        index+=2;
+            if (tif.bps==12) {
+                for (i=0; i<tif.read_size && (index+1)<tif.image_size; i+=(3*tif.spp)) {
+                    image->component[0].data[index]   = ( data[i+0]<<4 )        |(data[i+1]>>4); // R
+                    image->component[1].data[index]   = ((data[i+1]& 0x0f)<< 8) | data[i+2];     // G
+                    image->component[2].data[index]   = ( data[i+3]<<4)         |(data[i+4]>>4); // B
+                    if (tif.spp == 4) {
+                        /* skip alpha channel */
+                        image->component[0].data[index+1] = ( data[i+6]<<4)         |(data[i+7]>>4);  // R
+                        image->component[1].data[index+1] = ((data[i+7]& 0x0f)<< 8) | data[i+8];     // G
+                        image->component[2].data[index+1] = ( data[i+9]<<4)         |(data[i+10]>>4); // B
                     } else {
-                        break;
+                        image->component[0].data[index+1] = ((data[i+4]& 0x0f)<< 8) | data[i+5];     // R
+                        image->component[1].data[index+1] = ( data[i+6]<<4)         |(data[i+7]>>4);  // G
+                        image->component[2].data[index+1] = ((data[i+7]& 0x0f)<< 8) | data[i+8];     // B
                     }
+                    index+=2;
                 }
             /* 16 bits per pixel */
-            } else if(bps==16) {
-                for (i=0; i<ssize; i+=(2*spp)) {
-                    if(index < image_size) {
-                        image->component[0].data[index] = ( dat8[i+1] << 8 ) | dat8[i+0]; // R 
-                        image->component[1].data[index] = ( dat8[i+3] << 8 ) | dat8[i+2]; // G 
-                        image->component[2].data[index] = ( dat8[i+5] << 8 ) | dat8[i+4]; // B 
-                        /* round to 12 bits dcinema */
-                        image->component[0].data[index] = (image->component[0].data[index]) >> 4 ;
-                        image->component[1].data[index] = (image->component[1].data[index]) >> 4 ;
-                        image->component[2].data[index] = (image->component[2].data[index]) >> 4 ;
-                        index++;
-                    } else {
-                        break;
-                    }
+            } else if (tif.bps==16) {
+                for (i=0; i<tif.read_size && index<tif.image_size; i+=(2*tif.spp)) {
+                    /* rounded to 12 bits */
+                    image->component[0].data[index] = ((data[i+1] << 8) | data[i+0]) >> 4; // R 
+                    image->component[1].data[index] = ((data[i+3] << 8) | data[i+2]) >> 4; // G 
+                    image->component[2].data[index] = ((data[i+5] << 8) | data[i+4]) >> 4; // B 
+                    index++;
                 }
             /* 8 bits per pixel */
-            } else if (bps==8) {
-                for (i=0; i<ssize; i+=spp) {
-                    if(index < image_size) {
-                        /* rounded to 12 bits */
-                        image->component[0].data[index] = dat8[i+0] << 4; // R 
-                        image->component[1].data[index] = dat8[i+1] << 4; // G 
-                        image->component[2].data[index] = dat8[i+2] << 4; // B 
-                        index++;
-                    } else {
-                         break;
-                    }
+            } else if (tif.bps==8) {
+                for (i=0; i<tif.read_size && index<tif.image_size; i+=tif.spp) {
+                    /* rounded to 12 bits */
+                    image->component[0].data[index] = data[i+0] << 4; // R 
+                    image->component[1].data[index] = data[i+1] << 4; // G 
+                    image->component[2].data[index] = data[i+2] << 4; // B 
+                    index++;
                 }
-            } else {
-                 dcp_log(LOG_ERROR,"TIFF file load failed. Bits=%d, Only 8,12,16 bits implemented",bps);
-                 return DCP_FATAL;
             }
         }
-        _TIFFfree(buf);
-        TIFFClose(tif);
-    } else {
-        dcp_log(LOG_ERROR,"TIFF file creation. Bad color format. Only RGB & Grayscale has been implemented");
-        return DCP_FATAL;
     }
 
-    dcp_log(LOG_DEBUG,"TIFF read complete");
+    _TIFFfree(tif.strip_data);
+    TIFFClose(tif.fp);
+
+    dcp_log(LOG_DEBUG,"%-15.15s: tiff read complete","read_tif");
     *image_ptr = image;
 
     return DCP_SUCCESS;
 }
 
 int write_tif(odcp_image_t *image, const char *outfile, int fd) {
-    int y, image_size;
+    int y;
     TIFF *tif;
-    tdata_t buf;
+    tdata_t data;
 
     /* open tiff using filename or file descriptor */
     if (fd == 0) {
@@ -234,11 +235,9 @@ int write_tif(odcp_image_t *image, const char *outfile, int fd) {
     }
 
     if (tif == NULL) {
-        dcp_log(LOG_ERROR, "Failed to open %s for writing", outfile);
+        dcp_log(LOG_ERROR, "%-15.15s: failed to open file %s for writing","write_tif", outfile);
         return DCP_FATAL;
     }
-
-    image_size = image->w * image->h;
 
     /* Set tags */
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, image->w);
@@ -251,20 +250,20 @@ int write_tif(odcp_image_t *image, const char *outfile, int fd) {
     TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1);
 
     /* allocate memory for read line */
-    buf = _TIFFmalloc(TIFFScanlineSize(tif));
+    data = _TIFFmalloc(TIFFScanlineSize(tif));
 
-    if (buf == NULL) {
-        dcp_log(LOG_ERROR, "TIFF Memory allocation error: %s", outfile);
+    if (data == NULL) {
+        dcp_log(LOG_ERROR, "%-15.15s: tiff memory allocation error: %s", "write_tif", outfile);
         return DCP_FATAL;
     }
 
     /* write each row */
     for (y = 0; y<image->h; y++) {
-        odcp_image_readline(image, y, buf);
-        TIFFWriteScanline(tif, buf, y, 0);
+        odcp_image_readline(image, y, data);
+        TIFFWriteScanline(tif, data, y, 0);
     }
 
-    _TIFFfree(buf);
+    _TIFFfree(data);
     TIFFClose(tif);
 
     return DCP_SUCCESS;
