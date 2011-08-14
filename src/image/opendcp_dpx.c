@@ -459,24 +459,8 @@ int read_dpx(odcp_image_t **image_ptr, const char *infile, int fd) {
 
     /* create the image */
     dcp_log(LOG_DEBUG,"Allocating odcp image");
-    image = odcp_image_create(3,image_size);
+    image = odcp_image_create(3,w,h);
     dcp_log(LOG_DEBUG,"Image allocated");
-
-    /* RGB color */
-    image->bpp          = 12;
-    image->precision    = 12;
-    image->n_components = 3;
-    image->signed_bit   = 0;
-    image->dx           = 1;
-    image->dy           = 1;
-    image->w            = w;
-    image->h            = h;
-
-    /* set image offset and reference grid */
-    image->x0 = 0;
-    image->y0 = 0;
-    image->x1 = !image->x0 ? (w - 1) * image->dx + 1 : image->x0 + (w - 1) * image->dx + 1;
-    image->y1 = !image->y0 ? (h - 1) * image->dy + 1 : image->y0 + (h - 1) * image->dy + 1;
 
     fseek(dpx_fp, r_32(dpx.file.offset, endian), SEEK_SET);
 

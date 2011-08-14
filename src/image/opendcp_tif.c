@@ -42,6 +42,12 @@ typedef struct {
     int        supported;
 } tiff_t;
 
+void tif_set_strip(tiff_t *tif) {
+    tif->strip_num  = TIFFNumberOfStrips(tif->fp);
+    tif->strip_size = TIFFStripSize(tif->fp);
+    tif->strip_data = _TIFFmalloc(tif->strip_size);
+}
+
 int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
     tiff_t     tif;
     int        i,index;
@@ -74,12 +80,9 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
     switch (tif.photo) {
         case PHOTOMETRIC_MINISWHITE:
         case PHOTOMETRIC_MINISBLACK:
+        case PHOTOMETRIC_YCBCR:
         case PHOTOMETRIC_RGB:
             tif.supported = 1;
-            break;
-        case PHOTOMETRIC_YCBCR:
-            tif.supported = 0;
-            dcp_log(LOG_ERROR,"%-15.15s: tif image type YUV/YCbCr not currently supported","read_tif");
             break;
         default:
             tif.supported = 0;
@@ -106,7 +109,7 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
    
     /* create the image */
     dcp_log(LOG_DEBUG,"%-15.15s: allocating odcp image","read_tif");
-    image = odcp_image_create(3,tif.image_size);
+    image = odcp_image_create(3,tif.w,tif.h);
     
     if (!image) {
         TIFFClose(tif.fp);
@@ -114,48 +117,31 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
         return DCP_FATAL;
     }
 
-    /* set jpeg200 image properties (RGB 12-bits) */
-    image->bpp          = 12;
-    image->precision    = 12;
-    image->n_components = 3;
-    image->signed_bit   = 0;
-    image->dx           = 1;
-    image->dy           = 1;
-    image->w            = tif.w;
-    image->h            = tif.h;
-
-    /* set image offset and reference grid */
-    image->x0 = 0;
-    image->y0 = 0;
-    image->x1 = !image->x0 ? (tif.w - 1) * image->dx + 1 : image->x0 + (tif.w - 1) * image->dx + 1;
-    image->y1 = !image->y0 ? (tif.h - 1) * image->dy + 1 : image->y0 + (tif.h - 1) * image->dy + 1;
-
-    /* start reading tiff */
-    index      = 0;
-    tif.strip_num  = TIFFNumberOfStrips(tif.fp);
-    tif.strip_size = TIFFStripSize(tif.fp);
-    tif.strip_data = _TIFFmalloc(tif.strip_size);
-    unsigned char *data = (unsigned char*) tif.strip_data;
-
-    /* Read the Image components*/
-    for (tif.strip = 0; tif.strip < tif.strip_num; tif.strip++) {
-        tif.read_size = TIFFReadEncodedStrip(tif.fp, tif.strip, tif.strip_data, tif.strip_size);
-
-        /* BW */
-        if (tif.photo == PHOTOMETRIC_MINISWHITE) {
-            tif.read_size = TIFFReadEncodedStrip(tif.fp, 0, tif.strip_data, tif.strip_size);
-
+    /* BW */
+    if (tif.photo == PHOTOMETRIC_MINISWHITE) {
+        tif_set_strip(&tif);
+        uint8_t *data  = (uint8_t *)tif.strip_data;
+        for (tif.strip = 0; tif.strip < tif.strip_num; tif.strip++) {
+            tif.read_size = TIFFReadEncodedStrip(tif.fp, tif.strip, tif.strip_data, tif.strip_size);
             for (i=0; i<tif.image_size; i++) {
                 image->component[0].data[i] = data[i] << 4; // R 
                 image->component[1].data[i] = data[i] << 4; // G 
                 image->component[2].data[i] = data[i] << 4; // B 
             }
         }
+        _TIFFfree(tif.strip_data);
+    }
 
-        /* Grayscale */
-        else if (tif.photo == PHOTOMETRIC_MINISBLACK) {
-            /* 8 bits per pixel */
-            if (tif.bps==8) {
+    /* Grayscale */
+    else if (tif.photo == PHOTOMETRIC_MINISBLACK) {
+        tif_set_strip(&tif);
+        uint8_t *data  = (uint8_t *)tif.strip_data;
+
+        /* 8 bits per pixel */
+        if (tif.bps==8) {
+            index = 0;
+            for (tif.strip = 0; tif.strip < tif.strip_num; tif.strip++) {
+                tif.read_size = TIFFReadEncodedStrip(tif.fp, tif.strip, tif.strip_data, tif.strip_size);
                 for (i=0; i<tif.read_size && index<tif.image_size; i+=tif.spp) {
                     /* rounded to 12 bits */
                     image->component[0].data[index] = data[i] << 4; // R 
@@ -165,43 +151,34 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
                 }
             }
         }
+        _TIFFfree(tif.strip_data);
+    }
 
-        /* YUV */
-        else if (tif.photo == PHOTOMETRIC_YCBCR) {
-            TIFFClose(tif.fp);
+    /* YUV */
+    else if (tif.photo == PHOTOMETRIC_YCBCR) {
+        uint32_t *raster = (uint32_t*) _TIFFmalloc(tif.image_size * sizeof(uint32_t));
+        TIFFReadRGBAImageOriented(tif.fp, tif.w, tif.h, raster, ORIENTATION_TOPLEFT,0);
+        /* 8 bits per pixel */
+        if (tif.bps==8) {
+            for (i=0;i<tif.image_size;i++) {
+                image->component[0].data[i] = (raster[i] & 0xFF) << 4;
+                image->component[1].data[i] = (raster[i] >> 8 & 0xFF) << 4;
+                image->component[2].data[i] = (raster[i] >> 16 & 0xFF) << 4;
+            }
         }
+        _TIFFfree(raster);
+    }
 
-        /* RGB(A) */
-        else if (tif.photo == PHOTOMETRIC_RGB) {
-            /*12 bits per pixel*/
-            if (tif.bps==12) {
-                for (i=0; i<tif.read_size && (index+1)<tif.image_size; i+=(3*tif.spp)) {
-                    image->component[0].data[index]   = ( data[i+0]<<4 )        |(data[i+1]>>4); // R
-                    image->component[1].data[index]   = ((data[i+1]& 0x0f)<< 8) | data[i+2];     // G
-                    image->component[2].data[index]   = ( data[i+3]<<4)         |(data[i+4]>>4); // B
-                    if (tif.spp == 4) {
-                        /* skip alpha channel */
-                        image->component[0].data[index+1] = ( data[i+6]<<4)         |(data[i+7]>>4);  // R
-                        image->component[1].data[index+1] = ((data[i+7]& 0x0f)<< 8) | data[i+8];     // G
-                        image->component[2].data[index+1] = ( data[i+9]<<4)         |(data[i+10]>>4); // B
-                    } else {
-                        image->component[0].data[index+1] = ((data[i+4]& 0x0f)<< 8) | data[i+5];     // R
-                        image->component[1].data[index+1] = ( data[i+6]<<4)         |(data[i+7]>>4);  // G
-                        image->component[2].data[index+1] = ((data[i+7]& 0x0f)<< 8) | data[i+8];     // B
-                    }
-                    index+=2;
-                }
-            /* 16 bits per pixel */
-            } else if (tif.bps==16) {
-                for (i=0; i<tif.read_size && index<tif.image_size; i+=(2*tif.spp)) {
-                    /* rounded to 12 bits */
-                    image->component[0].data[index] = ((data[i+1] << 8) | data[i+0]) >> 4; // R 
-                    image->component[1].data[index] = ((data[i+3] << 8) | data[i+2]) >> 4; // G 
-                    image->component[2].data[index] = ((data[i+5] << 8) | data[i+4]) >> 4; // B 
-                    index++;
-                }
-            /* 8 bits per pixel */
-            } else if (tif.bps==8) {
+    /* RGB(A) */
+    else if (tif.photo == PHOTOMETRIC_RGB) {
+        tif_set_strip(&tif);
+        uint8_t *data  = (uint8_t *)tif.strip_data;
+
+        /* 8 bits per pixel */
+        if (tif.bps==8) {
+            index = 0;
+            for (tif.strip = 0; tif.strip < tif.strip_num; tif.strip++) {
+                tif.read_size = TIFFReadEncodedStrip(tif.fp, tif.strip, tif.strip_data, tif.strip_size);
                 for (i=0; i<tif.read_size && index<tif.image_size; i+=tif.spp) {
                     /* rounded to 12 bits */
                     image->component[0].data[index] = data[i+0] << 4; // R 
@@ -210,10 +187,45 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
                     index++;
                 }
             }
+        /*12 bits per pixel*/
+        } else if (tif.bps==12) {
+            index = 0;
+            for (tif.strip = 0; tif.strip < tif.strip_num; tif.strip++) {
+                tif.read_size = TIFFReadEncodedStrip(tif.fp, tif.strip, tif.strip_data, tif.strip_size);
+                for (i=0; i<tif.read_size && (index+1)<tif.image_size; i+=(3*tif.spp)) {
+                    image->component[0].data[index]   = ( data[i+0]<<4 )        |(data[i+1]>>4); // R
+                    image->component[1].data[index]   = ((data[i+1]& 0x0f)<< 8) | data[i+2];     // G
+                    image->component[2].data[index]   = ( data[i+3]<<4)         |(data[i+4]>>4); // B
+                    if (tif.spp == 4) {
+                        /* skip alpha channel */
+                        image->component[0].data[index+1] = ( data[i+6]<<4)         |(data[i+7]>>4);  // R
+                        image->component[1].data[index+1] = ((data[i+7]& 0x0f)<< 8) | data[i+8];      // G
+                        image->component[2].data[index+1] = ( data[i+9]<<4)         |(data[i+10]>>4); // B
+                    } else {
+                        image->component[0].data[index+1] = ((data[i+4]& 0x0f)<< 8) | data[i+5];      // R
+                        image->component[1].data[index+1] = ( data[i+6]<<4)         |(data[i+7]>>4);  // G
+                        image->component[2].data[index+1] = ((data[i+7]& 0x0f)<< 8) | data[i+8];      // B
+                    }
+                    index+=2;
+                }
+            }
+        /* 16 bits per pixel */
+        } else if (tif.bps==16) {
+            index = 0;
+            for (tif.strip = 0; tif.strip < tif.strip_num; tif.strip++) {
+                tif.read_size = TIFFReadEncodedStrip(tif.fp, tif.strip, tif.strip_data, tif.strip_size);
+                for (i=0; i<tif.read_size && index<tif.image_size; i+=(2*tif.spp)) {
+                    /* rounded to 12 bits */
+                    image->component[0].data[index] = ((data[i+1] << 8) | data[i+0]) >> 4; // R 
+                    image->component[1].data[index] = ((data[i+3] << 8) | data[i+2]) >> 4; // G 
+                    image->component[2].data[index] = ((data[i+5] << 8) | data[i+4]) >> 4; // B 
+                    index++;
+                }
+            }
         }
+        _TIFFfree(tif.strip_data);
     }
 
-    _TIFFfree(tif.strip_data);
     TIFFClose(tif.fp);
 
     dcp_log(LOG_DEBUG,"%-15.15s: tiff read complete","read_tif");

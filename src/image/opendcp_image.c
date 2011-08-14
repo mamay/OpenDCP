@@ -31,7 +31,7 @@
   (m)<0?0:((m)>max?max:(m))
 
 /* create opendcp image structure */
-odcp_image_t *odcp_image_create(int n_components, int image_size) {
+odcp_image_t *odcp_image_create(int n_components, int w, int h) {
     int x;
     odcp_image_t *image = 00; 
 
@@ -51,7 +51,7 @@ odcp_image_t *odcp_image_create(int n_components, int image_size) {
        
         for (x=0;x<n_components;x++) {
             image->component[x].component_number = x;
-            image->component[x].data = (int *)malloc((image_size)*sizeof(int));
+            image->component[x].data = (int *)malloc((w*h)*sizeof(int));
             if (!image->component[x].data) {
                 dcp_log(LOG_ERROR,"Unable to allocate memory for image components");
                 odcp_image_free(image);
@@ -59,6 +59,20 @@ odcp_image_t *odcp_image_create(int n_components, int image_size) {
             }
         }
     }
+
+    /* set default image parameters 12-bit RGB */
+    image->bpp          = 12;
+    image->precision    = 12;
+    image->n_components = 3;
+    image->signed_bit   = 0;
+    image->dx           = 1;
+    image->dy           = 1;
+    image->w            = w;
+    image->h            = h;
+    image->x0           = 0;
+    image->y0           = 0;
+    image->x1 = !image->x0 ? (w - 1) * image->dx + 1 : image->x0 + (w - 1) * image->dx + 1;
+    image->y1 = !image->y0 ? (h - 1) * image->dy + 1 : image->y0 + (h - 1) * image->dy + 1;
 
     return image;
 }
@@ -274,10 +288,8 @@ int resize(odcp_image_t **image,int w,int h,int method) {
     odcp_image_t *ptr = *image;
     rgb_pixel_float_t p;
 
-    image_size = w * h;
-
     /* create the image */
-    odcp_image_t *d_image = odcp_image_create(num_components,image_size);
+    odcp_image_t *d_image = odcp_image_create(num_components, w, h);
 
     if (!d_image) {
         return -1;
