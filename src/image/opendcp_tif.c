@@ -78,27 +78,25 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
 
     /* check if image is supported */
     switch (tif.photo) {
+        case PHOTOMETRIC_YCBCR:
+            if (tif.bps == 8 || tif.bps == 16 || tif.bps == 24) {
+                tif.supported = 1;
+            } else {
+                dcp_log(LOG_ERROR,"%-15.15s: YUV/YCbCr tiff conversion failed, bitdepth %d, only 8,16,24 bits are supported","read_tif", tif.bps);
+            }
+            break;
         case PHOTOMETRIC_MINISWHITE:
         case PHOTOMETRIC_MINISBLACK:
-        case PHOTOMETRIC_YCBCR:
         case PHOTOMETRIC_RGB:
-            tif.supported = 1;
+            if (tif.bps == 8 || tif.bps == 12 || tif.bps == 16) {
+                tif.supported = 1;
+            } else {
+                dcp_log(LOG_ERROR,"%-15.15s: RGB tiff conversion failed, bitdepth %d, only 8,12,16 bits are supported","read_tif", tif.bps);
+            }
             break;
         default:
             tif.supported = 0;
             dcp_log(LOG_ERROR,"%-15.15s: tif image type not supported","read_tif");
-            break;
-    }
-
-    switch (tif.bps) {
-        case  8:
-        case 12:
-        case 16:
-            tif.supported &= 1; 
-            break;
-        default:
-            tif.supported &= 0;
-            dcp_log(LOG_ERROR,"%-15.15s: rgb tiff conversion failed, bitdepth %d, only 8,12,16 bits are supported","read_tif", tif.bps);
             break;
     }
 
@@ -158,8 +156,8 @@ int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
     else if (tif.photo == PHOTOMETRIC_YCBCR) {
         uint32_t *raster = (uint32_t*) _TIFFmalloc(tif.image_size * sizeof(uint32_t));
         TIFFReadRGBAImageOriented(tif.fp, tif.w, tif.h, raster, ORIENTATION_TOPLEFT,0);
-        /* 8 bits per pixel */
-        if (tif.bps==8) {
+        /* 8/16/24 bits per pixel */
+        if (tif.bps==8 || tif.bps==16 || tif.bps==24) {
             for (i=0;i<tif.image_size;i++) {
                 image->component[0].data[i] = (raster[i] & 0xFF) << 4;
                 image->component[1].data[i] = (raster[i] >> 8 & 0xFF) << 4;
