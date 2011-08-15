@@ -142,6 +142,10 @@ int check_increment(char *str[], int index,int str_size) {
     strncpy(seq,str[index]+offset,diff_len);
     x = atoi(seq);
 
+    if (seq) {
+        free(seq);
+    }
+
     if (x == index) {
         return 0;
     } else {
@@ -149,20 +153,35 @@ int check_increment(char *str[], int index,int str_size) {
     }
 }
 
-int check_sequence(char str1[],char str2[]) {
+int check_file_sequence(char *str[], int count) {
+    int sequential = 1;
+    int x = 0;
+
+    while (x<(count-1) && sequential) {
+        sequential = check_sequential(str[x], str[x+1]);
+        x++;
+    }
+
+    if (sequential) {
+        return 0;
+    } else {
+        return x;
+    }
+}
+
+/* check if two strings are sequential */
+int check_sequential(char str1[],char str2[]) {
     int x,y;
     int offset, ext_offset, diff_len;
 
     offset     = find_seq_offset(str2,str1);
-    ext_offset = find_ext_offset(str1);
-    diff_len   = ext_offset - offset;;
 
-    char *seq = (char *)malloc(diff_len+1);
+    char *seq = (char *)malloc(offset+1);
 
-    strncpy(seq,str1+offset,diff_len);
+    strncpy(seq,str1+offset,offset);
     x = atoi(seq);
 
-    strncpy(seq,str2+offset,diff_len);
+    strncpy(seq,str2+offset,offset);
     y = atoi(seq);
 
     if (seq) {
@@ -170,9 +189,9 @@ int check_sequence(char str1[],char str2[]) {
     }
 
     if ((y - x) == 1) {
-        return 0;
-    } else {
         return 1;
+    } else {
+        return 0;
     }
 }
 

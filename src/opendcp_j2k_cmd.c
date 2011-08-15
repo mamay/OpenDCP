@@ -443,6 +443,13 @@ int main (int argc, char **argv) {
         dcp_fatal(opendcp,"Start frame must be less than end frame");
     }
 
+    /* check sequence */
+    dcp_log(LOG_DEBUG,"%-15.15s: checking file sequence","opendcp_j2k_cmd",in_path);
+    int s = check_file_sequence(filelist->in, filelist->file_count);
+    if (s) {
+        dcp_log(LOG_WARN,"file sequence mismatch between %s and %s",filelist->in[s-1],filelist->in[s]);
+    }
+
     if (opendcp->log_level>0 && opendcp->log_level<3) { progress_bar(0,0); }
 
 #ifdef OPENMP
