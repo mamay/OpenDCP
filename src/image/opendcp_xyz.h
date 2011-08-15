@@ -1,6 +1,6 @@
 /*
     OpenDCP: Builds Digital Cinema Packages
-    Copyright (c) 2010 Terrence Meiczinger, All Rights Reserved
+    Copyright (c) 2010-2011 Terrence Meiczinger, All Rights Reserved
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ static float color_matrix[3][3][3] = {
      {0.0000000000, 0.0470605601, 0.9073553944}}
 };
 
-static float lut_in[2][4096] = {
+static float lut_in[LI_MAX][4096] = {
     // Bit Depth:       12
     // Reference White: sRGB
     // Gamma:           2.2

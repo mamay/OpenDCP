@@ -1,6 +1,6 @@
 /*
     OpenDCP: Builds Digital Cinema Packages
-    Copyright (c) 2010 Terrence Meiczinger, All Rights Reserved
+    Copyright (c) 2010-2011 Terrence Meiczinger, All Rights Reserved
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,9 +54,9 @@ typedef struct {
     int n_components;
 } odcp_image_t;
 
-int  read_tif(odcp_image_t **image_ptr, const char *infile, int fd);
+int  read_tif(opendcp_t *opendcp, odcp_image_t **image_ptr, const char *infile, int fd);
 int  write_tif(odcp_image_t *image, const char *outfile, int fd);
-int  read_dpx(odcp_image_t **image_ptr, const char *infile, int fd);
+int  read_dpx(opendcp_t *opendcp, odcp_image_t **image_ptr, const char *infile, int fd);
 odcp_image_t *odcp_image_create(int n_components, int w, int h);
 void odcp_image_free(odcp_image_t *image);
 int odcp_image_readline(odcp_image_t *image, int y, unsigned char *data); 

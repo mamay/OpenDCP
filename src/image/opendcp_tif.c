@@ -1,6 +1,6 @@
 /*
     OpenDCP: Builds Digital Cinema Packages
-    Copyright (c) 2010 Terrence Meiczinger, All Rights Reserved
+    Copyright (c) 2010-2011 Terrence Meiczinger, All Rights Reserved
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,17 +40,17 @@ typedef struct {
     uint16_t   photo;
     uint16_t   planar;
     int        supported;
-} tiff_t;
+} tiff_image_t;
 
-void tif_set_strip(tiff_t *tif) {
+void tif_set_strip(tiff_image_t *tif) {
     tif->strip_num  = TIFFNumberOfStrips(tif->fp);
     tif->strip_size = TIFFStripSize(tif->fp);
     tif->strip_data = _TIFFmalloc(tif->strip_size);
 }
 
-int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
-    tiff_t     tif;
-    int        i,index;
+int read_tif(opendcp_t *opendcp, odcp_image_t **image_ptr, const char *infile, int fd) {
+    tiff_image_t tif;
+    int          i,index;
     odcp_image_t *image = 00;
 
     /* open tiff using filename or file descriptor */

@@ -1,6 +1,6 @@
 /*
     OpenDCP: Builds Digital Cinema Packages
-    Copyright (c) 2010 Terrence Meiczinger, All Rights Reserved
+    Copyright (c) 2010-2011 Terrence Meiczinger, All Rights Reserved
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -73,21 +73,22 @@ void dcp_usage() {
     fprintf(fp,"       -o | --output <file>           - output file or directory\n");
     fprintf(fp,"\n");
     fprintf(fp,"Options:\n");
-    fprintf(fp,"       -r | --rate <rate>             - frame rate (default 24)\n");
-    fprintf(fp,"       -p | --profile <profile>       - profile cinema2k | cinema4k (default cinema2k)\n");
-    fprintf(fp,"       -3 | --3d                      - Adjust frame rate for 3D\n");
-    fprintf(fp,"       -t | --threads <threads>       - Set number of threads (default 4)\n");
-    fprintf(fp,"       -x | --no_xyz                  - do not perform rgb->xyz color conversion\n");
-    fprintf(fp,"       -e | --encoder <0 | 1>         - jpeg2000 encoder 0:openjpeg 1:kakadu^ (default openjpeg)\n");
-    fprintf(fp,"       -b | --bw                      - Max Mbps bandwitdh (default: 250)\n");
-    fprintf(fp,"       -n | --no_overwrite            - do not overwrite existing jpeg2000 files\n");
-    fprintf(fp,"       -l | --log_level <level>       - Sets the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
-    fprintf(fp,"       -h | --help                    - show help\n");
-    fprintf(fp,"       -g | --lut                     - select color conversion LUT, 0:srgb, 1:rec709\n");
-    fprintf(fp,"       -s | --start                   - start frame\n");
-    fprintf(fp,"       -d | --end                     - end frame\n");
-    fprintf(fp,"       -v | --version                 - show version\n");
-    fprintf(fp,"       -m | --tmp_dir                 - sets temporary directory (usually tmpfs one) to save there temporary tiffs for Kakadu");
+    fprintf(fp,"       -r | --rate <rate>                 - frame rate (default 24)\n");
+    fprintf(fp,"       -p | --profile <profile>           - profile cinema2k | cinema4k (default cinema2k)\n");
+    fprintf(fp,"       -3 | --3d                          - adjust frame rate for 3D\n");
+    fprintf(fp,"       -t | --threads <threads>           - set number of threads (default 4)\n");
+    fprintf(fp,"       -x | --no_xyz                      - do not perform rgb->xyz color conversion\n");
+    fprintf(fp,"       -e | --encoder <0 | 1>             - jpeg2000 encoder 0:openjpeg 1:kakadu (default openjpeg)\n");
+    fprintf(fp,"       -g | --dpx <linear | film | video  - process dpx image as linear, log film, or log video (default linear)\n");
+    fprintf(fp,"       -b | --bw                          - max Mbps bandwitdh (default: 250)\n");
+    fprintf(fp,"       -n | --no_overwrite                - do not overwrite existing jpeg2000 files\n");
+    fprintf(fp,"       -l | --log_level <level>           - sets the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
+    fprintf(fp,"       -h | --help                        - show help\n");
+    fprintf(fp,"       -c | --lut                         - select color conversion LUT, 0:srgb, 1:rec709\n");
+    fprintf(fp,"       -s | --start                       - start frame\n");
+    fprintf(fp,"       -d | --end                         - end frame\n");
+    fprintf(fp,"       -v | --version                     - show version\n");
+    fprintf(fp,"       -m | --tmp_dir                     - sets temporary directory (usually tmpfs one) to save there temporary tiffs for Kakadu");
     fprintf(fp,"\n\n");
     fprintf(fp,"^ Kakadu requires you to download and have the kdu_compress utility in your path.\n");
     fprintf(fp,"  You must agree to the Kakadu licensing terms and assume all respsonsibility of its use.\n");
@@ -260,7 +261,8 @@ int main (int argc, char **argv) {
             {"help",           required_argument, 0, 'h'},
             {"input",          required_argument, 0, 'i'},
             {"output",         required_argument, 0, 'o'},
-            {"bw     ",        required_argument, 0, 'b'},
+            {"bw",             required_argument, 0, 'b'},
+            {"dpx ",           required_argument, 0, 'g'},
             {"rate",           required_argument, 0, 'r'},
             {"profile",        required_argument, 0, 'p'},
             {"log_level",      required_argument, 0, 'l'},
@@ -273,14 +275,14 @@ int main (int argc, char **argv) {
             {"3d",             no_argument,       0, '3'},
             {"version",        no_argument,       0, 'v'},
             {"tmp_dir",        required_argument, 0, 'm'},
-            {"lut",            required_argument, 0, 'g'},
+            {"lut",            required_argument, 0, 'c'},
             {0, 0, 0, 0}
         };
 
         /* getopt_long stores the option index here. */
         int option_index = 0;
      
-        c = getopt_long (argc, argv, "b:d:e:i:o:r:s:p:l:t:m:g:3hvxn",
+        c = getopt_long (argc, argv, "b:c:d:e:i:o:r:s:p:l:t:m:g:3hvxn",
                          long_options, &option_index);
      
         /* Detect the end of the options. */
@@ -303,6 +305,17 @@ int main (int argc, char **argv) {
                 break;
             case 's':
                 opendcp->j2k.start_frame = atoi(optarg);
+                break;
+            case 'g':
+                if (!strcmp(optarg,"linear")) {
+                    opendcp->j2k.dpx = DPX_LINEAR;
+                } else if (!strcmp(optarg,"film")) {
+                    opendcp->j2k.dpx = DPX_FILM;
+                } else if (!strcmp(optarg,"video")) {
+                    opendcp->j2k.dpx = DPX_VIDEO;
+                } else {
+                    dcp_fatal(opendcp,"Invalid DPX argument");
+                }
                 break;
             case 'p':
                 if (!strcmp(optarg,"cinema2k")) {
@@ -347,7 +360,7 @@ int main (int argc, char **argv) {
             case 'm':
                 tmp_path = optarg;
                 break;
-            case 'g':
+            case 'c':
                 opendcp->lut = atoi(optarg);
                 break;
         }

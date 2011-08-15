@@ -1,6 +1,6 @@
 /*
     OpenDCP: Builds Digital Cinema Packages
-    Copyright (c) 2010 Terrence Meiczinger, All Rights Reserved
+    Copyright (c) 2010=2011 Terrence Meiczinger, All Rights Reserved
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -142,6 +142,12 @@ enum J2K_ENCODER {
     J2K_KAKADU
 };
 
+enum DPX_MODE {
+    DPX_LINEAR = 0,
+    DPX_FILM,
+    DPX_VIDEO
+};
+
 typedef struct filelist_t {
     char           **in;
     char           **out;
@@ -224,6 +230,7 @@ typedef struct {
     int            start_frame;
     int            end_frame;
     int            duration;
+    int            dpx;
 } j2k_options_t;
 
 typedef struct {

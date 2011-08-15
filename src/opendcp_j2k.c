@@ -131,9 +131,9 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
     #endif
     {
     if (strnicmp(extension,"tif",3) == 0) {
-        result = read_tif(&odcp_image, in_file,0);
+        result = read_tif(opendcp, &odcp_image, in_file,0);
     } else if (strnicmp(extension,"dpx",3) == 0) {
-        result = read_dpx(&odcp_image, in_file,0);
+        result = read_dpx(opendcp, &odcp_image, in_file,0);
     }
     }
 

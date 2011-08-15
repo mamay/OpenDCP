@@ -1,6 +1,6 @@
 /*
-    OpenDCP: Builds XML files for Digital Cinema Packages
-    Copyright (c) 2010 Terrence Meiczinger, All Rights Reserved
+    OpenDCP: Builds Digital Cinema Packages
+    Copyright (c) 2010-2011 Terrence Meiczinger, All Rights Reserved
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
