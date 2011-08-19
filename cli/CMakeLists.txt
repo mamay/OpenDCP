@@ -5,30 +5,28 @@ MESSAGE(STATUS "----------------------------------------------------------------
 MESSAGE(STATUS "Creating Build Files")
 MESSAGE(STATUS "-------------------------------------------------------------------------------")
 
-#--Set opendcplib source files------------------------------------------------
+#--set opendcplib source files------------------------------------------------
+INCLUDE_DIRECTORIES(
+  ${OPENDCP_SOURCE_DIR}/libopendcp
+  ${OPENDCP_SOURCE_DIR}/cli
+)
+#-----------------------------------------------------------------------------
+
+#--set cli source files-------------------------------------------------------
 SET(OPENDCP_TARGETS opendcp_xml opendcp_j2k opendcp_mxf)
-SET(OPENDCP_SRC_FILES opendcp_j2k.c opendcp_xml.c opendcp_common.c opendcp_log.c asdcp_intf.cpp image/opendcp_tif.c image/opendcp_image.c image/opendcp_dpx.c)
 IF(ENABLE_XMLSEC)
     SET(OPENDCP_TARGETS ${OPENDCP_TARGETS} opendcp_xml_verify)
     SET(OPENDCP_SEC_FILES opendcp_xml_verify.c opendcp_xml_sign.c)
 ENDIF(ENABLE_XMLSEC)
 #-----------------------------------------------------------------------------
 
-#--Set output targets and paths-----------------------------------------------
+#--set output targets and paths-----------------------------------------------
 SET(OPENDCP_TARGETS opendcp_xml opendcp_j2k opendcp_mxf opendcp_largefile)
 SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin/")
-SET(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib/")
 SET(OPENDCP_LIB "${PROJECT_BINARY_DIR}/lib/libopendcp.a")
 #-----------------------------------------------------------------------------
 
-#--opendcplib-----------------------------------------------------------------
-ADD_LIBRARY(opendcp STATIC ${OPENDCP_SEC_FILES} ${OPENDCP_SRC_FILES})
-TARGET_LINK_LIBRARIES(opendcp ${LIBS})
-INSTALL(TARGETS opendcp DESTINATION lib)
-INSTALL(FILES opendcp.h DESTINATION include)
-#-----------------------------------------------------------------------------
-
-#--opendcp tools--------------------------------------------------------------
+#--compile cli tools----------------------------------------------------------
 ADD_EXECUTABLE(opendcp_largefile opendcp_largefile.c opendcp_force_cpp.cpp)
 TARGET_LINK_LIBRARIES(opendcp_largefile ${OPENDCP_LIB} ${LIBS})
 
@@ -47,7 +45,7 @@ IF(ENABLE_XMLSEC)
 ENDIF(ENABLE_XMLSEC)
 #-----------------------------------------------------------------------------
 
-#--install tools--------------------------------------------------------------
+#--install cli tools----------------------------------------------------------
 SET_TARGET_PROPERTIES(${OPENDCP_TARGETS} PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 INSTALL(TARGETS ${OPENDCP_TARGETS} 
   DESTINATION ${OPENDCP_INSTALL_BIN_DIR} COMPONENT Applications

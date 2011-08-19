@@ -35,7 +35,6 @@ ENDIF()
 #--Set Base Compiler Flags----------------------------------------------------
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 ${OPENMP}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 ${OPENMP}")
-SET(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
 #-----------------------------------------------------------------------------
 
 #--Set OS Specific Compiler Flags---------------------------------------------
@@ -100,7 +99,7 @@ IF(ENABLE_STATIC)
     SET(LIBS ${LIBS} "-L${LIB_DIR} -lopenjpeg -ltiff")
     SET(LIBS ${LIBS} "-L${LIB_DIR} -lexpat")
     IF(ENABLE_XMLSEC)
-        SET(LIBS ${LIBS} "-L${LIB_DIR} -lxmlsec1-openssl -lxmlsec1 -lxslt -lxml2 -liconv")
+        SET(LIBS ${LIBS} "-L${LIB_DIR} -lxmlsec1-openssl -lxmlsec1 -lxslt -lxml2")
     ENDIF(ENABLE_XMLSEC)
     SET(LIBS ${LIBS} "-L${LIB_DIR} -lssl -lcrypto" )
     SET(LIBS ${LIBS} "-lz")
@@ -151,10 +150,6 @@ ELSE()
     INCLUDE_DIRECTORIES(${TIFF_INCLUDE_DIR})
     SET(LIBS ${LIBS} ${TIFF_LIBRARIES})
 
-    #FIND_PACKAGE(JPEG REQUIRED)
-    #INCLUDE_DIRECTORIES(${JPEG_INCLUDE_DIR})
-    #SET(LIBS ${LIBS} ${JPEG_LIBRARIES})
-
     FIND_PACKAGE(OpenJPEG REQUIRED)
     INCLUDE_DIRECTORIES(${OPENJPEG_INCLUDE_DIR})
     SET(LIBS ${LIBS} ${OPENJPEG_LIBRARIES})
@@ -162,5 +157,7 @@ ENDIF()
 #-----------------------------------------------------------------------------
 
 #--Add source directory-------------------------------------------------------
-ADD_SUBDIRECTORY(src)
+ADD_SUBDIRECTORY(opendcplib)
+ADD_SUBDIRECTORY(cli)
+ADD_SUBDIRECTORY(gui)
 #-----------------------------------------------------------------------------
