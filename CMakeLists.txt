@@ -157,7 +157,7 @@ ENDIF()
 #-----------------------------------------------------------------------------
 
 #--Add source directory-------------------------------------------------------
-ADD_SUBDIRECTORY(opendcplib)
+ADD_SUBDIRECTORY(libopendcp)
 ADD_SUBDIRECTORY(cli)
 ADD_SUBDIRECTORY(gui)
 #-----------------------------------------------------------------------------
