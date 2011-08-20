@@ -229,6 +229,7 @@ typedef struct {
 typedef struct {
     int            start_frame;
     int            end_frame;
+    int            encoder;
     int            duration;
     int            dpx;
 } j2k_options_t;
@@ -243,7 +244,6 @@ typedef unsigned char byte_t;
 
 typedef struct {
     int            cinema_profile;
-    int            encoder;
     int            frame_rate;
     int            duration;
     int            entry_point;

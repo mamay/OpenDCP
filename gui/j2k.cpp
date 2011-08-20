@@ -230,9 +230,9 @@ void MainWindow::startJ2k() {
     }
 
     if (ui->encoderComboBox->currentIndex() == 0) {
-        context->encoder = J2K_OPENJPEG;
+        context->j2k.encoder = J2K_OPENJPEG;
     } else {
-        context->encoder = J2K_KAKADU;
+        context->j2k.encoder = J2K_KAKADU;
     }
 
     if (ui->stereoscopicCheckBox->checkState()) {

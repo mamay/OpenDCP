@@ -165,7 +165,7 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
         }
     }
 
-    if ( opendcp->encoder == J2K_KAKADU ) {
+    if ( opendcp->j2k.encoder == J2K_KAKADU ) {
         char tempfile[255];
         sprintf(tempfile,"%s/tmp_%s.tif",tmp_path,basename(in_file));
         dcp_log(LOG_DEBUG,"%-15.15s: Writing temporary tif %s","convet_to_j2k",tempfile);

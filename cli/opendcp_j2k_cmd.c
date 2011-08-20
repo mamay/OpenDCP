@@ -78,20 +78,20 @@ void dcp_usage() {
     fprintf(fp,"       -3 | --3d                          - adjust frame rate for 3D\n");
     fprintf(fp,"       -t | --threads <threads>           - set number of threads (default 4)\n");
     fprintf(fp,"       -x | --no_xyz                      - do not perform rgb->xyz color conversion\n");
-    fprintf(fp,"       -e | --encoder <0 | 1>             - jpeg2000 encoder 0:openjpeg 1:kakadu (default openjpeg)\n");
-    fprintf(fp,"       -g | --dpx <linear | film | video  - process dpx image as linear, log film, or log video (default linear)\n");
+    fprintf(fp,"       -e | --encoder <openjpeg | kakadu> - jpeg2000 encoder (default openjpeg)\n");
+    fprintf(fp,"       -g | --dpx <linear | film | video> - process dpx image as linear, log film, or log video (default linear)\n");
     fprintf(fp,"       -b | --bw                          - max Mbps bandwitdh (default: 250)\n");
     fprintf(fp,"       -n | --no_overwrite                - do not overwrite existing jpeg2000 files\n");
     fprintf(fp,"       -l | --log_level <level>           - sets the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
     fprintf(fp,"       -h | --help                        - show help\n");
-    fprintf(fp,"       -c | --lut                         - select color conversion LUT, 0:srgb, 1:rec709\n");
+    //fprintf(fp,"       -c | --lut                         - select color conversion LUT, 0:srgb, 1:rec709\n");
     fprintf(fp,"       -s | --start                       - start frame\n");
     fprintf(fp,"       -d | --end                         - end frame\n");
     fprintf(fp,"       -v | --version                     - show version\n");
     fprintf(fp,"       -m | --tmp_dir                     - sets temporary directory (usually tmpfs one) to save there temporary tiffs for Kakadu");
     fprintf(fp,"\n\n");
     fprintf(fp,"^ Kakadu requires you to download and have the kdu_compress utility in your path.\n");
-    fprintf(fp,"  You must agree to the Kakadu licensing terms and assume all respsonsibility of its use.\n");
+    fprintf(fp,"  You must agree to the Kakadu non-commerical licensing terms and assume all respsonsibility of its use.\n");
     fprintf(fp,"\n\n");
     
     fclose(fp);
@@ -244,7 +244,7 @@ int main (int argc, char **argv) {
     opendcp->xyz             = 1;
     opendcp->log_level       = LOG_WARN;
     opendcp->cinema_profile  = DCP_CINEMA2K;
-    opendcp->encoder         = J2K_OPENJPEG;
+    opendcp->j2k.encoder     = J2K_OPENJPEG;
     opendcp->frame_rate      = 24;
     opendcp->j2k.start_frame = 1;
     opendcp->bw              = 250;
@@ -322,6 +322,8 @@ int main (int argc, char **argv) {
                     opendcp->cinema_profile = DCP_CINEMA2K;
                 } else if (!strcmp(optarg,"cinema4k")) {
                     opendcp->cinema_profile = DCP_CINEMA4K;
+                } else {
+                    dcp_fatal(opendcp,"Invalid profile argument");
                 }
                 break;
             case 'i':
@@ -340,7 +342,13 @@ int main (int argc, char **argv) {
                 opendcp->frame_rate = atoi(optarg);
                 break;
             case 'e':
-                opendcp->encoder = atoi(optarg);
+                if (!strcmp(optarg,"openjpeg")) {
+                    opendcp->j2k.encoder = J2K_OPENJPEG;
+                } else if (!strcmp(optarg,"kakadu")) {
+                    opendcp->j2k.encoder = J2K_KAKADU;
+                } else {
+                    dcp_fatal(opendcp,"Invalid encoder argument");
+                }
                 break;
             case 'b':
                 opendcp->bw = atoi(optarg);
@@ -371,7 +379,7 @@ int main (int argc, char **argv) {
 
     if (opendcp->log_level > 0) {
         printf("\nOpenDCP J2K %s %s\n",OPEN_DCP_VERSION,OPEN_DCP_COPYRIGHT);
-        if (opendcp->encoder == J2K_KAKADU) {
+        if (opendcp->j2k.encoder == J2K_KAKADU) {
             printf("  Encoder: Kakadu\n");
         } else {
             printf("  Encoder: OpenJPEG\n");
@@ -399,7 +407,7 @@ int main (int argc, char **argv) {
     }
 
     /* encoder check */
-    if (opendcp->encoder == J2K_KAKADU) {
+    if (opendcp->j2k.encoder == J2K_KAKADU) {
         result = system("kdu_compress -u >/dev/null 2>&1");
         if (result>>8 != 0) {
             dcp_fatal(opendcp,"kdu_compress was not found. Either add to path or remove -e 1 flag");
