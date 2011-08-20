@@ -83,7 +83,7 @@ IF(ENABLE_XMLSEC)
                           --enable-static-linking=yes
                           --with-libxml=${PREFIX}
                           --with-libxslt=${PREFIX}
-                          #--with-openssl=${PREFIX}
+                          --with-openssl=${PREFIX}
                           --with-default-crypto=openssl
                            ${TARGET} 
         BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile

@@ -33,7 +33,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include "opendcp.h"
+#include <opendcp.h>
 
 #ifndef WIN32
 #define strnicmp strncasecmp

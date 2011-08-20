@@ -66,6 +66,7 @@ ENDIF()
 
 #--Build Paths----------------------------------------------------------------
 INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/include")
+INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/libopendcp")
 SET(OPENDCP_INSTALL_BIN_DIR "bin")
 #-----------------------------------------------------------------------------
 

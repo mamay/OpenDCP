@@ -17,11 +17,12 @@ INCLUDE(${QT_USE_FILE})
 #--set application icon and information---------------------------------------
 IF(APPLE)
     SET(PROGNAME OpenDCP)
-    SET(MACOSX_BUNDLE_ICON_FILE resources/opendcp.icns)
+    SET(MACOSX_BUNDLE_ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.icns)
     SET(MACOSX_BUNDLE_SHORT_VERSION_STRING ${OpenDCP_VERSION})
     SET(MACOSX_BUNDLE_VERSION ${OpenDCP_VERSION})
     SET(MACOSX_BUNDLE_LONG_VERSION_STRING ${OpenDCP_VERSION})
-    SET(CMAKE_OSX_ARCHITECTURES i386;x86_64)
+    SET(CMAKE_OSX_ARCHITECTURES x86_64)
+    #SET(CMAKE_OSX_ARCHITECTURES i386;x86_64)
 ELSEIF(UNIX)
     SET(PROGNAME opendcp)
 
@@ -40,7 +41,7 @@ ELSEIF(UNIX)
         DEPENDS ${DESKTOP_ENTRY}
     )
   
-    SET(APP_ICON resources/opendcp.png)
+    SET(APP_ICON ${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.png)
 ELSE()
     SET(PROGNAME opendcp)
 ENDIF()
@@ -66,47 +67,62 @@ SET(OPENDCP_GUI_UI
     generatetitle.ui
 )
 
-SET(OPENDCP_GUI_RES 
-    resources/resources.qrc
+SET(OPENDCP_GUI_RES
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/resources.qrc
 )
+
+SET(OPENDCP_GUI_RES_CXX
+     opendcp_resources.cpp 
+)
+
 #-----------------------------------------------------------------------------
 
 #--win32 icon and info--------------------------------------------------------
 IF(MING)
     ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/opendcpico.o
-                        COMMAND windres.exe -I${CMAKE_CURRENT_SOURCE_DIR} -i${CMAKE_CURRENT_SOURCE_DIR}resources/opendcp.rc 
+                        COMMAND windres.exe -I${CMAKE_CURRENT_SOURCE_DIR} -i${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.rc 
                                 -o ${CMAKE_CURRENT_BINARY_DIR}/opendcp.o)
     SET(OPENDCP_GUI_CXX_SRC ${OPENDCP_GUI_CXX_SRC} ${CMAKE_CURRENT_BINARY_DIR}/opendcp.o)
 ELSE()
-    SET(OPENDCP_GUI_CXX_SRC ${OPENDCP_GUI_CXX_SRC} resources/opendcp.rc)
+#    SET(OPENDCP_GUI_CXX_SRC ${OPENDCP_GUI_CXX_SRC} ${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.rc)
 ENDIF()
 #-----------------------------------------------------------------------------
 
 #--add qt4 src----------------------------------------------------------------
-QT4_ADD_RESOURCES(OPENDCP_GUI_RES_SRC ${OPEDNDCP_GUI_RES})
-QT4_WRAP_UI(OPENDCP_FORM_H_SRC ${OPENDCP_GUI_UI})
-QT4_WRAP_CPP(OPENDCP_MOC_H_SRC ${OPENDCP_GUI_H_SRC})
+QT4_ADD_RESOURCES(OPENDCP_GUI_RES_CXX ${OPEDNDCP_GUI_RES})
+QT4_WRAP_UI(OPENDCP_FORM_H ${OPENDCP_GUI_UI})
+QT4_WRAP_CPP(OPENDCP_MOC_H ${OPENDCP_GUI_H_SRC})
 #-----------------------------------------------------------------------------
 
 #--compile gui----------------------------------------------------------------
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 IF(APPLE)
-    ADD_EXECUTABLE(${PROGNAME} MACOSX_BUNDLE ${OPENDCP_GUI_CXX_SRC} ${OPENDCP_GUI_RES_SRC})
+    ADD_CUSTOM_COMMAND(OUTPUT ${OPENDCP_GUI_RES_CXX}  
+        COMMAND ${QT_RCC_EXECUTABLE}
+        ARGS ${rcc_options} -name ${OPENDCP_GUI_RES_CXX} -o ${OPENDCP_GUI_RES_CXX} ${OPENDCP_GUI_RES} 
+        MAIN_DEPENDENCY ${OPENDCP_GUI_RES} 
+        DEPENDS ${_RC_DEPENDS})
+
+    ADD_EXECUTABLE(${PROGNAME} MACOSX_BUNDLE ${OPENDCP_GUI_CXX_SRC} ${OPENDCP_GUI_RES_CXX} ${OPENDCP_FORM_H} ${OPENDCP_MOC_H})
     SET(OPENDCP_GUI_RESOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/${PROGNAME}.app/Contents/Resources)
     ADD_CUSTOM_COMMAND(TARGET ${PROGNAME} POST_BUILD
       COMMAND mkdir ARGS -p ${OPENDCP_GUI_RESOURCE_DIR} 
       COMMAND cp ARGS ${MACOSX_BUNDLE_ICON_FILE} ${CMAKE_CURRENT_BINARY_DIR}/${PROGNAME}.app/Contents/Resources
-      COMMAND cp ARGS *.qm ${CMAKE_CURRENT_BINARY_DIR}/${PROGNAME}.app/Contents/Resources)
+      #COMMAND cp ARGS *.qm ${CMAKE_CURRENT_BINARY_DIR}/${PROGNAME}.app/Contents/Resources)
+    )
 ELSE()
-    ADD_EXECUTABLE(${PROGNAME} ${OPENDCP_GUI_CXX_SRC} ${OPEDNDCP_GUI_RES} ${OPENDCP_GUI_RES_SRC} ${OPENDCP_FORM_H_SRC} ${OPENDCP_MOC_H_SRC})
+    ADD_EXECUTABLE(${PROGNAME} ${OPENDCP_GUI_CXX_SRC} ${OPENDCP_GUI_RES_CXX} ${OPENDCP_FORM_H} ${OPENDCP_MOC_H})
 ENDIF()
 #----------------------------------------------------------------------------
 
-#--install gui----------------------------------------------------------------
+#--build---------------------------------------------------------------------
 SET(OPENDCP_LIB "${PROJECT_BINARY_DIR}/lib/libopendcp.a")
 SET_TARGET_PROPERTIES(${PROGNAME} PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 TARGET_LINK_LIBRARIES(${PROGNAME} ${QT_LIBRARIES} ${OPENDCP_LIB} ${LIBS} ${LINK_FLAGS})
+#----------------------------------------------------------------------------
+
+#--install-------------------------------------------------------------------
 INSTALL(TARGETS ${PROGNAME} DESTINATION bin)
 IF(UNIX AND NOT APPLE)
     INSTALL(FILES ${APP_ICON} DESTINATION share/icons)

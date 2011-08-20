@@ -5,13 +5,6 @@ MESSAGE(STATUS "----------------------------------------------------------------
 MESSAGE(STATUS "Creating Build Files")
 MESSAGE(STATUS "-------------------------------------------------------------------------------")
 
-#--set opendcplib source files------------------------------------------------
-INCLUDE_DIRECTORIES(
-  ${OPENDCP_SOURCE_DIR}/libopendcp
-  ${OPENDCP_SOURCE_DIR}/cli
-)
-#-----------------------------------------------------------------------------
-
 #--set cli source files-------------------------------------------------------
 SET(OPENDCP_TARGETS opendcp_xml opendcp_j2k opendcp_mxf)
 IF(ENABLE_XMLSEC)
