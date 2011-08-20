@@ -117,7 +117,6 @@ ENDIF()
 #----------------------------------------------------------------------------
 
 #--build---------------------------------------------------------------------
-SET(OPENDCP_LIB "${PROJECT_BINARY_DIR}/lib/libopendcp.a")
 SET_TARGET_PROPERTIES(${PROGNAME} PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 TARGET_LINK_LIBRARIES(${PROGNAME} ${QT_LIBRARIES} ${OPENDCP_LIB} ${LIBS} ${LINK_FLAGS})
 #----------------------------------------------------------------------------

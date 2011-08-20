@@ -114,14 +114,14 @@ ELSE()
     SET(OPENSSL_CONFIGURE <SOURCE_DIR>/config ${PREFIX_ARG})
 ENDIF()
 
-#EXTERNALPROJECT_ADD(05_OPENSSL
-#    URL http://www.openssl.org/source/openssl-0.9.8r.tar.gz
-#    BUILD_IN_SOURCE 1
-#    PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/openssl-0.9.8r.patch
-#    CONFIGURE_COMMAND ${OPENSSL_CONFIGURE}
-#    BUILD_COMMAND ${OPENSSL_MAKE} -f <SOURCE_DIR>/Makefile
-#    INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
-#)
+EXTERNALPROJECT_ADD(05_OPENSSL
+    URL http://www.openssl.org/source/openssl-0.9.8r.tar.gz
+    BUILD_IN_SOURCE 1
+    PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/openssl-0.9.8r.patch
+    CONFIGURE_COMMAND ${OPENSSL_CONFIGURE}
+    BUILD_COMMAND ${OPENSSL_MAKE} -f <SOURCE_DIR>/Makefile
+    INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+)
 
 IF(PREFIX)
     SET(OPENSSL_PREFIX ${PREFIX})

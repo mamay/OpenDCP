@@ -13,7 +13,7 @@ ENDIF(ENABLE_XMLSEC)
 #-----------------------------------------------------------------------------
 
 #--Set output targets and paths-----------------------------------------------
-SET(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib/")
+SET(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/libopendcp/")
 #-----------------------------------------------------------------------------
 
 #--compile opendcplib---------------------------------------------------------

@@ -15,8 +15,7 @@ ENDIF(ENABLE_XMLSEC)
 
 #--set output targets and paths-----------------------------------------------
 SET(OPENDCP_TARGETS opendcp_xml opendcp_j2k opendcp_mxf opendcp_largefile)
-SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin/")
-SET(OPENDCP_LIB "${PROJECT_BINARY_DIR}/lib/libopendcp.a")
+SET(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}")
 #-----------------------------------------------------------------------------
 
 #--compile cli tools----------------------------------------------------------

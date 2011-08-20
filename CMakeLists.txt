@@ -14,7 +14,7 @@ ADD_DEFINITIONS(-DOPENDCP_VERSION="${OpenDCP_VERSION}")
 
 #--Options--------------------------------------------------------------------
 OPTION(ENABLE_XMLSEC "Enable XML digital singatures and security features" ON)
-OPTION(ENABLE_OSX386 "Enable i386" ON)
+OPTION(ENABLE_OSX386 "Enable i386" OFF)
 OPTION(ENABLE_OSX10.5 "Enable OSX 10.5 compatibility" OFF)
 OPTION(ENABLE_OPENMP "Enable OPENMP multithreading" ON)
 OPTION(ENABLE_STATIC "Enable static link to libraries" OFF)
@@ -68,6 +68,7 @@ ENDIF()
 INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/include")
 INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/libopendcp")
 SET(OPENDCP_INSTALL_BIN_DIR "bin")
+SET(OPENDCP_LIB "${PROJECT_BINARY_DIR}/libopendcp/libopendcp.a")
 #-----------------------------------------------------------------------------
 
 #--Contrib Paths--------------------------------------------------------------
