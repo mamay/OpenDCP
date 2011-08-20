@@ -18,6 +18,7 @@ OPTION(ENABLE_OSX386 "Enable i386" OFF)
 OPTION(ENABLE_OSX10.5 "Enable OSX 10.5 compatibility" OFF)
 OPTION(ENABLE_OPENMP "Enable OPENMP multithreading" ON)
 OPTION(ENABLE_STATIC "Enable static link to libraries" OFF)
+OPTION(ENABLE_GUI    "Enable GUI compiling" OFF)
 
 IF(ENABLE_XMLSEC)
     ADD_DEFINITIONS(-DXMLSEC)
@@ -161,5 +162,7 @@ ENDIF()
 #--Add source directory-------------------------------------------------------
 ADD_SUBDIRECTORY(libopendcp)
 ADD_SUBDIRECTORY(cli)
-ADD_SUBDIRECTORY(gui)
+IF(ENABLE_GUI)
+    ADD_SUBDIRECTORY(gui)
+ENDIF()
 #-----------------------------------------------------------------------------
