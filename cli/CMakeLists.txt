@@ -23,23 +23,23 @@ ADD_EXECUTABLE(opendcp_largefile opendcp_largefile.c opendcp_force_cpp.cpp)
 TARGET_LINK_LIBRARIES(opendcp_largefile ${OPENDCP_LIB} ${LIBS})
 
 ADD_EXECUTABLE(opendcp_xml opendcp_xml_cmd.c opendcp_force_cpp.cpp)
-TARGET_LINK_LIBRARIES(opendcp_xml ${OPENDCP_LIB} ${LIBS})
+TARGET_LINK_LIBRARIES(opendcp_xml ${OPENDCP_LIB} ${ASDCP_LIBRARIES} ${LIBS})
 
 ADD_EXECUTABLE(opendcp_j2k opendcp_j2k_cmd.c opendcp_force_cpp.cpp)
-TARGET_LINK_LIBRARIES(opendcp_j2k ${OPENDCP_LIB} ${LIBS})
+TARGET_LINK_LIBRARIES(opendcp_j2k ${OPENDCP_LIB} ${ASDCP_LIBRARIES} ${LIBS})
 
 ADD_EXECUTABLE(opendcp_mxf opendcp_mxf_cmd.c opendcp_force_cpp.cpp)
-TARGET_LINK_LIBRARIES(opendcp_mxf ${OPENDCP_LIB} ${LIBS})
+TARGET_LINK_LIBRARIES(opendcp_mxf ${OPENDCP_LIB} ${ASDCP_LIBRARIES} ${LIBS})
 
 IF(ENABLE_XMLSEC)
     ADD_EXECUTABLE(opendcp_xml_verify opendcp_xml_verify_cmd.c opendcp_force_cpp.cpp)
-    TARGET_LINK_LIBRARIES(opendcp_xml_verify ${OPENDCP_LIB} ${LIBS})
+    TARGET_LINK_LIBRARIES(opendcp_xml_verify ${OPENDCP_LIB} ${ASDCP_LIB} ${LIBS})
 ENDIF(ENABLE_XMLSEC)
 #-----------------------------------------------------------------------------
 
 #--install cli tools----------------------------------------------------------
 SET_TARGET_PROPERTIES(${OPENDCP_TARGETS} PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 INSTALL(TARGETS ${OPENDCP_TARGETS} 
-  DESTINATION ${OPENDCP_INSTALL_BIN_DIR} COMPONENT Applications
+  DESTINATION bin COMPONENT Applications
 )
 #-----------------------------------------------------------------------------

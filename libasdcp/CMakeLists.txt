@@ -1,0 +1,79 @@
+cmake_minimum_required(VERSION 2.8)
+
+MESSAGE(STATUS)
+MESSAGE(STATUS "-------------------------------------------------------------------------------")
+MESSAGE(STATUS "Creating ASDCPLIB Library Build Files")
+MESSAGE(STATUS "-------------------------------------------------------------------------------")
+
+#--Version--------------------------------------------------------------------
+SET(ASDCP_VERSION_MAJOR 1)
+SET(ASDCP_VERSION_MINOR 7)
+SET(ASDCP_VERSION_BUILD 40)
+SET(ASDCP_VERSION "${ASDCP_VERSION_MAJOR}.${ASDCP_VERSION_MINOR}.${ASDCP_VERSION_BUILD}")
+ADD_DEFINITIONS(-DASDCP_VERSION="${ASDCP_VERSION}")
+ADD_DEFINITIONS(-DPACKAGE_VERSION="${ASDCP_VERSION}")
+IF(WIN32)
+    SET(PLATFORM "win32")
+ELSEIF(APPLE)
+    SET(PLATFORM "osx")
+ELSE()
+    SET(PLATFORM "unix")
+ENDIF()
+ADD_DEFINITIONS(-DASDCP_PLATFORM="${PLATFORM}")
+#-----------------------------------------------------------------------------
+
+#--set source files-----------------------------------------------------------
+SET(KUMU_SRC_FILES
+    KM_fileio.cpp
+    KM_log.cpp
+    KM_prng.cpp
+    KM_util.cpp
+    KM_xml.cpp
+    KM_tai.cpp
+)
+
+SET(ASDCP_SRC_FILES
+    AS_DCP.cpp
+    AS_DCP_AES.cpp
+    AS_DCP_JP2K.cpp
+    AS_DCP_MPEG2.cpp
+    AS_DCP_MXF.cpp
+    AS_DCP_PCM.cpp
+    AS_DCP_TimedText.cpp
+    Dict.cpp
+    h__Reader.cpp
+    h__Writer.cpp
+    Index.cpp
+    JP2K_Codestream_Parser.cpp
+    JP2K.cpp
+    JP2K_Sequence_Parser.cpp
+    KLV.cpp
+    Metadata.cpp
+    MDD.cpp
+    MPEG2_Parser.cpp
+    MPEG.cpp
+    MXF.cpp
+    MXFTypes.cpp
+    PCM_Parser.cpp
+    PCMParserList.cpp
+    TimedText_Parser.cpp
+    Wav.cpp
+)
+#-----------------------------------------------------------------------------
+
+#--compile libraries----------------------------------------------------------
+SET(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/libasdcp/")
+IF(ENABLE_STATIC)
+    ADD_LIBRARY(asdcp STATIC ${ASDCP_SRC_FILES})
+    ADD_LIBRARY(kumu  STATIC ${KUMU_SRC_FILES})
+ELSE()
+    ADD_LIBRARY(kumu  SHARED ${KUMU_SRC_FILES})
+    ADD_LIBRARY(asdcp SHARED ${ASDCP_SRC_FILES})
+ENDIF()
+TARGET_LINK_LIBRARIES(kumu asdcp ${LIBS})
+#-----------------------------------------------------------------------------
+
+#--install libraries--------------------------------------------------------------------
+INSTALL(TARGETS kumu asdcp DESTINATION lib)
+INSTALL(FILES AS_DCP.h DESTINATION include)
+#-----------------------------------------------------------------------------

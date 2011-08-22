@@ -131,6 +131,7 @@ ELSE()
     SET(EXPAT_PREFIX "yes")
 ENDIF()
 
+IF(0)
 EXTERNALPROJECT_ADD(07_ASDCPLIB
     URL ${OPENDCP_URL}/asdcplib-1.7.40.tar.gz
     PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/asdcplib-1.7.40.patch
@@ -145,6 +146,7 @@ EXTERNALPROJECT_ADD(07_ASDCPLIB
     BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
 )
+ENDIF()
 
 EXTERNALPROJECT_ADD(08_TIFF
     URL http://download.osgeo.org/libtiff/tiff-3.9.5.tar.gz

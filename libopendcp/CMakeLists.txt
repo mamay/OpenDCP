@@ -17,11 +17,14 @@ SET(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/libopendcp/")
 #-----------------------------------------------------------------------------
 
 #--compile opendcplib---------------------------------------------------------
-#ADD_LIBRARY(opendcp-shared SHARED ${OPENDCP_SEC_FILES} ${OPENDCP_SRC_FILES})
-ADD_LIBRARY(opendcp-static STATIC ${OPENDCP_SEC_FILES} ${OPENDCP_SRC_FILES})
-SET_TARGET_PROPERTIES(opendcp-static PROPERTIES OUTPUT_NAME "opendcp")
-SET_TARGET_PROPERTIES(opendcp-static PROPERTIES PREFIX "lib")
-TARGET_LINK_LIBRARIES(opendcp-static ${LIBS})
-INSTALL(TARGETS opendcp-static DESTINATION lib)
+IF(ENABLE_STATIC)
+    ADD_LIBRARY(opendcp-lib STATIC ${OPENDCP_SEC_FILES} ${OPENDCP_SRC_FILES})
+ELSE()
+    ADD_LIBRARY(opendcp-lib SHARED ${OPENDCP_SEC_FILES} ${OPENDCP_SRC_FILES})
+ENDIF()
+SET_TARGET_PROPERTIES(opendcp-lib PROPERTIES OUTPUT_NAME "opendcp")
+SET_TARGET_PROPERTIES(opendcp-lib PROPERTIES PREFIX "lib")
+TARGET_LINK_LIBRARIES(opendcp-lib ${LIBS})
+INSTALL(TARGETS opendcp-lib DESTINATION lib)
 INSTALL(FILES opendcp.h DESTINATION include)
 #-----------------------------------------------------------------------------

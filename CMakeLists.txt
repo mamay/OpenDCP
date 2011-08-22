@@ -66,10 +66,13 @@ ENDIF()
 #-----------------------------------------------------------------------------
 
 #--Build Paths----------------------------------------------------------------
-INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/include")
-INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/libopendcp")
-SET(OPENDCP_INSTALL_BIN_DIR "bin")
+SET(OPENDCP_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/libopendcp")
+INCLUDE_DIRECTORIES(${OPENDCP_INCLUDE_DIR})
 SET(OPENDCP_LIB "${PROJECT_BINARY_DIR}/libopendcp/libopendcp.a")
+
+SET(ASDCP_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/libasdcp")
+INCLUDE_DIRECTORIES(${ASDCP_INCLUDE_DIR})
+SET(ASDCP_LIBRARIES ${PROJECT_BINARY_DIR}/libasdcp/libasdcp.a ${PROJECT_BINARY_DIR}/libasdcp/libkumu.a)
 #-----------------------------------------------------------------------------
 
 #--Contrib Paths--------------------------------------------------------------
@@ -98,7 +101,7 @@ IF(ENABLE_STATIC)
 
     SET(LIB_DIR "${PREFIX}/lib")
     MESSAGE(STATUS "LIB_DIR: ${LIB_DIR}")
-    SET(LIBS ${LIBS} "-L${LIB_DIR} -lasdcp -lkumu" )
+    #SET(LIBS ${LIBS} "-L${LIB_DIR} -lasdcp -lkumu" )
     SET(LIBS ${LIBS} "-L${LIB_DIR} -lopenjpeg -ltiff")
     SET(LIBS ${LIBS} "-L${LIB_DIR} -lexpat")
     IF(ENABLE_XMLSEC)
@@ -121,9 +124,9 @@ ELSE()
     INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
     SET(LIBS ${LIBS} ${ZLIB_LIBRARIES})
 
-    FIND_PACKAGE(ASDCP REQUIRED)
-    INCLUDE_DIRECTORIES(${ASDCP_INCLUDE_DIR})
-    SET(LIBS ${LIBS} ${ASDCP_LIBRARIES})
+    #FIND_PACKAGE(ASDCP REQUIRED)
+    #INCLUDE_DIRECTORIES(${ASDCP_INCLUDE_DIR})
+    #SET(LIBS ${LIBS} ${ASDCP_LIBRARIES})
 
     FIND_PACKAGE(OpenSSL REQUIRED)
     INCLUDE_DIRECTORIES(${OPENSSL_INCLUDE_DIR})
@@ -160,6 +163,7 @@ ENDIF()
 #-----------------------------------------------------------------------------
 
 #--Add source directory-------------------------------------------------------
+ADD_SUBDIRECTORY(libasdcp)
 ADD_SUBDIRECTORY(libopendcp)
 ADD_SUBDIRECTORY(cli)
 IF(ENABLE_GUI)
