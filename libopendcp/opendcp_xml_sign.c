@@ -205,7 +205,26 @@ int xmlsec_init() {
     return(DCP_SUCCESS);
 }
 
-xmlSecKeysMngrPtr load_certificates(opendcp_t *opendcp) {
+xmlSecKeysMngrPtr load_certificates_verify() {
+    xmlSecKeysMngrPtr key_manager;
+    xmlSecKeyPtr      key;
+
+    /* create and initialize keys manager */
+    key_manager = xmlSecKeysMngrCreate();
+
+    if (key_manager == NULL) {
+        return(NULL);
+    }
+
+    if (xmlSecCryptoAppDefaultKeysMngrInit(key_manager) < 0) {
+        xmlSecKeysMngrDestroy(key_manager);
+        return(NULL);
+    }
+
+    return(key_manager);
+}
+
+xmlSecKeysMngrPtr load_certificates_sign(opendcp_t *opendcp) {
     xmlSecKeysMngrPtr key_manager;
     xmlSecKeyPtr      key; 
         
@@ -320,7 +339,7 @@ int xml_sign(opendcp_t *opendcp, char *filename) {
     }
   
     /* create keys manager */
-    key_manager = load_certificates(opendcp);
+    key_manager = load_certificates_sign(opendcp);
     if (key_manager == NULL) {
         fprintf(stderr,"Error: failed to create key manager\n");
         goto done;
@@ -376,5 +395,105 @@ done:
 
     xmlsec_close();
 
+    return(result);
+}
+
+int xml_verify(char *filename) {
+    xmlSecDSigCtxPtr dsig_ctx = NULL;
+    xmlDocPtr        doc = NULL;
+    xmlNodePtr       root_node;
+    xmlNodePtr       sign_node;
+    xmlNodePtr       cert_node;
+    xmlNodePtr       x509d_node;
+    xmlNodePtr       cur_node;
+    int              result = DCP_FATAL;
+    xmlSecKeysMngrPtr key_manager;
+    char cert[5000];
+    int  cert_l;
+    xmlsec_init();
+
+    /* load doc file */
+    doc = xmlParseFile(filename);
+
+    if (doc == NULL) {
+        dcp_log(LOG_ERROR, "unable to parse file %s", filename);
+        goto done;
+    }
+
+    /* find root node */
+    root_node = xmlDocGetRootElement(doc);
+
+    if (root_node == NULL){
+        dcp_log(LOG_ERROR, "unable to find root node");
+        goto done;
+    }
+
+    /* find signature node */
+    sign_node = xmlSecFindNode(root_node, xmlSecNodeSignature, xmlSecDSigNs);
+    if(sign_node == NULL) {
+        dcp_log(LOG_ERROR, "signature node not found");
+        goto done;
+    }
+
+    /* create keys manager */
+    key_manager = load_certificates_verify();
+    if (key_manager == NULL) {
+        dcp_log(LOG_ERROR,"create key manager failed");
+        goto done;
+    }
+    /* find certificates */
+    cur_node = sign_node;
+    while (x509d_node = xmlSecFindNode(cur_node, xmlSecNodeX509Data, xmlSecDSigNs)) {
+        cert_node = xmlSecFindNode(x509d_node, xmlSecNodeX509Certificate, xmlSecDSigNs);
+        if(cert_node == NULL) {
+            dcp_log(LOG_ERROR, "X509certficate node not found");
+            goto done;
+        }
+        sprintf(cert,"-----BEGIN CERTIFICATE-----\n%s\n-----END CERTIFICATE-----\n",xmlNodeGetContent(cert_node));
+        cert_l = strlen(cert);
+        if (xmlSecCryptoAppKeysMngrCertLoadMemory(key_manager, cert, cert_l, xmlSecKeyDataFormatPem, xmlSecKeyDataTypeTrusted) < 0) {
+            dcp_log(LOG_ERROR, "could read X509certificate node value");
+            goto done;
+        }
+        cur_node = xmlNextElementSibling(x509d_node);
+    }
+
+    /* create signature context */
+    dsig_ctx = xmlSecDSigCtxCreate(key_manager);
+
+    if (dsig_ctx == NULL) {
+        dcp_log(LOG_ERROR,"create signature opendcp failed");
+        goto done;
+    }
+
+    /* sign the template */
+    if (xmlSecDSigCtxVerify(dsig_ctx, sign_node) < 0) {
+        dcp_log(LOG_ERROR,"signature verify failed");
+        goto done;
+    }
+
+    if (dsig_ctx->status != xmlSecDSigStatusSucceeded) {
+        dcp_log(LOG_ERROR,"signature validation failed");
+        goto done;
+    }
+
+    /* success */
+    result = 0;
+
+done:
+    /* destroy keys manager */
+    xmlSecKeysMngrDestroy(key_manager);
+
+    /* destroy signature context */
+    if(dsig_ctx != NULL) {
+        xmlSecDSigCtxDestroy(dsig_ctx);
+    }
+
+    /* destroy xml doc */
+    if(doc != NULL) {
+        xmlFreeDoc(doc);
+    }
+
+    xmlsec_close();
     return(result);
 }

@@ -9,7 +9,6 @@ MESSAGE(STATUS "----------------------------------------------------------------
 SET(OPENDCP_TARGETS opendcp_xml opendcp_j2k opendcp_mxf)
 IF(ENABLE_XMLSEC)
     SET(OPENDCP_TARGETS ${OPENDCP_TARGETS} opendcp_xml_verify)
-    SET(OPENDCP_SEC_FILES opendcp_xml_verify.c opendcp_xml_sign.c)
 ENDIF(ENABLE_XMLSEC)
 #-----------------------------------------------------------------------------
 
@@ -33,7 +32,7 @@ TARGET_LINK_LIBRARIES(opendcp_mxf ${OPENDCP_LIB} ${ASDCP_LIBRARIES} ${LIBS})
 
 IF(ENABLE_XMLSEC)
     ADD_EXECUTABLE(opendcp_xml_verify opendcp_xml_verify_cmd.c opendcp_force_cpp.cpp)
-    TARGET_LINK_LIBRARIES(opendcp_xml_verify ${OPENDCP_LIB} ${ASDCP_LIB} ${LIBS})
+    TARGET_LINK_LIBRARIES(opendcp_xml_verify ${OPENDCP_LIB} ${ASDCP_LIBRARIES} ${LIBS})
 ENDIF(ENABLE_XMLSEC)
 #-----------------------------------------------------------------------------
 

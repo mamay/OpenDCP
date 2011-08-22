@@ -43,7 +43,7 @@
 #include "opendcp.h"
 #include "opendcp_certificates.h"
 
-int xmlsec_init() {
+int xmlsec_verify_init() {
     /* init libxml lib */
     xmlInitParser();
     xmlIndentTreeOutput = 1; 
@@ -125,7 +125,7 @@ int xml_verify(char *filename) {
     xmlSecKeysMngrPtr key_manager;
     char cert[5000];
     int  cert_l; 
-    xmlsec_init();
+    xmlsec_verify_init();
 
     /* load doc file */
     doc = xmlParseFile(filename);

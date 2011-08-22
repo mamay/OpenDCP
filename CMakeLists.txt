@@ -6,10 +6,11 @@ SET(CMAKE_BUILD_TYPE Release)
 #-----------------------------------------------------------------------------
 
 #--Version--------------------------------------------------------------------
-SET(OpenDCP_VERSION_MAJOR 0)
-SET(OpenDCP_VERSION_MINOR 20)
-SET(OpenDCP_VERSION "${OpenDCP_VERSION_MAJOR}.${OpenDCP_VERSION_MINOR}")
-ADD_DEFINITIONS(-DOPENDCP_VERSION="${OpenDCP_VERSION}")
+SET(OPENDCP_VERSION_MAJOR 0)
+SET(OPENDCP_VERSION_MINOR 0)
+SET(OPENDCP_VERSION_BUILD 20)
+SET(OPENDCP_VERSION "${OPENDCP_VERSION_MAJOR}.${OPENDCP_VERSION_MINOR}.${OPENDCP_VERSION_BUILD}")
+ADD_DEFINITIONS(-DOPENDCP_VERSION="${OPENDCP_VERSION}")
 #-----------------------------------------------------------------------------
 
 #--Options--------------------------------------------------------------------
@@ -72,7 +73,7 @@ SET(OPENDCP_LIB "${PROJECT_BINARY_DIR}/libopendcp/libopendcp.a")
 
 SET(ASDCP_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/libasdcp")
 INCLUDE_DIRECTORIES(${ASDCP_INCLUDE_DIR})
-SET(ASDCP_LIBRARIES ${PROJECT_BINARY_DIR}/libasdcp/libasdcp.a ${PROJECT_BINARY_DIR}/libasdcp/libkumu.a)
+SET(ASDCP_LIBRARIES -L${PROJECT_BINARY_DIR}/libasdcp -lopendcp-asdcp -lopendcp-kumu)
 #-----------------------------------------------------------------------------
 
 #--Contrib Paths--------------------------------------------------------------
@@ -81,7 +82,7 @@ SET(OPENDCP_URL "http://opendcp.googlecode.com/files")
 
 MESSAGE(STATUS)
 MESSAGE(STATUS "===============================================================================")
-MESSAGE(STATUS "OpenDCP Version " ${OpenDCP_VERSION} " CMake - " ${OS})
+MESSAGE(STATUS "OpenDCP Version " ${OPENDCP_VERSION} " CMake - " ${OS})
 MESSAGE(STATUS "===============================================================================")
 
 #--Set linking mode-----------------------------------------------------------
@@ -169,4 +170,5 @@ ADD_SUBDIRECTORY(cli)
 IF(ENABLE_GUI)
     ADD_SUBDIRECTORY(gui)
 ENDIF()
+ADD_SUBDIRECTORY(installers)
 #-----------------------------------------------------------------------------

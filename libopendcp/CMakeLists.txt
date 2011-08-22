@@ -8,7 +8,7 @@ MESSAGE(STATUS "----------------------------------------------------------------
 #--Set opendcplib source files------------------------------------------------
 SET(OPENDCP_SRC_FILES opendcp_j2k.c opendcp_xml.c opendcp_common.c opendcp_log.c asdcp_intf.cpp image/opendcp_tif.c image/opendcp_image.c image/opendcp_dpx.c)
 IF(ENABLE_XMLSEC)
-    SET(OPENDCP_SEC_FILES opendcp_xml_verify.c opendcp_xml_sign.c)
+    SET(OPENDCP_SEC_FILES opendcp_xml_sign.c)
 ENDIF(ENABLE_XMLSEC)
 #-----------------------------------------------------------------------------
 
@@ -17,14 +17,11 @@ SET(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/libopendcp/")
 #-----------------------------------------------------------------------------
 
 #--compile opendcplib---------------------------------------------------------
-IF(ENABLE_STATIC)
-    ADD_LIBRARY(opendcp-lib STATIC ${OPENDCP_SEC_FILES} ${OPENDCP_SRC_FILES})
-ELSE()
-    ADD_LIBRARY(opendcp-lib SHARED ${OPENDCP_SEC_FILES} ${OPENDCP_SRC_FILES})
-ENDIF()
-SET_TARGET_PROPERTIES(opendcp-lib PROPERTIES OUTPUT_NAME "opendcp")
-SET_TARGET_PROPERTIES(opendcp-lib PROPERTIES PREFIX "lib")
-TARGET_LINK_LIBRARIES(opendcp-lib ${LIBS})
-INSTALL(TARGETS opendcp-lib DESTINATION lib)
+ADD_LIBRARY(opendcp-lib-static STATIC ${OPENDCP_SEC_FILES} ${OPENDCP_SRC_FILES})
+ADD_LIBRARY(opendcp-lib-shared SHARED ${OPENDCP_SEC_FILES} ${OPENDCP_SRC_FILES})
+SET_TARGET_PROPERTIES(opendcp-lib-static opendcp-lib-shared PROPERTIES OUTPUT_NAME "opendcp")
+SET_TARGET_PROPERTIES(opendcp-lib-static opendcp-lib-shared PROPERTIES PREFIX "lib")
+TARGET_LINK_LIBRARIES(opendcp-lib-static opendcp-lib-shared ${LIBS})
+INSTALL(TARGETS opendcp-lib-static opendcp-lib-shared DESTINATION lib)
 INSTALL(FILES opendcp.h DESTINATION include)
 #-----------------------------------------------------------------------------
