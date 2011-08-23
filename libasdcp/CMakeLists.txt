@@ -22,6 +22,9 @@ ENDIF()
 ADD_DEFINITIONS(-DASDCP_PLATFORM="${PLATFORM}")
 #-----------------------------------------------------------------------------
 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DKM_WIN32")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DKM_WIN32")
+
 #--set source files-----------------------------------------------------------
 SET(KUMU_SRC_FILES
     KM_fileio.cpp

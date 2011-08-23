@@ -35,8 +35,8 @@ ELSEIF(UNIX)
   
     ADD_CUSTOM_COMMAND(OUTPUT ${DESKTOP_ENTRY}
         COMMAND touch ${DESKTOP_ENTRY}
-        COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/opendcp-desktop.sh ${CMAKE_INSTALL_PREFIX} >${DESKTOP_ENTRY}
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/opendcp-desktop.sh
+        COMMAND sh ${PROJECT_SOURCE_DIR}/installers/opendcp-desktop.sh ${CMAKE_INSTALL_PREFIX} >${DESKTOP_ENTRY}
+        DEPENDS ${PROJECT_SOURCE_DIR}/installers/opendcp-desktop.sh
         COMMENT "Generating desktop entry file"
     )
 
@@ -71,7 +71,7 @@ SET(OPENDCP_GUI_UI
 )
 
 SET(OPENDCP_GUI_RES
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/resources.qrc
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.qrc
 )
 
 SET(OPENDCP_GUI_RES_CXX

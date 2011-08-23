@@ -1,19 +1,20 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-#--Build Type-----------------------------------------------------------------
-PROJECT (OpenDCP)
+#--build Type-----------------------------------------------------------------
+PROJECT(OpenDCP)
 SET(CMAKE_BUILD_TYPE Release)
+STRING(TOLOWER ${PROJECT_NAME} PACKAGE_NAME)
 #-----------------------------------------------------------------------------
 
-#--Version--------------------------------------------------------------------
-SET(OPENDCP_VERSION_MAJOR 0)
-SET(OPENDCP_VERSION_MINOR 0)
-SET(OPENDCP_VERSION_BUILD 20)
-SET(OPENDCP_VERSION "${OPENDCP_VERSION_MAJOR}.${OPENDCP_VERSION_MINOR}.${OPENDCP_VERSION_BUILD}")
+#--version--------------------------------------------------------------------
+SET(VERSION_MAJOR 0)
+SET(VERSION_MINOR 0)
+SET(VERSION_BUILD 20)
+SET(OPENDCP_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD}")
 ADD_DEFINITIONS(-DOPENDCP_VERSION="${OPENDCP_VERSION}")
 #-----------------------------------------------------------------------------
 
-#--Options--------------------------------------------------------------------
+#--options--------------------------------------------------------------------
 OPTION(ENABLE_XMLSEC "Enable XML digital singatures and security features" ON)
 OPTION(ENABLE_OSX386 "Enable i386" OFF)
 OPTION(ENABLE_OSX10.5 "Enable OSX 10.5 compatibility" OFF)
@@ -32,14 +33,21 @@ IF(ENABLE_OPENMP)
     ADD_DEFINITIONS(-DOPENMP)
     SET(OPENMP "-fopenmp")
 ENDIF()
+
+ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64)
 #-----------------------------------------------------------------------------
 
-#--Set Base Compiler Flags----------------------------------------------------
+#--cmake options--------------------------------------------------------------
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+SET(CMAKE_SKIP_RPATH TRUE)
+#-----------------------------------------------------------------------------
+
+#--set Base Compiler Flags----------------------------------------------------
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 ${OPENMP}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 ${OPENMP}")
 #-----------------------------------------------------------------------------
 
-#--Set OS Specific Compiler Flags---------------------------------------------
+#--set OS Specific Compiler Flags---------------------------------------------
 IF(APPLE)
     SET(OS "APPLE")
     IF(ENABLE_OSX386)
@@ -66,7 +74,7 @@ ELSE(UNIX)
 ENDIF()
 #-----------------------------------------------------------------------------
 
-#--Build Paths----------------------------------------------------------------
+#--build Paths----------------------------------------------------------------
 SET(OPENDCP_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/libopendcp")
 INCLUDE_DIRECTORIES(${OPENDCP_INCLUDE_DIR})
 SET(OPENDCP_LIB "${PROJECT_BINARY_DIR}/libopendcp/libopendcp.a")
@@ -76,7 +84,7 @@ INCLUDE_DIRECTORIES(${ASDCP_INCLUDE_DIR})
 SET(ASDCP_LIBRARIES -L${PROJECT_BINARY_DIR}/libasdcp -lopendcp-asdcp -lopendcp-kumu)
 #-----------------------------------------------------------------------------
 
-#--Contrib Paths--------------------------------------------------------------
+#--contrib Paths--------------------------------------------------------------
 SET(OPENDCP_URL "http://opendcp.googlecode.com/files")
 #-----------------------------------------------------------------------------
 
@@ -85,8 +93,8 @@ MESSAGE(STATUS "================================================================
 MESSAGE(STATUS "OpenDCP Version " ${OPENDCP_VERSION} " CMake - " ${OS})
 MESSAGE(STATUS "===============================================================================")
 
-#--Set linking mode-----------------------------------------------------------
-IF(ENABLE_STATIC)
+#--set linking mode-----------------------------------------------------------
+IF(ENABLE_STATIC AND NOT MINGW)
     MESSAGE(STATUS "-------------------------------------------------------------------------------")
     MESSAGE(STATUS "Find Static Library Dependencies")
     MESSAGE(STATUS "-------------------------------------------------------------------------------")
@@ -159,7 +167,7 @@ ELSE()
 ENDIF()
 #-----------------------------------------------------------------------------
 
-#--Add source directory-------------------------------------------------------
+#--add source directory-------------------------------------------------------
 ADD_SUBDIRECTORY(libasdcp)
 ADD_SUBDIRECTORY(libopendcp)
 ADD_SUBDIRECTORY(cli)

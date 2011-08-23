@@ -46,4 +46,4 @@ LIBS +=         -L/Users/tmeiczin/Development/OpenDCP/build/lib -lopendcp \
 INCLUDEPATH =   /usr/local/include /Users/tmeiczin/Development/OpenDCP/build/contrib/include
 
 RESOURCES += \
-    resources/resources.qrc
+    resources/opendcp.qrc
