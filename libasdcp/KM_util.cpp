@@ -72,7 +72,9 @@ Kumu::Result_t::Find(int v)
   if ( v == 0 )
     return RESULT_OK;
 
+#ifndef WIN32
   AutoMutex L(s_MapLock);
+#endif
 
   for ( ui32_t i = 0; i < s_MapSize; ++i )
     {
@@ -93,7 +95,9 @@ Kumu::Result_t::Delete(int v)
       return RESULT_FAIL;
     }
 
+#ifndef WIN32
   AutoMutex L(s_MapLock);
+#endif
 
   for ( ui32_t i = 0; i < s_MapSize; ++i )
     {
@@ -133,7 +137,9 @@ Kumu::Result_t::Result_t(int v, const char* s, const char* l) : value(v), symbol
   if ( v == 0 )
     return;
 
+#ifndef WIN32
   AutoMutex L(s_MapLock);
+#endif
 
   for ( ui32_t i = 0; i < s_MapSize; ++i )
     {
