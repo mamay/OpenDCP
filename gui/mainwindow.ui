@@ -20,7 +20,7 @@
    <string>OpenDCP</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources/resources.qrc">
+   <iconset resource="resources/opendcp.qrc">
     <normaloff>:/images/opendcp.png</normaloff>:/images/opendcp.png</iconset>
   </property>
   <property name="unifiedTitleAndToolBarOnMac">
@@ -710,7 +710,7 @@
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
                  <horstretch>0</horstretch>
-                 <verstretch>25</verstretch>
+                 <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
                <property name="minimumSize">
@@ -732,6 +732,34 @@
                 </size>
                </property>
               </spacer>
+             </item>
+             <item row="0" column="4">
+              <widget class="QCheckBox" name="dpxLogCheckBox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>25</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>25</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>25</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>DPX Logarithmic</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -2750,7 +2778,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="resources/resources.qrc"/>
+  <include location="resources/opendcp.qrc"/>
  </resources>
  <connections/>
 </ui>

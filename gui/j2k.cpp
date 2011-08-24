@@ -235,6 +235,12 @@ void MainWindow::startJ2k() {
         context->j2k.encoder = J2K_KAKADU;
     }
 
+    if (ui->dpxLogCheckBox->checkState()) {
+        context->j2k.dpx = 1;
+    } else {
+        context->j2k.dpx = 0;
+    }
+
     if (ui->stereoscopicCheckBox->checkState()) {
         context->stereoscopic = 1;
     } else {
