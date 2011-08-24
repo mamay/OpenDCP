@@ -12,7 +12,7 @@ ELSE()
     SET(MAKE "make")
 ENDIF()
 
-IF(ENABLE_ZLIB)
+IF(COMPILE_ZLIB)
     EXTERNALPROJECT_ADD(00_ZLIB
         URL http://zlib.net/zlib-1.2.5.tar.gz 
         BUILD_IN_SOURCE 1
@@ -21,30 +21,30 @@ IF(ENABLE_ZLIB)
         BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
         INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
     )
-ENDIF(ENABLE_ZLIB)
+ENDIF(COMPILE_ZLIB)
 
-IF(ENABLE_XMLSEC)
-    EXTERNALPROJECT_ADD(00_LTDL
-        URL http://ftp.gnu.org/gnu/libtool/libtool-2.4.tar.gz
-        BUILD_IN_SOURCE 1
-        CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
-                          --disable-dependency-tracking --enable-static=yes --enable-shared=no 
-                           ${TARGET}
-        BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
-        INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
-    )
+IF(ENABLE_XMLSEC AND COMPILE_XMLSEC)
+    #EXTERNALPROJECT_ADD(00_LTDL
+    #    URL http://ftp.gnu.org/gnu/libtool/libtool-2.4.tar.gz
+    #    BUILD_IN_SOURCE 1
+    #    CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
+    #                      --disable-dependency-tracking --enable-static=yes --enable-shared=no 
+    #                       ${TARGET}
+    #    BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
+    #    INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+    #)
 
-    IF(ENABLE_ICONV)
-        EXTERNALPROJECT_ADD(01_ICONV
-            URL ${OPENDCP_URL}/libiconv-1.13.1.tar.gz
-            BUILD_IN_SOURCE 1
-            CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
-                               --disable-dependency-tracking --enable-static=yes --enable-shared=no 
-                               ${TARGET} 
-            BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
-            INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
-        )
-    ENDIF(ENABLE_ICONV)
+    #IF(ENABLE_ICONV)
+    #    EXTERNALPROJECT_ADD(01_ICONV
+    #        URL ${OPENDCP_URL}/libiconv-1.13.1.tar.gz
+    #        BUILD_IN_SOURCE 1
+    #        CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
+    #                           --disable-dependency-tracking --enable-static=yes --enable-shared=no 
+    #                           ${TARGET} 
+    #        BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
+    #        INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+    #    )
+    #ENDIF(ENABLE_ICONV)
 
     EXTERNALPROJECT_ADD(02_XML2
         URL ${OPENDCP_URL}/libxml2-2.7.8.tar.gz
@@ -89,16 +89,18 @@ IF(ENABLE_XMLSEC)
         BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
         INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
      )
-ENDIF(ENABLE_XMLSEC)
+ENDIF(ENABLE_XMLSEC AND COMPILE_XMLSEC)
 
+IF(COMPILE_EXPAT)
 EXTERNALPROJECT_ADD(04_EXPAT
-    URL ${OPENDCP_URL}/expat-2.0.1.tar.gz
+   URL ${OPENDCP_URL}/expat-2.0.1.tar.gz
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                       --disable-dependency-tracking --enable-static=yes --enable-shared=no ${TARGET}
     BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
 )
+ENDIF(COMPILE_EXPAT)
 
 SET(OPENSSL_MAKE make)
 IF(APPLE)
@@ -114,6 +116,7 @@ ELSE()
     SET(OPENSSL_CONFIGURE <SOURCE_DIR>/config ${PREFIX_ARG})
 ENDIF()
 
+IF(COMPILE_OPENSSL)
 EXTERNALPROJECT_ADD(05_OPENSSL
     URL http://www.openssl.org/source/openssl-0.9.8r.tar.gz
     BUILD_IN_SOURCE 1
@@ -122,6 +125,7 @@ EXTERNALPROJECT_ADD(05_OPENSSL
     BUILD_COMMAND ${OPENSSL_MAKE} -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
 )
+ENDIF(COMPILE_OPENSSL)
 
 IF(PREFIX)
     SET(OPENSSL_PREFIX ${PREFIX})
@@ -131,23 +135,7 @@ ELSE()
     SET(EXPAT_PREFIX "yes")
 ENDIF()
 
-IF(0)
-EXTERNALPROJECT_ADD(07_ASDCPLIB
-    URL ${OPENDCP_URL}/asdcplib-1.7.40.tar.gz
-    PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/asdcplib-1.7.40.patch
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG}
-                      ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
-                      --disable-dependency-tracking
-                      #--with-openssl=${PREFIX}
-                      --with-expat=${EXPAT_PREFIX}
-                      --enable-static=yes --enable-shared=no
-                      ${TARGET} 
-    BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
-    INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
-)
-ENDIF()
-
+IF(COMPILE_TIFF)
 EXTERNALPROJECT_ADD(08_TIFF
     URL http://download.osgeo.org/libtiff/tiff-3.9.5.tar.gz
     BUILD_IN_SOURCE 1
@@ -158,7 +146,9 @@ EXTERNALPROJECT_ADD(08_TIFF
     BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
 )
+ENDIF(COMPILE_TIFF)
 
+IF(COMPILE_OPENJPEG)
 EXTERNALPROJECT_ADD(09_OpenJPEG
     URL ${OPENDCP_URL}/openjpeg_v1_4_sources_r697.tar.gz
     PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/openjpeg_v1_4.patch
@@ -169,3 +159,4 @@ EXTERNALPROJECT_ADD(09_OpenJPEG
     BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
 )
+ENDIF(COMPILE_OPENJPEG)

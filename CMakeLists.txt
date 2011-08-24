@@ -19,7 +19,6 @@ OPTION(ENABLE_XMLSEC "Enable XML digital singatures and security features" ON)
 OPTION(ENABLE_OSX386 "Enable i386" OFF)
 OPTION(ENABLE_OSX10.5 "Enable OSX 10.5 compatibility" OFF)
 OPTION(ENABLE_OPENMP "Enable OPENMP multithreading" ON)
-OPTION(ENABLE_STATIC "Enable static link to libraries" OFF)
 OPTION(ENABLE_GUI    "Enable GUI compiling" OFF)
 
 IF(ENABLE_XMLSEC)
@@ -86,6 +85,8 @@ SET(ASDCP_LIBRARIES -L${PROJECT_BINARY_DIR}/libasdcp -lopendcp-asdcp -lopendcp-k
 
 #--contrib Paths--------------------------------------------------------------
 SET(OPENDCP_URL "http://opendcp.googlecode.com/files")
+SET(PREFIX "${PROJECT_BINARY_DIR}/contrib")
+SET(PREFIX_ARG "--prefix=${PREFIX}")
 #-----------------------------------------------------------------------------
 
 MESSAGE(STATUS)
@@ -93,40 +94,43 @@ MESSAGE(STATUS "================================================================
 MESSAGE(STATUS "OpenDCP Version " ${OPENDCP_VERSION} " CMake - " ${OS})
 MESSAGE(STATUS "===============================================================================")
 
-#--set linking mode-----------------------------------------------------------
-IF(ENABLE_STATIC AND NOT MINGW)
-    MESSAGE(STATUS "-------------------------------------------------------------------------------")
-    MESSAGE(STATUS "Find Static Library Dependencies")
-    MESSAGE(STATUS "-------------------------------------------------------------------------------")
-
-    SET(PREFIX "${PROJECT_BINARY_DIR}/contrib")
-    SET(PREFIX_ARG "--prefix=${PREFIX}")
-    ADD_SUBDIRECTORY(contrib)
-
+#--set os specifc linking mode------------------------------------------------
+IF(APPLE)
+    #-- Apple includes some old versions of certain libraries, so we want to compile the
+    #-- recent versions of those. In other cases, we can use dynamic libraries.
     INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}/contrib/include")
-    INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}/contrib/include/libxml2")
-    INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}/contrib/include/libxslt")
-    INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}/contrib/include/xmlsec1")
-
     SET(LIB_DIR "${PREFIX}/lib")
-    MESSAGE(STATUS "LIB_DIR: ${LIB_DIR}")
-    #SET(LIBS ${LIBS} "-L${LIB_DIR} -lasdcp -lkumu" )
-    SET(LIBS ${LIBS} "-L${LIB_DIR} -lopenjpeg -ltiff")
-    SET(LIBS ${LIBS} "-L${LIB_DIR} -lexpat")
+
+    SET(COMPILE_ZLIB 0)
+    SET(LIBS ${LIBS} "-lz")
+    
+    SET(COMPILE_OPENSSL 1)
+    SET(LIBS ${LIBS} "-L${LIB_DIR} -lssl -lcrypto" )
+
     IF(ENABLE_XMLSEC)
+        INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}/contrib/include/libxml2")
+        INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}/contrib/include/libxslt")
+        INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}/contrib/include/xmlsec1")
+        SET(COMPILE_XMLSEC 1)
         SET(LIBS ${LIBS} "-L${LIB_DIR} -lxmlsec1-openssl -lxmlsec1 -lxslt -lxml2")
     ENDIF(ENABLE_XMLSEC)
-    SET(LIBS ${LIBS} "-L${LIB_DIR} -lssl -lcrypto" )
-    SET(LIBS ${LIBS} "-lz")
+
+    SET(COMPILE_EXPAT 1)
+    SET(LIBS ${LIBS} "-L${LIB_DIR} -lexpat")
+   
+    SET(COMPILE_TIFF 1)
+    SET(LIBS ${LIBS} "-L${LIB_DIR} -ltiff")
+
+    SET(COMPILE_OPENJPEG 1)
+    SET(LIBS ${LIBS} "-L${LIB_DIR} -lopenjpeg")
+
+    ADD_SUBDIRECTORY(contrib)
+ELSEIF(WIN32)
+    #-- Win32 Compiling
     IF (MINGW)
         SET(LIBS ${LIBS} "-lws2_32")
     ENDIF()
-ELSE()
-    MESSAGE(STATUS)
-    MESSAGE(STATUS "-------------------------------------------------------------------------------")
-    MESSAGE(STATUS "Finding Dynamic Library Dependencies")
-    MESSAGE(STATUS "-------------------------------------------------------------------------------")
-
+ELSEIF(UNIX)
     SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules/")
 
     FIND_PACKAGE(ZLIB REQUIRED)
@@ -161,18 +165,29 @@ ELSE()
     INCLUDE_DIRECTORIES(${TIFF_INCLUDE_DIR})
     SET(LIBS ${LIBS} ${TIFF_LIBRARIES})
 
-    FIND_PACKAGE(OpenJPEG REQUIRED)
-    INCLUDE_DIRECTORIES(${OPENJPEG_INCLUDE_DIR})
-    SET(LIBS ${LIBS} ${OPENJPEG_LIBRARIES})
+    #-- download and build openjpeg local because the versions
+    #-- between linux distributions are not compatible
+    SET(COMPILE_OPENJPEG 1)
+    INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}/contrib/include")
+    SET(LIBS ${LIBS} "${PREFIX}/lib/libopenjpeg.a")
+    #FIND_PACKAGE(OpenJPEG REQUIRED)
+    #INCLUDE_DIRECTORIES(${OPENJPEG_INCLUDE_DIR})
+    #SET(LIBS ${LIBS} ${OPENJPEG_LIBRARIES})
+    ADD_SUBDIRECTORY(contrib)
 ENDIF()
 #-----------------------------------------------------------------------------
 
-#--add source directory-------------------------------------------------------
+#--add source directories-----------------------------------------------------
 ADD_SUBDIRECTORY(libasdcp)
 ADD_SUBDIRECTORY(libopendcp)
 ADD_SUBDIRECTORY(cli)
 IF(ENABLE_GUI)
     ADD_SUBDIRECTORY(gui)
 ENDIF()
-ADD_SUBDIRECTORY(installers)
+#-----------------------------------------------------------------------------
+
+#--build packages-------------------------------------------------------------
+IF(ENABLE_PACKAGES)
+    ADD_SUBDIRECTORY(packages)
+ENDIF()
 #-----------------------------------------------------------------------------
