@@ -126,6 +126,17 @@ void MainWindow::startDcp()
     strcpy(xmlContext->pkl[0].cpl[0].filename,filename.toStdString().c_str());
     filename = path + "/" + xmlContext->pkl[0].uuid + "_pkl.xml";
     strcpy(xmlContext->pkl[0].filename,filename.toStdString().c_str());
+    if (xmlContext->ns == XML_NS_SMPTE) {
+        filename = path + "/" + "ASSETMAP.xml";
+        strcpy(xmlContext->assetmap.filename,filename.toStdString().c_str());
+        filename = path + "/" + "VOLINDEX.xml";
+        strcpy(xmlContext->volindex.filename,filename.toStdString().c_str());
+    } else {
+        filename = path + "/" + "ASSETMAP";
+        strcpy(xmlContext->assetmap.filename,filename.toStdString().c_str());
+        filename = path + "/" + "VOLINDEX";
+        strcpy(xmlContext->volindex.filename,filename.toStdString().c_str());
+    }
 
     // write XML Files
     if (write_cpl(xmlContext,&xmlContext->pkl[0].cpl[0]) != DCP_SUCCESS) {
