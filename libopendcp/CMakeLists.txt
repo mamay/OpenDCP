@@ -21,12 +21,20 @@ ADD_LIBRARY(opendcp-lib-static STATIC ${OPENDCP_SEC_FILES} ${OPENDCP_SRC_FILES})
 SET_TARGET_PROPERTIES(opendcp-lib-static PROPERTIES OUTPUT_NAME "opendcp")
 SET_TARGET_PROPERTIES(opendcp-lib-static PROPERTIES PREFIX "lib")
 TARGET_LINK_LIBRARIES(opendcp-lib-static ${ASDCP_LIBRARIES} ${LIBS})
+
 IF(UNIX AND NOT APPLE)
     ADD_LIBRARY(opendcp-lib-shared SHARED ${OPENDCP_SEC_FILES} ${OPENDCP_SRC_FILES})
     SET_TARGET_PROPERTIES(opendcp-lib-shared PROPERTIES OUTPUT_NAME "opendcp")
     SET_TARGET_PROPERTIES(opendcp-lib-shared PROPERTIES PREFIX "lib")
     TARGET_LINK_LIBRARIES(opendcp-lib-shared ${ASDCP_LIBRARIES} ${LIBS})
 ENDIF()
+#-----------------------------------------------------------------------------
+
+#--install opendcplib---------------------------------------------------------
 INSTALL(TARGETS opendcp-lib-static DESTINATION lib)
 INSTALL(FILES opendcp.h DESTINATION include)
+
+IF(UNIX AND NOT APPLE)
+    INSTALL(TARGETS opendcp-lib-shared DESTINATION lib)
+ENDIF()
 #-----------------------------------------------------------------------------
