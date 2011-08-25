@@ -14,12 +14,24 @@ SET(OPENDCP_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD}")
 ADD_DEFINITIONS(-DOPENDCP_VERSION="${OPENDCP_VERSION}")
 #-----------------------------------------------------------------------------
 
+#--check 32 or 64-bit---------------------------------------------------------
+IF(UNIX AND NOT WIN32)
+    IF(CMAKE_SIZEOF_VOID_P MATCHES "8")
+        SET(ARCH "x86_64")
+    ELSE()
+        SET(ARCH "i386")
+    ENDIF()
+ENDIF()
+#-----------------------------------------------------------------------------
+
 #--options--------------------------------------------------------------------
-OPTION(ENABLE_XMLSEC "Enable XML digital singatures and security features" ON)
-OPTION(ENABLE_OSX386 "Enable i386" OFF)
+OPTION(ENABLE_XMLSEC  "Enable XML digital singatures and security features" ON)
+OPTION(ENABLE_OSX386  "Enable i386" OFF)
 OPTION(ENABLE_OSX10.5 "Enable OSX 10.5 compatibility" OFF)
-OPTION(ENABLE_OPENMP "Enable OPENMP multithreading" ON)
-OPTION(ENABLE_GUI    "Enable GUI compiling" OFF)
+OPTION(ENABLE_OPENMP  "Enable OPENMP multithreading" ON)
+OPTION(ENABLE_GUI     "Enable GUI compiling" OFF)
+OPTION(MAKE_RPM       "Create RPM package" OFF)
+OPTION(MAKE_DEB       "Create DEB package" OFF)
 
 IF(ENABLE_XMLSEC)
     ADD_DEFINITIONS(-DXMLSEC)
@@ -91,7 +103,7 @@ SET(PREFIX_ARG "--prefix=${PREFIX}")
 
 MESSAGE(STATUS)
 MESSAGE(STATUS "===============================================================================")
-MESSAGE(STATUS "OpenDCP Version " ${OPENDCP_VERSION} " CMake - " ${OS})
+MESSAGE(STATUS "OpenDCP Version ${OPENDCP_VERSION} CMake - ${OS} (${ARCH})")
 MESSAGE(STATUS "===============================================================================")
 
 #--set os specifc linking mode------------------------------------------------
@@ -187,7 +199,5 @@ ENDIF()
 #-----------------------------------------------------------------------------
 
 #--build packages-------------------------------------------------------------
-IF(ENABLE_PACKAGES)
-    ADD_SUBDIRECTORY(packages)
-ENDIF()
+ADD_SUBDIRECTORY(packages)
 #-----------------------------------------------------------------------------
