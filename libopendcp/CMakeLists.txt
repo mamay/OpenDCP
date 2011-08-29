@@ -31,10 +31,10 @@ ENDIF()
 #-----------------------------------------------------------------------------
 
 #--install opendcplib---------------------------------------------------------
-INSTALL(TARGETS opendcp-lib-static DESTINATION lib)
+INSTALL(TARGETS opendcp-lib-static DESTINATION ${LIB_INSTALL_PATH})
 INSTALL(FILES opendcp.h DESTINATION include)
 
 IF(UNIX AND NOT APPLE)
-    INSTALL(TARGETS opendcp-lib-shared DESTINATION lib)
+    INSTALL(TARGETS opendcp-lib-shared DESTINATION ${LIB_INSTALL_PATH})
 ENDIF()
 #-----------------------------------------------------------------------------

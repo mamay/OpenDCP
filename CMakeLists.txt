@@ -50,7 +50,6 @@ ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64)
 
 #--cmake options--------------------------------------------------------------
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-SET(CMAKE_SKIP_RPATH TRUE)
 #-----------------------------------------------------------------------------
 
 #--set Base Compiler Flags----------------------------------------------------
@@ -82,10 +81,15 @@ ELSEIF(WIN32)
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 ELSE(UNIX)
     SET(OS "UNIX")
+    IF(ARCH STREQUAL "x86_64")
+        SET(AUTO_CFLAGS "CFLAGS=-fPIC")
+    ENDIF()
 ENDIF()
 #-----------------------------------------------------------------------------
 
 #--build Paths----------------------------------------------------------------
+SET(LIB_INSTALL_PATH "lib")
+
 SET(OPENDCP_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/libopendcp")
 INCLUDE_DIRECTORIES(${OPENDCP_INCLUDE_DIR})
 SET(OPENDCP_LIB "${PROJECT_BINARY_DIR}/libopendcp/libopendcp.a")
@@ -93,6 +97,10 @@ SET(OPENDCP_LIB "${PROJECT_BINARY_DIR}/libopendcp/libopendcp.a")
 SET(ASDCP_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/libasdcp")
 INCLUDE_DIRECTORIES(${ASDCP_INCLUDE_DIR})
 SET(ASDCP_LIBRARIES -L${PROJECT_BINARY_DIR}/libasdcp -lopendcp-asdcp -lopendcp-kumu)
+
+IF(UNIX AND NOT APPLE AND ARCH STREQUAL "x86_64")
+    SET(LIB_INSTALL_PATH "lib64")
+ENDIF()
 #-----------------------------------------------------------------------------
 
 #--contrib Paths--------------------------------------------------------------
