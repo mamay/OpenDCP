@@ -87,6 +87,10 @@ QFileInfoList inRightList;
 QString outLeftDir;
 QString outRightDir;
 
+void MainWindow::addCompleted(int iteration, QString file) {
+     dJ2kConversion->conversionStatus(iteration, file);
+}
+
 void j2kEncode(int &iteration)
 {
     QFileInfo fileinfo;
@@ -96,6 +100,7 @@ void j2kEncode(int &iteration)
     QImage image;
     char *cstrOutputFile;
     char *cstrInputFile;
+    int status = 0;
 
     fileinfo = inLeftList.at(iteration);
     inputFile = fileinfo.absoluteFilePath();
@@ -127,10 +132,11 @@ void j2kEncode(int &iteration)
         QFile f(cstrOutputFile);
         if (!f.exists() || context->no_overwrite == 0) {
             f.close();
-            convert_to_j2k(context,cstrInputFile,cstrOutputFile, NULL);
+            status = convert_to_j2k(context,cstrInputFile,cstrOutputFile, NULL);
         }
     }
 
+    //MainWindow::addCompleted(iteration, inputFile);
     //qDebug() << "jpeg convert " << inputFile << "->" << outputFile << " in thread" << QThread::currentThreadId();
 }
 
@@ -140,7 +146,7 @@ void MainWindow::showImage(QImage image) {
 
 void MainWindow::convertJ2k() {
     iterations = ui->endSpinBox->value() - ui->startSpinBox->value() + 1;
-    //iterations = inLeftList.size();
+    int threadCount = 0;
 
     // set thread limit in win32
     QThreadPool::globalInstance()->setMaxThreadCount(ui->threadsSpinBox->value());
@@ -151,31 +157,21 @@ void MainWindow::convertJ2k() {
         vector.append(i);
 
     // Create a progress dialog.
-    QProgressDialog dialog;
-    dialog.setLabelText(QString("JPEG2000 conversion using %1 thread(s)...").arg(QThreadPool::globalInstance()->maxThreadCount()));
+    threadCount = QThreadPool::globalInstance()->maxThreadCount();
+    dJ2kConversion->setup(iterations, threadCount);
 
     // Create a QFutureWatcher and conncect signals and slots.
-    QFutureWatcher<void> futureWatcher;
-    QObject::connect(&futureWatcher, SIGNAL(finished()), &dialog, SLOT(reset()));
-    QObject::connect(&dialog, SIGNAL(canceled()), &futureWatcher, SLOT(cancel()));
-    QObject::connect(&futureWatcher, SIGNAL(progressRangeChanged(int,int)), &dialog, SLOT(setRange(int,int)));
-    QObject::connect(&futureWatcher, SIGNAL(progressValueChanged(int)), &dialog, SLOT(setValue(int)));
+    //QFutureWatcher<void> futureWatcher;
+    QObject::connect(&futureWatcher, SIGNAL(finished()), dJ2kConversion, SLOT(resetButtons()));
+    QObject::connect(dJ2kConversion, SIGNAL(cancel()), &futureWatcher, SLOT(cancel()));
+    QObject::connect(&futureWatcher, SIGNAL(progressRangeChanged(int,int)), dJ2kConversion, SLOT(setRange(int,int)));
+    QObject::connect(&futureWatcher, SIGNAL(progressValueChanged(int)), dJ2kConversion, SLOT(step(int)));
 
-    // Start the computation.
+    // Start the computation
     futureWatcher.setFuture(QtConcurrent::map(vector, j2kEncode));
 
-    // Display the dialog and start the event loop.
-    dialog.exec();
-
-    if (futureWatcher.future().isCanceled()) {
-        QMessageBox msgBox;
-        msgBox.setText("JPEG2000 conversion cancelled");
-        msgBox.exec();
-    } else {
-        QMessageBox msgBox;
-        msgBox.setText("JPEG2000 conversion complete");
-        msgBox.exec();
-    }
+    // open conversion dialog box
+    dJ2kConversion->exec();
 
     // wait to ensure all threads are finished
     futureWatcher.waitForFinished();

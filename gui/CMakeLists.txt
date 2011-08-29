@@ -58,16 +58,19 @@ SET(OPENDCP_GUI_CXX_SRC
     mxf.cpp
     xml.cpp
     generatetitle.cpp
+    dialogj2kconversion.cpp
 )
 
 SET(OPENDCP_GUI_H_SRC
     mainwindow.h
     generatetitle.h
+    dialogj2kconversion.h
 )
 
 SET(OPENDCP_GUI_UI
     mainwindow.ui
     generatetitle.ui
+    dialogj2kconversion.ui
 )
 
 SET(OPENDCP_GUI_RES

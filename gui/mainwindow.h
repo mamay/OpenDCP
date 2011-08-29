@@ -4,8 +4,10 @@
 #include <QMainWindow>
 #include <QtGui>
 #include <opendcp.h>
+#include "dialogj2kconversion.h"
 
 class GenerateTitle;
+class DialogJ2kConversion;
 
 namespace Ui {
     class MainWindow;
@@ -48,7 +50,7 @@ protected:
     void showImage(QImage image);
     void createPictureMxf();
     void createAudioMxf();
-
+    void addCompleted(int iteration, QString file);
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -58,7 +60,10 @@ private:
     Ui::MainWindow *ui;
     QSignalMapper signalMapper;
     GenerateTitle *generateTitle;
+    //DialogJ2kConversion *dJ2kConversion;
     QString lastDir;
+    QFutureWatcher<void> futureWatcher;
+    DialogJ2kConversion *dJ2kConversion;
 };
 
 #endif // MAINWINDOW_H

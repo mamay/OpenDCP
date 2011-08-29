@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "generatetitle.h"
+#include "dialogj2kconversion.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -8,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     generateTitle = new GenerateTitle(this);
+    dJ2kConversion = new DialogJ2kConversion();
     setInitialUiState();
     connectSlots();
 }

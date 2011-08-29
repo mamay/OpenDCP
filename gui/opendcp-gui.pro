@@ -17,13 +17,16 @@ SOURCES += main.cpp\
            j2k.cpp \
            mxf.cpp \
            xml.cpp \
-           generatetitle.cpp
+           generatetitle.cpp \
+    dialogj2kconversion.cpp
 
 HEADERS  += mainwindow.h \
-            generatetitle.h
+            generatetitle.h \
+    dialogj2kconversion.h
 
 FORMS    += mainwindow.ui \
-            generatetitle.ui
+            generatetitle.ui \
+    dialogj2kconversion.ui
 
 #QMAKE_LFLAGS = -Wl,-subsystem,windows
 
@@ -40,7 +43,7 @@ WIN32_LIBS +=   /home/tmeiczin/Development/OpenDCP/build-win32/lib/libopendcp.a 
 LIBS +=         -L/Users/tmeiczin/Development/OpenDCP/build/lib -lopendcp \
                 -L/Users/tmeiczin/Development/OpenDCP/build/contrib/lib/ \
                 -lopenjpeg -ltiff -lxmlsec1 -lxmlsec1-openssl \
-                -lxslt -lxml2 -lasdcp -lkumu -lexpat -lcrypto -lssl -liconv \
+                -lxslt -lxml2 -lopendcp-asdcp -lopendcp-kumu -lexpat -lcrypto -lssl \
                 -lz -lgomp
 
 INCLUDEPATH =   /usr/local/include /Users/tmeiczin/Development/OpenDCP/build/contrib/include
