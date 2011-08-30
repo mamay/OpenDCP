@@ -1,3 +1,21 @@
+/*
+     OpenDCP: Builds Digital Cinema Packages
+     Copyright (c) 2010-2011 Terrence Meiczinger, All Rights Reserved
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QtGui>
@@ -87,10 +105,6 @@ QFileInfoList inRightList;
 QString outLeftDir;
 QString outRightDir;
 
-void MainWindow::addCompleted(int iteration, QString file) {
-     dJ2kConversion->conversionStatus(iteration, file);
-}
-
 void j2kEncode(int &iteration)
 {
     QFileInfo fileinfo;
@@ -135,9 +149,6 @@ void j2kEncode(int &iteration)
             status = convert_to_j2k(context,cstrInputFile,cstrOutputFile, NULL);
         }
     }
-
-    //MainWindow::addCompleted(iteration, inputFile);
-    //qDebug() << "jpeg convert " << inputFile << "->" << outputFile << " in thread" << QThread::currentThreadId();
 }
 
 void MainWindow::showImage(QImage image) {
@@ -148,7 +159,7 @@ void MainWindow::convertJ2k() {
     iterations = ui->endSpinBox->value() - ui->startSpinBox->value() + 1;
     int threadCount = 0;
 
-    // set thread limit in win32
+    // set thread limit
     QThreadPool::globalInstance()->setMaxThreadCount(ui->threadsSpinBox->value());
 
     // Prepare the vector.
@@ -156,16 +167,14 @@ void MainWindow::convertJ2k() {
     for (int i = ui->startSpinBox->value() - 1; i < ui->endSpinBox->value(); i++)
         vector.append(i);
 
-    // Create a progress dialog.
     threadCount = QThreadPool::globalInstance()->maxThreadCount();
-    dJ2kConversion->setup(iterations, threadCount);
+    dJ2kConversion->init(iterations, threadCount);
 
     // Create a QFutureWatcher and conncect signals and slots.
-    //QFutureWatcher<void> futureWatcher;
-    QObject::connect(&futureWatcher, SIGNAL(finished()), dJ2kConversion, SLOT(resetButtons()));
+    QFutureWatcher<void> futureWatcher;
     QObject::connect(dJ2kConversion, SIGNAL(cancel()), &futureWatcher, SLOT(cancel()));
-    QObject::connect(&futureWatcher, SIGNAL(progressRangeChanged(int,int)), dJ2kConversion, SLOT(setRange(int,int)));
-    QObject::connect(&futureWatcher, SIGNAL(progressValueChanged(int)), dJ2kConversion, SLOT(step(int)));
+    QObject::connect(&futureWatcher, SIGNAL(progressValueChanged(int)), dJ2kConversion, SLOT(step()));
+    QObject::connect(&futureWatcher, SIGNAL(finished()), dJ2kConversion, SLOT(finished()));
 
     // Start the computation
     futureWatcher.setFuture(QtConcurrent::map(vector, j2kEncode));
@@ -175,9 +184,6 @@ void MainWindow::convertJ2k() {
 
     // wait to ensure all threads are finished
     futureWatcher.waitForFinished();
-
-    // Query the future to check if was canceled.
-    //qDebug() << "Canceled?" << futureWatcher.future().isCanceled();
 
     return;
 }

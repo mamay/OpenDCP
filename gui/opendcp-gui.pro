@@ -18,17 +18,23 @@ SOURCES += main.cpp\
            mxf.cpp \
            xml.cpp \
            generatetitle.cpp \
-    dialogj2kconversion.cpp
+           dialogj2kconversion.cpp \
+           mxf-writer.cpp \
+    dialogmxfconversion.cpp
 
 HEADERS  += mainwindow.h \
             generatetitle.h \
-    dialogj2kconversion.h
+            dialogj2kconversion.h \
+            mxf-writer.h \
+    dialogmxfconversion.h
 
 FORMS    += mainwindow.ui \
             generatetitle.ui \
-    dialogj2kconversion.ui
+            dialogj2kconversion.ui \
+            dialogmxfconversion.ui
 
-#QMAKE_LFLAGS = -Wl,-subsystem,windows
+QMAKE_LFLAGS = -D_FILE_OFFSET_BITS=64
+QMAKE_CXXFLAGS = -D_FILE_OFFSET_BITS=64
 
 WIN32_LIBS +=   /home/tmeiczin/Development/OpenDCP/build-win32/lib/libopendcp.a \
                 /home/tmeiczin/Development/OpenDCP/build-win32/contrib/lib/libopenjpeg.a \
@@ -40,13 +46,17 @@ WIN32_LIBS +=   /home/tmeiczin/Development/OpenDCP/build-win32/lib/libopendcp.a 
                 /home/tmeiczin/Development/OpenDCP/build-win32/contrib/lib/libssl.a \
                 -lz
 
-LIBS +=         -L/Users/tmeiczin/Development/OpenDCP/build/lib -lopendcp \
-                -L/Users/tmeiczin/Development/OpenDCP/build/contrib/lib/ \
+LIBS +=         ../build-linux/libopendcp/libopendcp.a \
+                ../build-linux/libasdcp/libopendcp-asdcp.a \
+                ../build-linux/libasdcp/libopendcp-kumu.a \
+                -L/../build-linux/contrib/lib/ \
                 -lopenjpeg -ltiff -lxmlsec1 -lxmlsec1-openssl \
-                -lxslt -lxml2 -lopendcp-asdcp -lopendcp-kumu -lexpat -lcrypto -lssl \
+                -lxslt -lxml2 -lexpat -lcrypto -lssl \
                 -lz -lgomp
 
-INCLUDEPATH =   /usr/local/include /Users/tmeiczin/Development/OpenDCP/build/contrib/include
+INCLUDEPATH += ../libopendcp \
+               ../../build/contrib/include \
+               ../libasdcp
 
 RESOURCES += \
     resources/opendcp.qrc

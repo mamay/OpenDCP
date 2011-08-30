@@ -16,32 +16,34 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef GENERATETITLE_H
-#define GENERATETITLE_H
+#ifndef DIALOGMXFCONVERSION_H
+#define DIALOGMXFCONVERSION_H
 
-#include <QDialog>
+#include "ui_dialogmxfconversion.h"
 
-namespace Ui {
-    class GenerateTitle;
-}
-
-class GenerateTitle : public QDialog
-{
+class DialogMxfConversion : public QDialog, private Ui::DialogMxfConversion {
     Q_OBJECT
 
-public slots:
-    void updateTitle();
-
-protected:
-    void load(const QString& filename);
-
 public:
-    explicit GenerateTitle(QWidget *parent = 0);
-    ~GenerateTitle();
-    QString getTitle();
+    DialogMxfConversion(QWidget *parent = 0);
+    void init(int imageCount);
+    void finished();
 
 private:
-    Ui::GenerateTitle *ui;
+    int totalCount;
+    int currentCount;
+    int cancelled;
+    int done;
+
+signals:
+    void cancel();
+
+public slots:
+    void setButtons(int);
+    void step();
+
+private slots:
+    void abort();
 };
 
-#endif // GENERATETITLE_H
+#endif // DIALOGMXFCONVERSION_H

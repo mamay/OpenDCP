@@ -1,3 +1,21 @@
+/*
+     OpenDCP: Builds Digital Cinema Packages
+     Copyright (c) 2010-2011 Terrence Meiczinger, All Rights Reserved
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QtGui>
@@ -5,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <opendcp.h>
+#include "mxf-writer.h"
 
 void MainWindow::connectMxfSlots()
 {
@@ -16,6 +35,8 @@ void MainWindow::connectMxfSlots()
     connect(ui->mxfSourceTypeComboBox,SIGNAL(currentIndexChanged(int)),this, SLOT(mxfSourceTypeUpdate()));
     connect(ui->mxfButton,SIGNAL(clicked()),this,SLOT(startMxf()));
     connect(ui->subCreateButton,SIGNAL(clicked()),this,SLOT(createSubtitleMxf()));
+    connect(mxf, SIGNAL(frameDone()), dMxfConversion, SLOT(step()));
+    connect(mxf, SIGNAL(finished()), this, SLOT(mxfDone()));
 
     // Picture input lines
     signalMapper.setMapping(ui->pictureLeftButton, ui->pictureLeftEdit);
@@ -115,6 +136,10 @@ void MainWindow::setMxfSoundState() {
     }
 }
 
+void MainWindow::mxfDone() {
+   dMxfConversion->finished();
+}
+
 void MainWindow::startMxf() {
     if (ui->aMxfOutEdit->text().isEmpty() && ui->pMxfOutEdit->text().isEmpty()) {
         QMessageBox::critical(this, tr("Destination file needed"),tr("Please specify at least one destination MXF file."));
@@ -164,11 +189,6 @@ void MainWindow::startMxf() {
         }
     }
 
-    QMessageBox msgBox;
-    msgBox.setStandardButtons(0);
-    msgBox.setText("Creating the MXF Files... this could take 15 minutes or more depending on the size.");
-    msgBox.show();
-
     // create picture mxf file
     if (!ui->pMxfOutEdit->text().isEmpty()) {
         createPictureMxf();
@@ -178,8 +198,6 @@ void MainWindow::startMxf() {
     if (!ui->aMxfOutEdit->text().isEmpty()) {
         createAudioMxf();
     }
-
-    msgBox.close();
 }
 
 void MainWindow::createSubtitleMxf() {
@@ -245,6 +263,7 @@ void MainWindow::createAudioMxf() {
     } else {
         mxfContext->ns = XML_NS_SMPTE;
     }
+
     mxfContext->frame_rate = ui->mxfFrameRateComboBox->currentText().toInt();
     mxfContext->stereoscopic = 0;
 
@@ -277,7 +296,9 @@ void MainWindow::createAudioMxf() {
     char *outputFile = new char [ui->aMxfOutEdit->text().toStdString().size()+1];
     strcpy(outputFile, ui->aMxfOutEdit->text().toStdString().c_str());
 
-    if (write_mxf(mxfContext,fileList,outputFile) != 0 )  {
+    mxf->setMxfInputs(mxfContext,fileList,outputFile);
+    mxf->start();
+    if (!mxf->success)  {
         QMessageBox::critical(this, tr("MXF Creation Error"),
                              tr("Sound MXF creation failed."));
         return;
@@ -374,7 +395,11 @@ void MainWindow::createPictureMxf() {
                              tr("No input files found"));
         return;
     } else {
-        if (write_mxf(mxfContext,fileList,outputFile) != 0 )  {
+        mxf->setMxfInputs(mxfContext,fileList,outputFile);
+        dMxfConversion->init(fileList->file_count);
+        mxf->start();
+        dMxfConversion->exec();
+        if (!mxf->success)  {
             QMessageBox::critical(this, tr("MXF Creation Error"),
                                  tr("Picture MXF creation failed."));
         } else {

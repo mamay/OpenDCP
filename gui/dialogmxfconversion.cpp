@@ -17,9 +17,9 @@
 */
 
 #include <QDir>
-#include "dialogj2kconversion.h"
+#include "dialogmxfconversion.h"
 
-DialogJ2kConversion::DialogJ2kConversion(QWidget *parent) : QDialog(parent)
+DialogMxfConversion::DialogMxfConversion(QWidget *parent) : QDialog(parent)
 {
     setupUi(this);
 
@@ -29,10 +29,8 @@ DialogJ2kConversion::DialogJ2kConversion(QWidget *parent) : QDialog(parent)
     connect(buttonStop, SIGNAL(clicked()), this, SLOT(abort()));
 }
 
-void DialogJ2kConversion::init(int imageCount, int threadCount)
+void DialogMxfConversion::init(int imageCount)
 {
-    QString labelText;
-
     currentCount = 0;
     done         = 0;
     cancelled    = 0;
@@ -42,13 +40,10 @@ void DialogJ2kConversion::init(int imageCount, int threadCount)
     progressBar->setMinimum(0);
     progressBar->setMaximum(totalCount);
 
-    labelText.sprintf("Conversion using %d threads(s)",threadCount);
-    labelThreadCount->setText(labelText);
-
     setButtons(1);
 }
 
-void DialogJ2kConversion::step()
+void DialogMxfConversion::step()
 {
     QString labelText;
 
@@ -63,21 +58,21 @@ void DialogJ2kConversion::step()
     currentCount++;
 }
 
-void DialogJ2kConversion::finished()
+void DialogMxfConversion::finished()
 {
     done = 1;
     setButtons(0);
     step();
 }
 
-void DialogJ2kConversion::abort()
+void DialogMxfConversion::abort()
 {
     setButtons(0);
     cancelled = 1;
     emit cancel();
 }
 
-void DialogJ2kConversion::setButtons(int state)
+void DialogMxfConversion::setButtons(int state)
 {
     if (state == 0) {
         buttonClose->setEnabled(true);
