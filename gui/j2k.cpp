@@ -62,6 +62,8 @@ void MainWindow::j2kSetStereoscopicState() {
         ui->outJ2kRight->show();
         ui->outJ2kRightEdit->show();
         ui->outJ2kRightButton->show();
+
+        ui->bwSlider->setValue(250);
     } else {
         ui->inImageLeft->setText(tr("Directory:"));
         ui->outJ2kLeft->setText(tr("Directory:"));
@@ -71,6 +73,7 @@ void MainWindow::j2kSetStereoscopicState() {
         ui->outJ2kRight->hide();
         ui->outJ2kRightEdit->hide();
         ui->outJ2kRightButton->hide();
+        ui->bwSlider->setValue(125);
     }
 }
 
