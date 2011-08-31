@@ -46,6 +46,11 @@ MxfWriter::~MxfWriter()
 
 }
 
+void MxfWriter::reset()
+{
+  // emit default
+}
+
 void MxfWriter::conversionCompleted()
 {
     //emit nextConversion();
@@ -108,15 +113,10 @@ Result_t MxfWriter::fillWriterInfo(opendcp_t *opendcp, writer_info_t *writer_inf
     }
 }
 
-void MxfWriter::reset()
-{
-  // emit default
-}
-
 void MxfWriter::run()
 {
     Result_t result = writeMxf();
-    if (result = RESULT_OK) {
+    if (result == RESULT_OK) {
         success = 1;
     } else {
         success = 0;
@@ -235,12 +235,10 @@ Result_t MxfWriter::writeJ2kMxf(opendcp_t *opendcp, filelist_t *filelist, char *
             if (opendcp->encrypt_header_flag) {
                 frame_buffer.PlaintextOffset(0);
             }
-            qDebug() << "Duration: " << mxf_duration;
             i++;
             emit frameDone();
         }
         result = mxf_writer.WriteFrame(frame_buffer, writer_info.aes_context, writer_info.hmac_context);
-
     }
 
     if (result == RESULT_ENDOFFILE) {
@@ -281,45 +279,6 @@ Result_t MxfWriter::writeTTMxf(opendcp_t *opendcp,filelist_t *filelist, char *ou
 {
 
 }
-
-/*
-bool MxfWriter::writeImage(Image &my_image, QString format, int quality, QString out)
-{
-    my_image.magick(format.toStdString());
-
-    Image bgImg;
-    bgImg.size(Magick::Geometry(my_image.columns(), my_image.rows()));
-
-    QStringList excludedFormats;
-    excludedFormats << "png" << "gif";
-
-    if (!excludedFormats.contains(format, Qt::CaseInsensitive)) {
-        bgImg.read("xc:#FFFFFF");
-        bgImg.label("bgImg");
-        bgImg.depth(my_image.depth());
-
-        bgImg.composite(my_image, Magick::Geometry(bgImg.columns(),bgImg.rows()), Magick::DissolveCompositeOp );
-
-        my_image = bgImg;
-    }
-
-    bool converted = false;
-
-    if (quality != -1)
-        my_image.quality(quality);
-
-    try {
-        my_image.write(out.toStdString());
-
-        converted = true;
-    }
-    catch (Error& my_error) {
-        converted = false;
-    }
-
-    return converted;
-}
-*/
 
 void MxfWriter::stopProcess()
 {

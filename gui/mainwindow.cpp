@@ -120,6 +120,58 @@ void MainWindow::getPath(QWidget *w)
     lastDir = path;
 }
 
+int findSeqOffset(const char str1[], const char str2[]) {
+    int i = 0;
+    while(1) {
+        if(str1[i] != str2[i])
+                return i;
+        if(str1[i] == '\0' || str2[i] == '\0')
+                return 0;
+        i++;
+    }
+}
+
+int MainWindow::checkFileSequence(QStringList list) {
+    int sequential = 1;
+    int x = 0;
+
+    for (x = 0; x < (list.size()-1) && sequential; x++) {
+        sequential = checkSequential(list.at(x).toLocal8Bit().constData(), list.at(x+1).toLocal8Bit().constData());
+    }
+
+    if (sequential) {
+        return 0;
+    } else {
+        return x;
+    }
+}
+
+/* check if two strings are sequential */
+int MainWindow::checkSequential(const char *str1, const char *str2) {
+    int x,y;
+    int offset, ext_offset, diff_len;
+
+    offset     = findSeqOffset(str2,str1);
+
+    char *seq = (char *)malloc(offset+1);
+
+    strncpy(seq,str1+offset,offset);
+    x = atoi(seq);
+
+    strncpy(seq,str2+offset,offset);
+    y = atoi(seq);
+
+    if (seq) {
+        free(seq);
+    }
+
+    if ((y - x) == 1) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
 void MainWindow::about()
 {
     QMessageBox::about(this, tr("About OpenDCP"),

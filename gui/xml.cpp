@@ -109,10 +109,10 @@ void MainWindow::startDcp()
         reelList->asset_count++;
     }
 
-    /* add pkl to the DCP (only one PKL currently support) */
+    // add pkl to the DCP (only one PKL currently support)
     add_pkl(xmlContext);
 
-    /* add cpl to the DCP/PKL (only one CPL currently support) */
+    // add cpl to the DCP/PKL (only one CPL currently support)
     add_cpl(xmlContext, &xmlContext->pkl[0]);
 
     if (add_reel(xmlContext, &xmlContext->pkl[0].cpl[0],reelList[0]) != DCP_SUCCESS) {
@@ -276,7 +276,7 @@ void MainWindow::setPictureTrack()
     QString filter = "*.mxf";
     char *file;
 
-    path = QFileDialog::getOpenFileName(this, tr("Choose an file to open"),QString::null,filter);
+    path = QFileDialog::getOpenFileName(this, tr("Choose a file to open"),QString::null,filter);
     if (path.isEmpty()) {
         return;
     }
@@ -301,7 +301,7 @@ void MainWindow::setSoundTrack()
     QString filter = "*.mxf";
     char *file;
 
-    path = QFileDialog::getOpenFileName(this, tr("Choose an file to open"),QString::null,filter);
+    path = QFileDialog::getOpenFileName(this, tr("Choose a file to open"),QString::null,filter);
     if (path.isEmpty()) {
         return;
     }

@@ -71,6 +71,8 @@ protected:
     void showImage(QImage image);
     void createPictureMxf();
     void createAudioMxf();
+    int  checkFileSequence(QStringList list);
+    int  checkSequential(const char str1[], const char str2[]); 
 
 public:
     explicit MainWindow(QWidget *parent = 0);

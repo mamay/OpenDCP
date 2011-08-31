@@ -323,6 +323,7 @@ void MainWindow::createPictureMxf() {
     QFileInfoList pRightList;
     QFileInfo fileinfo;
     QString inputFile;
+    int s;
 
     opendcp_t *mxfContext = (opendcp_t *)malloc(sizeof(opendcp_t));
     memset(mxfContext,0,sizeof (opendcp_t));
@@ -338,7 +339,7 @@ void MainWindow::createPictureMxf() {
     mxfContext->frame_rate = ui->mxfFrameRateComboBox->currentText().toInt();
     mxfContext->stereoscopic = 0;
 
-    /* set log level */
+    // set log level
     dcp_set_log_level(mxfContext->log_level);
 
     filelist_t *fileList = (filelist_t*) malloc(sizeof(filelist_t));
@@ -372,6 +373,16 @@ void MainWindow::createPictureMxf() {
         // double count if 3D
         fileList->file_count *= 2;
     }
+
+    s = checkFileSequence(pLeftDir.entryList());
+    if (s) {
+        QString msg =
+        msg.sprintf("File list is not sequential between %s and %s. Please fix and try again.",pLeftDir.entryList().at(s-1).toAscii().constData(),
+                    pLeftDir.entryList().at(s).toAscii().constData());
+        QMessageBox::critical(this, tr("File Sequence Mismatch"), msg);
+        return;
+    }
+
     fileList->in = (char**) malloc(fileList->file_count*sizeof(char*));
     int offSet = 0;
     for (int x=0;x<pLeftList.size();x++) {

@@ -59,6 +59,7 @@ SET(OPENDCP_GUI_CXX_SRC
     xml.cpp
     generatetitle.cpp
     dialogj2kconversion.cpp
+    dialogmxfconversion.cpp
     mxf-writer.cpp
 )
 
@@ -66,6 +67,7 @@ SET(OPENDCP_GUI_H_SRC
     mainwindow.h
     generatetitle.h
     dialogj2kconversion.h
+    dialogmxfconversion.h
     mxf-writer.h
 )
 
@@ -73,6 +75,7 @@ SET(OPENDCP_GUI_UI
     mainwindow.ui
     generatetitle.ui
     dialogj2kconversion.ui
+    dialogmxfconversion.ui
 )
 
 SET(OPENDCP_GUI_RES

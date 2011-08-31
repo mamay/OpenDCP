@@ -111,26 +111,18 @@ void j2kEncode(int &iteration)
     QString inputFile;
     QString outputFile;
     QString baseName;
-    QImage image;
-    char *cstrOutputFile;
-    char *cstrInputFile;
     int status = 0;
 
     fileinfo = inLeftList.at(iteration);
     inputFile = fileinfo.absoluteFilePath();
     baseName = fileinfo.completeBaseName();
 
-    outputFile.sprintf("%s/%s.%s",outLeftDir.toStdString().c_str(),baseName.toStdString().c_str(),"j2c");
-    cstrOutputFile = new char [outputFile.toStdString().size()+1];
-    cstrInputFile = new char [inputFile.toStdString().size()+1];
-    strcpy(cstrOutputFile, outputFile.toStdString().c_str());
-    strcpy(cstrInputFile, inputFile.toStdString().c_str());
-    //image.load(inputFile);
-    //MainWindow::showImage(image);
-    QFile f(cstrOutputFile);
+    outputFile.sprintf("%s/%s.%s",outLeftDir.toAscii().constData(),baseName.toAscii().constData(),"j2c");
+
+    QFile f(outputFile);
     if (!f.exists() || context->no_overwrite == 0) {
         f.close();
-        convert_to_j2k(context,cstrInputFile,cstrOutputFile, NULL);
+        convert_to_j2k(context,inputFile.toAscii().data(),outputFile.toAscii().data(), NULL);
     }
 
     if (context->stereoscopic) {
@@ -139,14 +131,10 @@ void j2kEncode(int &iteration)
         baseName = fileinfo.completeBaseName();
 
         outputFile.sprintf("%s/%s.%s",outRightDir.toStdString().c_str(),baseName.toStdString().c_str(),"j2c");
-        cstrOutputFile = new char [outputFile.toStdString().size()+1];
-        cstrInputFile = new char [inputFile.toStdString().size()+1];
-        strcpy(cstrOutputFile, outputFile.toStdString().c_str());
-        strcpy(cstrInputFile, inputFile.toStdString().c_str());
-        QFile f(cstrOutputFile);
+        QFile f(outputFile);
         if (!f.exists() || context->no_overwrite == 0) {
             f.close();
-            status = convert_to_j2k(context,cstrInputFile,cstrOutputFile, NULL);
+            status = convert_to_j2k(context,inputFile.toAscii().data(),outputFile.toAscii().data(), NULL);
         }
     }
 }
