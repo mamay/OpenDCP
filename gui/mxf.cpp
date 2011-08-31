@@ -25,18 +25,18 @@
 #include <opendcp.h>
 #include "mxf-writer.h"
 
-void MainWindow::connectMxfSlots()
+void MainWindow::mxfConnectSlots()
 {
     // connect slots
-    connect(ui->mxfStereoscopicCheckBox, SIGNAL(stateChanged(int)), this, SLOT(setMxfStereoscopicState()));
-    connect(ui->mxfSoundRadio2, SIGNAL(clicked()), this, SLOT(setMxfSoundState()));
-    connect(ui->mxfSoundRadio5, SIGNAL(clicked()), this, SLOT(setMxfSoundState()));
-    connect(ui->qualitySlider,SIGNAL(valueChanged(int)),this, SLOT(qualitySliderUpdate()));
+    connect(ui->mxfStereoscopicCheckBox, SIGNAL(stateChanged(int)), this, SLOT(mxfSetStereoscopicState()));
+    connect(ui->mxfSoundRadio2, SIGNAL(clicked()), this, SLOT(mxfSetSoundState()));
+    connect(ui->mxfSoundRadio5, SIGNAL(clicked()), this, SLOT(mxfSetSoundState()));
     connect(ui->mxfSourceTypeComboBox,SIGNAL(currentIndexChanged(int)),this, SLOT(mxfSourceTypeUpdate()));
-    connect(ui->mxfButton,SIGNAL(clicked()),this,SLOT(startMxf()));
-    connect(ui->subCreateButton,SIGNAL(clicked()),this,SLOT(createSubtitleMxf()));
-    connect(mxf, SIGNAL(frameDone()), dMxfConversion, SLOT(step()));
-    connect(mxf, SIGNAL(finished()), this, SLOT(mxfDone()));
+    connect(ui->mxfButton,SIGNAL(clicked()),this,SLOT(mxfStart()));
+    connect(ui->subCreateButton,SIGNAL(clicked()),this,SLOT(mxfCreateSubtitle()));
+
+    connect(mxfWriterThread, SIGNAL(frameDone()), dMxfConversion, SLOT(step()));
+    connect(mxfWriterThread, SIGNAL(finished()), this, SLOT(mxfDone()));
 
     // Picture input lines
     signalMapper.setMapping(ui->pictureLeftButton, ui->pictureLeftEdit);
@@ -77,16 +77,16 @@ void MainWindow::mxfSourceTypeUpdate() {
     if (ui->mxfSourceTypeComboBox->currentIndex() == 0) {
         ui->mxfStereoscopicCheckBox->setEnabled(1);
         ui->mxfTypeComboBox->setCurrentIndex(1);
-        setMxfStereoscopicState();
+        mxfSetStereoscopicState();
     } else {
         ui->mxfStereoscopicCheckBox->setEnabled(0);
         ui->mxfStereoscopicCheckBox->setChecked(0);
         ui->mxfTypeComboBox->setCurrentIndex(0);
-        setMxfStereoscopicState();
+        mxfSetStereoscopicState();
     }
 }
 
-void MainWindow::setMxfStereoscopicState() {
+void MainWindow::mxfSetStereoscopicState() {
     int value = ui->mxfStereoscopicCheckBox->checkState();
 
     if (value) {
@@ -106,7 +106,7 @@ void MainWindow::setMxfStereoscopicState() {
     }
 }
 
-void MainWindow::setMxfSoundState() {
+void MainWindow::mxfSetSoundState() {
     if (ui->mxfSoundRadio2->isChecked()) {
         ui->aCenterLabel->setEnabled(0);
         ui->aCenterEdit->setEnabled(0);
@@ -140,7 +140,7 @@ void MainWindow::mxfDone() {
    dMxfConversion->finished();
 }
 
-void MainWindow::startMxf() {
+void MainWindow::mxfStart() {
     if (ui->aMxfOutEdit->text().isEmpty() && ui->pMxfOutEdit->text().isEmpty()) {
         QMessageBox::critical(this, tr("Destination file needed"),tr("Please specify at least one destination MXF file."));
         return;
@@ -191,16 +191,16 @@ void MainWindow::startMxf() {
 
     // create picture mxf file
     if (!ui->pMxfOutEdit->text().isEmpty()) {
-        createPictureMxf();
+        mxfCreatePicture();
     }
 
     // create sound mxf file
     if (!ui->aMxfOutEdit->text().isEmpty()) {
-        createAudioMxf();
+        mxfCreateAudio();
     }
 }
 
-void MainWindow::createSubtitleMxf() {
+void MainWindow::mxfCreateSubtitle() {
     if (ui->subInEdit->text().isEmpty()) {
         QMessageBox::critical(this, tr("Source subtitle needed"),tr("Please specify an input subtitle XML file."));
         return;
@@ -251,7 +251,7 @@ void MainWindow::createSubtitleMxf() {
     return;
 }
 
-void MainWindow::createAudioMxf() {
+void MainWindow::mxfCreateAudio() {
     opendcp_t *mxfContext = (opendcp_t *)malloc(sizeof(opendcp_t));
     memset(mxfContext,0,sizeof (opendcp_t));
 
@@ -296,9 +296,9 @@ void MainWindow::createAudioMxf() {
     char *outputFile = new char [ui->aMxfOutEdit->text().toStdString().size()+1];
     strcpy(outputFile, ui->aMxfOutEdit->text().toStdString().c_str());
 
-    mxf->setMxfInputs(mxfContext,fileList,outputFile);
-    mxf->start();
-    if (!mxf->success)  {
+    mxfWriterThread->setMxfInputs(mxfContext,fileList,outputFile);
+    mxfWriterThread->start();
+    if (!mxfWriterThread->success)  {
         QMessageBox::critical(this, tr("MXF Creation Error"),
                              tr("Sound MXF creation failed."));
         return;
@@ -316,7 +316,7 @@ void MainWindow::createAudioMxf() {
     return;
 }
 
-void MainWindow::createPictureMxf() {
+void MainWindow::mxfCreatePicture() {
     QDir pLeftDir;
     QDir pRightDir;
     QFileInfoList pLeftList;
@@ -376,11 +376,22 @@ void MainWindow::createPictureMxf() {
 
     s = checkFileSequence(pLeftDir.entryList());
     if (s) {
-        QString msg =
+        QString msg;
         msg.sprintf("File list is not sequential between %s and %s. Please fix and try again.",pLeftDir.entryList().at(s-1).toAscii().constData(),
                     pLeftDir.entryList().at(s).toAscii().constData());
         QMessageBox::critical(this, tr("File Sequence Mismatch"), msg);
         return;
+    }
+
+    if (ui->mxfStereoscopicCheckBox->checkState()) {
+        s = checkFileSequence(pRightDir.entryList());
+        if (s) {
+            QString msg;
+            msg.sprintf("File list is not sequential between %s and %s. Please fix and try again.",pRightDir.entryList().at(s-1).toAscii().constData(),
+                        pRightDir.entryList().at(s).toAscii().constData());
+            QMessageBox::critical(this, tr("File Sequence Mismatch"), msg);
+            return;
+        }
     }
 
     fileList->in = (char**) malloc(fileList->file_count*sizeof(char*));
@@ -406,11 +417,11 @@ void MainWindow::createPictureMxf() {
                              tr("No input files found"));
         return;
     } else {
-        mxf->setMxfInputs(mxfContext,fileList,outputFile);
+        mxfWriterThread->setMxfInputs(mxfContext,fileList,outputFile);
         dMxfConversion->init(fileList->file_count);
-        mxf->start();
+        mxfWriterThread->start();
         dMxfConversion->exec();
-        if (!mxf->success)  {
+        if (!mxfWriterThread->success)  {
             QMessageBox::critical(this, tr("MXF Creation Error"),
                                  tr("Picture MXF creation failed."));
         } else {

@@ -28,10 +28,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    generateTitle  = new GenerateTitle(this);
-    dJ2kConversion = new DialogJ2kConversion();
-    dMxfConversion = new DialogMxfConversion();
-    mxf            = new MxfWriter(this);
+    generateTitle   = new GenerateTitle(this);
+    dJ2kConversion  = new DialogJ2kConversion();
+    dMxfConversion  = new DialogMxfConversion();
+    mxfWriterThread = new MxfWriter(this);
 
     setInitialUiState();
     connectSlots();
@@ -44,8 +44,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::connectSlots()
 {
-    connectJ2kSlots();
-    connectMxfSlots();
+    j2kConnectSlots();
+    mxfConnectSlots();
     connectXmlSlots();
 
     // set initial directory
@@ -60,9 +60,9 @@ void MainWindow::setInitialUiState()
     ui->mxfSoundRadio2->setChecked(1);
 
     // set initial screen indexes
-    setJ2kStereoscopicState();
-    setMxfStereoscopicState();
-    setMxfSoundState();
+    j2kSetStereoscopicState();
+    mxfSetStereoscopicState();
+    mxfSetSoundState();
 
     // Check For Kakadu
     QProcess *kdu;
@@ -149,16 +149,22 @@ int MainWindow::checkFileSequence(QStringList list) {
 /* check if two strings are sequential */
 int MainWindow::checkSequential(const char *str1, const char *str2) {
     int x,y;
-    int offset, ext_offset, diff_len;
+    int offset, len;
 
-    offset     = findSeqOffset(str2,str1);
+    offset = findSeqOffset(str2,str1);
+
+    if (offset) {
+        len = offset;
+    } else {
+        len = strlen(str1);
+    }
 
     char *seq = (char *)malloc(offset+1);
 
-    strncpy(seq,str1+offset,offset);
+    strncpy(seq,str1+offset,len);
     x = atoi(seq);
 
-    strncpy(seq,str2+offset,offset);
+    strncpy(seq,str2+offset,len);
     y = atoi(seq);
 
     if (seq) {

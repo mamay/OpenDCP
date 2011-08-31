@@ -55,7 +55,7 @@
          </rect>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="j2kTab">
          <attribute name="title">
@@ -87,7 +87,7 @@
              <rect>
               <x>10</x>
               <y>30</y>
-              <width>60</width>
+              <width>71</width>
               <height>25</height>
              </rect>
             </property>
@@ -150,7 +150,7 @@
              <rect>
               <x>10</x>
               <y>60</y>
-              <width>65</width>
+              <width>71</width>
               <height>25</height>
              </rect>
             </property>
@@ -377,7 +377,7 @@
               </widget>
              </item>
              <item row="3" column="1">
-              <widget class="QSlider" name="qualitySlider">
+              <widget class="QSlider" name="bwSlider">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -411,7 +411,7 @@
               </widget>
              </item>
              <item row="3" column="3">
-              <widget class="QLabel" name="qualityValueLabel">
+              <widget class="QLabel" name="bwValueLabel">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                  <horstretch>0</horstretch>
@@ -496,7 +496,7 @@
               </widget>
              </item>
              <item row="3" column="0">
-              <widget class="QLabel" name="qualityLabel">
+              <widget class="QLabel" name="bwLabel">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -781,7 +781,7 @@
              <rect>
               <x>10</x>
               <y>30</y>
-              <width>60</width>
+              <width>71</width>
               <height>25</height>
              </rect>
             </property>
@@ -826,7 +826,7 @@
              <rect>
               <x>10</x>
               <y>60</y>
-              <width>65</width>
+              <width>71</width>
               <height>25</height>
              </rect>
             </property>
@@ -1106,7 +1106,7 @@
             <rect>
              <x>10</x>
              <y>30</y>
-             <width>60</width>
+             <width>71</width>
              <height>25</height>
             </rect>
            </property>
@@ -1804,11 +1804,6 @@
              <string>Closed Caption</string>
             </property>
            </item>
-           <item>
-            <property name="text">
-             <string>CineCanvas</string>
-            </property>
-           </item>
           </widget>
          </widget>
          <widget class="QGroupBox" name="subInputGrpBox">
@@ -2325,7 +2320,10 @@
              </rect>
             </property>
             <property name="layoutDirection">
-             <enum>Qt::RightToLeft</enum>
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -2347,7 +2345,13 @@
              </rect>
             </property>
             <property name="layoutDirection">
-             <enum>Qt::RightToLeft</enum>
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="frame">
+             <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -2464,7 +2468,10 @@
              </rect>
             </property>
             <property name="layoutDirection">
-             <enum>Qt::RightToLeft</enum>
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -2486,7 +2493,10 @@
              </rect>
             </property>
             <property name="layoutDirection">
-             <enum>Qt::RightToLeft</enum>
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -2603,7 +2613,10 @@
              </rect>
             </property>
             <property name="layoutDirection">
-             <enum>Qt::RightToLeft</enum>
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -2625,7 +2638,10 @@
              </rect>
             </property>
             <property name="layoutDirection">
-             <enum>Qt::RightToLeft</enum>
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -2750,7 +2766,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

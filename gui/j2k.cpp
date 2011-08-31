@@ -24,13 +24,13 @@
 #include <stdio.h>
 #include <opendcp.h>
 
-void MainWindow::connectJ2kSlots()
+void MainWindow::j2kConnectSlots()
 {
     // connect slots
-    connect(ui->stereoscopicCheckBox, SIGNAL(stateChanged(int)), this, SLOT(setJ2kStereoscopicState()));
-    connect(ui->qualitySlider,SIGNAL(valueChanged(int)),this, SLOT(qualitySliderUpdate()));
-    connect(ui->encodeButton,SIGNAL(clicked()),this,SLOT(startJ2k()));
-    connect(ui->profileComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(cinemaProfileUpdate()));
+    connect(ui->stereoscopicCheckBox, SIGNAL(stateChanged(int)), this, SLOT(j2kSetStereoscopicState()));
+    connect(ui->bwSlider,SIGNAL(valueChanged(int)),this, SLOT(j2kBwSliderUpdate()));
+    connect(ui->encodeButton,SIGNAL(clicked()),this,SLOT(j2kStart()));
+    connect(ui->profileComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(j2kCinemaProfileUpdate()));
 
     // set signal mapper to handle file dialogs
     signalMapper.setMapping(ui->inImageLeftButton, ui->inImageLeftEdit);
@@ -45,11 +45,12 @@ void MainWindow::connectJ2kSlots()
     connect(ui->outJ2kRightButton, SIGNAL(clicked()), &signalMapper, SLOT(map()));
 
     // update file
-    connect(ui->inImageLeftEdit, SIGNAL(textChanged(QString)),this,SLOT(checkInputFiles()));
-    connect(ui->endSpinBox, SIGNAL(valueChanged(int)),this,SLOT(updateEndSpinBox()));
+    connect(ui->inImageLeftEdit, SIGNAL(textChanged(QString)),this,SLOT(j2kCheckLeftInputFiles()));
+    connect(ui->inImageRightEdit, SIGNAL(textChanged(QString)),this,SLOT(j2kCheckRightInputFiles()));
+    connect(ui->endSpinBox, SIGNAL(valueChanged(int)),this,SLOT(j2kUpdateEndSpinBox()));
 }
 
-void MainWindow::setJ2kStereoscopicState() {
+void MainWindow::j2kSetStereoscopicState() {
     int value = ui->stereoscopicCheckBox->checkState();
 
     if (value) {
@@ -73,7 +74,7 @@ void MainWindow::setJ2kStereoscopicState() {
     }
 }
 
-void MainWindow::cinemaProfileUpdate() {
+void MainWindow::j2kCinemaProfileUpdate() {
     if (ui->profileComboBox->currentIndex() == 0) {
 #ifdef Q_WS_WIN
         ui->threadsSpinBox->setMaximum(6);
@@ -89,12 +90,12 @@ void MainWindow::cinemaProfileUpdate() {
     }
 }
 
-void MainWindow::qualitySliderUpdate() {
-    int bw = ui->qualitySlider->value();
+void MainWindow::j2kBwSliderUpdate() {
+    int bw = ui->bwSlider->value();
     QString string;
 
     string.sprintf("%d mb/s",bw);
-    ui->qualityValueLabel->setText(string);
+    ui->bwValueLabel->setText(string);
 }
 
 // globals for threads
@@ -143,7 +144,7 @@ void MainWindow::showImage(QImage image) {
     ui->previewLabel->setPixmap(QPixmap::fromImage(image));
 }
 
-void MainWindow::convertJ2k() {
+void MainWindow::j2kConvert() {
     iterations = ui->endSpinBox->value() - ui->startSpinBox->value() + 1;
     int threadCount = 0;
 
@@ -176,14 +177,14 @@ void MainWindow::convertJ2k() {
     return;
 }
 
-void MainWindow::updateEndSpinBox() {
+void MainWindow::j2kUpdateEndSpinBox() {
     ui->startSpinBox->setMaximum(ui->endSpinBox->value());
 }
 
-void MainWindow::checkInputFiles() {
+void MainWindow::j2kCheckLeftInputFiles() {
     QString filter = "*.tif;*.tiff;*.dpx";
     QDir inLeftDir;
-    QDir inRightDir;
+    int  s;
 
     inLeftDir.cd(ui->inImageLeftEdit->text());
     inLeftDir.setFilter(QDir::Files | QDir::NoSymLinks);
@@ -197,11 +198,50 @@ void MainWindow::checkInputFiles() {
         return;
     }
 
+    s = checkFileSequence(inLeftDir.entryList());
+
+    if (s) {
+        QString msg;
+        msg.sprintf("File list is not sequential between %s and %s.",inLeftDir.entryList().at(s-1).toAscii().constData(),
+                    inLeftDir.entryList().at(s).toAscii().constData());
+        QMessageBox::warning(this, tr("File Sequence Mismatch"), msg);
+    }
+
     ui->endSpinBox->setValue(inLeftList.size());
     ui->startSpinBox->setMaximum(ui->endSpinBox->value());
 }
 
-void MainWindow::startJ2k() {
+void MainWindow::j2kCheckRightInputFiles() {
+    QString filter = "*.tif;*.tiff;*.dpx";
+    QDir inRightDir;
+    int  s;
+
+    inRightDir.cd(ui->inImageRightEdit->text());
+    inRightDir.setFilter(QDir::Files | QDir::NoSymLinks);
+    inRightDir.setNameFilters(filter.split(';'));
+    inRightDir.setSorting(QDir::Name);
+    inRightList = inRightDir.entryInfoList();
+
+    if (inRightList.size() < 1) {
+        QMessageBox::warning(this, tr("No TIF files found"),
+                                   tr("No TIF files were found in the selected directory"));
+        return;
+    }
+
+    s = checkFileSequence(inRightDir.entryList());
+
+    if (s) {
+        QString msg;
+        msg.sprintf("File list is not sequential between %s and %s.",inRightDir.entryList().at(s-1).toAscii().constData(),
+                    inRightDir.entryList().at(s).toAscii().constData());
+        QMessageBox::warning(this, tr("File Sequence Mismatch"), msg);
+    }
+
+    ui->endSpinBox->setValue(inRightList.size());
+    ui->startSpinBox->setMaximum(ui->endSpinBox->value());
+}
+
+void MainWindow::j2kStart() {
     QString filter = "*.tif;*.tiff";
     QDir inLeftDir;
     QDir inRightDir;
@@ -250,7 +290,7 @@ void MainWindow::startJ2k() {
     }
 
     context->frame_rate = ui->frameRateComboBox->currentText().toInt();
-    context->bw = ui->qualitySlider->value() * 1000000;
+    context->bw = ui->bwSlider->value() * 1000000;
 
     // validate destination directories
     if (ui->stereoscopicCheckBox->checkState() == 0) {
@@ -281,13 +321,13 @@ void MainWindow::startJ2k() {
         inRightList = inRightDir.entryInfoList();
         outRightDir = ui->outJ2kRightEdit->text();
         if (inLeftList.size() != inRightList.size()) {
-            QMessageBox::warning(this, tr("File Count Mismatch"),
+            QMessageBox::critical(this, tr("File Count Mismatch"),
                                  tr("The left and right image directories have different file counts. They must be the same. Please fix and try again."));
             return;
         }
     }
 
-    convertJ2k();
+    j2kConvert();
 
     if (context != NULL) {
         free(context);

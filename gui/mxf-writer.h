@@ -53,14 +53,12 @@ public:
     void reset();
     ~MxfWriter();
     void run();
-    void setGeneralParamethers(QString fileName, QString format, int quality, QString destination);
-    void stopProcess();
+    void cancel();
     void setMxfInputs(opendcp_t *opendcp, filelist_t *filelist, char *output_file);
     int  success;
 
 private:
-    QWaitCondition imageCondition;
-
+    int        cancelled;
     opendcp_t  *opendcpMxf;
     filelist_t *filelistMxf;
     char       *outputFileMxf;

@@ -38,39 +38,46 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public slots:
-    void setJ2kStereoscopicState();
-    void setMxfStereoscopicState();
-    void setMxfSoundState();
+
     void getPath(QWidget *w);
     void setPictureTrack();
     void setSoundTrack();
     void setSubtitleTrack();
-    void startJ2k();
-    void startMxf();
+
+    void j2kStart();
+    void j2kCheckLeftInputFiles();
+    void j2kCheckRightInputFiles();
+    void j2kBwSliderUpdate();
+    void j2kCinemaProfileUpdate();
+    void j2kUpdateEndSpinBox();
+    void j2kSetStereoscopicState();
+
+    void mxfStart();
+    void mxfSourceTypeUpdate();
+    void mxfSetStereoscopicState();
+    void mxfSetSoundState();
+    void mxfCreateSubtitle();
+    void mxfDone();
+
     void startDcp();
     void updatePictureDuration();
     void updateSoundDuration();
     void updateSubtitleDuration();
-    void updateEndSpinBox();
-    void checkInputFiles();
-    void mxfSourceTypeUpdate();
-    void qualitySliderUpdate();
-    void cinemaProfileUpdate();
+
     void getTitle();
     void about();
-    void createSubtitleMxf();
-    void mxfDone();
 
 protected:
     void setInitialUiState();
     void connectSlots();
-    void connectJ2kSlots();
-    void connectMxfSlots();
+    void j2kConnectSlots();
+    void j2kConvert();
+    void mxfConnectSlots();
+    void mxfCreatePicture();
+    void mxfCreateAudio();
+
     void connectXmlSlots();
-    void convertJ2k();
     void showImage(QImage image);
-    void createPictureMxf();
-    void createAudioMxf();
     int  checkFileSequence(QStringList list);
     int  checkSequential(const char str1[], const char str2[]); 
 
@@ -85,7 +92,7 @@ private:
     QString             lastDir;
     DialogJ2kConversion *dJ2kConversion;
     DialogMxfConversion *dMxfConversion;
-    MxfWriter           *mxf;
+    MxfWriter           *mxfWriterThread;
 };
 
 #endif // MAINWINDOW_H

@@ -38,6 +38,7 @@ MxfWriter::MxfWriter(QObject *parent)
     : QThread(parent)
 {
     reset();
+
     //connect(this, SIGNAL(finished()), this, SLOT(mxfCompleted()));
 }
 
@@ -48,7 +49,8 @@ MxfWriter::~MxfWriter()
 
 void MxfWriter::reset()
 {
-  // emit default
+    cancelled = 0;
+    success = 0;
 }
 
 void MxfWriter::conversionCompleted()
@@ -116,11 +118,13 @@ Result_t MxfWriter::fillWriterInfo(opendcp_t *opendcp, writer_info_t *writer_inf
 void MxfWriter::run()
 {
     Result_t result = writeMxf();
+
     if (result == RESULT_OK) {
         success = 1;
     } else {
         success = 0;
     }
+
     emit finished();
 }
 
@@ -220,7 +224,7 @@ Result_t MxfWriter::writeJ2kMxf(opendcp_t *opendcp, filelist_t *filelist, char *
 
     // read each input frame and write to the output mxf until duration is reached
     while (ASDCP_SUCCESS(result) && mxf_duration--) {
-        if (opendcp->slide == 0 || i == start_frame) {
+        if (opendcp->slide == 0 || i == start_frame && cancelled == 0) {
             result = j2k_parser.OpenReadFrame(filelist->in[i], frame_buffer);
 
             if (opendcp->delete_intermediate) {
@@ -236,9 +240,9 @@ Result_t MxfWriter::writeJ2kMxf(opendcp_t *opendcp, filelist_t *filelist, char *
                 frame_buffer.PlaintextOffset(0);
             }
             i++;
-            emit frameDone();
         }
         result = mxf_writer.WriteFrame(frame_buffer, writer_info.aes_context, writer_info.hmac_context);
+        emit frameDone();
     }
 
     if (result == RESULT_ENDOFFILE) {
@@ -280,7 +284,7 @@ Result_t MxfWriter::writeTTMxf(opendcp_t *opendcp,filelist_t *filelist, char *ou
 
 }
 
-void MxfWriter::stopProcess()
+void MxfWriter::cancel()
 {
     //m_process_stopped = 1;
 }
