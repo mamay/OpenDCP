@@ -266,22 +266,332 @@ Result_t MxfWriter::writeJ2kMxf(opendcp_t *opendcp, filelist_t *filelist, char *
 
 Result_t MxfWriter::writeJ2kStereoscopicMxf(opendcp_t *opendcp,filelist_t *filelist, char *output_file)
 {
-    int hello;
+    JP2K::MXFSWriter         mxf_writer;
+    JP2K::PictureDescriptor picture_desc;
+    JP2K::CodestreamParser  j2k_parser_left;
+    JP2K::CodestreamParser  j2k_parser_right;
+    JP2K::FrameBuffer       frame_buffer_left(FRAME_BUFFER_SIZE);
+    JP2K::FrameBuffer       frame_buffer_right(FRAME_BUFFER_SIZE);
+    writer_info_t           writer_info;
+    Result_t                result = RESULT_OK;
+    ui32_t                  mxf_duration;
+
+    result = j2k_parser_left.OpenReadFrame(filelist->in[0], frame_buffer_left);
+
+    if (ASDCP_FAILURE(result)) {
+        printf("Failed to open file %s\n",filelist->in[0]);
+        return result;
+    }
+
+    result = j2k_parser_right.OpenReadFrame(filelist->in[1], frame_buffer_right);
+
+    if (ASDCP_FAILURE(result)) {
+        printf("Failed to open file %s\n",filelist->in[1]);
+        return result;
+    }
+
+    Rational edit_rate(opendcp->frame_rate,1);
+    j2k_parser_left.FillPictureDescriptor(picture_desc);
+    picture_desc.EditRate = edit_rate;
+
+    fillWriterInfo(opendcp, &writer_info);
+
+    result = mxf_writer.OpenWrite(output_file, writer_info.info, picture_desc);
+
+    if (ASDCP_FAILURE(result)) {
+        printf("failed to open output file %s\n",output_file);
+        return result;
+    }
+
+    /* set the duration of the output mxf, set to half the filecount since it is 3D */
+    if ((filelist->file_count/2) < opendcp->duration || !opendcp->duration) {
+        mxf_duration = filelist->file_count/2;
+    } else {
+        mxf_duration = opendcp->duration;
+    }
+
+    ui32_t i = 0;
+    /* read each input frame and write to the output mxf until duration is reached */
+    while (ASDCP_SUCCESS(result) && mxf_duration--) {
+        if (opendcp->slide == 0 || i == 0 && cancelled == 0) {
+            result = j2k_parser_left.OpenReadFrame(filelist->in[i], frame_buffer_left);
+
+            if (opendcp->delete_intermediate) {
+                unlink(filelist->in[i]);
+            }
+
+            if (ASDCP_FAILURE(result)) {
+                printf("Failed to open file %s\n",filelist->in[i]);
+                return result;
+            }
+            i++;
+
+            result = j2k_parser_right.OpenReadFrame(filelist->in[i], frame_buffer_right);
+
+            if (opendcp->delete_intermediate) {
+                unlink(filelist->in[i]);
+            }
+
+            if (ASDCP_FAILURE(result)) {
+                printf("Failed to open file %s\n",filelist->in[i]);
+                return result;
+            }
+            i++;
+
+            if (opendcp->encrypt_header_flag) {
+                frame_buffer_left.PlaintextOffset(0);
+            }
+
+            if (opendcp->encrypt_header_flag) {
+                frame_buffer_right.PlaintextOffset(0);
+            }
+        }
+        result = mxf_writer.WriteFrame(frame_buffer_left, JP2K::SP_LEFT, writer_info.aes_context, writer_info.hmac_context);
+        result = mxf_writer.WriteFrame(frame_buffer_right, JP2K::SP_RIGHT, writer_info.aes_context, writer_info.hmac_context);
+        emit frameDone();
+    }
+
+    if (result == RESULT_ENDOFFILE) {
+        result = RESULT_OK;
+    }
+
+
+    if (ASDCP_FAILURE(result)) {
+        printf("not end of file\n");
+        return result;
+    }
+
+    result = mxf_writer.Finalize();
+
+    if (ASDCP_FAILURE(result)) {
+        printf("failed to finalize\n");
+        return result;
+    }
+
+    return result;
 }
 
 Result_t MxfWriter::writePcmMxf(opendcp_t *opendcp,filelist_t *filelist, char *output_file)
 {
+    PCMParserList        pcm_parser;
+    PCM::MXFWriter       mxf_writer;
+    PCM::FrameBuffer     frame_buffer;
+    PCM::AudioDescriptor audio_desc;
+    writer_info_t        writer_info;
+    Result_t             result = RESULT_OK;
+    ui32_t               mxf_duration;
 
+    Rational edit_rate(opendcp->frame_rate,1);
+
+    result = pcm_parser.OpenRead(filelist->file_count,(const char **)filelist->in, edit_rate);
+
+    if (ASDCP_FAILURE(result)) {
+        printf("Failed to open file %s\n",filelist->in[0]);
+        return result;
+    }
+
+    pcm_parser.FillAudioDescriptor(audio_desc);
+    audio_desc.EditRate = edit_rate;
+    frame_buffer.Capacity(PCM::CalcFrameBufferSize(audio_desc));
+
+    fillWriterInfo(opendcp, &writer_info);
+
+    result = mxf_writer.OpenWrite(output_file, writer_info.info, audio_desc);
+
+    if (ASDCP_FAILURE(result)) {
+        printf("failed to open output file %s\n",output_file);
+        return result;
+    }
+
+    result = pcm_parser.Reset();
+
+    if (ASDCP_FAILURE(result)) {
+        printf("parser reset failed\n");
+        return result;
+    }
+
+    if (!opendcp->duration) {
+        mxf_duration = 0xffffffff;
+    } else {
+        mxf_duration = opendcp->duration;
+    }
+
+    while (ASDCP_SUCCESS(result) && mxf_duration-- && cancelled == 0) {
+        result = pcm_parser.ReadFrame(frame_buffer);
+
+        if (ASDCP_FAILURE(result)) {
+            continue;
+        } else {
+            if (frame_buffer.Size() != frame_buffer.Capacity()) {
+                printf("WARNING: Last frame read was short, PCM input is possibly not frame aligned.\n");
+                result = RESULT_ENDOFFILE;
+                continue;
+            }
+            result = mxf_writer.WriteFrame(frame_buffer, writer_info.aes_context, writer_info.hmac_context);
+        }
+    }
+
+    if (result == RESULT_ENDOFFILE) {
+        result = RESULT_OK;
+    }
+
+    if (ASDCP_FAILURE(result)) {
+        printf("not end of file\n");
+        return result;
+    }
+
+    result = mxf_writer.Finalize();
+
+    if (ASDCP_FAILURE(result)) {
+        printf("failed to finalize\n");
+        return result;
+    }
+
+    return result;
 }
 
 Result_t MxfWriter::writeMpeg2Mxf(opendcp_t *opendcp,filelist_t *filelist, char *output_file)
 {
+    MPEG2::FrameBuffer     frame_buffer(FRAME_BUFFER_SIZE);
+    MPEG2::Parser          mpeg2_parser;
+    MPEG2::MXFWriter       mxf_writer;
+    MPEG2::VideoDescriptor video_desc;
+    writer_info_t          writer_info;
+    Result_t               result = RESULT_OK;
+    ui32_t                 mxf_duration;
 
+    result = mpeg2_parser.OpenRead(filelist->in[0]);
+
+    if (ASDCP_FAILURE(result)) {
+        printf("Failed to open file %s\n",filelist->in[0]);
+        return result;
+    }
+
+    mpeg2_parser.FillVideoDescriptor(video_desc);
+
+    fillWriterInfo(opendcp, &writer_info);
+
+    result = mxf_writer.OpenWrite(output_file, writer_info.info, video_desc);
+
+    if (ASDCP_FAILURE(result)) {
+        printf("failed to open output file %s\n",output_file);
+        return result;
+    }
+
+    result = mpeg2_parser.Reset();
+
+    if (ASDCP_FAILURE(result)) {
+        printf("parser reset failed\n");
+        return result;
+    }
+
+    if (!opendcp->duration) {
+        mxf_duration = 0xffffffff;
+    } else {
+        mxf_duration = opendcp->duration;
+    }
+
+    while (ASDCP_SUCCESS(result) && mxf_duration-- && cancelled == 0) {
+        result = mpeg2_parser.ReadFrame(frame_buffer);
+
+        if (ASDCP_FAILURE(result)) {
+            continue;
+        }
+
+        if (opendcp->encrypt_header_flag) {
+            frame_buffer.PlaintextOffset(0);
+        }
+
+        result = mxf_writer.WriteFrame(frame_buffer, writer_info.aes_context, writer_info.hmac_context);
+    }
+
+    if (result == RESULT_ENDOFFILE) {
+        result = RESULT_OK;
+    }
+
+    if (ASDCP_FAILURE(result)) {
+        printf("not end of file\n");
+        return result;
+    }
+
+    result = mxf_writer.Finalize();
+
+    if (ASDCP_FAILURE(result)) {
+        printf("failed to finalize\n");
+        return result;
+    }
+
+    return result;
 }
 
 Result_t MxfWriter::writeTTMxf(opendcp_t *opendcp,filelist_t *filelist, char *output_file)
 {
+    TimedText::DCSubtitleParser    tt_parser;
+    TimedText::MXFWriter           mxf_writer;
+    TimedText::FrameBuffer         frame_buffer(FRAME_BUFFER_SIZE);
+    TimedText::TimedTextDescriptor tt_desc;
+    TimedText::ResourceList_t::const_iterator resource_iterator;
+    writer_info_t                  writer_info;
+    std::string                    xml_doc;
+    Result_t                       result = RESULT_OK;
+    ui32_t                         mxf_duration;
 
+    result = tt_parser.OpenRead(filelist->in[0]);
+
+    if (ASDCP_FAILURE(result)) {
+        printf("Failed to open file %s\n",filelist->in[0]);
+        return result;
+    }
+
+    tt_parser.FillTimedTextDescriptor(tt_desc);
+
+    fillWriterInfo(opendcp, &writer_info);
+
+    result = mxf_writer.OpenWrite(output_file, writer_info.info, tt_desc);
+    result = tt_parser.ReadTimedTextResource(xml_doc);
+
+    if (ASDCP_FAILURE(result)) {
+        printf("Could not read Time Text Resource\n");
+        return result;
+    }
+
+    result = mxf_writer.WriteTimedTextResource(xml_doc, writer_info.aes_context, writer_info.hmac_context);
+
+    if (ASDCP_FAILURE(result)) {
+        printf("Could not write Time Text Resource\n");
+        return result;
+    }
+
+    resource_iterator = tt_desc.ResourceList.begin();
+
+    while (ASDCP_SUCCESS(result) && resource_iterator != tt_desc.ResourceList.end() && cancelled == 0) {
+        result = tt_parser.ReadAncillaryResource((*resource_iterator++).ResourceID, frame_buffer);
+
+        if (ASDCP_FAILURE(result)) {
+          printf("Could not read Time Text Resource\n");
+          return result;
+        }
+
+        result = mxf_writer.WriteAncillaryResource(frame_buffer, writer_info.aes_context, writer_info.hmac_context);
+    }
+
+    if (result == RESULT_ENDOFFILE) {
+        result = RESULT_OK;
+    }
+
+    if (ASDCP_FAILURE(result)) {
+        printf("not end of file\n");
+        return result;
+    }
+
+    result = mxf_writer.Finalize();
+
+    if (ASDCP_FAILURE(result)) {
+        printf("failed to finalize\n");
+        return result;
+    }
+
+    return result;
 }
 
 void MxfWriter::cancel()
