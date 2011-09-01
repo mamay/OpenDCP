@@ -172,16 +172,22 @@ int check_file_sequence(char *str[], int count) {
 /* check if two strings are sequential */
 int check_sequential(char str1[],char str2[]) {
     int x,y;
-    int offset, ext_offset, diff_len;
+    int offset, len;
 
     offset     = find_seq_offset(str2,str1);
 
-    char *seq = (char *)malloc(offset+1);
+    if (offset) {
+        len = offset;
+    } else {
+        len = strlen(str1);
+    }
 
-    strncpy(seq,str1+offset,offset);
+    char *seq = (char *)malloc(len+1);
+
+    strncpy(seq,str1+offset,len);
     x = atoi(seq);
 
-    strncpy(seq,str2+offset,offset);
+    strncpy(seq,str2+offset,len);
     y = atoi(seq);
 
     if (seq) {

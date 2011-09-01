@@ -159,7 +159,7 @@ int MainWindow::checkSequential(const char *str1, const char *str2) {
         len = strlen(str1);
     }
 
-    char *seq = (char *)malloc(offset+1);
+    char *seq = (char *)malloc(len+1);
 
     strncpy(seq,str1+offset,len);
     x = atoi(seq);
