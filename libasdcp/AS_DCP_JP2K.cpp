@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    AS_DCP_JP2k.cpp
-    \version $Id: AS_DCP_JP2K.cpp,v 1.50 2010/11/15 17:04:13 jhurst Exp $
+    \version $Id: AS_DCP_JP2K.cpp,v 1.52 2011/07/27 21:01:49 jhurst Exp $
     \brief   AS-DCP library, JPEG 2000 essence reader and writer implementation
 */
 
@@ -315,7 +315,12 @@ lh__Reader::OpenRead(const char* filename, EssenceType_t type)
 	      DefaultLogSink().Warn("EditRate and SampleRate do not match (%.03f, %.03f).\n",
 				    m_EditRate.Quotient(), m_SampleRate.Quotient());
 	      
-	      if ( m_EditRate == EditRate_24 && m_SampleRate == EditRate_48 )
+	      if ( m_EditRate == EditRate_24 && m_SampleRate == EditRate_48 ||
+		   m_EditRate == EditRate_25 && m_SampleRate == EditRate_50 ||
+		   m_EditRate == EditRate_30 && m_SampleRate == EditRate_60 ||
+		   m_EditRate == EditRate_48 && m_SampleRate == EditRate_96 ||
+		   m_EditRate == EditRate_50 && m_SampleRate == EditRate_100 ||
+		   m_EditRate == EditRate_60 && m_SampleRate == EditRate_120 )
 		{
 		  DefaultLogSink().Debug("File may contain JPEG Interop stereoscopic images.\n");
 		  return RESULT_SFORMAT;
@@ -347,6 +352,30 @@ lh__Reader::OpenRead(const char* filename, EssenceType_t type)
 	      if ( m_SampleRate != EditRate_60 )
 		{
 		  DefaultLogSink().Error("EditRate and SampleRate not correct for 30/60 stereoscopic essence.\n");
+		  return RESULT_FORMAT;
+		}
+	    }
+	  else if ( m_EditRate == EditRate_48 )
+	    {
+	      if ( m_SampleRate != EditRate_96 )
+		{
+		  DefaultLogSink().Error("EditRate and SampleRate not correct for 48/96 stereoscopic essence.\n");
+		  return RESULT_FORMAT;
+		}
+	    }
+	  else if ( m_EditRate == EditRate_50 )
+	    {
+	      if ( m_SampleRate != EditRate_100 )
+		{
+		  DefaultLogSink().Error("EditRate and SampleRate not correct for 50/100 stereoscopic essence.\n");
+		  return RESULT_FORMAT;
+		}
+	    }
+	  else if ( m_EditRate == EditRate_60 )
+	    {
+	      if ( m_SampleRate != EditRate_120 )
+		{
+		  DefaultLogSink().Error("EditRate and SampleRate not correct for 60/120 stereoscopic essence.\n");
 		  return RESULT_FORMAT;
 		}
 	    }
@@ -496,6 +525,19 @@ ASDCP::JP2K::MXFReader::DumpIndex(FILE* stream) const
 {
   if ( m_Reader->m_File.IsOpen() )
     m_Reader->m_FooterPart.Dump(stream);
+}
+
+//
+ASDCP::Result_t
+ASDCP::JP2K::MXFReader::Close() const
+{
+  if ( m_Reader && m_Reader->m_File.IsOpen() )
+    {
+      m_Reader->Close();
+      return RESULT_OK;
+    }
+
+  return RESULT_INIT;
 }
 
 
@@ -674,6 +716,20 @@ ASDCP::JP2K::MXFSReader::DumpIndex(FILE* stream) const
   if ( m_Reader->m_File.IsOpen() )
     m_Reader->m_FooterPart.Dump(stream);
 }
+
+//
+ASDCP::Result_t
+ASDCP::JP2K::MXFSReader::Close() const
+{
+  if ( m_Reader && m_Reader->m_File.IsOpen() )
+    {
+      m_Reader->Close();
+      return RESULT_OK;
+    }
+
+  return RESULT_INIT;
+}
+
 
 //------------------------------------------------------------------------------------------
 
@@ -1037,9 +1093,12 @@ ASDCP::JP2K::MXFSWriter::OpenWrite(const char* filename, const WriterInfo& Info,
 
   if ( PDesc.EditRate != ASDCP::EditRate_24
        && PDesc.EditRate != ASDCP::EditRate_25
-       && PDesc.EditRate != ASDCP::EditRate_30 )
+       && PDesc.EditRate != ASDCP::EditRate_30
+       && PDesc.EditRate != ASDCP::EditRate_48
+       && PDesc.EditRate != ASDCP::EditRate_50
+       && PDesc.EditRate != ASDCP::EditRate_60 )
     {
-      DefaultLogSink().Error("Stereoscopic wrapping requires 24, 25 or 30 fps input streams.\n");
+      DefaultLogSink().Error("Stereoscopic wrapping requires 24, 25, 30, 48, 50 or 60 fps input streams.\n");
       return RESULT_FORMAT;
     }
 
@@ -1062,6 +1121,15 @@ ASDCP::JP2K::MXFSWriter::OpenWrite(const char* filename, const WriterInfo& Info,
 
       else if ( PDesc.EditRate == ASDCP::EditRate_30 )
 	TmpPDesc.EditRate = ASDCP::EditRate_60;
+
+      else if ( PDesc.EditRate == ASDCP::EditRate_48 )
+	TmpPDesc.EditRate = ASDCP::EditRate_96;
+
+      else if ( PDesc.EditRate == ASDCP::EditRate_50 )
+	TmpPDesc.EditRate = ASDCP::EditRate_100;
+
+      else if ( PDesc.EditRate == ASDCP::EditRate_60 )
+	TmpPDesc.EditRate = ASDCP::EditRate_120;
 
       result = m_Writer->SetSourceStream(TmpPDesc, JP2K_S_PACKAGE_LABEL, PDesc.EditRate);
     }

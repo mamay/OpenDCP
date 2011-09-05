@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
   /*! \file    KM_log.h
-    \version $Id: KM_log.h,v 1.11 2009/06/22 05:49:02 jhurst Exp $
+    \version $Id: KM_log.h,v 1.13 2011/03/05 19:15:35 jhurst Exp $
     \brief   message logging API
   */
 

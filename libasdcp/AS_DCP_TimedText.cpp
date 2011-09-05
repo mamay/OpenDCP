@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008-2009, John Hurst
+Copyright (c) 2008-2011, John Hurst
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    AS_DCP_TimedText.cpp
-    \version $Id: AS_DCP_TimedText.cpp,v 1.23 2009/05/19 21:51:08 jhurst Exp $       
+    \version $Id: AS_DCP_TimedText.cpp,v 1.24 2011/05/13 01:50:18 jhurst Exp $       
     \brief   AS-DCP library, PCM essence reader and writer implementation
 */
 
@@ -430,6 +430,20 @@ ASDCP::TimedText::MXFReader::DumpIndex(FILE* stream) const
   if ( m_Reader->m_File.IsOpen() )
     m_Reader->m_FooterPart.Dump(stream);
 }
+
+//
+ASDCP::Result_t
+ASDCP::TimedText::MXFReader::Close() const
+{
+  if ( m_Reader && m_Reader->m_File.IsOpen() )
+    {
+      m_Reader->Close();
+      return RESULT_OK;
+    }
+
+  return RESULT_INIT;
+}
+
 
 //------------------------------------------------------------------------------------------
 

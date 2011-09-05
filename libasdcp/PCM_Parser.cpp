@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2004-2009, John Hurst
+Copyright (c) 2004-2011, John Hurst
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    PCM_Parser.cpp
-    \version $Id: PCM_Parser.cpp,v 1.6 2009/02/13 05:00:31 jhurst Exp $
+    \version $Id: PCM_Parser.cpp,v 1.7 2011/05/13 01:50:19 jhurst Exp $
     \brief   AS-DCP library, PCM raw essence reader implementation
 */
 

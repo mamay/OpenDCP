@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2004-2009, John Hurst
+Copyright (c) 2004-2011, John Hurst
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
   /*! \file    KM_fileio.cpp
-    \version $Id: KM_fileio.cpp,v 1.29 2009/07/16 00:16:32 jhurst Exp $
+    \version $Id: KM_fileio.cpp,v 1.31 2011/03/08 19:03:47 jhurst Exp $
     \brief   portable file i/o
   */
 
@@ -37,6 +37,10 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef KM_WIN32
 #include <direct.h>
+#else
+#define _getcwd getcwd
+#define _unlink unlink
+#define _rmdir rmdir
 #endif
 
 using namespace Kumu;
@@ -343,7 +347,7 @@ Kumu::PathMakeAbsolute(const std::string& Path, char separator)
     return Path;
 
   char cwd_buf [MaxFilePath];
-  if ( getcwd(cwd_buf, MaxFilePath) == 0 )
+  if ( _getcwd(cwd_buf, MaxFilePath) == 0 )
     {
       DefaultLogSink().Error("Error retrieving current working directory.");
       return "";
@@ -649,7 +653,7 @@ Kumu::FileReader::OpenRead(const char* filename) const
   // suppress popup window on error
   UINT prev = ::SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOOPENFILEERRORBOX);
 
-  const_cast<FileReader*>(this)->m_Handle = ::CreateFile(filename,
+  const_cast<FileReader*>(this)->m_Handle = ::CreateFileA(filename,
 			  (GENERIC_READ),                // open for reading
 			  FILE_SHARE_READ,               // share for reading
 			  NULL,                          // no security
@@ -774,7 +778,7 @@ Kumu::FileWriter::OpenWrite(const char* filename)
   // suppress popup window on error
   UINT prev = ::SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOOPENFILEERRORBOX);
 
-  m_Handle = ::CreateFile(filename,
+  m_Handle = ::CreateFileA(filename,
 			  (GENERIC_WRITE|GENERIC_READ),  // open for reading
 			  FILE_SHARE_READ,               // share for reading
 			  NULL,                          // no security
@@ -1413,7 +1417,7 @@ Kumu::CreateDirectoriesInPath(const std::string& Path)
       if ( ! PathIsDirectory(tmp_path) )
 	{
 #ifdef KM_WIN32
-	  if ( mkdir(tmp_path.c_str()) != 0 )
+	  if ( _mkdir(tmp_path.c_str()) != 0 )
 #else // KM_WIN32
 	  if ( mkdir(tmp_path.c_str(), 0775) != 0 )
 #endif // KM_WIN32
@@ -1433,7 +1437,7 @@ Kumu::CreateDirectoriesInPath(const std::string& Path)
 Result_t
 Kumu::DeleteFile(const std::string& filename)
 {
-  if ( unlink(filename.c_str()) == 0 )
+  if ( _unlink(filename.c_str()) == 0 )
     return RESULT_OK;
 
   switch ( errno )
@@ -1486,7 +1490,7 @@ h__DeletePath(const std::string& pathname)
 	  }
       }
 
-      if ( rmdir(pathname.c_str()) != 0 )
+      if ( _rmdir(pathname.c_str()) != 0 )
 	{
 	  switch ( errno )
 	    {
@@ -1533,7 +1537,7 @@ Kumu::FreeSpaceForPath(const std::string& path, Kumu::fsize_t& free_space, Kumu:
 	ULARGE_INTEGER lTotalNumberOfBytes;
 	ULARGE_INTEGER lTotalNumberOfFreeBytes;
 
-	BOOL fResult = ::GetDiskFreeSpaceEx(path.c_str(), NULL, &lTotalNumberOfBytes, &lTotalNumberOfFreeBytes);
+	BOOL fResult = ::GetDiskFreeSpaceExA(path.c_str(), NULL, &lTotalNumberOfBytes, &lTotalNumberOfFreeBytes);
 	if (fResult) {
       free_space = static_cast<Kumu::fsize_t>(lTotalNumberOfFreeBytes.QuadPart);
       total_space = static_cast<Kumu::fsize_t>(lTotalNumberOfBytes.QuadPart);

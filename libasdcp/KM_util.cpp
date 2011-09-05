@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2005-2010, John Hurst
+Copyright (c) 2005-2011, John Hurst
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
   /*! \file    KM_util.cpp
-    \version $Id: KM_util.cpp,v 1.35 2010/07/30 22:47:32 jhurst Exp $
+    \version $Id: KM_util.cpp,v 1.38 2011/05/13 01:50:19 jhurst Exp $
     \brief   Utility functions
   */
 
@@ -58,10 +58,13 @@ struct map_entry_t
   Kumu::Result_t* result;
 };
 
-const ui32_t MapMax = 2048;
 
-static Kumu::Mutex s_MapLock;
+// WIN32 does not init this in time for use with Result_t(...) below, so it is
+// now a pointer that Result_t(...) fills in when it needs it.
+static Kumu::Mutex* s_MapLock = 0;
+
 static ui32_t s_MapSize = 0;
+static const ui32_t MapMax = 2048;
 static struct map_entry_t s_ResultMap[MapMax];
 
 
@@ -72,9 +75,8 @@ Kumu::Result_t::Find(int v)
   if ( v == 0 )
     return RESULT_OK;
 
-#ifndef WIN32
-  AutoMutex L(s_MapLock);
-#endif
+  assert(s_MapLock);
+  AutoMutex L(*s_MapLock);
 
   for ( ui32_t i = 0; i < s_MapSize; ++i )
     {
@@ -95,9 +97,8 @@ Kumu::Result_t::Delete(int v)
       return RESULT_FAIL;
     }
 
-#ifndef WIN32
-  AutoMutex L(s_MapLock);
-#endif
+  assert(s_MapLock);
+  AutoMutex L(*s_MapLock);
 
   for ( ui32_t i = 0; i < s_MapSize; ++i )
     {
@@ -137,9 +138,15 @@ Kumu::Result_t::Result_t(int v, const char* s, const char* l) : value(v), symbol
   if ( v == 0 )
     return;
 
-#ifndef WIN32
-  AutoMutex L(s_MapLock);
-#endif
+  // This may seem tricky, but it is certain that the static values declared in KM_error.h will
+  // be created (and thus this method will be called) before main(...) is called.  It is not
+  // until then that threads could be created, thus the mutex will exist before multi-threaded
+  // access could occur.
+  if ( s_MapLock == 0 )
+    s_MapLock = new Kumu::Mutex;
+
+  assert(s_MapLock);
+  AutoMutex L(*s_MapLock);
 
   for ( ui32_t i = 0; i < s_MapSize; ++i )
     {
@@ -963,6 +970,16 @@ Kumu::Timestamp::Timestamp(const Timestamp& rhs) : IArchive()
   Second = rhs.Second;
 }
 
+//
+Kumu::Timestamp::Timestamp(const char* datestr) : IArchive()
+{
+  if ( ! DecodeString(datestr) )
+    {
+      *this = Timestamp();
+    }
+}
+
+//
 Kumu::Timestamp::~Timestamp()
 {
 }

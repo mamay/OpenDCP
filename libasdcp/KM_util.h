@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2005-2009, John Hurst
+Copyright (c) 2005-2011, John Hurst
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
   /*! \file    KM_util.h
-    \version $Id: KM_util.h,v 1.28 2010/05/13 19:12:13 jhurst Exp $
+    \version $Id: KM_util.h,v 1.31 2011/07/21 16:54:42 jhurst Exp $
     \brief   Utility functions
   */
 
@@ -221,7 +221,7 @@ namespace Kumu
       bool Archive(Kumu::MemIOWriter* Writer) const
 	{
 	  if ( Writer == 0 ) return false;
-	  if ( ! Writer->WriteUi32BE(this->size()) ) return false;
+	  if ( ! Writer->WriteUi32BE(static_cast<ui32_t>(this->size())) ) return false;
 	  typename ArchivableList<T>::const_iterator i = this->begin();
 	  for ( ; i != this->end(); i++ )
 	    if ( ! i->Archive(Writer) ) return false;
@@ -243,7 +243,7 @@ namespace Kumu
       virtual ~ArchivableString() {}
 
       bool   HasValue() const { return ! this->empty(); }
-      ui32_t ArchiveLength() const { return sizeof(ui32_t) + this->size(); }
+      ui32_t ArchiveLength() const { return static_cast<ui32_t>((sizeof(ui32_t) + this->size())|0xffffffff); }
 
       bool   Archive(MemIOWriter* Writer) const {
 	if ( Writer == 0 ) return false;
@@ -518,6 +518,11 @@ namespace Kumu
 	return true;
       }
     };
+
+  inline void hexdump(const ByteString& buf, FILE* stream = 0) {
+    hexdump(buf.RoData(), buf.Length());
+  }
+
 
 } // namespace Kumu
 

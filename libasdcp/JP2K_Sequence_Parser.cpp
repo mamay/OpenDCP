@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2004-2009, John Hurst
+Copyright (c) 2004-2011, John Hurst
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    JP2K_Sequence_Parser.cpp
-    \version $Id: JP2K_Sequence_Parser.cpp,v 1.7 2009/10/15 19:12:00 jhurst Exp $
+    \version $Id: JP2K_Sequence_Parser.cpp,v 1.8 2011/05/13 01:50:19 jhurst Exp $
     \brief   AS-DCP library, JPEG 2000 codestream essence reader implementation
 */
 
@@ -78,7 +78,9 @@ public:
 	    std::string Str(m_DirName);
 	    Str += "/";
 	    Str += next_file;
-	    push_back(Str);
+
+	    if ( ! Kumu::PathIsDirectory(Str) )
+	      push_back(Str);
 	  }
 
 	sort();

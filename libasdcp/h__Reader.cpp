@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    h__Reader.cpp
-    \version $Id: h__Reader.cpp,v 1.27 2010/06/09 21:27:32 jhurst Exp $
+    \version $Id: h__Reader.cpp,v 1.28 2011/06/14 23:38:34 jhurst Exp $
     \brief   MXF file reader base class
 */
 
@@ -63,12 +63,10 @@ ASDCP::h__Reader::InitInfo()
   InterchangeObject* Object;
 
   m_Info.LabelSetType = LS_MXF_UNKNOWN;
-  UL OPAtomUL(SMPTE_390_OPAtom_Entry().ul);
-  UL Interop_OPAtomUL(MXFInterop_OPAtom_Entry().ul);
 
-  if ( m_HeaderPart.OperationalPattern == Interop_OPAtomUL )
+  if ( m_HeaderPart.OperationalPattern.ExactMatch(MXFInterop_OPAtom_Entry().ul) )
     m_Info.LabelSetType = LS_MXF_INTEROP;
-  else if ( m_HeaderPart.OperationalPattern == OPAtomUL )
+  else if ( m_HeaderPart.OperationalPattern.ExactMatch(SMPTE_390_OPAtom_Entry().ul) )
     m_Info.LabelSetType = LS_MXF_SMPTE;
 
   // Identification

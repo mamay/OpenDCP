@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
   /*! \file    KM_prng.cpp
-    \version $Id: KM_prng.cpp,v 1.8 2009/10/08 15:58:16 jhurst Exp $
+    \version $Id: KM_prng.cpp,v 1.9 2011/06/14 23:38:33 jhurst Exp $
     \brief   Fortuna pseudo-random number generator
   */
 
@@ -163,6 +163,7 @@ Kumu::FortunaRNG::FillRandom(byte_t* buf, ui32_t len)
 {
   assert(buf);
   assert(s_RNG);
+  const byte_t* front_of_buffer = buf;
 
   while ( len )
     {
@@ -179,7 +180,7 @@ Kumu::FortunaRNG::FillRandom(byte_t* buf, ui32_t len)
       s_RNG->set_key(rng_key);
   }
   
-  return buf;
+  return front_of_buffer;
 }
 
 //

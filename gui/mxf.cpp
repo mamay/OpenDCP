@@ -297,7 +297,9 @@ void MainWindow::mxfCreateAudio() {
     strcpy(outputFile, ui->aMxfOutEdit->text().toStdString().c_str());
 
     mxfWriterThread->setMxfInputs(mxfContext,fileList,outputFile);
+    dMxfConversion->init(fileList->file_count);
     mxfWriterThread->start();
+    dMxfConversion->exec();
     if (!mxfWriterThread->success)  {
         QMessageBox::critical(this, tr("MXF Creation Error"),
                              tr("Sound MXF creation failed."));

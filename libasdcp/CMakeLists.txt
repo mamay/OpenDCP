@@ -20,6 +20,7 @@ ELSE()
     SET(PLATFORM "unix")
 ENDIF()
 ADD_DEFINITIONS(-DASDCP_PLATFORM="${PLATFORM}")
+ADD_DEFINITIONS(-DHAVE_EXPAT=1)
 #-----------------------------------------------------------------------------
 
 IF(WIN32)

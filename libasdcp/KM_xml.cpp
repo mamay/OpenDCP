@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    KM_xml.cpp
-    \version $Id: KM_xml.cpp,v 1.16 2010/11/15 17:04:13 jhurst Exp $
+    \version $Id: KM_xml.cpp,v 1.18 2011/08/15 23:03:26 jhurst Exp $
     \brief   XML writer
 */
 
@@ -375,6 +375,20 @@ Kumu::XMLElement::ForgetChild(const XMLElement* element)
     }
 }
 
+//
+bool
+Kumu::XMLElement::ParseString(const ByteString& document)
+{
+  return ParseString((const char*)document.RoData(), document.Length());
+}
+
+//
+bool
+Kumu::XMLElement::ParseString(const std::string& document)
+{
+  return ParseString(document.c_str(), document.size());
+}
+
 
 //----------------------------------------------------------------------------------------------------
 
@@ -499,7 +513,7 @@ xph_namespace_start(void* p, const XML_Char* ns_prefix, const XML_Char* ns_name)
 
 //
 bool
-Kumu::XMLElement::ParseString(const std::string& document)
+Kumu::XMLElement::ParseString(const char* document, ui32_t doc_len)
 {
   XML_Parser Parser = XML_ParserCreateNS("UTF-8", '|');
 
@@ -515,7 +529,7 @@ Kumu::XMLElement::ParseString(const std::string& document)
   XML_SetCharacterDataHandler(Parser, xph_char);
   XML_SetStartNamespaceDeclHandler(Parser, xph_namespace_start);
 
-  if ( ! XML_Parse(Parser, document.c_str(), document.size(), 1) )
+  if ( ! XML_Parse(Parser, document, doc_len, 1) )
     {
       XML_ParserFree(Parser);
       DefaultLogSink().Error("XML Parse error on line %d: %s\n",
@@ -878,9 +892,9 @@ public:
 
 //
 bool
-Kumu::XMLElement::ParseString(const std::string& document)
+Kumu::XMLElement::ParseString(const char* document, ui32_t doc_len)
 {
-  if ( document.empty() )
+  if ( doc_len == 0 )
     return false;
 
   init_xml_dom();
@@ -897,8 +911,8 @@ Kumu::XMLElement::ParseString(const std::string& document)
 
   try
     {
-      MemBufInputSource xmlSource(reinterpret_cast<const XMLByte*>(document.c_str()),
-				  static_cast<const unsigned int>(document.size()),
+      MemBufInputSource xmlSource(reinterpret_cast<const XMLByte*>(document),
+				  static_cast<const unsigned int>(doc_len),
 				  "pidc_rules_file");
 
       parser->parse(xmlSource);

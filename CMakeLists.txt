@@ -53,8 +53,8 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 #-----------------------------------------------------------------------------
 
 #--set Base Compiler Flags----------------------------------------------------
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 ${OPENMP}")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -D_FILE_OFFSET_BITS=64 ${OPENMP}")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -D_FILE_OFFSET_BITS=64 ${OPENMP}")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -D_FILE_OFFSET_BITS=64 ${OPENMP}")
 #-----------------------------------------------------------------------------
 
 #--set OS Specific Compiler Flags---------------------------------------------
@@ -68,10 +68,10 @@ IF(APPLE)
         SET(OSXMIN "-mmacosx-version-min=10.5")
         SET(OSXSDK "-isysroot /Developer/SDKs/MacOSX10.5.sdk")
     ENDIF()
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OSXMIN}")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OSXMIN} -O3 -mfpmath=sse -mtune=native")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OSXMIN}")
     SET(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} "-Wl,-search_paths_first")
-    SET(AUTO_CFLAGS "CFLAGS=${ARCH_FLAG} ${OSXMIN} ${OSXSDK} -Wl,-search_paths_first")
+    SET(AUTO_CFLAGS "CFLAGS=${ARCH_FLAG} ${OSXMIN} ${OSXSDK} -Wl,-search_paths_first -O3 -mfpmath=sse -mtune=native")
     SET(AUTO_CXXFLAGS "CXXFLAGS=${ARCH_FLAG} ${OSXMIN} ${OSXSDK} -Wl,-search_paths_first")
     SET(AUTO_LDFLAGS "LDFLAGS=-Wl,-search_paths_first")
 ELSEIF(WIN32)
@@ -82,7 +82,7 @@ ELSEIF(WIN32)
 ELSE(UNIX)
     SET(OS "UNIX")
     IF(ARCH STREQUAL "x86_64")
-        SET(AUTO_CFLAGS "CFLAGS=-fPIC")
+        SET(AUTO_CFLAGS "CFLAGS=-fPIC -O3 -mfpmath=both -mtune=corei7")
     ENDIF()
 ENDIF()
 #-----------------------------------------------------------------------------

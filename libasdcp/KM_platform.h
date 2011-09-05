@@ -64,10 +64,10 @@ WINUSERAPI
 LRESULT
 WINAPI
 SendMessage(
-    HWND hWnd,
-    UINT Msg,
-    WPARAM wParam,
-    LPARAM lParam)
+    __in HWND hWnd,
+    __in UINT Msg,
+    __in WPARAM wParam,
+    __in LPARAM lParam)
 {
 	return SendMessageA(hWnd, Msg, wParam, lParam);
 }

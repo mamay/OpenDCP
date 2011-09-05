@@ -46,10 +46,10 @@ WIN32_LIBS +=   /home/tmeiczin/Development/OpenDCP/build-win32/lib/libopendcp.a 
                 /home/tmeiczin/Development/OpenDCP/build-win32/contrib/lib/libssl.a \
                 -lz
 
-LIBS +=         ../build-linux/libopendcp/libopendcp.a \
-                ../build-linux/libasdcp/libopendcp-asdcp.a \
-                ../build-linux/libasdcp/libopendcp-kumu.a \
-                -L/../build-linux/contrib/lib/ \
+LIBS +=         ../build/libopendcp/libopendcp.a \
+                ../build/libasdcp/libopendcp-asdcp.a \
+                ../build/libasdcp/libopendcp-kumu.a \
+                -L../build/contrib/lib/ \
                 -lopenjpeg -ltiff -lxmlsec1 -lxmlsec1-openssl \
                 -lxslt -lxml2 -lexpat -lcrypto -lssl \
                 -lz -lgomp

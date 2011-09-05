@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2006-2010, John Hurst
+Copyright (c) 2006-2011, John Hurst
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
   /*! \file  KM_memio.h
-    \version $Id: KM_memio.h,v 1.8 2010/05/13 19:12:13 jhurst Exp $
+    \version $Id: KM_memio.h,v 1.9 2011/03/07 06:46:36 jhurst Exp $
     \brief   abstraction for byte-oriented conversion of integers and objects
   */
 
@@ -122,10 +122,10 @@ namespace Kumu
 	return true;
       }
 
-      inline bool WriteString(const std::string& str)
-      {
-	if ( ! WriteUi32BE(str.length()) ) return false;
-	if ( ! WriteRaw((const byte_t*)str.c_str(), str.length()) ) return false;
+      inline bool WriteString(const std::string& str) {
+	ui32_t len = static_cast<ui32_t>(str.length());
+	if ( ! WriteUi32BE(len) ) return false;
+	if ( ! WriteRaw((const byte_t*)str.c_str(), len) ) return false;
 	return true;
       }
     };

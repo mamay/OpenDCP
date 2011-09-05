@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2004-2009, John Hurst
+Copyright (c) 2004-2011, John Hurst
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
   /*! \file    KM_log.cpp
-    \version $Id: KM_log.cpp,v 1.12 2010/03/12 17:48:40 jhurst Exp $
+    \version $Id: KM_log.cpp,v 1.15 2011/03/08 19:03:47 jhurst Exp $
     \brief   message logging API
   */
 
@@ -116,6 +116,8 @@ Kumu::StdioLogSink::WriteEntry(const LogEntry& Entry)
 
 #ifdef KM_WIN32
 //
+// http://www.codeguru.com/forum/showthread.php?t=231165
+//
 void
 Kumu::WinDbgLogSink::WriteEntry(const LogEntry& Entry)
 {
@@ -125,7 +127,7 @@ Kumu::WinDbgLogSink::WriteEntry(const LogEntry& Entry)
   if ( Entry.TestFilter(m_filter) )
     {
       Entry.CreateStringWithOptions(buf, m_options);
-      ::OutputDebugString(buf.c_str());
+      ::OutputDebugStringA(buf.c_str());
     }
 }
 #endif

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2004-2009, John Hurst
+Copyright (c) 2004-2011, John Hurst
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    MPEG2_Parser.cpp
-    \version $Id: MPEG2_Parser.cpp,v 1.10 2009/04/09 19:16:49 msheby Exp $
+    \version $Id: MPEG2_Parser.cpp,v 1.11 2011/08/30 17:04:25 jhurst Exp $
     \brief   AS-DCP library, MPEG2 raw essence reader implementation
 */
 
@@ -368,7 +368,7 @@ class ASDCP::MPEG2::Parser::h__Parser
   ASDCP_NO_COPY_CONSTRUCT(h__Parser);
 
 public:
-  h__Parser() : m_TmpBuffer(VESReadSize*2) {}
+  h__Parser() : m_TmpBuffer(VESReadSize*8) {}
   ~h__Parser() { Close(); }
 
   Result_t OpenRead(const char* filename);

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2005-2009, John Hurst
+Copyright (c) 2005-2011, John Hurst
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    KLV.h
-  \version $Id: KLV.h,v 1.19 2010/11/15 17:04:13 jhurst Exp $
+  \version $Id: KLV.h,v 1.22 2011/06/14 23:38:33 jhurst Exp $
   \brief   KLV objects
 */
 
@@ -106,6 +106,8 @@ inline const char* ui64sz(ui64_t i, char* buf)
       virtual ~UL() {}
 
       const char* EncodeString(char* str_buf, ui32_t buf_len) const;
+      bool operator==(const UL& rhs) const;
+      bool ExactMatch(const UL& rhs) const;
     };
 
   // UMID
