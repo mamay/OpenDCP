@@ -28,8 +28,8 @@
 
 #define BIT_DEPTH      12
 #define BIT_PRECISION  8
-#define COLOR_DEPTH    (4096)
-#define DCI_LUT_SIZE   (COLOR_DEPTH * BIT_PRECISION) 
+#define COLOR_DEPTH    (4095)
+#define DCI_LUT_SIZE   ((COLOR_DEPTH + 1) * BIT_PRECISION) 
 #define DCI_GAMMA      (2.6)
 #define DCI_DEGAMMA    (1/DCI_GAMMA)
 #define DCI_COEFFICENT (48.0/52.37)
@@ -601,7 +601,7 @@ static float lut_in[LI_MAX][4096] = {
     }
 };
 
-static float lut_out[1][32768] = {
+static float lut_out[1][DCI_LUT_SIZE] = {
     // Bit Depth:       12
     // Reference White: DCI 
     // Gamma:           2.6

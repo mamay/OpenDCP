@@ -53,6 +53,8 @@ int read_tif(opendcp_t *opendcp, odcp_image_t **image_ptr, const char *infile, i
     int          i,index;
     odcp_image_t *image = 00;
 
+    memset(&tif, 0, sizeof(tiff_image_t));
+
     /* open tiff using filename or file descriptor */
     dcp_log(LOG_DEBUG,"%-15.15s: opening tiff file %s","read_tif", infile);
     if (fd == 0) {
@@ -86,7 +88,15 @@ int read_tif(opendcp_t *opendcp, odcp_image_t **image_ptr, const char *infile, i
             }
             break;
         case PHOTOMETRIC_MINISWHITE:
+            dcp_log(LOG_ERROR,"%-15.15s: 1-bit BW images are not supported","read_tif", tif.bps);
+            break;
         case PHOTOMETRIC_MINISBLACK:
+            if (tif.bps == 1 || tif.bps == 8 || tif.bps == 16 || tif.bps == 24) {
+                tif.supported = 1;
+            } else {
+                dcp_log(LOG_ERROR,"%-15.15s: Grayscale tiff conversion failed, bitdepth %d, only 8,16,24 bits are supported","read_tif", tif.bps);
+            }
+            break;
         case PHOTOMETRIC_RGB:
             if (tif.bps == 8 || tif.bps == 12 || tif.bps == 16) {
                 tif.supported = 1;
@@ -130,26 +140,19 @@ int read_tif(opendcp_t *opendcp, odcp_image_t **image_ptr, const char *infile, i
         _TIFFfree(tif.strip_data);
     }
 
-    /* Grayscale */
+    /* GRAYSCALE */
     else if (tif.photo == PHOTOMETRIC_MINISBLACK) {
-        tif_set_strip(&tif);
-        uint8_t *data  = (uint8_t *)tif.strip_data;
-
-        /* 8 bits per pixel */
-        if (tif.bps==8) {
-            index = 0;
-            for (tif.strip = 0; tif.strip < tif.strip_num; tif.strip++) {
-                tif.read_size = TIFFReadEncodedStrip(tif.fp, tif.strip, tif.strip_data, tif.strip_size);
-                for (i=0; i<tif.read_size && index<tif.image_size; i+=tif.spp) {
-                    /* rounded to 12 bits */
-                    image->component[0].data[index] = data[i] << 4; // R 
-                    image->component[1].data[index] = data[i] << 4; // G 
-                    image->component[2].data[index] = data[i] << 4; // B 
-                    index++;
-                }
+        uint32_t *raster = (uint32_t*) _TIFFmalloc(tif.image_size * sizeof(uint32_t));
+        TIFFReadRGBAImageOriented(tif.fp, tif.w, tif.h, raster, ORIENTATION_TOPLEFT,0);
+        /* 8/16/24 bits per pixel */
+        if (tif.bps==8 || tif.bps==16 || tif.bps==24) {
+            for (i=0;i<tif.image_size;i++) {
+                image->component[0].data[i] = (raster[i] & 0xFF)       << 4;
+                image->component[1].data[i] = (raster[i] >> 8 & 0xFF)  << 4;
+                image->component[2].data[i] = (raster[i] >> 16 & 0xFF) << 4;
             }
         }
-        _TIFFfree(tif.strip_data);
+        _TIFFfree(raster);
     }
 
     /* YUV */
@@ -159,18 +162,19 @@ int read_tif(opendcp_t *opendcp, odcp_image_t **image_ptr, const char *infile, i
         /* 8/16/24 bits per pixel */
         if (tif.bps==8 || tif.bps==16 || tif.bps==24) {
             for (i=0;i<tif.image_size;i++) {
-                image->component[0].data[i] = (raster[i] & 0xFF) << 4;
-                image->component[1].data[i] = (raster[i] >> 8 & 0xFF) << 4;
+                image->component[0].data[i] = (raster[i] & 0xFF)       << 4;
+                image->component[1].data[i] = (raster[i] >> 8 & 0xFF)  << 4;
                 image->component[2].data[i] = (raster[i] >> 16 & 0xFF) << 4;
             }
         }
         _TIFFfree(raster);
     }
 
-    /* RGB(A) */
+    /* RGB(A) and GRAYSCALE */
     else if (tif.photo == PHOTOMETRIC_RGB) {
         tif_set_strip(&tif);
         uint8_t *data  = (uint8_t *)tif.strip_data;
+        int c = 0;
 
         /* 8 bits per pixel */
         if (tif.bps==8) {
@@ -191,18 +195,18 @@ int read_tif(opendcp_t *opendcp, odcp_image_t **image_ptr, const char *infile, i
             for (tif.strip = 0; tif.strip < tif.strip_num; tif.strip++) {
                 tif.read_size = TIFFReadEncodedStrip(tif.fp, tif.strip, tif.strip_data, tif.strip_size);
                 for (i=0; i<tif.read_size && (index+1)<tif.image_size; i+=(3*tif.spp)) {
-                    image->component[0].data[index]   = ( data[i+0]<<4 )        |(data[i+1]>>4); // R
-                    image->component[1].data[index]   = ((data[i+1]& 0x0f)<< 8) | data[i+2];     // G
-                    image->component[2].data[index]   = ( data[i+3]<<4)         |(data[i+4]>>4); // B
+                    image->component[0].data[index]   = ( data[i+0] << 4)         | (data[i+1] >> 4); // R
+                    image->component[1].data[index]   = ((data[i+1] & 0x0f) << 8) | (data[i+2]);      // G
+                    image->component[2].data[index]   = ( data[i+3] << 4)         | (data[i+4] >> 4); // B
                     if (tif.spp == 4) {
                         /* skip alpha channel */
-                        image->component[0].data[index+1] = ( data[i+6]<<4)         |(data[i+7]>>4);  // R
-                        image->component[1].data[index+1] = ((data[i+7]& 0x0f)<< 8) | data[i+8];      // G
-                        image->component[2].data[index+1] = ( data[i+9]<<4)         |(data[i+10]>>4); // B
+                        image->component[0].data[index+1] = ( data[i+6] << 4)         | (data[i+7] >> 4);  // R
+                        image->component[1].data[index+1] = ((data[i+7] & 0x0f) << 8) | (data[i+8]);       // G
+                        image->component[2].data[index+1] = ( data[i+9] << 4)         | (data[i+10] >> 4); // B
                     } else {
-                        image->component[0].data[index+1] = ((data[i+4]& 0x0f)<< 8) | data[i+5];      // R
-                        image->component[1].data[index+1] = ( data[i+6]<<4)         |(data[i+7]>>4);  // G
-                        image->component[2].data[index+1] = ((data[i+7]& 0x0f)<< 8) | data[i+8];      // B
+                        image->component[0].data[index+1] = ((data[i+4] & 0x0f) << 8) | (data[i+5]);       // R
+                        image->component[1].data[index+1] = ( data[i+6] <<4 )         | (data[i+7] >> 4);  // G
+                        image->component[2].data[index+1] = ((data[i+7] & 0x0f) << 8) | (data[i+8]);       // B
                     }
                     index+=2;
                 }

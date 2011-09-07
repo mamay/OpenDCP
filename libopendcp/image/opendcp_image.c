@@ -160,40 +160,6 @@ int odcp_image_readline(odcp_image_t *image, int y, unsigned char *data) {
     return DCP_SUCCESS;
 }
 
-/* rgb to xyz color conversion 12-bit LUT */
-int rgb_to_xyz(odcp_image_t *image, int index) {
-    int i;
-    int size;
-    rgb_pixel_float_t s;
-    xyz_pixel_float_t d;
-
-    size = image->w * image->h;
-
-    for (i=0;i<size;i++) {
-        /* In gamma LUT */
-        s.r = lut_in[index][image->component[0].data[i]];
-        s.g = lut_in[index][image->component[1].data[i]];
-        s.b = lut_in[index][image->component[2].data[i]];
- 
-        /* RGB to XYZ Matrix */
-        d.x = ((s.r * color_matrix[index][0][0]) + (s.g * color_matrix[index][0][1]) + (s.b * color_matrix[index][0][2]));
-        d.y = ((s.r * color_matrix[index][1][0]) + (s.g * color_matrix[index][1][1]) + (s.b * color_matrix[index][1][2]));
-        d.z = ((s.r * color_matrix[index][2][0]) + (s.g * color_matrix[index][2][1]) + (s.b * color_matrix[index][2][2]));
-
-        /* DCI Companding */
-        d.x = ((d.x > 1) ? 1.0 : d.x) * (DCI_COEFFICENT) * (DCI_LUT_SIZE - 1);
-        d.y = ((d.y > 1) ? 1.0 : d.y) * (DCI_COEFFICENT) * (DCI_LUT_SIZE - 1);
-        d.z = ((d.z > 1) ? 1.0 : d.z) * (DCI_COEFFICENT) * (DCI_LUT_SIZE - 1);
-
-        /* Out gamma LUT */
-        image->component[0].data[i] = lut_out[LO_DCI][(int)d.x];
-        image->component[1].data[i] = lut_out[LO_DCI][(int)d.y];
-        image->component[2].data[i] = lut_out[LO_DCI][(int)d.z];
-    }
-
-    return DCP_SUCCESS;
-}
-
 /* complex gamma function */
 float complex_gamma(float p, float gamma) {
     float v;
@@ -205,6 +171,40 @@ float complex_gamma(float p, float gamma) {
     }
 
     return v;
+}
+
+/* rgb to xyz color conversion 12-bit LUT */
+int rgb_to_xyz(odcp_image_t *image, int index) {
+    int i;
+    int size;
+    rgb_pixel_float_t s;
+    xyz_pixel_float_t d;
+
+    size = image->w * image->h;
+
+    for (i=0;i<size;i++) {
+        /* in gamma LUT */
+        s.r = lut_in[index][image->component[0].data[i]];
+        s.g = lut_in[index][image->component[1].data[i]];
+        s.b = lut_in[index][image->component[2].data[i]];
+
+        /* RGB to XYZ Matrix */
+        d.x = ((s.r * color_matrix[index][0][0]) + (s.g * color_matrix[index][0][1]) + (s.b * color_matrix[index][0][2]));
+        d.y = ((s.r * color_matrix[index][1][0]) + (s.g * color_matrix[index][1][1]) + (s.b * color_matrix[index][1][2]));
+        d.z = ((s.r * color_matrix[index][2][0]) + (s.g * color_matrix[index][2][1]) + (s.b * color_matrix[index][2][2]));
+
+        /* DCI Companding */
+        d.x = ((d.x > 1.0) ? 1.0 : d.x) * (DCI_COEFFICENT) * (DCI_LUT_SIZE-1);
+        d.y = ((d.y > 1.0) ? 1.0 : d.y) * (DCI_COEFFICENT) * (DCI_LUT_SIZE-1);
+        d.z = ((d.z > 1.0) ? 1.0 : d.z) * (DCI_COEFFICENT) * (DCI_LUT_SIZE-1);
+
+        /* out gamma LUT */
+        image->component[0].data[i] = lut_out[LO_DCI][(int)d.x];
+        image->component[1].data[i] = lut_out[LO_DCI][(int)d.y];
+        image->component[2].data[i] = lut_out[LO_DCI][(int)d.z];
+    }
+
+    return DCP_SUCCESS;
 }
 
 rgb_pixel_float_t yuv444toRGB888(int y, int cb, int cr) {
@@ -227,9 +227,13 @@ int rgb_to_xyz_calculate(odcp_image_t *image, int index) {
     size = image->w * image->h;
 
     for (i=0;i<size;i++) {
-        s.r = complex_gamma(image->component[0].data[i]/COLOR_DEPTH, GAMMA[index]);
-        s.g = complex_gamma(image->component[1].data[i]/COLOR_DEPTH, GAMMA[index]);
-        s.b = complex_gamma(image->component[2].data[i]/COLOR_DEPTH, GAMMA[index]);
+        s.r = complex_gamma(image->component[0].data[i]/(float)COLOR_DEPTH, GAMMA[index]);
+        s.g = complex_gamma(image->component[1].data[i]/(float)COLOR_DEPTH, GAMMA[index]);
+        s.b = complex_gamma(image->component[2].data[i]/(float)COLOR_DEPTH, GAMMA[index]);
+
+        s.r = lut_in[index][image->component[0].data[i]];
+        s.g = lut_in[index][image->component[1].data[i]];
+        s.b = lut_in[index][image->component[2].data[i]];
 
         d.x = ((s.r * color_matrix[index][0][0]) + (s.g * color_matrix[index][0][1]) + (s.b * color_matrix[index][0][2]));
         d.y = ((s.r * color_matrix[index][1][0]) + (s.g * color_matrix[index][1][1]) + (s.b * color_matrix[index][1][2]));
@@ -295,20 +299,6 @@ int resize(odcp_image_t **image,int w,int h,int method) {
         return -1;
     }
 
-    /* new image parameters */
-    d_image->bpp          = 12;
-    d_image->precision    = 12;
-    d_image->n_components = 3;
-    d_image->signed_bit   = 0;
-    d_image->dx           = 1;
-    d_image->dy           = 1;
-    d_image->w            = w;
-    d_image->h            = h;
-    d_image->x0           = 0;
-    d_image->y0           = 0;
-    d_image->x1 = !d_image->x0 ? (w - 1) * d_image->dx + 1 : d_image->x0 + (w - 1) * d_image->dx + 1;
-    d_image->y1 = !d_image->y0 ? (h - 1) * d_image->dy + 1 : d_image->y0 + (h - 1) * d_image->dy + 1;
-    
     /* simple resize - pixel double */
     if (method == NEAREST_PIXEL) {
         int x,y,i,dx,dy;
