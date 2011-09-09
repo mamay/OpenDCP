@@ -67,7 +67,7 @@ void MainWindow::startDcp()
 
     if (ui->digitalSignatureCheckBox->checkState()) {
         xmlContext->xml_sign = 1;
-        xmlContext->xml_use_internal_certs = 1;
+        xmlContext->xml_use_external_certs = 0;
     }
 
     dcp_set_log_level(xmlContext->log_level);

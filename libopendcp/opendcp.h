@@ -264,7 +264,7 @@ typedef struct {
     int            bw;
     int            threads;
     int            xml_sign;
-    int            xml_use_internal_certs;
+    int            xml_use_external_certs;
     char           *root_cert_file;
     char           *ca_cert_file;
     char           *signer_cert_file;

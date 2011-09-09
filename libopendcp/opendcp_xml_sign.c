@@ -71,7 +71,7 @@ int write_dsig_template(opendcp_t *opendcp, FILE *fp) {
     char *cert[3];
     int i;
 
-    if (opendcp->xml_use_internal_certs) {
+    if (opendcp->xml_use_external_certs) {
         /* read certificates from file */
         FILE *cp;
 
@@ -313,9 +313,11 @@ int xml_sign(opendcp_t *opendcp, char *filename) {
     int result = DCP_FATAL;
     xmlSecKeysMngrPtr key_manager;
     
+    dcp_log(LOG_DEBUG, "xml_sign: xmlsec_init");
     xmlsec_init();
 
     /* load doc file */
+    dcp_log(LOG_DEBUG, "xml_sign: parse file");
     doc = xmlParseFile(filename);
 
     if (doc == NULL) {
