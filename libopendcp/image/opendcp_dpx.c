@@ -349,7 +349,6 @@ static double dpx_log(int in, int white, float gamma) {
 int dpx_log_to_lin(int value, float gamma) {
     double gain;
     double offset;
-    double scale;
     int value2;
 
     gain = 4095.0 / (1 - dpx_log(DEFAULT_BLACK_POINT, DEFAULT_WHITE_POINT, gamma));
