@@ -277,12 +277,13 @@ int add_cpl(opendcp_t *opendcp, pkl_t *pkl) {
     char uuid_s[40];
     int i = pkl->cpl_count;
 
-    strcpy(pkl->cpl[i].issuer,    opendcp->issuer);
-    strcpy(pkl->cpl[i].creator,   opendcp->creator);
-    strcpy(pkl->cpl[i].title,     opendcp->title);
-    strcpy(pkl->cpl[i].kind,      opendcp->kind);
-    strcpy(pkl->cpl[i].rating,    opendcp->rating);
-    strcpy(pkl->cpl[i].timestamp, opendcp->timestamp);
+    strcpy(pkl->cpl[i].annotation, opendcp->annotation);
+    strcpy(pkl->cpl[i].issuer,     opendcp->issuer);
+    strcpy(pkl->cpl[i].creator,    opendcp->creator);
+    strcpy(pkl->cpl[i].title,      opendcp->title);
+    strcpy(pkl->cpl[i].kind,       opendcp->kind);
+    strcpy(pkl->cpl[i].rating,     opendcp->rating);
+    strcpy(pkl->cpl[i].timestamp,  opendcp->timestamp);
 
     uuid_random(uuid_s);
     sprintf(pkl->cpl[i].uuid,"%.36s",uuid_s);
@@ -413,6 +414,11 @@ int add_reel(opendcp_t *opendcp, cpl_t *cpl, asset_list_t reel) {
                 dcp_log(LOG_ERROR,"Warning DCP specification mismatch in assets. Please make sure all assets are MXF Interop or SMPTE");
                 return DCP_FATAL;
             }
+        }
+
+        /* force aspect ratio, if specified */
+        if (strcmp(opendcp->aspect_ratio,"") ) {
+            sprintf(asset.aspect_ratio,"%s",opendcp->aspect_ratio);
         }
 
         /* Set duration, if specified */

@@ -72,9 +72,11 @@ void dcp_usage() {
     fprintf(fp,"       -t | --title <title>           - DCP content title\n");
     fprintf(fp,"       -b | --base <basename>         - Prepend CPL/PKL filenames with basename rather than UUID\n");
     fprintf(fp,"       -n | --duration <duration>     - Set asset durations in frames\n");
-    fprintf(fp,"       -m | --rating <duration>       - Set DCP MPAA rating G PG PG-13 R NC-17 (default none)\n");
+    fprintf(fp,"       -m | --rating <rating>         - Set DCP MPAA rating G PG PG-13 R NC-17 (default none)\n");
     fprintf(fp,"       -e | --entry <entry point>     - Set asset entry point (offset) frame\n");
     fprintf(fp,"       -k | --kind <kind>             - Content kind (test, feature, trailer, policy, teaser, etc)\n");
+    fprintf(fp,"       -x | --width                   - Force aspect width (overrides detect value)\n");
+    fprintf(fp,"       -y | --height                  - Force aspect height (overrides detected value)\n");
     fprintf(fp,"       -l | --log_level <level>       - Set the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
     fprintf(fp,"\n\n");
 
@@ -85,6 +87,8 @@ void dcp_usage() {
 int main (int argc, char **argv) {
     int c,j;
     int reel_count=0;
+    int height = 0;
+    int width  = 0;
     char uuid_s[40];
     char buffer[80];
     opendcp_t *opendcp;
@@ -118,6 +122,8 @@ int main (int argc, char **argv) {
             {"signer",         required_argument, 0, '3'},
             {"privatekey",     required_argument, 0, 'p'},
             {"sign",           no_argument,       0, 's'},
+            {"height",         required_argument, 0, 'y'},
+            {"width",          required_argument, 0, 'x'},
             {"version",        no_argument,       0, 'v'},
             {0, 0, 0, 0}
         };
@@ -125,7 +131,7 @@ int main (int argc, char **argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
      
-        c = getopt_long (argc, argv, "a:b:e:svdhi:k:r:l:m:n:t:p:1:2:3:",
+        c = getopt_long (argc, argv, "a:b:e:svdhi:k:r:l:m:n:t:x:y:p:1:2:3:",
                          long_options, &option_index);
 
         /* Detect the end of the options. */
@@ -207,6 +213,14 @@ int main (int argc, char **argv) {
 
             case 't':
                sprintf(opendcp->title,"%.80s",optarg);
+            break;
+
+            case 'x':
+               width = atoi(optarg);
+            break;
+
+            case 'y':
+               height = atoi(optarg);
             break;
 
             case '1':
@@ -292,6 +306,19 @@ int main (int argc, char **argv) {
         } else {
             dcp_fatal(opendcp,"XML digital signature certifcates enabled, but private key file not specified");
         }
+    }
+  
+    /* set aspect ratio override */
+    if (width || height) {
+        if (!height) {
+            dcp_fatal(opendcp,"You must specify height, if you specify width");
+        }
+
+        if (!width) {
+            dcp_fatal(opendcp,"You must specify widht, if you specify height");
+        }
+
+        sprintf(opendcp->aspect_ratio,"%d %d",width,height);
     }
 
     /* add pkl to the DCP (only one PKL currently support) */

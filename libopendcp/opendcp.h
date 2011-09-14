@@ -199,6 +199,7 @@ typedef struct {
 
 typedef struct {
     char           uuid[40];
+    char           annotation[128];
     char           size[18];
     char           digest[40];
     int            duration;
@@ -216,10 +217,10 @@ typedef struct {
 
 typedef struct {
     char           uuid[40];
+    char           annotation[128];
     char           size[18];
     char           issuer[80];
     char           creator[80];
-    char           annotation[128];
     char           timestamp[30];
     char           filename[MAX_FILENAME_LENGTH];
     int            cpl_count;
@@ -278,6 +279,7 @@ typedef struct {
     char           title[80];
     char           kind[15];
     char           rating[5];
+    char           aspect_ratio[20];
     j2k_options_t  j2k;
     mxf_options_t  mxf;
     assetmap_t     assetmap;

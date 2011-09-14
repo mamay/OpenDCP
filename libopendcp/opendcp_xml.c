@@ -97,6 +97,7 @@ int write_cpl(opendcp_t *opendcp, cpl_t *cpl) {
     fprintf(fp,"%s\n",XML_HEADER);
     fprintf(fp,"<CompositionPlaylist xmlns=\"%s\" xmlns:dsig=\"%s\">\n",NS_CPL[opendcp->ns],DS_DSIG);
     fprintf(fp,"  <Id>urn:uuid:%s</Id>\n",cpl->uuid);
+    fprintf(fp,"  <AnnotationText>%s</AnnotationText>\n",cpl->annotation);
     fprintf(fp,"  <IssueDate>%s</IssueDate>\n",cpl->timestamp);
     fprintf(fp,"  <Issuer>%s</Issuer>\n",cpl->issuer);
     fprintf(fp,"  <Creator>%s</Creator>\n",cpl->creator);
