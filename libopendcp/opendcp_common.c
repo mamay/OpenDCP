@@ -28,7 +28,6 @@
 #include "opendcp.h"
 
 void cleanup(opendcp_t *opendcp, int exit_flag) {
-    int result; 
     if (exit_flag) {
         exit(1);
     }
@@ -132,7 +131,7 @@ int find_ext_offset(char str[]) {
 
 int check_increment(char *str[], int index,int str_size) {
     int x;
-    int array_size, offset, ext_offset, diff_len;
+    int offset, ext_offset, diff_len;
 
     offset     = find_seq_offset(str[str_size-1],str[0]);
     ext_offset = find_ext_offset(str[0]);
@@ -150,22 +149,6 @@ int check_increment(char *str[], int index,int str_size) {
         return 0;
     } else {
         return 1;
-    }
-}
-
-int check_file_sequence(char *str[], int count) {
-    int sequential = 1;
-    int x = 0;
-
-    while (x<(count-1) && sequential) {
-        sequential = check_sequential(str[x], str[x+1]);
-        x++;
-    }
-
-    if (sequential) {
-        return 0;
-    } else {
-        return x;
     }
 }
 
@@ -201,6 +184,23 @@ int check_sequential(char str1[],char str2[]) {
     }
 }
 
+int check_file_sequence(char *str[], int count) {
+    int sequential = 1;
+    int x = 0;
+
+    while (x<(count-1) && sequential) {
+        sequential = check_sequential(str[x], str[x+1]);
+        x++;
+    }
+
+    if (sequential) {
+        return 0;
+    } else {
+        return x;
+    }
+}
+
+
 int get_asset_type(asset_t asset) {
     switch (asset.essence_type) {
        case AET_MPEG2_VES:
@@ -229,12 +229,12 @@ opendcp_t *create_opendcp() {
 
     /* initialize opendcp */
     opendcp->log_level = LOG_WARN;
-    sprintf(opendcp->issuer,"%.80s %.80s",OPEN_DCP_NAME,OPEN_DCP_VERSION);
-    sprintf(opendcp->creator,"%.80s %.80s",OPEN_DCP_NAME, OPEN_DCP_VERSION);
-    sprintf(opendcp->annotation,"%.128s",DCP_ANNOTATION);
-    sprintf(opendcp->title,"%.80s",DCP_TITLE);
-    sprintf(opendcp->kind,"%.15s",DCP_KIND);
-    get_timestamp(opendcp->timestamp);
+    sprintf(opendcp->xml.issuer,"%.80s %.80s",OPEN_DCP_NAME,OPEN_DCP_VERSION);
+    sprintf(opendcp->xml.creator,"%.80s %.80s",OPEN_DCP_NAME, OPEN_DCP_VERSION);
+    sprintf(opendcp->xml.annotation,"%.128s",DCP_ANNOTATION);
+    sprintf(opendcp->xml.title,"%.80s",DCP_TITLE);
+    sprintf(opendcp->xml.kind,"%.15s",DCP_KIND);
+    get_timestamp(opendcp->xml.timestamp);
     sprintf(opendcp->assetmap.filename,"%.128s","ASSETMAP.xml");
     sprintf(opendcp->volindex.filename,"%.128s","VOLINDEX.xml");
 
@@ -252,20 +252,20 @@ int add_pkl(opendcp_t *opendcp) {
     char uuid_s[40];
     int i = opendcp->pkl_count++;
 
-    strcpy(opendcp->pkl[i].issuer,     opendcp->issuer);
-    strcpy(opendcp->pkl[i].creator,    opendcp->creator);
-    strcpy(opendcp->pkl[i].annotation, opendcp->annotation);
-    strcpy(opendcp->pkl[i].timestamp,  opendcp->timestamp);
+    strcpy(opendcp->pkl[i].issuer,     opendcp->xml.issuer);
+    strcpy(opendcp->pkl[i].creator,    opendcp->xml.creator);
+    strcpy(opendcp->pkl[i].annotation, opendcp->xml.annotation);
+    strcpy(opendcp->pkl[i].timestamp,  opendcp->xml.timestamp);
 
     /* Generate UUIDs */
     uuid_random(uuid_s);
     sprintf(opendcp->pkl[i].uuid,"%.36s",uuid_s);
 
     /* Generate XML filename */
-    if ( !strcmp(opendcp->basename,"") ) {
+    if ( !strcmp(opendcp->xml.basename,"") ) {
         sprintf(opendcp->pkl[i].filename,"%.40s_pkl.xml",opendcp->pkl[i].uuid);
     } else {
-        sprintf(opendcp->pkl[i].filename,"%.40s_pkl.xml",opendcp->basename);
+        sprintf(opendcp->pkl[i].filename,"%.40s_pkl.xml",opendcp->xml.basename);
     }
 
     opendcp->pkl_count++;
@@ -277,22 +277,22 @@ int add_cpl(opendcp_t *opendcp, pkl_t *pkl) {
     char uuid_s[40];
     int i = pkl->cpl_count;
 
-    strcpy(pkl->cpl[i].annotation, opendcp->annotation);
-    strcpy(pkl->cpl[i].issuer,     opendcp->issuer);
-    strcpy(pkl->cpl[i].creator,    opendcp->creator);
-    strcpy(pkl->cpl[i].title,      opendcp->title);
-    strcpy(pkl->cpl[i].kind,       opendcp->kind);
-    strcpy(pkl->cpl[i].rating,     opendcp->rating);
-    strcpy(pkl->cpl[i].timestamp,  opendcp->timestamp);
+    strcpy(pkl->cpl[i].annotation, opendcp->xml.annotation);
+    strcpy(pkl->cpl[i].issuer,     opendcp->xml.issuer);
+    strcpy(pkl->cpl[i].creator,    opendcp->xml.creator);
+    strcpy(pkl->cpl[i].title,      opendcp->xml.title);
+    strcpy(pkl->cpl[i].kind,       opendcp->xml.kind);
+    strcpy(pkl->cpl[i].rating,     opendcp->xml.rating);
+    strcpy(pkl->cpl[i].timestamp,  opendcp->xml.timestamp);
 
     uuid_random(uuid_s);
     sprintf(pkl->cpl[i].uuid,"%.36s",uuid_s);
 
     /* Generate XML filename */
-    if ( !strcmp(opendcp->basename,"") ) {
+    if ( !strcmp(opendcp->xml.basename,"") ) {
         sprintf(pkl->cpl[i].filename,"%.40s_cpl.xml",pkl->cpl[i].uuid);
     } else {
-        sprintf(pkl->cpl[i].filename,"%.40s_cpl.xml",opendcp->basename);
+        sprintf(pkl->cpl[i].filename,"%.40s_cpl.xml",opendcp->xml.basename);
     }
 
     pkl->cpl_count++;
@@ -364,7 +364,6 @@ int add_reel(opendcp_t *opendcp, cpl_t *cpl, asset_list_t reel) {
     int x,r;
     FILE *fp;
     char *filename;
-    int bp;
     asset_t asset;
     struct stat st;
     char uuid_s[40];
@@ -417,8 +416,8 @@ int add_reel(opendcp_t *opendcp, cpl_t *cpl, asset_list_t reel) {
         }
 
         /* force aspect ratio, if specified */
-        if (strcmp(opendcp->aspect_ratio,"") ) {
-            sprintf(asset.aspect_ratio,"%s",opendcp->aspect_ratio);
+        if (strcmp(opendcp->xml.aspect_ratio,"") ) {
+            sprintf(asset.aspect_ratio,"%s",opendcp->xml.aspect_ratio);
         }
 
         /* Set duration, if specified */

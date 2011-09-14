@@ -174,7 +174,6 @@ int read_tif(opendcp_t *opendcp, odcp_image_t **image_ptr, const char *infile, i
     else if (tif.photo == PHOTOMETRIC_RGB) {
         tif_set_strip(&tif);
         uint8_t *data  = (uint8_t *)tif.strip_data;
-        int c = 0;
 
         /* 8 bits per pixel */
         if (tif.bps==8) {

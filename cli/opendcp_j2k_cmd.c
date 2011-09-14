@@ -211,7 +211,7 @@ void progress_bar(int val, int total) {
 }
 
 int main (int argc, char **argv) {
-    int c, result, count = 0, abort = 0;
+    int c, result, count = 0;
     int openmp_flag = 0;
     opendcp_t *opendcp;
     char *in_path = NULL;

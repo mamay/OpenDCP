@@ -207,7 +207,6 @@ int xmlsec_init() {
 
 xmlSecKeysMngrPtr load_certificates_verify() {
     xmlSecKeysMngrPtr key_manager;
-    xmlSecKeyPtr      key;
 
     /* create and initialize keys manager */
     key_manager = xmlSecKeysMngrCreate();

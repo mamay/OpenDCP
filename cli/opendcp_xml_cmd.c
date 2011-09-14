@@ -89,7 +89,6 @@ int main (int argc, char **argv) {
     int reel_count=0;
     int height = 0;
     int width  = 0;
-    char uuid_s[40];
     char buffer[80];
     opendcp_t *opendcp;
     asset_list_t reel_list[MAX_REELS];
@@ -147,11 +146,11 @@ int main (int argc, char **argv) {
             break;
 
             case 'a':
-               sprintf(opendcp->annotation,"%.128s",optarg);
+               sprintf(opendcp->xml.annotation,"%.128s",optarg);
             break;
 
             case 'b':
-               sprintf(opendcp->basename,"%.80s",optarg);
+               sprintf(opendcp->xml.basename,"%.80s",optarg);
             break;
 
             case 'd':
@@ -167,11 +166,11 @@ int main (int argc, char **argv) {
             break;
      
             case 'i':
-               sprintf(opendcp->issuer,"%.80s",optarg);
+               sprintf(opendcp->xml.issuer,"%.80s",optarg);
             break;
 
             case 'k':
-               sprintf(opendcp->kind,"%.15s",optarg);
+               sprintf(opendcp->xml.kind,"%.15s",optarg);
             break;
 
             case 'l':
@@ -184,7 +183,7 @@ int main (int argc, char **argv) {
                     || !strcmp(optarg,"PG-13")
                     || !strcmp(optarg,"R")
                     || !strcmp(optarg,"NC-17") ) {
-                   sprintf(opendcp->rating,"%.5s",optarg);
+                   sprintf(opendcp->xml.rating,"%.5s",optarg);
                } else {
                    sprintf(buffer,"Invalid rating %s\n",optarg);
                    dcp_fatal(opendcp,buffer);
@@ -212,7 +211,7 @@ int main (int argc, char **argv) {
 #endif
 
             case 't':
-               sprintf(opendcp->title,"%.80s",optarg);
+               sprintf(opendcp->xml.title,"%.80s",optarg);
             break;
 
             case 'x':
@@ -318,7 +317,7 @@ int main (int argc, char **argv) {
             dcp_fatal(opendcp,"You must specify widht, if you specify height");
         }
 
-        sprintf(opendcp->aspect_ratio,"%d %d",width,height);
+        sprintf(opendcp->xml.aspect_ratio,"%d %d",width,height);
     }
 
     /* add pkl to the DCP (only one PKL currently support) */

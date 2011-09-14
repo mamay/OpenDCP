@@ -113,6 +113,7 @@ Result_t MxfWriter::fillWriterInfo(opendcp_t *opendcp, writer_info_t *writer_inf
             }
         }
     }
+    return result;
 }
 
 void MxfWriter::run()
@@ -166,6 +167,7 @@ Result_t MxfWriter::writeMxf()
             result = writeTTMxf(opendcpMxf,filelistMxf,outputFileMxf);
             break;
         case ESS_UNKNOWN:
+            result = RESULT_FAIL;
             break;
     }
 
@@ -224,7 +226,7 @@ Result_t MxfWriter::writeJ2kMxf(opendcp_t *opendcp, filelist_t *filelist, char *
 
     // read each input frame and write to the output mxf until duration is reached
     while (ASDCP_SUCCESS(result) && mxf_duration--) {
-        if (opendcp->slide == 0 || i == start_frame && cancelled == 0) {
+        if ((opendcp->slide == 0 || i == start_frame) && cancelled == 0) {
             result = j2k_parser.OpenReadFrame(filelist->in[i], frame_buffer);
 
             if (opendcp->delete_intermediate) {
@@ -313,7 +315,7 @@ Result_t MxfWriter::writeJ2kStereoscopicMxf(opendcp_t *opendcp,filelist_t *filel
     ui32_t i = 0;
     /* read each input frame and write to the output mxf until duration is reached */
     while (ASDCP_SUCCESS(result) && mxf_duration--) {
-        if (opendcp->slide == 0 || i == 0 && cancelled == 0) {
+        if ((opendcp->slide == 0 || i == 0) && cancelled == 0) {
             result = j2k_parser_left.OpenReadFrame(filelist->in[i], frame_buffer_left);
 
             if (opendcp->delete_intermediate) {
@@ -534,7 +536,6 @@ Result_t MxfWriter::writeTTMxf(opendcp_t *opendcp,filelist_t *filelist, char *ou
     writer_info_t                  writer_info;
     std::string                    xml_doc;
     Result_t                       result = RESULT_OK;
-    ui32_t                         mxf_duration;
 
     result = tt_parser.OpenRead(filelist->in[0]);
 

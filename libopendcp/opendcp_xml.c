@@ -236,9 +236,9 @@ int write_pkl(opendcp_t *opendcp, pkl_t *pkl) {
     fprintf(fp,"<PackingList xmlns=\"%s\" xmlns:dsig=\"%s\">\n",NS_PKL[opendcp->ns],DS_DSIG);
     fprintf(fp,"  <Id>urn:uuid:%s</Id>\n",pkl->uuid);
     fprintf(fp,"  <AnnotationText>%s</AnnotationText>\n",pkl->annotation);
-    fprintf(fp,"  <IssueDate>%s</IssueDate>\n",opendcp->timestamp);
-    fprintf(fp,"  <Issuer>%s</Issuer>\n",opendcp->issuer);
-    fprintf(fp,"  <Creator>%s</Creator>\n",opendcp->creator);
+    fprintf(fp,"  <IssueDate>%s</IssueDate>\n",opendcp->xml.timestamp);
+    fprintf(fp,"  <Issuer>%s</Issuer>\n",opendcp->xml.issuer);
+    fprintf(fp,"  <Creator>%s</Creator>\n",opendcp->xml.creator);
     fprintf(fp,"  <AssetList>\n");
 
 
@@ -345,10 +345,10 @@ int write_assetmap(opendcp_t *opendcp) {
     fprintf(fp,"%s\n",XML_HEADER);
     fprintf(fp,"<AssetMap xmlns=\"%s\">\n",NS_AM[opendcp->ns]);
     fprintf(fp,"  <Id>urn:uuid:%s</Id>\n",uuid_s);
-    fprintf(fp,"  <Creator>%s</Creator>\n",opendcp->creator);
+    fprintf(fp,"  <Creator>%s</Creator>\n",opendcp->xml.creator);
     fprintf(fp,"  <VolumeCount>1</VolumeCount>\n");
-    fprintf(fp,"  <IssueDate>%s</IssueDate>\n",opendcp->timestamp);
-    fprintf(fp,"  <Issuer>%s</Issuer>\n",opendcp->issuer);
+    fprintf(fp,"  <IssueDate>%s</IssueDate>\n",opendcp->xml.timestamp);
+    fprintf(fp,"  <Issuer>%s</Issuer>\n",opendcp->xml.issuer);
     fprintf(fp,"  <AssetList>\n");
  
     /* PKL */

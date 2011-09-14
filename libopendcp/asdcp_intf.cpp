@@ -168,7 +168,6 @@ extern "C" int read_asset_info(asset_t *asset)
     WriterInfo info;
     Result_t result = RESULT_OK;
     Kumu::UUID uuid;
-    char buffer[80];
     char uuid_buffer[64];
     
     result = ASDCP::EssenceType(asset->filename, essence_type);
@@ -339,6 +338,9 @@ extern "C" int write_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_
             else
                 result = write_j2k_mxf(opendcp,filelist,output_file);
             break;
+        case ESS_JPEG_2000_S:
+                result = write_j2k_s_mxf(opendcp,filelist,output_file);
+            break;
         case ESS_PCM_24b_48k:
         case ESS_PCM_24b_96k:
             result = write_pcm_mxf(opendcp,filelist,output_file);
@@ -348,6 +350,9 @@ extern "C" int write_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_
             break;
         case ESS_TIMED_TEXT:
             result = write_tt_mxf(opendcp,filelist,output_file);
+            break;
+        case ESS_UNKNOWN:
+            result = RESULT_FAIL;
             break;
     }
 
@@ -420,6 +425,7 @@ Result_t fill_writer_info(opendcp_t *opendcp, writer_info_t *writer_info) {
         }
     }
 
+    return result;
 }
 
 /* write out j2k mxf file */
@@ -703,7 +709,6 @@ Result_t write_tt_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_fil
     writer_info_t                  writer_info;
     std::string                    xml_doc;
     Result_t                       result = RESULT_OK;
-    ui32_t                         mxf_duration;
 
     result = tt_parser.OpenRead(filelist->in[0]);
  

@@ -128,7 +128,7 @@ ENDIF()
 
 #--build---------------------------------------------------------------------
 SET_TARGET_PROPERTIES(${PROGNAME} PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-TARGET_LINK_LIBRARIES(${PROGNAME} ${QT_LIBRARIES} ${OPENDCP_LIB} ${ASDCP_LIBRARIES} ${LIBS} ${LINK_FLAGS})
+TARGET_LINK_LIBRARIES(${PROGNAME} ${QT_LIBRARIES} ${OPENDCP_LIB} ${ASDCP_LIBRARIES} ${LIBS})
 #----------------------------------------------------------------------------
 
 #--install-------------------------------------------------------------------

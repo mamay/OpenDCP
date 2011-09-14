@@ -72,13 +72,13 @@ void MainWindow::startDcp()
     }
 
     dcp_set_log_level(xmlContext->log_level);
-    strcpy(xmlContext->title, ui->cplTitleEdit->text().toStdString().c_str());
-    strcpy(xmlContext->annotation, ui->cplAnnotationEdit->text().toStdString().c_str());
-    strcpy(xmlContext->issuer, ui->cplIssuerEdit->text().toStdString().c_str());
-    strcpy(xmlContext->kind, ui->cplKindComboBox->currentText().toStdString().c_str());
-    strcpy(xmlContext->rating, ui->cplRatingComboBox->currentText().toStdString().c_str());
-    sprintf(xmlContext->creator,"%s-%s",OPEN_DCP_NAME,OPEN_DCP_VERSION);
-    strcpy(xmlContext->timestamp,timestamp.toStdString().c_str());
+    strcpy(xmlContext->xml.title, ui->cplTitleEdit->text().toStdString().c_str());
+    strcpy(xmlContext->xml.annotation, ui->cplAnnotationEdit->text().toStdString().c_str());
+    strcpy(xmlContext->xml.issuer, ui->cplIssuerEdit->text().toStdString().c_str());
+    strcpy(xmlContext->xml.kind, ui->cplKindComboBox->currentText().toStdString().c_str());
+    strcpy(xmlContext->xml.rating, ui->cplRatingComboBox->currentText().toStdString().c_str());
+    sprintf(xmlContext->xml.creator,"%s-%s",OPEN_DCP_NAME,OPEN_DCP_VERSION);
+    strcpy(xmlContext->xml.timestamp,timestamp.toStdString().c_str());
 
     // check picture track is supplied
     if (ui->reelPictureEdit->text().isEmpty()) {

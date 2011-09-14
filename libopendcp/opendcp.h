@@ -241,6 +241,18 @@ typedef struct {
     int            duration;
 } mxf_options_t;
 
+typedef struct {
+    char           basename[40];
+    char           issuer[80];
+    char           creator[80];
+    char           timestamp[30];
+    char           annotation[128];
+    char           title[80];
+    char           kind[15];
+    char           rating[5];
+    char           aspect_ratio[20];
+} xml_options_t;
+
 typedef unsigned char byte_t; 
 
 typedef struct {
@@ -270,18 +282,10 @@ typedef struct {
     char           *ca_cert_file;
     char           *signer_cert_file;
     char           *private_key_file; 
-    char           basename[40];
     char           dcp_path[MAX_BASENAME_LENGTH];
-    char           issuer[80];
-    char           creator[80];
-    char           timestamp[30];
-    char           annotation[128];
-    char           title[80];
-    char           kind[15];
-    char           rating[5];
-    char           aspect_ratio[20];
     j2k_options_t  j2k;
     mxf_options_t  mxf;
+    xml_options_t  xml;
     assetmap_t     assetmap;
     volindex_t     volindex;
     int            pkl_count;

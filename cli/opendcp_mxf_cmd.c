@@ -149,7 +149,6 @@ int get_filelist_3d(opendcp_t *opendcp,char *in_path_left,char *in_path_right,fi
 int get_filelist(opendcp_t *opendcp,char *in_path,filelist_t *filelist) {
     struct dirent **files;
     struct stat st_in;
-    struct stat st_out;
     int x = 0;
 
     if (stat(in_path, &st_in) != 0 ) {
@@ -184,16 +183,12 @@ int get_filelist(opendcp_t *opendcp,char *in_path,filelist_t *filelist) {
 
 int main (int argc, char **argv) {
     int c;
-    int count;
-    int image_nb = 0;
-    int result;
     opendcp_t *opendcp;
     char *in_path = NULL;
     char *in_path_left = NULL;
     char *in_path_right = NULL;
     char *out_path = NULL;
     filelist_t *filelist;
-    char out_file[4096]; 
 
     if ( argc <= 1 ) {
         dcp_usage();
