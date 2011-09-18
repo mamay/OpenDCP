@@ -84,7 +84,7 @@ ELSEIF(WIN32)
 ELSE(UNIX)
     SET(OS "UNIX")
     IF(ARCH STREQUAL "x86_64")
-        SET(AUTO_CFLAGS "CFLAGS=-fPIC -O3 -mfpmath=both -mtune=corei7")
+        SET(AUTO_CFLAGS "CFLAGS=-fPIC -O3")
     ENDIF()
 ENDIF()
 #-----------------------------------------------------------------------------
