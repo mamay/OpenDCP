@@ -27,7 +27,7 @@ IF(MAKE_DEB)
         STRING(TOLOWER ${CPACK_PACKAGE_FILE_NAME} CPACK_PACKAGE_FILE_NAME)
     ENDIF()
     SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE ${ARCH})
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "openssl (>= 0.9.8),libxml2 (>= 2.7),libxslt1.1 (>= 1.1.26),xmlsec1 (>= 1.2),libxmlsec1-openssl (>= 1.2),libtiff4 (>= 3.9),libqt4-core (>= 4.6),libqt4-gui (>= 4.6)")
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "openssl (>= 0.9.8),libxml2 (>= 2.7),libxslt1.1 (>= 1.1.26),xmlsec1 (>= 1.2),libxmlsec1-openssl (>= 1.2),libtiff4 (>= 3.9),libqtcore4 (>= 4.6),libqtgui4 (>= 4.6)")
     SET(CPACK_GENERATOR "DEB")
 ENDIF()
 #--rpm package----------------------------------------------------------------
