@@ -196,8 +196,8 @@ void MainWindow::j2kCheckLeftInputFiles() {
     inLeftList = inLeftDir.entryInfoList();
 
     if (inLeftList.size() < 1) {
-        QMessageBox::warning(this, tr("No TIF files found"),
-                                   tr("No TIF files were found in the selected directory"));
+        QMessageBox::warning(this, tr("No image files found"),
+                                   tr("No valid image files were found in the selected directory"));
         return;
     }
 
@@ -227,8 +227,8 @@ void MainWindow::j2kCheckRightInputFiles() {
     inRightList = inRightDir.entryInfoList();
 
     if (inRightList.size() < 1) {
-        QMessageBox::warning(this, tr("No TIF files found"),
-                                   tr("No TIF files were found in the selected directory"));
+        QMessageBox::warning(this, tr("No image files found"),
+                                   tr("No valid image files were found in the selected directory"));
         return;
     }
 
@@ -246,7 +246,7 @@ void MainWindow::j2kCheckRightInputFiles() {
 }
 
 void MainWindow::j2kStart() {
-    QString filter = "*.tif;*.tiff";
+    QString filter = "*.tif;*.tiff;*.dpx";
     QDir inLeftDir;
     QDir inRightDir;
 
