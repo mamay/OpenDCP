@@ -89,13 +89,11 @@ SET(OPENDCP_GUI_RES_CXX
 #-----------------------------------------------------------------------------
 
 #--win32 icon and info--------------------------------------------------------
-IF(MING)
-    ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/opendcpico.o
-                        COMMAND windres.exe -I${CMAKE_CURRENT_SOURCE_DIR} -i${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.rc 
-                                -o ${CMAKE_CURRENT_BINARY_DIR}/opendcp.o)
-    SET(OPENDCP_GUI_CXX_SRC ${OPENDCP_GUI_CXX_SRC} ${CMAKE_CURRENT_BINARY_DIR}/opendcp.o)
-ELSE()
-#    SET(OPENDCP_GUI_CXX_SRC ${OPENDCP_GUI_CXX_SRC} ${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.rc)
+IF(WIN32)
+    ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/opendcp_ico.o
+                        COMMAND i686-pc-mingw32-windres -I${CMAKE_CURRENT_SOURCE_DIR} -i${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.rc 
+                                -o ${CMAKE_CURRENT_BINARY_DIR}/opendcp_ico.o)
+    SET(OPENDCP_GUI_CXX_SRC ${OPENDCP_GUI_CXX_SRC} ${CMAKE_CURRENT_BINARY_DIR}/opendcp_ico.o)
 ENDIF()
 #-----------------------------------------------------------------------------
 
@@ -121,6 +119,8 @@ IF(APPLE)
       COMMAND cp ARGS ${MACOSX_BUNDLE_ICON_FILE} ${CMAKE_CURRENT_BINARY_DIR}/${PROGNAME}.app/Contents/Resources
       #COMMAND cp ARGS *.qm ${CMAKE_CURRENT_BINARY_DIR}/${PROGNAME}.app/Contents/Resources)
     )
+ELSE(WIN32)
+    ADD_EXECUTABLE(${PROGNAME} WIN32 ${OPENDCP_GUI_CXX_SRC} ${OPENDCP_GUI_RES_CXX} ${OPENDCP_FORM_H} ${OPENDCP_MOC_H})
 ELSE()
     ADD_EXECUTABLE(${PROGNAME} ${OPENDCP_GUI_CXX_SRC} ${OPENDCP_GUI_RES_CXX} ${OPENDCP_FORM_H} ${OPENDCP_MOC_H})
 ENDIF()
