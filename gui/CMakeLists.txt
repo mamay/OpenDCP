@@ -90,8 +90,13 @@ SET(OPENDCP_GUI_RES_CXX
 
 #--win32 icon and info--------------------------------------------------------
 IF(WIN32)
+    IF(i386)
+        SET(WINDRES i686-w32-mingw32-windres)
+    ELSE()
+        SET(WINDRES i686-w64-mingw32-windres)
+    ENDIF()
     ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/opendcp_ico.o
-                        COMMAND i686-pc-mingw32-windres -I${CMAKE_CURRENT_SOURCE_DIR} -i${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.rc 
+                        COMMAND ${WINDRES} -I${CMAKE_CURRENT_SOURCE_DIR} -i${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.rc 
                                 -o ${CMAKE_CURRENT_BINARY_DIR}/opendcp_ico.o)
     SET(OPENDCP_GUI_CXX_SRC ${OPENDCP_GUI_CXX_SRC} ${CMAKE_CURRENT_BINARY_DIR}/opendcp_ico.o)
 ENDIF()

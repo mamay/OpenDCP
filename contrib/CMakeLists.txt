@@ -3,13 +3,15 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 INCLUDE(ExternalProject)
 
-IF(MINGW)
-    SET(CONFIGURE "mingw32-configure")
-    SET(MAKE "mingw32-make")
+IF(WIN32)
+    SET(CONFIGURE "mingw64-configure")
+    SET(MAKE "mingw64-make")
+    SET(INSTALL "sudo mingw64-make")
     #SET(INSTALL_DIR DESTDIR=${PREFIX})
 ELSE()
     SET(CONFIGURE "<SOURCE_DIR>/configure")
     SET(MAKE "make")
+    SET(INSTALL "make")
 ENDIF()
 
 IF(COMPILE_ZLIB)
@@ -19,33 +21,11 @@ IF(COMPILE_ZLIB)
         PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/zlib-1.2.5.patch
         CONFIGURE_COMMAND sh <SOURCE_DIR>/mkzlib.sh ${PREFIX} ${AUTO_CFLAGS} ${AUTO_LDFLAGS}
         BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
-        INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+        INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
     )
 ENDIF(COMPILE_ZLIB)
 
 IF(ENABLE_XMLSEC AND COMPILE_XMLSEC)
-    #EXTERNALPROJECT_ADD(00_LTDL
-    #    URL http://ftp.gnu.org/gnu/libtool/libtool-2.4.tar.gz
-    #    BUILD_IN_SOURCE 1
-    #    CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
-    #                      --disable-dependency-tracking --enable-static=yes --enable-shared=no 
-    #                       ${TARGET}
-    #    BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
-    #    INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
-    #)
-
-    #IF(ENABLE_ICONV)
-    #    EXTERNALPROJECT_ADD(01_ICONV
-    #        URL ${OPENDCP_URL}/libiconv-1.13.1.tar.gz
-    #        BUILD_IN_SOURCE 1
-    #        CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
-    #                           --disable-dependency-tracking --enable-static=yes --enable-shared=no 
-    #                           ${TARGET} 
-    #        BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
-    #        INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
-    #    )
-    #ENDIF(ENABLE_ICONV)
-
     EXTERNALPROJECT_ADD(02_XML2
         URL ${OPENDCP_URL}/libxml2-2.7.8.tar.gz
         BUILD_IN_SOURCE 1
@@ -55,7 +35,7 @@ IF(ENABLE_XMLSEC AND COMPILE_XMLSEC)
                           --with-threads=off
                           ${TARGET}
         BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
-        INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+        INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
     )
 
     EXTERNALPROJECT_ADD(03_XSLT
@@ -68,7 +48,7 @@ IF(ENABLE_XMLSEC AND COMPILE_XMLSEC)
                           --with-libxml-libs-prefix=${PREFIX}/lib
                           ${TARGET} 
         BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
-        INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+        INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
     )
 
     EXTERNALPROJECT_ADD(06_XMLSEC1
@@ -87,7 +67,7 @@ IF(ENABLE_XMLSEC AND COMPILE_XMLSEC)
                           --with-default-crypto=openssl
                            ${TARGET} 
         BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
-        INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+        INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
      )
 ENDIF(ENABLE_XMLSEC AND COMPILE_XMLSEC)
 
@@ -98,7 +78,7 @@ EXTERNALPROJECT_ADD(04_EXPAT
     CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                       --disable-dependency-tracking --enable-static=yes --enable-shared=no ${TARGET}
     BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
-    INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+    INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
 )
 ENDIF(COMPILE_EXPAT)
 
@@ -123,7 +103,7 @@ EXTERNALPROJECT_ADD(05_OPENSSL
     PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/openssl-0.9.8r.patch
     CONFIGURE_COMMAND ${OPENSSL_CONFIGURE}
     BUILD_COMMAND ${OPENSSL_MAKE} -f <SOURCE_DIR>/Makefile
-    INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+    INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
 )
 ENDIF(COMPILE_OPENSSL)
 
@@ -144,7 +124,7 @@ EXTERNALPROJECT_ADD(08_TIFF
                       --enable-jpeg=no
                       ${TARGET} 
     BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
-    INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+    INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
 )
 ENDIF(COMPILE_TIFF)
 
@@ -157,6 +137,6 @@ EXTERNALPROJECT_ADD(09_OpenJPEG
                       --disable-dependency-tracking --enable-static=yes --enable-shared=no --enable-png=no --enable-tiff=no
                       ${TARGET} 
     BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
-    INSTALL_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+    INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
 )
 ENDIF(COMPILE_OPENJPEG)
