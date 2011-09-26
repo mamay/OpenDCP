@@ -235,7 +235,7 @@ void MainWindow::mxfCreateSubtitle() {
 
     if (write_mxf(mxfContext,fileList,outputFile) != 0 )  {
         QMessageBox::critical(this, tr("MXF Creation Error"),
-                             tr("Sound MXF creation failed."));
+                             tr("Subtitle MXF creation failed."));
         return;
     } else {
         QMessageBox msgBox;
@@ -325,7 +325,8 @@ void MainWindow::mxfCreatePicture() {
     QFileInfoList pRightList;
     QFileInfo fileinfo;
     QString inputFile;
-    int s;
+    QString msg;
+    int s,l,r;
 
     opendcp_t *mxfContext = (opendcp_t *)malloc(sizeof(opendcp_t));
     memset(mxfContext,0,sizeof (opendcp_t));
@@ -376,23 +377,34 @@ void MainWindow::mxfCreatePicture() {
         fileList->file_count *= 2;
     }
 
-    s = checkFileSequence(pLeftDir.entryList());
-    if (s) {
-        QString msg;
-        msg.sprintf("File list is not sequential between %s and %s. Please fix and try again.",pLeftDir.entryList().at(s-1).toAscii().constData(),
-                    pLeftDir.entryList().at(s).toAscii().constData());
-        QMessageBox::critical(this, tr("File Sequence Mismatch"), msg);
-        return;
-    }
-
     if (ui->mxfStereoscopicCheckBox->checkState()) {
-        s = checkFileSequence(pRightDir.entryList());
+        l = checkFileSequence(pLeftDir.entryList());
+        r = checkFileSequence(pRightDir.entryList());
+        
+        if (l) {
+            msg.sprintf("File list does not appear to be sequential between %s and %s. Do you wish to continue?",pLeftDir.entryList().at(s-1).toAscii().constData(),
+                        pLeftDir.entryList().at(s).toAscii().constData());
+            if (QMessageBox::question(this, tr("File Sequence Mismatch"), msg, QMessageBox::No,QMessageBox::Yes) == QMessageBox::No) {
+                 return;
+            }
+        }
+        if (r) {
+            msg.sprintf("File list does not appear to be sequential between %s and %s. Do you wish to continue?",pRightDir.entryList().at(s-1).toAscii().constData(),
+                        pRightDir.entryList().at(s).toAscii().constData());
+            if (QMessageBox::question(this, tr("File Sequence Mismatch"), msg, QMessageBox::No,QMessageBox::Yes) == QMessageBox::No) {
+                 return;
+            }
+        }
+    } else {
+        s = checkFileSequence(pLeftDir.entryList());
+
         if (s) {
             QString msg;
-            msg.sprintf("File list is not sequential between %s and %s. Please fix and try again.",pRightDir.entryList().at(s-1).toAscii().constData(),
-                        pRightDir.entryList().at(s).toAscii().constData());
-            QMessageBox::critical(this, tr("File Sequence Mismatch"), msg);
-            return;
+            msg.sprintf("File list does not appear to be sequential between %s and %s. Do you wish to continue?",pLeftDir.entryList().at(s-1).toAscii().constData(),
+                        pLeftDir.entryList().at(s).toAscii().constData());
+            if (QMessageBox::question(this, tr("File Sequence Mismatch"), msg, QMessageBox::No,QMessageBox::Yes) == QMessageBox::No) {
+                 return;
+            }
         }
     }
 
