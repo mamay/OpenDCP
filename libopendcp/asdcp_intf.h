@@ -23,8 +23,8 @@ extern "C" void uuid_random(char *uuid);
 extern "C" int calculate_digest(const char *filename, char *digest);
 
 // internal functions
-Kumu::Result_t write_j2k_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file);
-Kumu::Result_t write_j2k_s_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file);
-Kumu::Result_t write_pcm_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file);
-Kumu::Result_t write_tt_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file);
-Kumu::Result_t write_mpeg2_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file);
+int write_j2k_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file);
+int write_j2k_s_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file);
+int write_pcm_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file);
+int write_tt_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file);
+int write_mpeg2_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file);

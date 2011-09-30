@@ -451,9 +451,25 @@ int main (int argc, char **argv) {
         dcp_fatal(opendcp,"Start frame must be less than end frame");
     }
 
+    /* check file name lengths are equal */
+    if (filelist->file_count > 1) {
+        int x,f = 0;
+        int len = strlen(filelist->in[0]);
+        for (x=1;x<filelist->file_count;x++) {
+            if (strlen(filelist->in[x]) != len) {
+                f = 1;
+            }
+        }
+        if (f) {
+            dcp_log(LOG_WARN,"all file names must be same length");
+        }
+    }
+
     /* check sequence */
     dcp_log(LOG_DEBUG,"%-15.15s: checking file sequence","opendcp_j2k_cmd",in_path);
+
     int s = check_file_sequence(filelist->in, filelist->file_count);
+
     if (s) {
         dcp_log(LOG_WARN,"file sequence mismatch between %s and %s",filelist->in[s-1],filelist->in[s]);
     }

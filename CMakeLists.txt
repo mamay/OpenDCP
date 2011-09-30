@@ -9,7 +9,7 @@ STRING(TOLOWER ${PROJECT_NAME} PACKAGE_NAME)
 #--version--------------------------------------------------------------------
 SET(VERSION_MAJOR 0)
 SET(VERSION_MINOR 0)
-SET(VERSION_BUILD 20)
+SET(VERSION_BUILD 21)
 SET(OPENDCP_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD})
 ADD_DEFINITIONS(-DOPENDCP_VERSION="${OPENDCP_VERSION}")
 #-----------------------------------------------------------------------------

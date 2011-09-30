@@ -1,6 +1,6 @@
 /*
     OpenDCP: Builds Digital Cinema Packages
-    Copyright (c) 2010=2011 Terrence Meiczinger, All Rights Reserved
+    Copyright (c) 2010-2011 Terrence Meiczinger, All Rights Reserved
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ extern "C" {
 #ifdef OPENDCP_VERSION
 static const char *OPEN_DCP_VERSION   = OPENDCP_VERSION; 
 #else
-static const char *OPEN_DCP_VERSION   = "0.20"; 
+static const char *OPEN_DCP_VERSION   = "0.21"; 
 #endif
 
 static const char *OPEN_DCP_NAME      = "OpenDCP"; 
