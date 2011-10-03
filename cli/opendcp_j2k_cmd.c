@@ -39,8 +39,6 @@
 #define strnicmp strncasecmp
 #endif
 
-opendcp_t *opendcp_ptr;
-
 #ifndef _WIN32
 sig_atomic_t SIGINT_received = 0;
 
@@ -158,6 +156,10 @@ int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *fil
                         sprintf(filelist->out[x],"%s/%s.j2c",out_path,get_basename(files[x]->d_name));
                 }
             }
+            for (x=0;x<filelist->file_count;x++) {
+                free(files[x]);
+            }
+            free(files);
         } else {
             dcp_log(LOG_ERROR,"If input is a directory, output must be as well");
             return DCP_FATAL;
@@ -232,10 +234,7 @@ int main (int argc, char **argv) {
         dcp_usage();
     }
 
-    opendcp = malloc(sizeof(opendcp_t));
-    opendcp_ptr = opendcp;
-
-    memset(opendcp,0,sizeof (opendcp_t));
+    opendcp = create_opendcp();
 
     filelist = malloc(sizeof(filelist_t));
     memset(filelist,0,sizeof (filelist_t));
@@ -478,6 +477,7 @@ int main (int argc, char **argv) {
 
 #ifdef OPENMP
     omp_set_num_threads(opendcp->threads);
+    dcp_log(LOG_DEBUG,"OpenMP Enable");
 #endif
 
     count = opendcp->j2k.start_frame;
@@ -487,7 +487,7 @@ int main (int argc, char **argv) {
         #pragma omp flush(SIGINT_received)
         if (!SIGINT_received) {
             dcp_log(LOG_INFO,"JPEG2000 conversion %s started OPENMP: %d",filelist->in[c],openmp_flag);
-            if(access( filelist->out[c], F_OK ) != 0 || opendcp->no_overwrite == 0) {
+            if(access(filelist->out[c], F_OK) != 0 || opendcp->no_overwrite == 0) {
                 result = convert_to_j2k(opendcp,filelist->in[c],filelist->out[c], tmp_path);
             } else {
                 result = DCP_SUCCESS;
@@ -510,9 +510,7 @@ int main (int argc, char **argv) {
 
     if (opendcp->log_level>0 && opendcp->log_level<3) {progress_bar(count-1,opendcp->j2k.end_frame);}
 
-    if ( filelist != NULL) {
-        free(filelist);
-    }
+    filelist_free(filelist);
 
     if (opendcp->log_level > 0) {
         printf("\n");
@@ -520,9 +518,7 @@ int main (int argc, char **argv) {
 
     cleanup(opendcp,0);
 
-    if ( opendcp != NULL) {
-        free(opendcp);
-    }
+    delete_opendcp(opendcp);
 
     exit(0);
 }

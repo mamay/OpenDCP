@@ -318,6 +318,8 @@ int write_assetmap(opendcp_t *opendcp) {
     int a,c,r;
     char filename[MAX_PATH_LENGTH];
     char uuid_s[40];
+    cpl_t cpl;
+    reel_t reel;
 
     if(opendcp->assetmap.filename == 0) {
         if (opendcp->ns == XML_NS_INTEROP) {
@@ -367,7 +369,7 @@ int write_assetmap(opendcp_t *opendcp) {
 
     /* CPL */
     for (c=0;c<opendcp->pkl[0].cpl_count;c++) {
-        cpl_t cpl = opendcp->pkl[0].cpl[c];
+        cpl = opendcp->pkl[0].cpl[c];
         fprintf(fp,"    <Asset>\n");
         fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",cpl.uuid);
         fprintf(fp,"      <ChunkList>\n");
@@ -382,7 +384,7 @@ int write_assetmap(opendcp_t *opendcp) {
 
         /* Assets(s) Start */
         for (r=0;r<cpl.reel_count;r++) {
-            reel_t reel = cpl.reel[r];
+            reel = cpl.reel[r];
             for (a=0;a<reel.asset_count;a++) {
                 asset_t asset = reel.asset[a];
                 fprintf(fp,"    <Asset>\n");

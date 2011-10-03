@@ -167,6 +167,16 @@ int write_dsig_template(opendcp_t *opendcp, FILE *fp) {
     fprintf(fp,"    </dsig:KeyInfo>\n");
     fprintf(fp,"  </dsig:Signature>\n");
 
+    if (subject_xn[0]) {
+       free(subject_xn[0]);
+    } 
+
+    for (i=0;i<3;i++) {
+        if (issuer_xn[i]) {
+            free(issuer_xn[i]);
+        }
+    }
+
     return DCP_SUCCESS;
 }
 

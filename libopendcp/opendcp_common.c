@@ -224,6 +224,48 @@ int get_asset_type(asset_t asset) {
     }
 }
 
+filelist_t *filelist_alloc(int count) {
+    int x;
+    filelist_t *filelist;
+
+    filelist->file_count = count;
+    filelist->in = (char**) malloc(filelist->file_count*sizeof(char*));
+
+    if (filelist->file_count) {
+        for (x=0;x<filelist->file_count;x++) {
+                filelist->in[x] = (char *) malloc(MAX_FILENAME_LENGTH);
+        }
+    }
+}
+
+void filelist_free(filelist_t *filelist) {
+    int x;
+
+    for (x=0;x<filelist->file_count;x++) {
+        if (filelist->in[x]) {
+            free(filelist->in[x]);
+        }
+        if (filelist->out[x]) {
+            free(filelist->out[x]);
+        }
+
+    }
+
+    if (filelist->in) {
+        free(filelist->in);
+    }
+
+    if (filelist->out) {
+        free(filelist->out);
+    }
+
+    if (filelist) {
+        free(filelist);
+    }
+
+    return;
+}
+
 opendcp_t *create_opendcp() {
     opendcp_t *opendcp;
 

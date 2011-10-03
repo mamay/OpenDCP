@@ -122,6 +122,8 @@ int get_filelist_3d(opendcp_t *opendcp,char *in_path_left,char *in_path_right,fi
 
     if (filelist_left->file_count != filelist_right->file_count) {
         dcp_log(LOG_ERROR,"Mismatching file count for 3D images left: %d right: %d\n",filelist_left->file_count,filelist_right->file_count);
+        filelist_free(filelist_left);
+        filelist_free(filelist_right);
         return DCP_FATAL; 
     }
 
@@ -135,13 +137,8 @@ int get_filelist_3d(opendcp_t *opendcp,char *in_path_left,char *in_path_right,fi
         filelist->in[y++] = filelist_right->in[x];
     }
 
-    if ( filelist_left != NULL) {
-        free(filelist_left);
-    }
-
-    if ( filelist_right != NULL) {
-        free(filelist_right);
-    }
+    filelist_free(filelist_left);
+    filelist_free(filelist_right);
 
     return DCP_SUCCESS;
 }
@@ -166,6 +163,10 @@ int get_filelist(opendcp_t *opendcp,char *in_path,filelist_t *filelist) {
                 sprintf(filelist->in[x],"%s/%s",in_path,files[x]->d_name);
             }
         }
+        for (x=0;x<filelist->file_count;x++) {
+            free(files[x]);
+        }
+        free(files);
     } else {
         /* mpeg2 or time_text */
         int essence_type = get_file_essence_type(in_path);
@@ -194,8 +195,7 @@ int main (int argc, char **argv) {
         dcp_usage();
     }
 
-    opendcp = malloc(sizeof(opendcp_t));
-    memset(opendcp,0,sizeof (opendcp_t));
+    opendcp = create_opendcp();
 
     filelist = malloc(sizeof(filelist_t));
     memset(filelist,0,sizeof (filelist_t));
@@ -375,9 +375,7 @@ int main (int argc, char **argv) {
         printf("Error!\n");
     }
 
-    if ( filelist != NULL) {
-        free(filelist);
-    }
+    filelist_free(filelist);
 
     dcp_log(LOG_INFO,"MXF creation complete");
 
@@ -385,9 +383,7 @@ int main (int argc, char **argv) {
         printf("\n");
     }
 
-    if ( opendcp != NULL) {
-        free(opendcp);
-    }
+    delete_opendcp(opendcp);
 
     exit(0);
 }
