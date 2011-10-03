@@ -51,14 +51,16 @@ void MainWindow::getTitle() {
 
 void MainWindow::startDcp()
 {
-    QString path;
-    QString filename;
-    int     overwrite;
+    QString     path;
+    QString     filename;
+    QFileInfo   source;
+    QFileInfo   destination;
+    int         overwrite;
+    QMessageBox msgBox;
 
     asset_list_t reelList[MAX_REELS];
 
-    opendcp_t *xmlContext = (opendcp_t *)malloc(sizeof(opendcp_t));
-    memset(xmlContext,0,sizeof (opendcp_t));
+    opendcp_t *xmlContext = create_opendcp();
 
     // get date
     QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
@@ -84,7 +86,7 @@ void MainWindow::startDcp()
     if (ui->reelPictureEdit->text().isEmpty()) {
         QMessageBox::critical(this, tr("Missing Picture Track"),
                              tr("An MXF picture track is required"));
-        return;
+        goto Done;
     }
 
     // check durations
@@ -92,7 +94,7 @@ void MainWindow::startDcp()
         (!ui->reelSubtitleEdit->text().isEmpty() && ui->reelPictureDurationSpinBox->value() != ui->reelSubtitleDurationSpinBox->value())) {
         QMessageBox::critical(this, tr("Duration Mismatch"),
                              tr("The duration of all MXF tracks must be the same."));
-        return;
+        goto Done;
     }
 
     // copy assets
@@ -119,7 +121,7 @@ void MainWindow::startDcp()
     if (add_reel(xmlContext, &xmlContext->pkl[0].cpl[0],reelList[0]) != DCP_SUCCESS) {
         QMessageBox::critical(this, tr("Add Reel Failed"),
                              tr("Could not add reel to CPL."));
-        return;
+        goto Done;
     }
 
     // adjust durations
@@ -133,13 +135,13 @@ void MainWindow::startDcp()
     if (validate_reel(xmlContext,&xmlContext->pkl[0].cpl[0],0) != DCP_SUCCESS) {
         QMessageBox::critical(this, tr("Validating Reel Failed"),
                              tr("Could not valiate reel."));
-        return;
+        goto Done;
     }
 
     // set filenames
     path = QFileDialog::getExistingDirectory(this, tr("Choose destination folder"),QString::null);
     if (path.isEmpty()) {
-        return;
+        goto Done;
     }
 
     filename = path + "/" + xmlContext->pkl[0].cpl[0].uuid + "_cpl.xml";
@@ -162,28 +164,28 @@ void MainWindow::startDcp()
     if (write_cpl(xmlContext,&xmlContext->pkl[0].cpl[0]) != DCP_SUCCESS) {
         QMessageBox::critical(this, tr("Write CPL Failed"),
                              tr("Failed to create CPL."));
-        return;
+        goto Done;
     }
     if (write_pkl(xmlContext,&xmlContext->pkl[0]) != DCP_SUCCESS) {
         QMessageBox::critical(this, tr("Write PKL Failed"),
                              tr("Failed to create PKL."));
-        return;
+        goto Done;
     }
     if (write_volumeindex(xmlContext) != DCP_SUCCESS) {
         QMessageBox::critical(this, tr("Write VOLNDEX Failed"),
                              tr("Failed to create VOLINDEX."));
-        return;
+        goto Done;
     }
     if (write_assetmap(xmlContext) != DCP_SUCCESS) {
         QMessageBox::critical(this, tr("Write CPL Failed"),
                              tr("Failed to create CPL."));
-        return;
+        goto Done;
     }
 
     // copy the picture mxf files
     overwrite = 0;
-    QFileInfo source(xmlContext->pkl[0].cpl[0].reel[0].asset[0].filename);
-    QFileInfo destination(path + "/" + source.fileName());
+    source.setFile(xmlContext->pkl[0].cpl[0].reel[0].asset[0].filename);
+    destination.setFile(path + "/" + source.fileName());
 
     if (!ui->reelPictureEdit->text().isEmpty() && source.absoluteFilePath() != destination.absoluteFilePath()) {
         if (QMessageBox::question(this,tr("Move MXF File"),tr("The destination DCP folder and source picture MXF folder are different. Do you want move (not copy) the MXF file to the destination DCP folder?"),
@@ -221,13 +223,12 @@ void MainWindow::startDcp()
         }
     }
 
-    QMessageBox msgBox;
     msgBox.setText("DCP Created successfully");
     msgBox.exec();
 
-    if (xmlContext != NULL) {
-        free(xmlContext);
-    }
+
+Done:
+    delete_opendcp(xmlContext);
 
     return;
 }
@@ -257,22 +258,28 @@ void MainWindow::setPictureTrack()
     char *file;
 
     path = QFileDialog::getOpenFileName(this, tr("Choose a file to open"),QString::null,filter);
+
     if (path.isEmpty()) {
         return;
     }
+
     file = new char [path.toStdString().size()+1];
     strcpy(file, path.toStdString().c_str());
     if (get_file_essence_class(file) != ACT_PICTURE) {
         QMessageBox::critical(this, tr("Not a Picture Track"),
                              tr("The selected file is not a valid MXF picture track."));
-        return;
+    } else {
+        ui->reelPictureEdit->setProperty("text", path);
+        strcpy(pictureAsset.filename, ui->reelPictureEdit->text().toStdString().c_str());
+        read_asset_info(&pictureAsset);
+        ui->reelPictureDurationSpinBox->setValue(pictureAsset.duration);
+        ui->reelPictureDurationSpinBox->setMaximum(pictureAsset.intrinsic_duration);
+        ui->reelPictureOffsetSpinBox->setMaximum(pictureAsset.intrinsic_duration-1);
     }
-    ui->reelPictureEdit->setProperty("text", path);
-    strcpy(pictureAsset.filename, ui->reelPictureEdit->text().toStdString().c_str());
-    read_asset_info(&pictureAsset);
-    ui->reelPictureDurationSpinBox->setValue(pictureAsset.duration);
-    ui->reelPictureDurationSpinBox->setMaximum(pictureAsset.intrinsic_duration);
-    ui->reelPictureOffsetSpinBox->setMaximum(pictureAsset.intrinsic_duration-1);
+
+    delete[] file;
+
+    return;
 }
 
 void MainWindow::setSoundTrack()
@@ -282,22 +289,28 @@ void MainWindow::setSoundTrack()
     char *file;
 
     path = QFileDialog::getOpenFileName(this, tr("Choose a file to open"),QString::null,filter);
+
     if (path.isEmpty()) {
         return;
     }
+
     file = new char [path.toStdString().size()+1];
     strcpy(file, path.toStdString().c_str());
     if (get_file_essence_class(file) != ACT_SOUND) {
         QMessageBox::critical(this, tr("Not a Sound Track"),
                              tr("The selected file is not a valid MXF sound track."));
-        return;
+    } else {
+        ui->reelSoundEdit->setProperty("text", path);
+        strcpy(soundAsset.filename, ui->reelSoundEdit->text().toStdString().c_str());
+        read_asset_info(&soundAsset);
+        ui->reelSoundDurationSpinBox->setValue(soundAsset.duration);
+        ui->reelSoundDurationSpinBox->setMaximum(soundAsset.intrinsic_duration);
+        ui->reelSoundOffsetSpinBox->setMaximum(soundAsset.intrinsic_duration-1);
     }
-    ui->reelSoundEdit->setProperty("text", path);
-    strcpy(soundAsset.filename, ui->reelSoundEdit->text().toStdString().c_str());
-    read_asset_info(&soundAsset);
-    ui->reelSoundDurationSpinBox->setValue(soundAsset.duration);
-    ui->reelSoundDurationSpinBox->setMaximum(soundAsset.intrinsic_duration);
-    ui->reelSoundOffsetSpinBox->setMaximum(soundAsset.intrinsic_duration-1);
+
+    delete[] file;
+
+    return;
 }
 
 void MainWindow::setSubtitleTrack()
@@ -307,6 +320,7 @@ void MainWindow::setSubtitleTrack()
     char *file;
 
     path = QFileDialog::getOpenFileName(this, tr("Choose an file to open"),QString::null,filter);
+
     if (path.isEmpty()) {
         return;
     }
@@ -316,12 +330,16 @@ void MainWindow::setSubtitleTrack()
     if (get_file_essence_class(file) != ACT_TIMED_TEXT) {
         QMessageBox::critical(this, tr("Not a Subtitle Track"),
                              tr("The selected file is not a valid MXF subtitle track."));
-        return;
+    } else {
+        ui->reelSubtitleEdit->setProperty("text", path);
+        strcpy(subtitleAsset.filename, ui->reelSubtitleEdit->text().toStdString().c_str());
+        read_asset_info(&subtitleAsset);
+        ui->reelSubtitleDurationSpinBox->setValue(subtitleAsset.duration);
+        ui->reelSubtitleDurationSpinBox->setMaximum(subtitleAsset.intrinsic_duration);
+        ui->reelSubtitleOffsetSpinBox->setMaximum(subtitleAsset.intrinsic_duration-1);
     }
-    ui->reelSubtitleEdit->setProperty("text", path);
-    strcpy(subtitleAsset.filename, ui->reelSubtitleEdit->text().toStdString().c_str());
-    read_asset_info(&subtitleAsset);
-    ui->reelSubtitleDurationSpinBox->setValue(subtitleAsset.duration);
-    ui->reelSubtitleDurationSpinBox->setMaximum(subtitleAsset.intrinsic_duration);
-    ui->reelSubtitleOffsetSpinBox->setMaximum(subtitleAsset.intrinsic_duration-1);
+
+    delete[] file;
+
+    return;
 }

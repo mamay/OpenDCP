@@ -250,8 +250,7 @@ void MainWindow::j2kStart() {
     QDir inLeftDir;
     QDir inRightDir;
 
-    context = (opendcp_t *)malloc(sizeof(opendcp_t));
-    memset(context,0,sizeof (opendcp_t));
+    context = create_opendcp();
 
     // process options
     context->log_level = 0;
@@ -300,18 +299,18 @@ void MainWindow::j2kStart() {
     if (ui->stereoscopicCheckBox->checkState() == 0) {
         if (ui->inImageLeftEdit->text().isEmpty()) {
             QMessageBox::warning(this, tr("Source Directory Needed"),tr("Please select a source directory"));
-            return;
+            goto Done;
         } else if (ui->outJ2kLeftEdit->text().isEmpty()) {
             QMessageBox::warning(this, tr("Destination Directory Needed"),tr("Please select a destination directory"));
-            return;
+            goto Done;
         }
     } else {
         if (ui->inImageLeftEdit->text().isEmpty() || ui->inImageRightEdit->text().isEmpty()) {
             QMessageBox::warning(this, tr("Source Directories Needed"),tr("Please select source directories"));
-            return;
+            goto Done;
         } else if (ui->outJ2kLeftEdit->text().isEmpty() || ui->outJ2kRightEdit->text().isEmpty()) {
             QMessageBox::warning(this, tr("Destination Directories Needed"),tr("Please select destination directories"));
-            return;
+            goto Done;
         }
     }
 
@@ -327,13 +326,12 @@ void MainWindow::j2kStart() {
         if (inLeftList.size() != inRightList.size()) {
             QMessageBox::critical(this, tr("File Count Mismatch"),
                                  tr("The left and right image directories have different file counts. They must be the same. Please fix and try again."));
-            return;
+            goto Done;
         }
     }
 
     j2kConvert();
 
-    if (context != NULL) {
-        free(context);
-    }
+Done:
+    delete_opendcp(context);
 }

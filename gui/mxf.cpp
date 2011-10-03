@@ -211,8 +211,7 @@ void MainWindow::mxfCreateSubtitle() {
         return;
     }
 
-    opendcp_t *mxfContext = (opendcp_t *)malloc(sizeof(opendcp_t));
-    memset(mxfContext,0,sizeof (opendcp_t));
+    opendcp_t *mxfContext = create_opendcp();
 
     // process options
     mxfContext->log_level = 0;
@@ -236,24 +235,30 @@ void MainWindow::mxfCreateSubtitle() {
     if (write_mxf(mxfContext,fileList,outputFile) != 0 )  {
         QMessageBox::critical(this, tr("MXF Creation Error"),
                              tr("Subtitle MXF creation failed."));
-        return;
     } else {
         QMessageBox msgBox;
-        msgBox.setText("Sound MXF file created successfully.");
+        msgBox.setText("Subtitle MXF file created successfully.");
         msgBox.exec();
-        return;
     }
 
-    if ( mxfContext != NULL) {
-         free(mxfContext);
+    delete_opendcp(mxfContext);
+
+    // free filelist
+    for (int x=0;x<fileList->file_count;x++) {
+        delete[] fileList->in[x];
     }
+
+    if (fileList) {
+        free(fileList);
+    }
+
+    delete[] outputFile;
 
     return;
 }
 
 void MainWindow::mxfCreateAudio() {
-    opendcp_t *mxfContext = (opendcp_t *)malloc(sizeof(opendcp_t));
-    memset(mxfContext,0,sizeof (opendcp_t));
+    opendcp_t *mxfContext = create_opendcp();
 
     // process options
     mxfContext->log_level = 0;
@@ -303,17 +308,24 @@ void MainWindow::mxfCreateAudio() {
     if (!mxfWriterThread->success)  {
         QMessageBox::critical(this, tr("MXF Creation Error"),
                              tr("Sound MXF creation failed."));
-        return;
     } else {
         QMessageBox msgBox;
         msgBox.setText("Sound MXF file created successfully.");
         msgBox.exec();
-        return;
     }
 
-    if ( mxfContext != NULL) {
-         free(mxfContext);
+    delete_opendcp(mxfContext);
+
+    // free filelist
+    for (int x=0;x<fileList->file_count;x++) {
+        delete[] fileList->in[x];
     }
+
+    if (fileList) {
+        free(fileList);
+    }
+
+    delete[] outputFile;
 
     return;
 }
@@ -327,9 +339,10 @@ void MainWindow::mxfCreatePicture() {
     QString inputFile;
     QString msg;
     int s,l,r;
+    int offSet = 0;
+    char *outputFile;
 
-    opendcp_t *mxfContext = (opendcp_t *)malloc(sizeof(opendcp_t));
-    memset(mxfContext,0,sizeof (opendcp_t));
+    opendcp_t *mxfContext = create_opendcp();
 
     // process options
     mxfContext->log_level = 0;
@@ -370,7 +383,7 @@ void MainWindow::mxfCreatePicture() {
         if (pLeftList.size() != pRightList.size()) {
             QMessageBox::critical(this, tr("File Count Mismatch"),
                                  tr("The left and right image directories have different file counts. They must be the same. Please fix and try again."));
-            return;
+            goto Done;
         }
 
         // double count if 3D
@@ -385,14 +398,14 @@ void MainWindow::mxfCreatePicture() {
             msg.sprintf("File list does not appear to be sequential between %s and %s. Do you wish to continue?",pLeftDir.entryList().at(s-1).toAscii().constData(),
                         pLeftDir.entryList().at(s).toAscii().constData());
             if (QMessageBox::question(this, tr("File Sequence Mismatch"), msg, QMessageBox::No,QMessageBox::Yes) == QMessageBox::No) {
-                 return;
+                 goto Done;
             }
         }
         if (r) {
             msg.sprintf("File list does not appear to be sequential between %s and %s. Do you wish to continue?",pRightDir.entryList().at(s-1).toAscii().constData(),
                         pRightDir.entryList().at(s).toAscii().constData());
             if (QMessageBox::question(this, tr("File Sequence Mismatch"), msg, QMessageBox::No,QMessageBox::Yes) == QMessageBox::No) {
-                 return;
+                 goto Done;
             }
         }
     } else {
@@ -403,13 +416,12 @@ void MainWindow::mxfCreatePicture() {
             msg.sprintf("File list does not appear to be sequential between %s and %s. Do you wish to continue?",pLeftDir.entryList().at(s-1).toAscii().constData(),
                         pLeftDir.entryList().at(s).toAscii().constData());
             if (QMessageBox::question(this, tr("File Sequence Mismatch"), msg, QMessageBox::No,QMessageBox::Yes) == QMessageBox::No) {
-                 return;
+                 goto Done;
             }
         }
     }
 
     fileList->in = (char**) malloc(fileList->file_count*sizeof(char*));
-    int offSet = 0;
     for (int x=0;x<pLeftList.size();x++) {
             fileinfo = pLeftList.at(x);
             inputFile = fileinfo.absoluteFilePath();
@@ -423,13 +435,13 @@ void MainWindow::mxfCreatePicture() {
             }
     }
 
-    char *outputFile = new char [ui->pMxfOutEdit->text().toStdString().size()+1];
+    outputFile = new char [ui->pMxfOutEdit->text().toStdString().size()+1];
     strcpy(outputFile, ui->pMxfOutEdit->text().toStdString().c_str());
 
     if (fileList->file_count < 1) {
         QMessageBox::critical(this, tr("MXF Creation Error"),
                              tr("No input files found"));
-        return;
+        goto Done;
     } else {
         mxfWriterThread->setMxfInputs(mxfContext,fileList,outputFile);
         dMxfConversion->init(fileList->file_count);
@@ -445,9 +457,21 @@ void MainWindow::mxfCreatePicture() {
        }
     }
 
-    if ( mxfContext != NULL) {
-        free(mxfContext);
+Done:
+
+    // free filelist
+    for (int x=0;x<fileList->file_count;x++) {
+        delete[] fileList->in[x]; 
     }
 
+    if (outputFile) {
+        delete[] outputFile;
+    }
+
+    if (fileList) {
+        free(fileList);
+    }
+
+    delete_opendcp(mxfContext);
     return;
 }
