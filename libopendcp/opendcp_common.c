@@ -26,6 +26,7 @@
 #include <openssl/x509.h>
 #include <openssl/bio.h>
 #include "opendcp.h"
+#include "opendcp_error.h"
 
 void cleanup(opendcp_t *opendcp, int exit_flag) {
     if (exit_flag) {
@@ -157,7 +158,11 @@ int check_sequential(char str1[],char str2[]) {
     int x,y;
     int offset, len;
 
-    offset     = find_seq_offset(str2,str1);
+    if (strlen(str1) != strlen(str2)) {
+        return STRING_LENGTH_NOTEQUAL;
+    }
+
+    offset = find_seq_offset(str2,str1);
 
     if (offset) {
         len = offset;
@@ -196,10 +201,9 @@ int check_file_sequence(char *str[], int count) {
     if (sequential) {
         return 0;
     } else {
-        return x;
+        return x+DCP_ERROR_MAX;
     }
 }
-
 
 int get_asset_type(asset_t asset) {
     switch (asset.essence_type) {
@@ -326,10 +330,10 @@ int validate_reel(opendcp_t *opendcp, cpl_t *cpl, int reel) {
 
     if (picture < 1) {
         dcp_log(LOG_ERROR,"Reel %d has no picture track",reel);
-        return DCP_FATAL;
+        return DCP_NO_PICTURE_TRACK;
     } else if (picture > 1) {
         dcp_log(LOG_ERROR,"Reel %d has multiple picture tracks",reel);
-        return DCP_FATAL;
+        return DCP_MULTIPLE_PICTURE_TRACK;
     }
 
     d = cpl->reel[reel].asset[0].duration;
@@ -345,7 +349,7 @@ int validate_reel(opendcp_t *opendcp, cpl_t *cpl, int reel) {
             }
         } else {
             dcp_log(LOG_ERROR,"Asset %s has no duration",cpl->reel[reel].asset[x].filename);
-           return DCP_FATAL;
+           return DCP_ASSET_NO_DURATION;
         }
     }
 
@@ -356,7 +360,7 @@ int validate_reel(opendcp_t *opendcp, cpl_t *cpl, int reel) {
         }
     }
           
-    return result;
+    return DCP_SUCCESS;
 }
 
 int add_reel(opendcp_t *opendcp, cpl_t *cpl, asset_list_t reel) {
@@ -387,7 +391,7 @@ int add_reel(opendcp_t *opendcp, cpl_t *cpl, asset_list_t reel) {
         /* check if file exists */
         if ((fp = fopen(filename, "r")) == NULL) {
             dcp_log(LOG_ERROR,"add_reel: Could not open file: %s",filename);
-            return DCP_FATAL;
+            return DCP_FILE_OPEN_ERROR;
         } else {
             fclose (fp);
         }
@@ -403,7 +407,7 @@ int add_reel(opendcp_t *opendcp, cpl_t *cpl, asset_list_t reel) {
 
         if (result == DCP_FATAL) {
             dcp_log(LOG_ERROR,"%s is not a proper essence file",filename);
-            return DCP_FATAL;
+            return DCP_INVALID_ESSENCE;
         }
 
         if (x == 0) {
@@ -411,7 +415,7 @@ int add_reel(opendcp_t *opendcp, cpl_t *cpl, asset_list_t reel) {
         } else {
             if (opendcp->ns != asset.xml_ns) {
                 dcp_log(LOG_ERROR,"Warning DCP specification mismatch in assets. Please make sure all assets are MXF Interop or SMPTE");
-                return DCP_FATAL;
+                return DCP_SPECIFCATION_MISMATCH;
             }
         }
 

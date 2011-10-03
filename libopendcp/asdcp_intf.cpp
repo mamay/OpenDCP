@@ -29,6 +29,7 @@
 #include "asdcp_intf.h"
 #include "asdcp_intf_parserList.h"
 #include "opendcp.h"
+#include "opendcp_error.h"
 
 using namespace ASDCP;
 
@@ -80,7 +81,7 @@ extern "C" int calculate_digest(const char *filename, char *digest)
     if (ASDCP_SUCCESS(result)) {
         return DCP_SUCCESS;
     } else {
-        return DCP_FATAL;
+        return MXF_CALC_DIGEST_FAILED;
     }
 }
 
@@ -93,16 +94,16 @@ extern "C" int get_file_essence_class(char *filename) {
     result = ASDCP::EssenceType(filename, essence_type);
 
     if (ASDCP_FAILURE(result)) {
-        return DCP_FATAL;
+        return MXF_COULD_NOT_DETECT_ESSENCE_TYPE;
     }
 
     /* If type is unknown, try reading raw */
-    if ( essence_type == ESS_UNKNOWN) {
+    if (essence_type == ESS_UNKNOWN) {
        result = ASDCP::RawEssenceType(filename, essence_type);
     }
 
     if (ASDCP_FAILURE(result)) {
-        return DCP_FATAL;
+        return MXF_COULD_NOT_DETECT_ESSENCE_TYPE;
     }
 
     switch (essence_type) {
@@ -134,7 +135,7 @@ extern "C" int get_file_essence_type(char *filename) {
     result = ASDCP::RawEssenceType(filename, essence_type);
 
     if (ASDCP_FAILURE(result)) {
-        return DCP_FATAL;
+        return MXF_COULD_NOT_DETECT_ESSENCE_TYPE;
     }
 
     switch(essence_type) {
@@ -173,7 +174,7 @@ extern "C" int read_asset_info(asset_t *asset)
     result = ASDCP::EssenceType(asset->filename, essence_type);
 
     if (ASDCP_FAILURE(result)) {
-        return DCP_FATAL;
+        return MXF_COULD_NOT_DETECT_ESSENCE_TYPE;
     }
 
     switch (essence_type) {
@@ -184,7 +185,7 @@ extern "C" int read_asset_info(asset_t *asset)
             result = reader.OpenRead(asset->filename);
 
             if (ASDCP_FAILURE(result)) {
-                return DCP_FATAL;
+                return MXF_MPEG2_FILE_OPEN_ERROR;
             }
 
 	    reader.FillVideoDescriptor(desc);
@@ -210,7 +211,7 @@ extern "C" int read_asset_info(asset_t *asset)
             result = reader.OpenRead(asset->filename);
 
             if (ASDCP_FAILURE(result)) {
-                return DCP_FATAL;
+                return MXF_J2K_FILE_OPEN_ERROR;
             }
 
             reader.FillPictureDescriptor(desc);
@@ -242,7 +243,7 @@ extern "C" int read_asset_info(asset_t *asset)
                 result = reader.OpenRead(asset->filename);
                 asset->stereoscopic   = 1;
                 if ( ASDCP_FAILURE(result) ) {
-                    return DCP_FATAL;
+                    return MXF_J2K_FILE_OPEN_ERROR;
                 }
                 reader.FillPictureDescriptor(desc);
                 reader.FillWriterInfo(info);
@@ -272,7 +273,7 @@ extern "C" int read_asset_info(asset_t *asset)
             result = reader.OpenRead(asset->filename);
 
             if (ASDCP_FAILURE(result)) {
-                return DCP_FATAL;
+                return MXF_WAV_FILE_OPEN_ERROR;
             }
 
             reader.FillAudioDescriptor(desc);
@@ -296,7 +297,7 @@ extern "C" int read_asset_info(asset_t *asset)
             result = reader.OpenRead(asset->filename);
 
             if (ASDCP_FAILURE(result)) {
-                return DCP_FATAL;
+                return MXF_TT_FILE_OPEN_ERROR;
             }
   
             reader.FillTimedTextDescriptor(desc);
@@ -313,7 +314,7 @@ extern "C" int read_asset_info(asset_t *asset)
       }
       break;
       default:
-            return DCP_FATAL;
+            return MXF_UNKOWN_ESSENCE_TYPE;
     }
  
     return DCP_SUCCESS;
@@ -322,45 +323,41 @@ extern "C" int read_asset_info(asset_t *asset)
 /* write the asset to an mxf file */
 extern "C" int write_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     Result_t      result = RESULT_OK; 
+    int           rc;
     EssenceType_t essence_type;
 
     result = ASDCP::RawEssenceType(filelist->in[0], essence_type);
 
     if (ASDCP_FAILURE(result)) {
-        printf("Could determine essence type of  %s\n",filelist->in[0]);
-        return DCP_FATAL;
+        return MXF_COULD_NOT_DETECT_ESSENCE_TYPE;
     }
 
     switch (essence_type) {
         case ESS_JPEG_2000:
             if ( opendcp->stereoscopic )
-                result = write_j2k_s_mxf(opendcp,filelist,output_file);
+                rc = write_j2k_s_mxf(opendcp,filelist,output_file);
             else
-                result = write_j2k_mxf(opendcp,filelist,output_file);
+                rc = write_j2k_mxf(opendcp,filelist,output_file);
             break;
         case ESS_JPEG_2000_S:
-                result = write_j2k_s_mxf(opendcp,filelist,output_file);
+                rc = write_j2k_s_mxf(opendcp,filelist,output_file);
             break;
         case ESS_PCM_24b_48k:
         case ESS_PCM_24b_96k:
-            result = write_pcm_mxf(opendcp,filelist,output_file);
+            rc = write_pcm_mxf(opendcp,filelist,output_file);
             break;
         case ESS_MPEG2_VES:
-            result = write_mpeg2_mxf(opendcp,filelist,output_file);
+            rc = write_mpeg2_mxf(opendcp,filelist,output_file);
             break;
         case ESS_TIMED_TEXT:
-            result = write_tt_mxf(opendcp,filelist,output_file);
+            rc = write_tt_mxf(opendcp,filelist,output_file);
             break;
         case ESS_UNKNOWN:
-            result = RESULT_FAIL;
+            rc = MXF_UNKOWN_ESSENCE_TYPE;
             break;
     }
 
-    if (ASDCP_FAILURE(result)) {
-        return DCP_FATAL;
-    }
-
-    return DCP_SUCCESS; 
+    return rc; 
 }
 
 typedef struct {
@@ -429,7 +426,7 @@ Result_t fill_writer_info(opendcp_t *opendcp, writer_info_t *writer_info) {
 }
 
 /* write out j2k mxf file */
-Result_t write_j2k_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
+int write_j2k_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     JP2K::MXFWriter         mxf_writer;
     JP2K::PictureDescriptor picture_desc;
     JP2K::CodestreamParser  j2k_parser;
@@ -449,8 +446,7 @@ Result_t write_j2k_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_fi
     result = j2k_parser.OpenReadFrame(filelist->in[start_frame], frame_buffer);
 
     if (ASDCP_FAILURE(result)) {
-        printf("Failed to open file %s\n",filelist->in[start_frame]);
-        return result;
+        return MXF_J2K_FILE_OPEN_ERROR;
     }
 
     Rational edit_rate(opendcp->frame_rate,1);
@@ -462,8 +458,7 @@ Result_t write_j2k_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_fi
     result = mxf_writer.OpenWrite(output_file, writer_info.info, picture_desc);
 
     if (ASDCP_FAILURE(result)) {
-        printf("failed to open output file %s\n",output_file);
-        return result;
+        return MXF_FILE_WRITE_ERROR;
     }
    
     /* set the duration of the output mxf */
@@ -484,8 +479,7 @@ Result_t write_j2k_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_fi
             }
 
             if (ASDCP_FAILURE(result)) {
-                printf("Failed to open file %s\n",filelist->in[i]);
-                return result;
+                return MXF_J2K_FILE_OPEN_ERROR;
             }
 
             if (opendcp->encrypt_header_flag) {
@@ -501,22 +495,20 @@ Result_t write_j2k_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_fi
     }
 
     if (ASDCP_FAILURE(result)) {
-        printf("not end of file\n");
-        return result;
+        return MXF_FILE_WRITE_ERROR;
     }
 
     result = mxf_writer.Finalize();
 
     if (ASDCP_FAILURE(result)) {
-        printf("failed to finalize\n");
-        return result;
+        return MXF_FILE_FINALIZE_ERROR;
     }
 
-    return result;
+    return DCP_SUCCESS;
 }
 
 /* write out 3D j2k mxf file */
-Result_t write_j2k_s_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
+int write_j2k_s_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     JP2K::MXFSWriter         mxf_writer;
     JP2K::PictureDescriptor picture_desc;
     JP2K::CodestreamParser  j2k_parser_left;
@@ -530,15 +522,13 @@ Result_t write_j2k_s_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_
     result = j2k_parser_left.OpenReadFrame(filelist->in[0], frame_buffer_left);
 
     if (ASDCP_FAILURE(result)) {
-        printf("Failed to open file %s\n",filelist->in[0]);
-        return result;
+        return MXF_J2K_FILE_OPEN_ERROR;
     }
 
     result = j2k_parser_right.OpenReadFrame(filelist->in[1], frame_buffer_right);
 
     if (ASDCP_FAILURE(result)) {
-        printf("Failed to open file %s\n",filelist->in[1]);
-        return result;
+        return MXF_J2K_FILE_OPEN_ERROR;
     }
 
     Rational edit_rate(opendcp->frame_rate,1);
@@ -550,8 +540,7 @@ Result_t write_j2k_s_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_
     result = mxf_writer.OpenWrite(output_file, writer_info.info, picture_desc);
 
     if (ASDCP_FAILURE(result)) {
-        printf("failed to open output file %s\n",output_file);
-        return result;
+        return MXF_FILE_WRITE_ERROR;
     }
      
     /* set the duration of the output mxf, set to half the filecount since it is 3D */
@@ -572,8 +561,7 @@ Result_t write_j2k_s_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_
             }
 
             if (ASDCP_FAILURE(result)) {
-                printf("Failed to open file %s\n",filelist->in[i]);
-                return result;
+                return MXF_J2K_FILE_OPEN_ERROR;
             }
             i++;
 
@@ -584,8 +572,7 @@ Result_t write_j2k_s_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_
             }
 
             if (ASDCP_FAILURE(result)) {
-                printf("Failed to open file %s\n",filelist->in[i]);
-                return result;
+                return MXF_J2K_FILE_OPEN_ERROR;
             }
             i++;
 
@@ -606,22 +593,20 @@ Result_t write_j2k_s_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_
     }
 
     if (ASDCP_FAILURE(result)) {
-        printf("not end of file\n");
-        return result;
+        return MXF_FILE_WRITE_ERROR;
     }
 
     result = mxf_writer.Finalize();
 
     if (ASDCP_FAILURE(result)) {
-        printf("failed to finalize\n");
-        return result;
+        return MXF_FILE_FINALIZE_ERROR;
     }
 
-    return result;
+    return DCP_SUCCESS;
 }
 
 /* write out pcm audio mxf file */
-Result_t write_pcm_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
+int write_pcm_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     PCMParserList        pcm_parser;
     PCM::MXFWriter       mxf_writer;
     PCM::FrameBuffer     frame_buffer;
@@ -635,8 +620,7 @@ Result_t write_pcm_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_fi
     result = pcm_parser.OpenRead(filelist->file_count,(const char **)filelist->in, edit_rate);
 
     if (ASDCP_FAILURE(result)) {
-        printf("Failed to open file %s\n",filelist->in[0]);
-        return result;
+        return MXF_WAV_FILE_OPEN_ERROR;
     }
 
     pcm_parser.FillAudioDescriptor(audio_desc);
@@ -648,15 +632,13 @@ Result_t write_pcm_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_fi
     result = mxf_writer.OpenWrite(output_file, writer_info.info, audio_desc);
 
     if (ASDCP_FAILURE(result)) {
-        printf("failed to open output file %s\n",output_file);
-        return result;
+        return MXF_FILE_WRITE_ERROR;
     }
 
     result = pcm_parser.Reset();
   
     if (ASDCP_FAILURE(result)) {
-        printf("parser reset failed\n");
-        return result;
+        return MXF_PARSER_RESET_ERROR;
     }
 
     if (!opendcp->duration) {
@@ -672,7 +654,6 @@ Result_t write_pcm_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_fi
             continue;
         } else {
             if (frame_buffer.Size() != frame_buffer.Capacity()) {
-                printf("WARNING: Last frame read was short, PCM input is possibly not frame aligned.\n");
                 result = RESULT_ENDOFFILE;
                 continue;
             }
@@ -685,22 +666,20 @@ Result_t write_pcm_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_fi
     }
 
     if (ASDCP_FAILURE(result)) {
-        printf("not end of file\n");
-        return result;
+        return MXF_FILE_WRITE_ERROR;
     }
 
     result = mxf_writer.Finalize();
 
     if (ASDCP_FAILURE(result)) {
-        printf("failed to finalize\n");
-        return result;
+        return MXF_FILE_FINALIZE_ERROR;
     }
 
-    return result;
+    return DCP_SUCCESS;
 }
 
 /* write out timed text mxf file */
-Result_t write_tt_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
+int write_tt_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     TimedText::DCSubtitleParser    tt_parser;
     TimedText::MXFWriter           mxf_writer;
     TimedText::FrameBuffer         frame_buffer(FRAME_BUFFER_SIZE);
@@ -713,8 +692,7 @@ Result_t write_tt_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_fil
     result = tt_parser.OpenRead(filelist->in[0]);
  
     if (ASDCP_FAILURE(result)) {
-        printf("Failed to open file %s\n",filelist->in[0]);
-        return result;
+        return MXF_TT_FILE_OPEN_ERROR;
     }
 
     tt_parser.FillTimedTextDescriptor(tt_desc);
@@ -725,15 +703,13 @@ Result_t write_tt_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_fil
     result = tt_parser.ReadTimedTextResource(xml_doc);
 
     if (ASDCP_FAILURE(result)) {
-        printf("Could not read Time Text Resource\n");
-        return result;
+        return MXF_TT_FILE_OPEN_ERROR;
     }
 
     result = mxf_writer.WriteTimedTextResource(xml_doc, writer_info.aes_context, writer_info.hmac_context);
 
     if (ASDCP_FAILURE(result)) {
-        printf("Could not write Time Text Resource\n");
-        return result;
+        return MXF_FILE_WRITE_ERROR;
     }
 
     resource_iterator = tt_desc.ResourceList.begin();
@@ -742,8 +718,7 @@ Result_t write_tt_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_fil
         result = tt_parser.ReadAncillaryResource((*resource_iterator++).ResourceID, frame_buffer);
 
         if (ASDCP_FAILURE(result)) {
-          printf("Could not read Time Text Resource\n");
-          return result;
+          return MXF_TT_FILE_OPEN_ERROR;
         }
 
         result = mxf_writer.WriteAncillaryResource(frame_buffer, writer_info.aes_context, writer_info.hmac_context);
@@ -754,22 +729,20 @@ Result_t write_tt_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_fil
     }
 
     if (ASDCP_FAILURE(result)) {
-        printf("not end of file\n");
-        return result;
+        return MXF_FILE_WRITE_ERROR;
     }
 
     result = mxf_writer.Finalize();
 
     if (ASDCP_FAILURE(result)) {
-        printf("failed to finalize\n");
-        return result;
+        return MXF_FILE_FINALIZE_ERROR;
     }
 
-    return result;
+    return DCP_SUCCESS;
 }
 
 /* write out mpeg2 mxf file */
-Result_t write_mpeg2_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
+int write_mpeg2_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     MPEG2::FrameBuffer     frame_buffer(FRAME_BUFFER_SIZE);
     MPEG2::Parser          mpeg2_parser;
     MPEG2::MXFWriter       mxf_writer;
@@ -781,8 +754,7 @@ Result_t write_mpeg2_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_
     result = mpeg2_parser.OpenRead(filelist->in[0]);
 
     if (ASDCP_FAILURE(result)) {
-        printf("Failed to open file %s\n",filelist->in[0]);
-        return result;
+        return MXF_MPEG2_FILE_OPEN_ERROR;
     }
 
     mpeg2_parser.FillVideoDescriptor(video_desc);
@@ -792,15 +764,13 @@ Result_t write_mpeg2_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_
     result = mxf_writer.OpenWrite(output_file, writer_info.info, video_desc);
 
     if (ASDCP_FAILURE(result)) {
-        printf("failed to open output file %s\n",output_file);
-        return result;
+        return MXF_FILE_WRITE_ERROR;
     }
 
     result = mpeg2_parser.Reset();
   
     if (ASDCP_FAILURE(result)) {
-        printf("parser reset failed\n");
-        return result;
+        return MXF_PARSER_RESET_ERROR;
     }
 
     if (!opendcp->duration) {
@@ -828,16 +798,14 @@ Result_t write_mpeg2_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_
     }
 
     if (ASDCP_FAILURE(result)) {
-        printf("not end of file\n");
-        return result;
+        return MXF_FILE_WRITE_ERROR;
     }
 
     result = mxf_writer.Finalize();
 
     if (ASDCP_FAILURE(result)) {
-        printf("failed to finalize\n");
-        return result;
+        return MXF_FILE_FINALIZE_ERROR;
     }
 
-    return result;
+    return DCP_SUCCESS;
 }
