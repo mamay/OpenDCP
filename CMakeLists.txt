@@ -2,8 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 #--build Type-----------------------------------------------------------------
 PROJECT(OpenDCP)
-#SET(CMAKE_BUILD_TYPE Release)
-SET(CMAKE_BUILD_TYPE Debug)
+SET(CMAKE_BUILD_TYPE Release)
 STRING(TOLOWER ${PROJECT_NAME} PACKAGE_NAME)
 #-----------------------------------------------------------------------------
 
