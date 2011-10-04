@@ -65,11 +65,11 @@ private:
 
     Result_t writeMxf();
     Result_t fillWriterInfo(opendcp_t *opendcp, writer_info_t *writer_info);
-    Result_t writeJ2kStereoscopicMxf(opendcp_t *opendcp,filelist_t *filelist, char *output_file);
-    Result_t writeJ2kMxf(opendcp_t *opendcp,QFileInfoList inputList, QString outputFile);
-    Result_t writePcmMxf(opendcp_t *opendcp,filelist_t *filelist, char *output_file);
-    Result_t writeMpeg2Mxf(opendcp_t *opendcp,filelist_t *filelist, char *output_file);
-    Result_t writeTTMxf(opendcp_t *opendcp,filelist_t *filelist, char *output_file);
+    Result_t writeJ2kStereoscopicMxf(opendcp_t *opendcp, QFileInfoList inputList, QString outputFile);
+    Result_t writeJ2kMxf(opendcp_t *opendcp, QFileInfoList inputList, QString outputFile);
+    Result_t writePcmMxf(opendcp_t *opendcp, QFileInfoList inputList, QString outputFile);
+    Result_t writeMpeg2Mxf(opendcp_t *opendcp, QFileInfoList inputList, QString outputFile);
+    Result_t writeTTMxf(opendcp_t *opendcp, QFileInfoList inputList, QString outputFile);
 
 signals:
     void finished();

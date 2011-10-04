@@ -258,7 +258,9 @@ void MainWindow::mxfCreateSubtitle() {
 }
 
 void MainWindow::mxfCreateAudio() {
-    opendcp_t *mxfContext = create_opendcp();
+    opendcp_t     *mxfContext = create_opendcp();
+    QFileInfoList inputList;
+    QString       outputFile;
 
     // process options
     mxfContext->log_level = 0;
@@ -272,37 +274,23 @@ void MainWindow::mxfCreateAudio() {
     mxfContext->frame_rate = ui->mxfFrameRateComboBox->currentText().toInt();
     mxfContext->stereoscopic = 0;
 
-    filelist_t *fileList = (filelist_t*) malloc(sizeof(filelist_t));
-
     if (ui->mxfSoundRadio2->isChecked()) {
-        fileList->file_count = 2;
-        fileList->in = (char**) malloc(fileList->file_count*sizeof(char*));
-        fileList->in[0] = new char [ui->aLeftEdit->text().toStdString().size()+1];
-        strcpy(fileList->in[0], ui->aLeftEdit->text().toStdString().c_str());
-        fileList->in[1] = new char [ui->aRightEdit->text().toStdString().size()+1];
-        strcpy(fileList->in[1], ui->aRightEdit->text().toStdString().c_str());
+        inputList.append(QFileInfo(ui->aLeftEdit->text()));
+        inputList.append(QFileInfo(ui->aRightEdit->text()));
     } else {
-        fileList->file_count = 6;
-        fileList->in = (char**) malloc(fileList->file_count*sizeof(char*));
-        fileList->in[0] = new char [ui->aLeftEdit->text().toStdString().size()+1];
-        strcpy(fileList->in[0], ui->aLeftEdit->text().toStdString().c_str());
-        fileList->in[1] = new char [ui->aRightEdit->text().toStdString().size()+1];
-        strcpy(fileList->in[1], ui->aRightEdit->text().toStdString().c_str());
-        fileList->in[2] = new char [ui->aCenterEdit->text().toStdString().size()+1];
-        strcpy(fileList->in[2], ui->aCenterEdit->text().toStdString().c_str());
-        fileList->in[3] = new char [ui->aSubEdit->text().toStdString().size()+1];
-        strcpy(fileList->in[3], ui->aSubEdit->text().toStdString().c_str());
-        fileList->in[4] = new char [ui->aLeftSEdit->text().toStdString().size()+1];
-        strcpy(fileList->in[4], ui->aLeftSEdit->text().toStdString().c_str());
-        fileList->in[5] = new char [ui->aRightSEdit->text().toStdString().size()+1];
-        strcpy(fileList->in[5], ui->aRightSEdit->text().toStdString().c_str());
+        inputList.append(QFileInfo(ui->aLeftEdit->text()));
+        inputList.append(QFileInfo(ui->aRightEdit->text()));
+        inputList.append(QFileInfo(ui->aCenterEdit->text()));
+        inputList.append(QFileInfo(ui->aSubEdit->text()));
+        inputList.append(QFileInfo(ui->aLeftSEdit->text()));
+        inputList.append(QFileInfo(ui->aRightSEdit->text()));
+        inputList.append(QFileInfo(ui->aLeftEdit->text()));
     }
 
-    char *outputFile = new char [ui->aMxfOutEdit->text().toStdString().size()+1];
-    strcpy(outputFile, ui->aMxfOutEdit->text().toStdString().c_str());
+    outputFile = ui->aMxfOutEdit->text();
+    mxfWriterThread->setMxfInputs(mxfContext, inputList, outputFile);
 
-    //mxfWriterThread->setMxfInputs(mxfContext,fileList,outputFile);
-    dMxfConversion->init(fileList->file_count);
+    dMxfConversion->init(inputList.size());
     mxfWriterThread->start();
     dMxfConversion->exec();
     if (!mxfWriterThread->success)  {
@@ -315,17 +303,6 @@ void MainWindow::mxfCreateAudio() {
     }
 
     delete_opendcp(mxfContext);
-
-    // free filelist
-    for (int x=0;x<fileList->file_count;x++) {
-        delete[] fileList->in[x];
-    }
-
-    if (fileList) {
-        free(fileList);
-    }
-
-    delete[] outputFile;
 
     return;
 }
@@ -419,9 +396,7 @@ void MainWindow::mxfCreatePicture() {
         }
     }
 
-
     outputFile = ui->pMxfOutEdit->text();
-    //outputFile = new char [ui->pMxfOutEdit->text().toStdString().size()+1];
 
     if (inputList.size() < 1) {
         QMessageBox::critical(this, tr("MXF Creation Error"), tr("No input files found"));
