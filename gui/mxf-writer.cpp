@@ -129,11 +129,11 @@ void MxfWriter::run()
     emit finished();
 }
 
-void MxfWriter::setMxfInputs(opendcp_t *opendcp, filelist_t *filelist, char *output_file)
+void MxfWriter::setMxfInputs(opendcp_t *opendcp, QFileInfoList fileList, QString outputFile)
 {
-    opendcpMxf = opendcp;
-    filelistMxf = filelist;
-    outputFileMxf = output_file;
+    opendcpMxf    = opendcp;
+    mxfFileList   = fileList;
+    mxfOutputFile = outputFile;
 }
 
 Result_t MxfWriter::writeMxf()
@@ -141,30 +141,31 @@ Result_t MxfWriter::writeMxf()
     Result_t      result = RESULT_OK;
     EssenceType_t essence_type;
 
-    result = ASDCP::RawEssenceType(filelistMxf->in[0], essence_type);
+    result = ASDCP::RawEssenceType(mxfFileList.at(0).absoluteFilePath().toAscii().constData(), essence_type);
 
     if (ASDCP_FAILURE(result)) {
-        printf("Could determine essence type of  %s\n",filelistMxf->in[0]);
+        printf("Could determine essence type of  %s\n",mxfFileList.at(0).absoluteFilePath().toAscii().constData());
         result = RESULT_FAIL;
     }
 
     switch (essence_type) {
         case ESS_JPEG_2000:
         case ESS_JPEG_2000_S:
-            if ( opendcpMxf->stereoscopic )
-                result = writeJ2kStereoscopicMxf(opendcpMxf,filelistMxf,outputFileMxf);
-            else
-                result = writeJ2kMxf(opendcpMxf,filelistMxf,outputFileMxf);
+            if ( opendcpMxf->stereoscopic ) {
+                //result = writeJ2kStereoscopicMxf(opendcpMxf,mxfFileList,mxfOutputFile);
+            } else {
+                result = writeJ2kMxf(opendcpMxf,mxfFileList,mxfOutputFile);
+            }
             break;
         case ESS_PCM_24b_48k:
         case ESS_PCM_24b_96k:
-            result = writePcmMxf(opendcpMxf,filelistMxf,outputFileMxf);
+           // result = writePcmMxf(opendcpMxf,mxfFileList,mxfOutputFile);
             break;
         case ESS_MPEG2_VES:
-            result = writeMpeg2Mxf(opendcpMxf,filelistMxf,outputFileMxf);
+          //  result = writeMpeg2Mxf(opendcpMxf,mxfFileList,mxfOutputFile);
             break;
         case ESS_TIMED_TEXT:
-            result = writeTTMxf(opendcpMxf,filelistMxf,outputFileMxf);
+          //  result = writeTTMxf(opendcpMxf,mxfFileList,mxfOutputFile);
             break;
         case ESS_UNKNOWN:
             result = RESULT_FAIL;
@@ -178,7 +179,7 @@ Result_t MxfWriter::writeMxf()
     return RESULT_OK;
 }
 
-Result_t MxfWriter::writeJ2kMxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
+Result_t MxfWriter::writeJ2kMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, QString mxfOuputFile) {
     JP2K::MXFWriter         mxf_writer;
     JP2K::PictureDescriptor picture_desc;
     JP2K::CodestreamParser  j2k_parser;
@@ -189,16 +190,16 @@ Result_t MxfWriter::writeJ2kMxf(opendcp_t *opendcp, filelist_t *filelist, char *
     ui32_t                  mxf_duration;
 
     // set the starting frame
-    if (opendcp->mxf.start_frame && filelist->file_count >= (opendcp->mxf.start_frame-1)) {
+    if (opendcp->mxf.start_frame && mxfFileList.size() >= (opendcp->mxf.start_frame-1)) {
         start_frame = opendcp->mxf.start_frame - 1; // adjust for zero base
     } else {
         start_frame = 0;
     }
 
-    result = j2k_parser.OpenReadFrame(filelist->in[start_frame], frame_buffer);
+    result = j2k_parser.OpenReadFrame(mxfFileList.at(start_frame).absoluteFilePath().toAscii().constData(), frame_buffer);
 
     if (ASDCP_FAILURE(result)) {
-        printf("Failed to open file %s\n",filelist->in[start_frame]);
+        printf("Failed to open file %s\n",mxfFileList.at(start_frame).absoluteFilePath().toAscii().constData());
         return result;
     }
 
@@ -208,18 +209,18 @@ Result_t MxfWriter::writeJ2kMxf(opendcp_t *opendcp, filelist_t *filelist, char *
 
     fillWriterInfo(opendcp, &writer_info);
 
-    result = mxf_writer.OpenWrite(output_file, writer_info.info, picture_desc);
+    result = mxf_writer.OpenWrite(mxfOutputFile.toAscii().constData(), writer_info.info, picture_desc);
 
     if (ASDCP_FAILURE(result)) {
-        printf("failed to open output file %s\n",output_file);
+        printf("failed to open output file %s\n",mxfOutputFile.toAscii().constData());
         return result;
     }
 
     // set the duration of the output mxf
-    if (opendcp->mxf.duration && filelist->file_count >= opendcp->mxf.duration) {
+    if (opendcp->mxf.duration && mxfFileList.size() >= opendcp->mxf.duration) {
         mxf_duration = opendcp->mxf.duration;
     } else {
-        mxf_duration = filelist->file_count;
+        mxf_duration = mxfFileList.size();
     }
 
     ui32_t i = start_frame;
@@ -227,14 +228,14 @@ Result_t MxfWriter::writeJ2kMxf(opendcp_t *opendcp, filelist_t *filelist, char *
     // read each input frame and write to the output mxf until duration is reached
     while (ASDCP_SUCCESS(result) && mxf_duration--) {
         if ((opendcp->slide == 0 || i == start_frame) && cancelled == 0) {
-            result = j2k_parser.OpenReadFrame(filelist->in[i], frame_buffer);
+            result = j2k_parser.OpenReadFrame(mxfFileList.at(i).absoluteFilePath().toAscii().constData(), frame_buffer);
 
             if (opendcp->delete_intermediate) {
-                unlink(filelist->in[i]);
+                unlink(mxfFileList.at(i).absoluteFilePath().toAscii().constData());
             }
 
             if (ASDCP_FAILURE(result)) {
-                printf("Failed to open file %s\n",filelist->in[i]);
+                printf("Failed to open file %s\n",mxfFileList.at(i).absoluteFilePath().toAscii().constData());
                 return result;
             }
 

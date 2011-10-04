@@ -54,19 +54,19 @@ public:
     ~MxfWriter();
     void run();
     void cancel();
-    void setMxfInputs(opendcp_t *opendcp, filelist_t *filelist, char *output_file);
+    void setMxfInputs(opendcp_t *opendcp, QFileInfoList fileList, QString outputFile);
     int  success;
 
 private:
-    int        cancelled;
-    opendcp_t  *opendcpMxf;
-    filelist_t *filelistMxf;
-    char       *outputFileMxf;
+    opendcp_t      *opendcpMxf;
+    int            cancelled;
+    QFileInfoList  mxfFileList;
+    QString        mxfOutputFile;
 
     Result_t writeMxf();
     Result_t fillWriterInfo(opendcp_t *opendcp, writer_info_t *writer_info);
     Result_t writeJ2kStereoscopicMxf(opendcp_t *opendcp,filelist_t *filelist, char *output_file);
-    Result_t writeJ2kMxf(opendcp_t *opendcp,filelist_t *filelist, char *output_file);
+    Result_t writeJ2kMxf(opendcp_t *opendcp,QFileInfoList inputList, QString outputFile);
     Result_t writePcmMxf(opendcp_t *opendcp,filelist_t *filelist, char *output_file);
     Result_t writeMpeg2Mxf(opendcp_t *opendcp,filelist_t *filelist, char *output_file);
     Result_t writeTTMxf(opendcp_t *opendcp,filelist_t *filelist, char *output_file);

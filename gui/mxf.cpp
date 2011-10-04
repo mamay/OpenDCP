@@ -301,7 +301,7 @@ void MainWindow::mxfCreateAudio() {
     char *outputFile = new char [ui->aMxfOutEdit->text().toStdString().size()+1];
     strcpy(outputFile, ui->aMxfOutEdit->text().toStdString().c_str());
 
-    mxfWriterThread->setMxfInputs(mxfContext,fileList,outputFile);
+    //mxfWriterThread->setMxfInputs(mxfContext,fileList,outputFile);
     dMxfConversion->init(fileList->file_count);
     mxfWriterThread->start();
     dMxfConversion->exec();
@@ -331,16 +331,14 @@ void MainWindow::mxfCreateAudio() {
 }
 
 void MainWindow::mxfCreatePicture() {
-    QDir pLeftDir;
-    QDir pRightDir;
+    QDir          pLeftDir;
+    QDir          pRightDir;
     QFileInfoList pLeftList;
     QFileInfoList pRightList;
-    QFileInfo fileinfo;
-    QString inputFile;
-    QString msg;
+    QFileInfoList inputList;
+    QString       outputFile;
+    QString       msg;
     int s,l,r;
-    int offSet = 0;
-    char *outputFile;
 
     opendcp_t *mxfContext = create_opendcp();
 
@@ -358,18 +356,14 @@ void MainWindow::mxfCreatePicture() {
     // set log level
     dcp_set_log_level(mxfContext->log_level);
 
-    filelist_t *fileList = (filelist_t*) malloc(sizeof(filelist_t));
-
     if (ui->mxfSourceTypeComboBox->currentIndex() == 0) {
         pLeftDir.cd(ui->pictureLeftEdit->text());
         pLeftDir.setNameFilters(QStringList() << "*.j2c");
         pLeftDir.setFilter(QDir::Files | QDir::NoSymLinks);
         pLeftDir.setSorting(QDir::Name);
         pLeftList = pLeftDir.entryInfoList();
-        fileList->file_count = pLeftList.size();
     } else {
         pLeftList.append(ui->pictureLeftEdit->text());
-        fileList->file_count = 1;
     }
 
     if (ui->mxfStereoscopicCheckBox->checkState()) {
@@ -385,9 +379,6 @@ void MainWindow::mxfCreatePicture() {
                                  tr("The left and right image directories have different file counts. They must be the same. Please fix and try again."));
             goto Done;
         }
-
-        // double count if 3D
-        fileList->file_count *= 2;
     }
 
     if (ui->mxfStereoscopicCheckBox->checkState()) {
@@ -421,35 +412,27 @@ void MainWindow::mxfCreatePicture() {
         }
     }
 
-    fileList->in = (char**) malloc(fileList->file_count*sizeof(char*));
     for (int x=0;x<pLeftList.size();x++) {
-            fileinfo = pLeftList.at(x);
-            inputFile = fileinfo.absoluteFilePath();
-            fileList->in[offSet] = new char [inputFile.toStdString().size()+1];
-            strcpy(fileList->in[offSet++], inputFile.toStdString().c_str());
-            if (ui->mxfStereoscopicCheckBox->checkState()) {
-                fileinfo = pRightList.at(x);
-                inputFile = fileinfo.absoluteFilePath();
-                fileList->in[offSet] = new char [inputFile.toStdString().size()+1];
-                strcpy(fileList->in[offSet++], inputFile.toStdString().c_str());
-            }
+        inputList.append(pLeftList.at(x));
+        if (ui->mxfStereoscopicCheckBox->checkState()) {
+            inputList.append(pRightList.at(x));
+        }
     }
 
-    outputFile = new char [ui->pMxfOutEdit->text().toStdString().size()+1];
-    strcpy(outputFile, ui->pMxfOutEdit->text().toStdString().c_str());
 
-    if (fileList->file_count < 1) {
-        QMessageBox::critical(this, tr("MXF Creation Error"),
-                             tr("No input files found"));
+    outputFile = ui->pMxfOutEdit->text();
+    //outputFile = new char [ui->pMxfOutEdit->text().toStdString().size()+1];
+
+    if (inputList.size() < 1) {
+        QMessageBox::critical(this, tr("MXF Creation Error"), tr("No input files found"));
         goto Done;
     } else {
-        mxfWriterThread->setMxfInputs(mxfContext,fileList,outputFile);
-        dMxfConversion->init(fileList->file_count);
+        mxfWriterThread->setMxfInputs(mxfContext,inputList,outputFile);
+        dMxfConversion->init(inputList.size());
         mxfWriterThread->start();
         dMxfConversion->exec();
         if (!mxfWriterThread->success)  {
-            QMessageBox::critical(this, tr("MXF Creation Error"),
-                                 tr("Picture MXF creation failed."));
+            QMessageBox::critical(this, tr("MXF Creation Error"), tr("Picture MXF creation failed."));
         } else {
             QMessageBox msgBox;
             msgBox.setText("Picture MXF file created successfully.");
@@ -458,19 +441,6 @@ void MainWindow::mxfCreatePicture() {
     }
 
 Done:
-
-    // free filelist
-    for (int x=0;x<fileList->file_count;x++) {
-        delete[] fileList->in[x]; 
-    }
-
-    if (outputFile) {
-        delete[] outputFile;
-    }
-
-    if (fileList) {
-        free(fileList);
-    }
 
     delete_opendcp(mxfContext);
     return;
