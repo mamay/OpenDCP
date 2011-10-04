@@ -110,10 +110,10 @@ void MainWindow::getPath(QWidget *w)
         path = QFileDialog::getOpenFileName(this, tr("DCDM Subtitle File"),lastDir);
     } else if (w->objectName().contains("MxfOut")) {
         filter = "*.mxf";
-        path = QFileDialog::getSaveFileName(this, tr("Save MXF as"),QString::null,filter);
+        path = QFileDialog::getSaveFileName(this, tr("Save MXF as"),lastDir,filter);
     } else {
         filter = "*.wav";
-        path = QFileDialog::getOpenFileName(this, tr("Choose a file to open"),QString::null,filter);
+        path = QFileDialog::getOpenFileName(this, tr("Choose a file to open"),lastDir,filter);
     }
 
     w->setProperty("text", path);

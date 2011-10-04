@@ -137,7 +137,7 @@ void MainWindow::mxfSetSoundState() {
 }
 
 void MainWindow::mxfDone() {
-   dMxfConversion->finished();
+   dMxfConversion->finished(mxfWriterThread->success);
 }
 
 void MainWindow::mxfStart() {
@@ -293,13 +293,10 @@ void MainWindow::mxfCreateAudio() {
     dMxfConversion->init(inputList.size());
     mxfWriterThread->start();
     dMxfConversion->exec();
+
     if (!mxfWriterThread->success)  {
         QMessageBox::critical(this, tr("MXF Creation Error"),
                              tr("Sound MXF creation failed."));
-    } else {
-        QMessageBox msgBox;
-        msgBox.setText("Sound MXF file created successfully.");
-        msgBox.exec();
     }
 
     delete_opendcp(mxfContext);

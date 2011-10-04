@@ -306,6 +306,7 @@ int add_pkl(opendcp_t *opendcp);
 void dcp_set_log_level(int log_level);
 opendcp_t *create_opendcp();
 int delete_opendcp(opendcp_t *opendcp);
+void filelist_free(filelist_t *filelist);
 
 /* ASDCPLIB Routines */
 int read_asset_info(asset_t *asset);

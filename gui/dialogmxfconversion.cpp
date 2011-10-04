@@ -51,18 +51,27 @@ void DialogMxfConversion::step()
         currentCount = totalCount;
     }
 
-    labelText.sprintf("Completed %d of %d",currentCount,totalCount);
+    labelText.sprintf("Writing %d of %d",currentCount,totalCount);
     labelTotal->setText(labelText);
     progressBar->setValue(currentCount);
 
     currentCount++;
 }
 
-void DialogMxfConversion::finished()
+void DialogMxfConversion::finished(int status)
 {
+    QString labelText;
+
     done = 1;
-    setButtons(0);
     step();
+    if (status) {
+        labelText.sprintf("Conversion Done.",currentCount,totalCount);
+        labelTotal->setText(labelText);
+    } else {
+        labelText.sprintf("Conversion Failed.",currentCount,totalCount);
+        labelTotal->setText(labelText);
+    }
+    setButtons(0);
 }
 
 void DialogMxfConversion::abort()

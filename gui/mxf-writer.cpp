@@ -393,37 +393,37 @@ Result_t MxfWriter::writePcmMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
     PCM::MXFWriter       mxf_writer;
     PCM::FrameBuffer     frame_buffer;
     PCM::AudioDescriptor audio_desc;
+    PCM::AudioDescriptor audio_desc_tmp;
     writer_info_t        writer_info;
     Result_t             result = RESULT_OK;
     ui32_t               mxf_duration;
-    char const           **fileList;
-
+    filelist_t           *filelist;
+  
     Rational edit_rate(opendcp->frame_rate,1);
 
-    fileList = (const char **)malloc(mxfFileList.size()*sizeof(char*));
+    filelist = (filelist_t *)malloc(sizeof(filelist_t));
+    memset(filelist,0,sizeof (filelist_t));
+    filelist->in = (char**) malloc(mxfFileList.size()*sizeof(char*));
 
-    for (int i = 0; mxfFileList.size(); i++) {
-        fileList[i] = (char *)malloc(MAX_PATH_LENGTH * sizeof(char *));
-        fileList[i] = (char *)mxfFileList.at(i).absoluteFilePath().toAscii().constData();
+    for (int i = 0; i < mxfFileList.size(); i++) {
+        filelist->in[i] = (char *) malloc(MAX_FILENAME_LENGTH);
+        sprintf(filelist->in[i],"%s",mxfFileList.at(i).absoluteFilePath().toAscii().constData());
     }
 
-    for (int i = 0; mxfFileList.size(); i++) {
-        printf("file: %s\n",fileList[i]);
-    }
+    result = pcm_parser.OpenRead(mxfFileList.size(), (const char **)filelist->in, edit_rate);
 
-    result = pcm_parser.OpenRead(mxfFileList.size(), fileList, edit_rate);
+    filelist_free(filelist);
+
+    pcm_parser.FillAudioDescriptor(audio_desc);
+    audio_desc.EditRate = edit_rate;
+    frame_buffer.Capacity(PCM::CalcFrameBufferSize(audio_desc));
 
     if (ASDCP_FAILURE(result)) {
         printf("Failed to open file %s\n",mxfFileList.at(0).absoluteFilePath().toAscii().constData());
         return result;
     }
 
-    pcm_parser.FillAudioDescriptor(audio_desc);
-    audio_desc.EditRate = edit_rate;
-    frame_buffer.Capacity(PCM::CalcFrameBufferSize(audio_desc));
-
     fillWriterInfo(opendcp, &writer_info);
-
     result = mxf_writer.OpenWrite(mxfOutputFile.toAscii().constData(), writer_info.info, audio_desc);
 
     if (ASDCP_FAILURE(result)) {
@@ -444,14 +444,13 @@ Result_t MxfWriter::writePcmMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
         mxf_duration = opendcp->duration;
     }
 
-    while (ASDCP_SUCCESS(result) && mxf_duration-- && cancelled == 0) {
+    while (ASDCP_SUCCESS(result) && mxf_duration--) {
         result = pcm_parser.ReadFrame(frame_buffer);
 
         if (ASDCP_FAILURE(result)) {
             continue;
         } else {
             if (frame_buffer.Size() != frame_buffer.Capacity()) {
-                printf("WARNING: Last frame read was short, PCM input is possibly not frame aligned.\n");
                 result = RESULT_ENDOFFILE;
                 continue;
             }

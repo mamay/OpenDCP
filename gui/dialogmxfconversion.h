@@ -27,7 +27,7 @@ class DialogMxfConversion : public QDialog, private Ui::DialogMxfConversion {
 public:
     DialogMxfConversion(QWidget *parent = 0);
     void init(int imageCount);
-    void finished();
+    void finished(int status);
 
 private:
     int totalCount;
