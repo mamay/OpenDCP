@@ -235,10 +235,6 @@ void MainWindow::mxfCreateSubtitle() {
     if (write_mxf(mxfContext,fileList,outputFile) != 0 )  {
         QMessageBox::critical(this, tr("MXF Creation Error"),
                              tr("Subtitle MXF creation failed."));
-    } else {
-        QMessageBox msgBox;
-        msgBox.setText("Subtitle MXF file created successfully.");
-        msgBox.exec();
     }
 
     delete_opendcp(mxfContext);
@@ -290,7 +286,7 @@ void MainWindow::mxfCreateAudio() {
     outputFile = ui->aMxfOutEdit->text();
     mxfWriterThread->setMxfInputs(mxfContext, inputList, outputFile);
 
-    dMxfConversion->init(inputList.size());
+    dMxfConversion->init(inputList.size(), outputFile);
     mxfWriterThread->start();
     dMxfConversion->exec();
 
@@ -400,15 +396,11 @@ void MainWindow::mxfCreatePicture() {
         goto Done;
     } else {
         mxfWriterThread->setMxfInputs(mxfContext,inputList,outputFile);
-        dMxfConversion->init(inputList.size());
+        dMxfConversion->init(inputList.size(), outputFile);
         mxfWriterThread->start();
         dMxfConversion->exec();
         if (!mxfWriterThread->success)  {
             QMessageBox::critical(this, tr("MXF Creation Error"), tr("Picture MXF creation failed."));
-        } else {
-            QMessageBox msgBox;
-            msgBox.setText("Picture MXF file created successfully.");
-            msgBox.exec();
        }
     }
 

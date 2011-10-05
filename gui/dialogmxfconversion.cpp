@@ -29,12 +29,13 @@ DialogMxfConversion::DialogMxfConversion(QWidget *parent) : QDialog(parent)
     connect(buttonStop, SIGNAL(clicked()), this, SLOT(abort()));
 }
 
-void DialogMxfConversion::init(int imageCount)
+void DialogMxfConversion::init(int imageCount, QString outputFile)
 {
-    currentCount = 0;
-    done         = 0;
-    cancelled    = 0;
-    totalCount   = imageCount;
+    currentCount  = 0;
+    done          = 0;
+    cancelled     = 0;
+    totalCount    = imageCount;
+    mxfOutputFile = outputFile;
 
     progressBar->reset();
     progressBar->setMinimum(0);
@@ -51,11 +52,13 @@ void DialogMxfConversion::step()
         currentCount = totalCount;
     }
 
-    labelText.sprintf("Writing %d of %d",currentCount,totalCount);
+    labelText.sprintf("MXF File Creation: %s  [Writing %d of %d]",mxfOutputFile.toAscii().constData(),currentCount,totalCount);
     labelTotal->setText(labelText);
     progressBar->setValue(currentCount);
 
-    currentCount++;
+    if (!done) {
+        currentCount++;
+    }
 }
 
 void DialogMxfConversion::finished(int status)
@@ -65,10 +68,10 @@ void DialogMxfConversion::finished(int status)
     done = 1;
     step();
     if (status) {
-        labelText.sprintf("Conversion Done.",currentCount,totalCount);
+        labelText.sprintf("MXF File Creation: Writing %d of %d. MXF file %s created successfully.",currentCount,totalCount,mxfOutputFile.toAscii().constData());
         labelTotal->setText(labelText);
     } else {
-        labelText.sprintf("Conversion Failed.",currentCount,totalCount);
+        labelText.sprintf("MXF File Creation: Writing %d of %d. MXF file %s creation failed.",currentCount,totalCount,mxfOutputFile.toAscii().constData());
         labelTotal->setText(labelText);
     }
     setButtons(0);
