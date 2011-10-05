@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 #include "opendcp.h"
 
@@ -43,24 +44,28 @@ void dcp_usage() {
 }
 
 int main (int argc, char **argv) {
-    FILE *fp;
     int result;
     char *filename;
+    struct stat s;
 
     if ( argc <= 1 ) {
         dcp_usage();
     }
 
+    /* set log level */
+    dcp_set_log_level(LOG_DEBUG);
+
     filename = argv[1];
 
-    fp = fopen(filename,"rb");
-
-    if (fp) {
-        fclose(fp);
+    if( stat(filename,&s) == 0 ) {
+        if( !(s.st_mode & S_IFREG) ) {
+            dcp_log(LOG_ERROR,"%s not a file",filename);
+            exit(DCP_FATAL);
+        }
     } else {
         dcp_log(LOG_ERROR,"could not open file: %s",filename);
         exit(DCP_FATAL);
-    } 
+    }
 
     result = xml_verify(filename);
 
