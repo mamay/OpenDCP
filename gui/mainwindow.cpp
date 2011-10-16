@@ -182,7 +182,7 @@ void MainWindow::about()
 {
     QMessageBox::about(this, tr("About OpenDCP"),
                        tr(
-                          "OpenDCP Version 0.20\n\n"
+                          "OpenDCP Version 0.21\n\n"
                           "Copyright 2010-2011 Terrence Meiczinger. All rights reserved.\n\n"
                           "The program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.\n\n"
                           "http://www.opendcp.org"

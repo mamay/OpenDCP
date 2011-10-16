@@ -16,6 +16,13 @@ STRING(TOLOWER ${CPACK_PACKAGE_FILE_NAME} CPACK_PACKAGE_FILE_NAME)
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "OpenDCP Digital Cinema Package Tool")
 SET(CPACK_PACKAGE_DESCRIPTION "This tool is used to created digital cinema packages (DCP)")
 SET(CPACK_PACKAGE_VENDOR "OpenDCP")
+#--OSX package-------------------------------------------------------------
+IF(MAKE_OSX)
+    SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-mac.${ARCH}")
+    SET(CPACK_PACKAGE_ICON ${PROJECT_SOURCE_DIR}/resources/opendcp.icns) 
+    SET(CPACK_GENERATOR "DragNDrop")
+    SET(CPACK_BINARY_DRAGNDROP ON)
+ENDIF()
 #--debian package-------------------------------------------------------------
 IF(MAKE_DEB)
     SET(CPACK_DEBIAN_PACKAGE_SECTION "Video")

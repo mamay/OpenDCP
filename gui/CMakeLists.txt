@@ -14,42 +14,6 @@ FIND_PACKAGE(Qt4 REQUIRED)
 INCLUDE(${QT_USE_FILE})
 #-----------------------------------------------------------------------------
 
-#--set application icon and information---------------------------------------
-IF(APPLE)
-    SET(PROGNAME OpenDCP)
-    SET(MACOSX_BUNDLE_ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.icns)
-    SET(MACOSX_BUNDLE_SHORT_VERSION_STRING ${OpenDCP_VERSION})
-    SET(MACOSX_BUNDLE_VERSION ${OpenDCP_VERSION})
-    SET(MACOSX_BUNDLE_LONG_VERSION_STRING ${OpenDCP_VERSION})
-    IF(ENABLE_OSX386)
-        SET(CMAKE_OSX_ARCHITECTURES i386;x86_64)
-    ELSE()
-        SET(CMAKE_OSX_ARCHITECTURES x86_64)
-    ENDIF()
-ELSEIF(UNIX)
-    SET(PROGNAME opendcp)
-
-    IF(NOT DESKTOP_ENTRY)
-        SET(DESKTOP_ENTRY opendcp.desktop)
-    ENDIF(NOT DESKTOP_ENTRY)
-  
-    ADD_CUSTOM_COMMAND(OUTPUT ${DESKTOP_ENTRY}
-        COMMAND touch ${DESKTOP_ENTRY}
-        COMMAND sh ${PROJECT_SOURCE_DIR}/packages/opendcp-desktop.sh ${CMAKE_INSTALL_PREFIX} >${DESKTOP_ENTRY}
-        DEPENDS ${PROJECT_SOURCE_DIR}/packages/opendcp-desktop.sh
-        COMMENT "Generating desktop entry file"
-    )
-
-    ADD_CUSTOM_TARGET(DESKTOP_ENTRY_FILE ALL
-        DEPENDS ${DESKTOP_ENTRY}
-    )
-  
-    SET(APP_ICON ${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.png)
-ELSE()
-    SET(PROGNAME opendcp)
-ENDIF()
-#-----------------------------------------------------------------------------
-
 #--set gui source-------------------------------------------------------------
 SET(OPENDCP_GUI_CXX_SRC
     main.cpp
@@ -85,19 +49,56 @@ SET(OPENDCP_GUI_RES
 SET(OPENDCP_GUI_RES_CXX
      ${CMAKE_CURRENT_BINARY_DIR}/opendcp_resources.cpp 
 )
-
 #-----------------------------------------------------------------------------
 
-#--win32 icon and info--------------------------------------------------------
-IF(WIN32)
+#--set application icon and information---------------------------------------
+IF(APPLE)
+    SET(PROGNAME OpenDCP)
+    SET(MACOSX_BUNDLE_ICON_FILE opendcp.icns)
+    SET(MACOSX_BUNDLE_GUI_IDENTIFIER org.opendcp.opendcp)
+    SET(MACOSX_BUNDLE_LONG_VERSION_STRING ${OPENDCP_VERSION})
+    SET(MACOSX_BUNDLE_SHORT_VERSION_STRING ${OPENDCP_VERSION})
+    SET(MACOSX_BUNDLE_BUNDLE_VERSION ${OPENDCP_VERSION})
+    SET(MACOSX_BUNDLE_BUNDLE_NAME ${PROGNAME})
+    SET(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2010-2011 Terrence Meiczinger. All Rights Reserved.")
+
+    IF(ENABLE_OSX386)
+        SET(CMAKE_OSX_ARCHITECTURES i386;x86_64)
+    ELSE()
+        SET(CMAKE_OSX_ARCHITECTURES x86_64)
+    ENDIF()
+
+    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    SET(OPENDCP_GUI_CXX_SRC ${OPENDCP_GUI_CXX_SRC} ${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.icns)
+ELSEIF(UNIX)
+    SET(PROGNAME opendcp)
+
+    IF(NOT DESKTOP_ENTRY)
+        SET(DESKTOP_ENTRY opendcp.desktop)
+    ENDIF(NOT DESKTOP_ENTRY)
+ 
+    ADD_CUSTOM_COMMAND(OUTPUT ${DESKTOP_ENTRY}
+        COMMAND touch ${DESKTOP_ENTRY}
+        COMMAND sh ${PROJECT_SOURCE_DIR}/packages/opendcp-desktop.sh ${CMAKE_INSTALL_PREFIX} >${DESKTOP_ENTRY}
+        DEPENDS ${PROJECT_SOURCE_DIR}/packages/opendcp-desktop.sh
+        COMMENT "Generating desktop entry file"
+    )
+
+    ADD_CUSTOM_TARGET(DESKTOP_ENTRY_FILE ALL
+        DEPENDS ${DESKTOP_ENTRY}
+    )
+ 
+    SET(APP_ICON ${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.png)
+ELSEIF(WIN32)
+    SET(PROGNAME opendcp)
     IF(i386)
         SET(WINDRES i686-w32-mingw32-windres)
     ELSE()
         SET(WINDRES i686-w64-mingw32-windres)
     ENDIF()
     ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/opendcp_ico.o
-                        COMMAND ${WINDRES} -I${CMAKE_CURRENT_SOURCE_DIR} -i${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.rc 
-                                -o ${CMAKE_CURRENT_BINARY_DIR}/opendcp_ico.o)
+                       COMMAND ${WINDRES} -I${CMAKE_CURRENT_SOURCE_DIR} -i${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.rc 
+                               -o ${CMAKE_CURRENT_BINARY_DIR}/opendcp_ico.o)
     SET(OPENDCP_GUI_CXX_SRC ${OPENDCP_GUI_CXX_SRC} ${CMAKE_CURRENT_BINARY_DIR}/opendcp_ico.o)
 ENDIF()
 #-----------------------------------------------------------------------------
@@ -118,13 +119,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 IF(APPLE)
     ADD_EXECUTABLE(${PROGNAME} MACOSX_BUNDLE ${OPENDCP_GUI_CXX_SRC} ${OPENDCP_GUI_RES_CXX} ${OPENDCP_FORM_H} ${OPENDCP_MOC_H})
-    SET(OPENDCP_GUI_RESOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/${PROGNAME}.app/Contents/Resources)
-    ADD_CUSTOM_COMMAND(TARGET ${PROGNAME} POST_BUILD
-      COMMAND mkdir ARGS -p ${OPENDCP_GUI_RESOURCE_DIR} 
-      COMMAND cp ARGS ${MACOSX_BUNDLE_ICON_FILE} ${CMAKE_CURRENT_BINARY_DIR}/${PROGNAME}.app/Contents/Resources
-      #COMMAND cp ARGS *.qm ${CMAKE_CURRENT_BINARY_DIR}/${PROGNAME}.app/Contents/Resources)
-    )
-ELSE(WIN32)
+ELSEIF(WIN32)
     ADD_EXECUTABLE(${PROGNAME} WIN32 ${OPENDCP_GUI_CXX_SRC} ${OPENDCP_GUI_RES_CXX} ${OPENDCP_FORM_H} ${OPENDCP_MOC_H})
 ELSE()
     ADD_EXECUTABLE(${PROGNAME} ${OPENDCP_GUI_CXX_SRC} ${OPENDCP_GUI_RES_CXX} ${OPENDCP_FORM_H} ${OPENDCP_MOC_H})
@@ -137,9 +132,34 @@ TARGET_LINK_LIBRARIES(${PROGNAME} ${QT_LIBRARIES} ${OPENDCP_LIB} ${ASDCP_LIBRARI
 #----------------------------------------------------------------------------
 
 #--install-------------------------------------------------------------------
-INSTALL(TARGETS ${PROGNAME} DESTINATION bin)
-IF(UNIX AND NOT APPLE)
+INSTALL(
+    TARGETS ${PROGNAME}
+    BUNDLE DESTINATION . COMPONENT Runtime
+    RUNTIME DESTINATION bin COMPONENT Runtime
+)
+
+IF(APPLE)
+    SET(plugin_dest_dir opendcp.app/Contents/MacOS)
+    SET(QTCONF_DEST_DIR opendcp.app/Contents/Resources)
+    SET(OSX_LIB_DIRS ${QT_LIBRARY_DIRS})
+    SET(APPLICATION "\${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app")
+
+    INSTALL(
+        CODE "
+        file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")
+        " COMPONENT Runtime
+    )
+
+    INSTALL(
+        CODE "
+        file(GLOB_RECURSE QTPLUGINS
+             \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+        include(BundleUtilities)
+        fixup_bundle(\"${APPLICATION}\" \"\${QTPLUGINS}\" \"${OSX_LIB_DIRS}\")
+        " COMPONENT Runtime
+)
+ELSEIF(UNIX)
     INSTALL(FILES ${APP_ICON} DESTINATION share/icons)
     INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/opendcp.desktop DESTINATION share/applications)
-ENDIF(UNIX AND NOT APPLE)
+ENDIF()
 #----------------------------------------------------------------------------
