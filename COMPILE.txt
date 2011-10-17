@@ -7,7 +7,7 @@ Requirements
 The program requires the following libraries. The versions listed are the ones tested with OpenDCP. Other versions may work, except where indicated.
     Library                       Version Tested    Minimum Required    Website 
     -------                       --------------    ----------------    -------
-    AS-DCP File Access Library**  1.7.40            1.7.40              http://www.cinecert.com/asdcplib
+    AS-DCP File Access Library**  1.8.41            1.7.40              http://www.cinecert.com/asdcplib
     OpenSSL                       0.9.8             0.9.8               http://www.openssl.org/docs/crypto/crypto.html
     LibXML2*                      2.7.8             2.7.8               http://xmlsoft.org
     LibXSLT*                      1.1.26            1.1.26              http://xmlsoft.org

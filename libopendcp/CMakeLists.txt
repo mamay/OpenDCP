@@ -5,6 +5,10 @@ MESSAGE(STATUS "----------------------------------------------------------------
 MESSAGE(STATUS "Creating Library Build Files")
 MESSAGE(STATUS "-------------------------------------------------------------------------------")
 
+#--configure files------------------------------------------------------------
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/opendcp.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/opendcp.h)
+#-----------------------------------------------------------------------------
+
 #--Set opendcplib source files------------------------------------------------
 SET(OPENDCP_SRC_FILES opendcp_j2k.c opendcp_xml.c opendcp_common.c opendcp_log.c asdcp_intf.cpp image/opendcp_tif.c image/opendcp_image.c image/opendcp_dpx.c)
 IF(ENABLE_XMLSEC)
@@ -32,7 +36,7 @@ ENDIF()
 
 #--install opendcplib---------------------------------------------------------
 INSTALL(TARGETS opendcp-lib-static DESTINATION ${LIB_INSTALL_PATH})
-INSTALL(FILES opendcp.h DESTINATION include)
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/opendcp.h DESTINATION include)
 
 IF(UNIX AND NOT APPLE)
     INSTALL(TARGETS opendcp-lib-shared DESTINATION ${LIB_INSTALL_PATH})

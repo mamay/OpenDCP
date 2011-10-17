@@ -21,7 +21,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include "../opendcp.h"
+#include "opendcp.h"
 #include "opendcp_image.h"
 
 #define MAGIC_NUMBER 0x53445058

@@ -11,6 +11,8 @@ SET(VERSION_MAJOR 0)
 SET(VERSION_MINOR 0)
 SET(VERSION_BUILD 21)
 SET(OPENDCP_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD})
+SET(OPENDCP_NAME ${PROJECT_NAME})
+SET(OPENDCP_COPYRIGHT "Copyright (c) 2010-2011 Terrence Meiczinger. All rights reserved.")
 ADD_DEFINITIONS(-DOPENDCP_VERSION="${OPENDCP_VERSION}")
 #-----------------------------------------------------------------------------
 
@@ -29,9 +31,10 @@ OPTION(ENABLE_XMLSEC  "Enable XML digital singatures and security features" ON)
 OPTION(ENABLE_i386    "Enable i386" OFF)
 OPTION(ENABLE_OSX10.5 "Enable OSX 10.5 compatibility" OFF)
 OPTION(ENABLE_OPENMP  "Enable OPENMP multithreading" ON)
-OPTION(ENABLE_GUI     "Enable GUI compiling" OFF)
+OPTION(ENABLE_GUI     "Enable GUI compiling" ON)
 OPTION(MAKE_RPM       "Create RPM package" OFF)
 OPTION(MAKE_DEB       "Create DEB package" OFF)
+OPTION(MAKE_OSX       "Create OSX package" OFF)
 
 IF(ENABLE_XMLSEC)
     ADD_DEFINITIONS(-DXMLSEC)
@@ -92,8 +95,9 @@ ENDIF()
 #--build Paths----------------------------------------------------------------
 SET(LIB_INSTALL_PATH "lib")
 
-SET(OPENDCP_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/libopendcp)
-INCLUDE_DIRECTORIES(${OPENDCP_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${OPENDCP_INCLUDE_DIR}//libopendcp
+                    ${PROJECT_BINARY_DIR}/libopendcp/include
+)
 SET(OPENDCP_LIB ${PROJECT_BINARY_DIR}/libopendcp/libopendcp.a)
 
 SET(ASDCP_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/libasdcp)
@@ -212,10 +216,6 @@ ELSEIF(UNIX)
     SET(COMPILE_OPENJPEG 1)
     INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/contrib/include)
     SET(LIBS ${LIBS} ${PREFIX}/lib/libopenjpeg.a)
-
-    #FIND_PACKAGE(OpenJPEG REQUIRED)
-    #INCLUDE_DIRECTORIES(${OPENJPEG_INCLUDE_DIR})
-    #SET(LIBS ${LIBS} ${OPENJPEG_LIBRARIES})
 
     ADD_SUBDIRECTORY(contrib)
 ENDIF()

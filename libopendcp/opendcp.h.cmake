@@ -34,14 +34,9 @@ extern "C" {
 #define MAX_DCP_JPEG_BITRATE 250000000  /* Maximum DCI compliant bit rate for JPEG2000 */
 #define MAX_DCP_MPEG_BITRATE  80000000  /* Maximum DCI compliant bit rate for MPEG */
 
-#ifdef OPENDCP_VERSION
-static const char *OPEN_DCP_VERSION   = OPENDCP_VERSION; 
-#else
-static const char *OPEN_DCP_VERSION   = "0.21"; 
-#endif
-
-static const char *OPEN_DCP_NAME      = "OpenDCP"; 
-static const char *OPEN_DCP_COPYRIGHT = "(c) 2010-2011 Terrence Meiczinger, All Rights Reserved."; 
+static const char *OPEN_DCP_VERSION   = "${OPENDCP_VERSION}"; 
+static const char *OPEN_DCP_NAME      = "${OPENDCP_NAME}"; 
+static const char *OPEN_DCP_COPYRIGHT = "${OPENDCP_COPYRIGHT}"; 
 
 /* XML Namespaces */
 static const char *XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";

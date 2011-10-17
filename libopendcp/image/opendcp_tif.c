@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <tiffio.h>
-#include "../opendcp.h"
+#include "opendcp.h"
 #include "opendcp_image.h"
 
 typedef struct {
