@@ -33,7 +33,6 @@ IF(ENABLE_XMLSEC AND COMPILE_XMLSEC)
                           --disable-dependency-tracking --enable-static=yes --enable-shared=no
                           --with-iconv=no
                           --with-threads=off
-                          ${TARGET}
         BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
         INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
     )
@@ -46,7 +45,6 @@ IF(ENABLE_XMLSEC AND COMPILE_XMLSEC)
                           --with-libxml-prefix=${PREFIX}
                           --with-libxml-include-prefix=${PREFIX}/include/libxml2
                           --with-libxml-libs-prefix=${PREFIX}/lib
-                          ${TARGET} 
         BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
         INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
     )
@@ -65,7 +63,6 @@ IF(ENABLE_XMLSEC AND COMPILE_XMLSEC)
                           --with-libxslt=${PREFIX}
                           --with-openssl=${PREFIX}
                           --with-default-crypto=openssl
-                           ${TARGET} 
         BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
         INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
      )
@@ -76,7 +73,7 @@ EXTERNALPROJECT_ADD(04_EXPAT
    URL ${OPENDCP_URL}/expat-2.0.1.tar.gz
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
-                      --disable-dependency-tracking --enable-static=yes --enable-shared=no ${TARGET}
+                      --disable-dependency-tracking --enable-static=yes --enable-shared=no
     BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
 )
@@ -84,12 +81,7 @@ ENDIF(COMPILE_EXPAT)
 
 SET(OPENSSL_MAKE make)
 IF(APPLE)
-    IF(ENABLE_OSX386)
-        SET(OPENSSL_CONFIGURE sh <SOURCE_DIR>/util/mkuniversal.sh ${PREFIX_ARG} configure)
-        SET(OPENSSL_MAKE sh <SOURCE_DIR>/util/mkuniversal.sh ${PREFIX_ARG})
-    ELSE()
-        SET(OPENSSL_CONFIGURE <SOURCE_DIR>/Configure darwin64-x86_64-cc ${PREFIX_ARG})
-    ENDIF()
+    SET(OPENSSL_CONFIGURE <SOURCE_DIR>/Configure darwin64-x86_64-cc ${PREFIX_ARG})
 ELSEIF(MINGW)
     SET(OPENSSL_CONFIGURE <SOURCE_DIR>/config mingw ${PREFIX_ARG})
 ELSE()
@@ -122,7 +114,6 @@ EXTERNALPROJECT_ADD(08_TIFF
     CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                       --disable-dependency-tracking --enable-static=yes --enable-shared=no
                       --enable-jpeg=no
-                      ${TARGET} 
     BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
 )
@@ -135,7 +126,6 @@ EXTERNALPROJECT_ADD(09_OpenJPEG
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                       --disable-dependency-tracking --enable-static=yes --enable-shared=no --enable-png=no --enable-tiff=no
-                      ${TARGET} 
     BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
     INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
 )

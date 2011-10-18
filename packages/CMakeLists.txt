@@ -17,7 +17,7 @@ SET(CPACK_PACKAGE_VENDOR "OpenDCP")
 #--OSX package-------------------------------------------------------------
 IF(MAKE_OSX)
     STRING(TOLOWER "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-mac.${ARCH}" CPACK_PACKAGE_FILE_NAME)
-    SET(CPACK_PACKAGE_ICON ${PROJECT_SOURCE_DIR}/resources/opendcp.icns) 
+    SET(CPACK_PACKAGE_ICON ${PROJECT_SOURCE_DIR}/gui/resources/opendcp.icns) 
     SET(CPACK_GENERATOR "DragNDrop")
     SET(CPACK_BINARY_DRAGNDROP ON)
 ENDIF()

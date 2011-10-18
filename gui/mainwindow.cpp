@@ -131,6 +131,7 @@ int findSeqOffset(const char str1[], const char str2[]) {
     }
 }
 
+/* check if filelist is sequential */
 int MainWindow::checkFileSequence(QStringList list) {
     int sequential = 1;
     int x = 0;
