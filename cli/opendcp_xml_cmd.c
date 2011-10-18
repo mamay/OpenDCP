@@ -33,7 +33,7 @@ void version() {
     FILE *fp;
 
     fp = stdout;
-    fprintf(fp,"\n%s version %s %s\n\n",OPEN_DCP_NAME,OPEN_DCP_VERSION,OPEN_DCP_COPYRIGHT);
+    fprintf(fp,"\n%s version %s %s\n\n",OPENDCP_NAME,OPENDCP_VERSION,OPENDCP_COPYRIGHT);
 
     exit(0);
 }
@@ -42,7 +42,7 @@ void dcp_usage() {
     FILE *fp;
     fp = stdout;
 
-    fprintf(fp,"\n%s version %s %s\n\n",OPEN_DCP_NAME,OPEN_DCP_VERSION,OPEN_DCP_COPYRIGHT);
+    fprintf(fp,"\n%s version %s %s\n\n",OPENDCP_NAME,OPENDCP_VERSION,OPENDCP_COPYRIGHT);
     fprintf(fp,"Usage:\n");
     fprintf(fp,"       opendcp_xml --reel <mxf mxf mxf> [options]\n\n");
     fprintf(fp,"Ex:\n");
@@ -255,7 +255,7 @@ int main (int argc, char **argv) {
     dcp_set_log_level(opendcp->log_level);
 
     if (opendcp->log_level > 0) {
-        printf("\nOpenDCP XML %s %s\n\n",OPEN_DCP_VERSION,OPEN_DCP_COPYRIGHT);
+        printf("\nOpenDCP XML %s %s\n\n",OPENDCP_VERSION,OPENDCP_COPYRIGHT);
     }
 
     if (reel_count < 1) {

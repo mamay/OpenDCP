@@ -54,7 +54,7 @@ void version() {
     FILE *fp;
 
     fp = stdout;
-    fprintf(fp,"\n%s version %s %s\n\n",OPEN_DCP_NAME,OPEN_DCP_VERSION,OPEN_DCP_COPYRIGHT);
+    fprintf(fp,"\n%s version %s %s\n\n",OPENDCP_NAME,OPENDCP_VERSION,OPENDCP_COPYRIGHT);
 
     exit(0);
 }
@@ -63,7 +63,7 @@ void dcp_usage() {
     FILE *fp;
     fp = stdout;
 
-    fprintf(fp,"\n%s version %s %s\n\n",OPEN_DCP_NAME,OPEN_DCP_VERSION,OPEN_DCP_COPYRIGHT);
+    fprintf(fp,"\n%s version %s %s\n\n",OPENDCP_NAME,OPENDCP_VERSION,OPENDCP_COPYRIGHT);
     fprintf(fp,"Usage:\n");
     fprintf(fp,"       opendcp_j2k -i <file> -o <file> [options ...]\n\n");
     fprintf(fp,"Required:\n");
@@ -107,24 +107,6 @@ static int file_filter(struct dirent *filename) {
     return return_code;
 }
 
-int check_extension(char *filename, char *pattern) {
-    char *extension;
-
-    extension = strrchr(filename,'.');
-
-    if ( extension == NULL ) {
-        return 0;
-    }
-
-    extension++;
-
-   if (strnicmp(extension,pattern,3) !=0) {
-       return 0;
-   }
-
-   return 1;
-}
-
 int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *filelist) {
     struct dirent **files;
     int x = 0;
@@ -146,12 +128,12 @@ int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *fil
 
         if (st_out.st_mode & S_IFDIR) {
             filelist->file_count = scandir(in_path,&files,(void *)file_filter,alphasort);
-            filelist->in = (char**) malloc(filelist->file_count*sizeof(char*));
+            filelist->in  = (char**) malloc(filelist->file_count*sizeof(char*));
             filelist->out = (char**) malloc(filelist->file_count*sizeof(char*));
             if (filelist->file_count) {
                 for (x=0;x<filelist->file_count;x++) {
-                        filelist->in[x] = (char *) malloc(MAX_FILENAME_LENGTH);
-                        filelist->out[x] = (char *) malloc(MAX_FILENAME_LENGTH);
+                        filelist->in[x] = (char *) malloc(MAX_FILENAME_LENGTH*sizeof(char*));
+                        filelist->out[x] = (char *) malloc(MAX_FILENAME_LENGTH*sizeof(char*));
                         sprintf(filelist->in[x],"%s/%s",in_path,files[x]->d_name);
                         sprintf(filelist->out[x],"%s/%s.j2c",out_path,get_basename(files[x]->d_name));
                 }
@@ -175,12 +157,12 @@ int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *fil
         extension = strrchr(in_path,'.');
         if (strnicmp(++extension,"tif",3) == 0 || strnicmp(++extension,"dpx",3)) {
             filelist->file_count = 1;
-            filelist->in = (char**) malloc(filelist->file_count*sizeof(char*));
+            filelist->in  = (char**) malloc(filelist->file_count*sizeof(char*));
             filelist->out = (char**) malloc(filelist->file_count*sizeof(char*));
-            filelist->in[0] = (char *) malloc(MAX_FILENAME_LENGTH);
-            filelist->out[0] = (char *) malloc(MAX_FILENAME_LENGTH);
-            filelist->in[0] = in_path;
-            filelist->out[0] = out_path;
+            filelist->in[0]  = (char *) malloc(MAX_FILENAME_LENGTH*sizeof(char*));
+            filelist->out[0] = (char *) malloc(MAX_FILENAME_LENGTH*sizeof(char*));
+            sprintf(filelist->in[x],"%s",in_path);
+            sprintf(filelist->out[x],"%s",out_path);
         }
     }
 
@@ -377,7 +359,7 @@ int main (int argc, char **argv) {
     dcp_set_log_level(opendcp->log_level);
 
     if (opendcp->log_level > 0) {
-        printf("\nOpenDCP J2K %s %s\n",OPEN_DCP_VERSION,OPEN_DCP_COPYRIGHT);
+        printf("\nOpenDCP J2K %s %s\n",OPENDCP_VERSION,OPENDCP_COPYRIGHT);
         if (opendcp->j2k.encoder == J2K_KAKADU) {
             printf("  Encoder: Kakadu\n");
         } else {

@@ -34,7 +34,7 @@ void dcp_usage() {
     FILE *fp;
     fp = stdout;
 
-    fprintf(fp,"\n%s version %s %s\n\n",OPEN_DCP_NAME,OPEN_DCP_VERSION,OPEN_DCP_COPYRIGHT);
+    fprintf(fp,"\n%s version %s %s\n\n",OPENDCP_NAME,OPENDCP_VERSION,OPENDCP_COPYRIGHT);
     fprintf(fp,"Verifies the digital signature of an XML file\n\n");
     fprintf(fp,"Usage:\n");
     fprintf(fp,"       opendcp_xml_verify <xml file>\n\n");

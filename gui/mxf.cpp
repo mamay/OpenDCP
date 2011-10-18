@@ -308,7 +308,6 @@ void MainWindow::mxfCreatePicture() {
     QFileInfoList inputList;
     QString       outputFile;
     QString       msg;
-    int s,l,r;
 
     opendcp_t *mxfContext = create_opendcp();
 
@@ -351,35 +350,12 @@ void MainWindow::mxfCreatePicture() {
         }
     }
 
-    if (ui->mxfStereoscopicCheckBox->checkState()) {
-        l = checkFileSequence(pLeftDir.entryList());
-        r = checkFileSequence(pRightDir.entryList());
-        
-        if (l) {
-            msg.sprintf("File list does not appear to be sequential between %s and %s. Do you wish to continue?",pLeftDir.entryList().at(s-1).toAscii().constData(),
-                        pLeftDir.entryList().at(s).toAscii().constData());
-            if (QMessageBox::question(this, tr("File Sequence Mismatch"), msg, QMessageBox::No,QMessageBox::Yes) == QMessageBox::No) {
-                 goto Done;
-            }
-        }
-        if (r) {
-            msg.sprintf("File list does not appear to be sequential between %s and %s. Do you wish to continue?",pRightDir.entryList().at(s-1).toAscii().constData(),
-                        pRightDir.entryList().at(s).toAscii().constData());
-            if (QMessageBox::question(this, tr("File Sequence Mismatch"), msg, QMessageBox::No,QMessageBox::Yes) == QMessageBox::No) {
-                 goto Done;
-            }
-        }
-    } else {
-        s = checkFileSequence(pLeftDir.entryList());
+    if (checkFileSequence(pLeftDir.entryList()) != DCP_SUCCESS) {
+        goto Done;
+    }
 
-        if (s) {
-            QString msg;
-            msg.sprintf("File list does not appear to be sequential between %s and %s. Do you wish to continue?",pLeftDir.entryList().at(s-1).toAscii().constData(),
-                        pLeftDir.entryList().at(s).toAscii().constData());
-            if (QMessageBox::question(this, tr("File Sequence Mismatch"), msg, QMessageBox::No,QMessageBox::Yes) == QMessageBox::No) {
-                 goto Done;
-            }
-        }
+    if (ui->mxfStereoscopicCheckBox->checkState() && checkFileSequence(pRightDir.entryList()) != DCP_SUCCESS) {
+        goto Done;
     }
 
     for (int x=0;x<pLeftList.size();x++) {

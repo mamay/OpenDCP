@@ -22,6 +22,7 @@
 #include "dialogj2kconversion.h"
 #include "dialogmxfconversion.h"
 #include "mxf-writer.h"
+#include "opendcp.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -133,60 +134,40 @@ int findSeqOffset(const char str1[], const char str2[]) {
 
 /* check if filelist is sequential */
 int MainWindow::checkFileSequence(QStringList list) {
-    int sequential = 1;
-    int x = 0;
+    QString msg;
+    int     sequential = 0;
+    int     x = 0;
 
-    for (x = 0; x < (list.size()-1) && sequential; x++) {
-        sequential = checkSequential(list.at(x).toLocal8Bit().constData(), list.at(x+1).toLocal8Bit().constData());
+    for (x = 0; x < (list.size()-1) && sequential == DCP_SUCCESS; x++) {
+        sequential = check_sequential((char *)list.at(x).toStdString().c_str(), (char *)list.at(x+1).toStdString().c_str());
     }
 
-    if (sequential) {
-        return 0;
+    if (sequential == STRING_LENGTH_NOTEQUAL) {
+        QMessageBox::critical(this, tr("File Sequence Check Error"), tr("All filenames must be of the same length."));
+        return DCP_ERROR;
+    }
+
+    if (sequential == STRING_NOTSEQUENTIAL) {
+        QTextStream(&msg) << "File list does not appear to be sequential between " << list.at(x-1);
+        QTextStream(&msg) << " and " << list.at(x) << ". Do you wish to continue?";
+        if (QMessageBox::question(this, tr("File Sequence Mismatch"), msg, QMessageBox::No,QMessageBox::Yes) == QMessageBox::No) {
+            return DCP_ERROR;
+        } else {
+            return DCP_NO_ERROR;
+        }
+    }
+
+    if (sequential == DCP_SUCCESS) {
+        return DCP_SUCCESS;
     } else {
-        return x;
-    }
-}
-
-/* check if two strings are sequential */
-int MainWindow::checkSequential(const char *str1, const char *str2) {
-    int x,y;
-    int offset, len;
-
-    offset = findSeqOffset(str2,str1);
-
-    if (offset) {
-        len = offset;
-    } else {
-        len = strlen(str1);
-    }
-
-    char *seq = (char *)malloc(len+1);
-
-    strncpy(seq,str1+offset,len);
-    x = atoi(seq);
-
-    strncpy(seq,str2+offset,len);
-    y = atoi(seq);
-
-    if (seq) {
-        free(seq);
-    }
-
-    if ((y - x) == 1) {
-        return 1;
-    } else {
-        return 0;
+        return DCP_ERROR;
     }
 }
 
 void MainWindow::about()
 {
-    QMessageBox::about(this, tr("About OpenDCP"),
-                       tr(
-                          "OpenDCP Version 0.21\n\n"
-                          "Copyright 2010-2011 Terrence Meiczinger. All rights reserved.\n\n"
-                          "The program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.\n\n"
-                          "http://www.opendcp.org"
-                         ));
+    QString msg;
+    QTextStream(&msg) << OPENDCP_NAME << " Version " << OPENDCP_VERSION << "\n\n";
+    QTextStream(&msg) << OPENDCP_COPYRIGHT << "\n\n" << OPENDCP_LICENSE << "\n\n" << OPENDCP_WEBSITE << "\n\n";
+    QMessageBox::about(this, "About OpenDCP",msg);
 }
-

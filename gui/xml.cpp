@@ -79,7 +79,7 @@ void MainWindow::startDcp()
     strcpy(xmlContext->xml.issuer, ui->cplIssuerEdit->text().toStdString().c_str());
     strcpy(xmlContext->xml.kind, ui->cplKindComboBox->currentText().toStdString().c_str());
     strcpy(xmlContext->xml.rating, ui->cplRatingComboBox->currentText().toStdString().c_str());
-    sprintf(xmlContext->xml.creator,"%s-%s",OPEN_DCP_NAME,OPEN_DCP_VERSION);
+    sprintf(xmlContext->xml.creator,"%s-%s",OPENDCP_NAME,OPENDCP_VERSION);
     strcpy(xmlContext->xml.timestamp,timestamp.toStdString().c_str());
 
     // check picture track is supplied

@@ -20,8 +20,8 @@
 extern "C" {
 #endif
 
-#ifndef _OPEN_DCP_H_
-#define _OPEN_DCP_H_
+#ifndef _OPENDCP_H_
+#define _OPENDCP_H_
 
 #define MAX_ASSETS          10   /* Soft limit */
 #define MAX_REELS           30   /* Soft limit */
@@ -34,9 +34,11 @@ extern "C" {
 #define MAX_DCP_JPEG_BITRATE 250000000  /* Maximum DCI compliant bit rate for JPEG2000 */
 #define MAX_DCP_MPEG_BITRATE  80000000  /* Maximum DCI compliant bit rate for MPEG */
 
-static const char *OPEN_DCP_VERSION   = "${OPENDCP_VERSION}"; 
-static const char *OPEN_DCP_NAME      = "${OPENDCP_NAME}"; 
-static const char *OPEN_DCP_COPYRIGHT = "${OPENDCP_COPYRIGHT}"; 
+static const char *OPENDCP_VERSION   = "${OPENDCP_VERSION}"; 
+static const char *OPENDCP_NAME      = "${OPENDCP_NAME}"; 
+static const char *OPENDCP_COPYRIGHT = "${OPENDCP_COPYRIGHT}"; 
+static const char *OPENDCP_LICENSE   = "${OPENDCP_LICENSE}"; 
+static const char *OPENDCP_WEBSITE   = "${OPENDCP_WEBSITE}"; 
 
 /* XML Namespaces */
 static const char *XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
@@ -96,6 +98,11 @@ enum DCP_ERROR {
     DCP_QUIT    =  2
 };
 
+enum FILE_FILTER {
+    J2K_INPUT,
+    MXF_INPUT
+};
+
 enum LOG_LEVEL {
     LOG_NONE = 0,
     LOG_ERROR,
@@ -141,6 +148,48 @@ enum DPX_MODE {
     DPX_LINEAR = 0,
     DPX_FILM,
     DPX_VIDEO
+};
+
+enum DCP_ERROR_MESSAGES {
+    DCP_NO_ERROR   = 0,
+    DCP_ERROR,
+    DCP_FILE_OPEN_ERROR,
+    DCP_NO_PICTURE_TRACK,
+    DCP_MULTIPLE_PICTURE_TRACK,
+    DCP_ASSET_NO_DURATION,
+    DCP_INVALID_ESSENCE,
+    DCP_SPECIFCATION_MISMATCH,
+
+    /* J2K */
+    J2K_ERROR,
+
+    /* MXF */
+    MXF_CALC_DIGEST_FAILED,
+    MXF_COULD_NOT_DETECT_ESSENCE_TYPE,
+    MXF_UNKOWN_ESSENCE_TYPE,
+    MXF_MPEG2_FILE_OPEN_ERROR,
+    MXF_J2K_FILE_OPEN_ERROR,
+    MXF_WAV_FILE_OPEN_ERROR,
+    MXF_TT_FILE_OPEN_ERROR,
+    MXF_FILE_WRITE_ERROR,
+    MXF_FILE_FINALIZE_ERROR,
+    MXF_PARSER_RESET_ERROR,
+
+    /* XML */
+
+    /* COMMON */
+    STRING_LENGTH_NOTEQUAL,
+    STRING_NOTSEQUENTIAL,
+
+    DCP_ERROR_MAX
+};
+
+static const char *ERR_STRING[] = {
+    "NONE",
+    "ERROR",
+    "WARN",
+    "INFO",
+    "DEBUG"
 };
 
 typedef struct filelist_t {
@@ -288,20 +337,24 @@ typedef struct {
 } opendcp_t;
 
 /* Common Routines */
-void dcp_log(int level, const char *fmt, ...);
-void dcp_fatal(opendcp_t *opendcp, char *error);
-void get_timestamp(char *timestamp);
-int get_asset_type(asset_t asset);
-int get_file_essence_class(char *filename);
-char *get_basename(const char *filename);
-int validate_reel(opendcp_t *opendcp, cpl_t *cpl, int reel);
-int add_reel(opendcp_t *opendcp, cpl_t *cpl, asset_list_t reel);
-int add_cpl(opendcp_t *opendcp, pkl_t *pkl);
-int add_pkl(opendcp_t *opendcp);
-void dcp_set_log_level(int log_level);
+void  dcp_log(int level, const char *fmt, ...);
+void  dcp_fatal(opendcp_t *opendcp, char *error);
+void  get_timestamp(char *timestamp);
+int   get_asset_type(asset_t asset);
+int   get_file_essence_class(char *filename);
+char  *get_basename(const char *filename);
+int   validate_reel(opendcp_t *opendcp, cpl_t *cpl, int reel);
+int   add_reel(opendcp_t *opendcp, cpl_t *cpl, asset_list_t reel);
+int   add_cpl(opendcp_t *opendcp, pkl_t *pkl);
+int   add_pkl(opendcp_t *opendcp);
+int   check_sequential(char str1[],char str2[]);
+int   check_extension(char *filename, char *pattern);
+void  dcp_set_log_level(int log_level);
+filelist_t *filelist_alloc(int count);
+void  filelist_free(filelist_t *filelist);
+
 opendcp_t *create_opendcp();
-int delete_opendcp(opendcp_t *opendcp);
-void filelist_free(filelist_t *filelist);
+int       delete_opendcp(opendcp_t *opendcp);
 
 /* ASDCPLIB Routines */
 int read_asset_info(asset_t *asset);
@@ -323,7 +376,10 @@ char *strip_cert_file(char *filename);
 /* J2K Routines */
 int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_path);
 
-#endif // _OPEN_DCP_H_
+/* retrieve error string */
+char *error_string(int error_code);
+
+#endif // _OPENDCP_H_
 #ifdef __cplusplus
 }
 #endif

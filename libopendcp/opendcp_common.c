@@ -21,12 +21,16 @@
 #include <stdio.h>
 #include <libgen.h>
 #include <sys/stat.h>
+#include <dirent.h>
 #include <inttypes.h>
 #include <time.h>
 #include <openssl/x509.h>
 #include <openssl/bio.h>
 #include "opendcp.h"
-#include "opendcp_error.h"
+
+#ifndef WIN32
+#define strnicmp strncasecmp
+#endif
 
 void cleanup(opendcp_t *opendcp, int exit_flag) {
     if (exit_flag) {
@@ -49,6 +53,24 @@ char *get_basename(const char *filename) {
     base[(strlen(filename) - strlen(extension))] = '\0';
 
     return(base);
+}
+
+int check_extension(char *filename, char *pattern) {
+    char *extension;
+
+    extension = strrchr(filename,'.');
+
+    if ( extension == NULL ) {
+        return 0;
+    }
+
+    extension++;
+
+   if (strnicmp(extension,pattern,3) !=0) {
+       return 0;
+   }
+
+   return 1;
 }
 
 char *base64(const unsigned char *data, int length) {
@@ -158,6 +180,7 @@ int check_sequential(char str1[],char str2[]) {
     int x,y;
     int offset, len;
 
+
     if (strlen(str1) != strlen(str2)) {
         return STRING_LENGTH_NOTEQUAL;
     }
@@ -183,22 +206,22 @@ int check_sequential(char str1[],char str2[]) {
     }
 
     if ((y - x) == 1) {
-        return 1;
+        return DCP_SUCCESS;
     } else {
-        return 0;
+        return STRING_NOTSEQUENTIAL;
     }
 }
 
 int check_file_sequence(char *str[], int count) {
-    int sequential = 1;
+    int sequential = 0;
     int x = 0;
 
-    while (x<(count-1) && sequential) {
+    while (x<(count-1) && sequential == DCP_SUCCESS) {
         sequential = check_sequential(str[x], str[x+1]);
         x++;
     }
 
-    if (sequential) {
+    if (sequential == DCP_SUCCESS) {
         return 0;
     } else {
         return x+DCP_ERROR_MAX;
@@ -224,18 +247,77 @@ int get_asset_type(asset_t asset) {
     }
 }
 
+static int filter;
+static int file_filter(struct dirent *filename) {
+    char *extension;
+
+    extension = strrchr(filename->d_name,'.');
+
+    if ( extension == NULL ) {
+        return 0;
+    }
+
+    extension++;
+
+    /* return only known asset types */
+    if (filter == MXF_INPUT) {
+        if (strnicmp(extension,"j2c",3) != 0 &&
+            strnicmp(extension,"j2k",3) != 0)
+        return 0;
+    } else if (filter == J2K_INPUT) {
+        if (strnicmp(extension,"tif",3) != 0 &&
+            strnicmp(extension,"dpx",3) != 0)
+        return 0;
+    }
+
+    return 1;
+}
+
+int get_file_count(char *path, int file_type) {
+    struct dirent **files;
+    struct stat st_in;
+
+    int x,count;
+
+    filter = file_type;
+
+    if (stat(path, &st_in) != 0 ) {
+        dcp_log(LOG_ERROR,"Could not open input file %s",path);
+        return DCP_FATAL;
+    }
+
+    if (S_ISDIR(st_in.st_mode)) {
+        count = scandir(path,&files,(void *)file_filter,alphasort);
+        for (x=0;x<count;x++) {
+            free(files[x]);
+        }
+        free(files);
+
+    } else {
+        count = 1;
+    }
+
+    return count;
+}
+
 filelist_t *filelist_alloc(int count) {
     int x;
     filelist_t *filelist;
 
+    filelist = malloc(sizeof(filelist_t));
+
     filelist->file_count = count;
-    filelist->in = (char**) malloc(filelist->file_count*sizeof(char*));
+    filelist->in  = malloc(filelist->file_count*sizeof(char*));
+    filelist->out = malloc(filelist->file_count*sizeof(char*));
 
     if (filelist->file_count) {
         for (x=0;x<filelist->file_count;x++) {
-                filelist->in[x] = (char *) malloc(MAX_FILENAME_LENGTH);
+                filelist->in[x]  = malloc(MAX_FILENAME_LENGTH*sizeof(char *));
+                filelist->out[x] = malloc(MAX_FILENAME_LENGTH*sizeof(char *));
         }
     }
+
+    return filelist;
 }
 
 void filelist_free(filelist_t *filelist) {
@@ -248,7 +330,6 @@ void filelist_free(filelist_t *filelist) {
         if (filelist->out[x]) {
             free(filelist->out[x]);
         }
-
     }
 
     if (filelist->in) {
@@ -275,8 +356,8 @@ opendcp_t *create_opendcp() {
 
     /* initialize opendcp */
     opendcp->log_level = LOG_WARN;
-    sprintf(opendcp->xml.issuer,"%.80s %.80s",OPEN_DCP_NAME,OPEN_DCP_VERSION);
-    sprintf(opendcp->xml.creator,"%.80s %.80s",OPEN_DCP_NAME, OPEN_DCP_VERSION);
+    sprintf(opendcp->xml.issuer,"%.80s %.80s",OPENDCP_NAME,OPENDCP_VERSION);
+    sprintf(opendcp->xml.creator,"%.80s %.80s",OPENDCP_NAME, OPENDCP_VERSION);
     sprintf(opendcp->xml.annotation,"%.128s",DCP_ANNOTATION);
     sprintf(opendcp->xml.title,"%.80s",DCP_TITLE);
     sprintf(opendcp->xml.kind,"%.15s",DCP_KIND);

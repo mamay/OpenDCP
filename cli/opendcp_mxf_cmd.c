@@ -38,7 +38,7 @@ void version() {
     FILE *fp;
 
     fp = stdout;
-    fprintf(fp,"\n%s version %s %s\n\n",OPEN_DCP_NAME,OPEN_DCP_VERSION,OPEN_DCP_COPYRIGHT);
+    fprintf(fp,"\n%s version %s %s\n\n",OPENDCP_NAME,OPENDCP_VERSION,OPENDCP_COPYRIGHT);
 
     exit(0);
 }
@@ -47,7 +47,7 @@ void dcp_usage() {
     FILE *fp;
     fp = stdout;
 
-    fprintf(fp,"\n%s version %s %s\n\n",OPEN_DCP_NAME,OPEN_DCP_VERSION,OPEN_DCP_COPYRIGHT);
+    fprintf(fp,"\n%s version %s %s\n\n",OPENDCP_NAME,OPENDCP_VERSION,OPENDCP_COPYRIGHT);
     fprintf(fp,"Usage:\n");
     fprintf(fp,"       opendcp_mxf -i <file> -o <file> [options ...]\n\n");
     fprintf(fp,"Required:\n");
@@ -70,7 +70,7 @@ void dcp_usage() {
     exit(0);
 }
 
-static int file_filter(struct dirent *filename) {
+static int file_filter(struct dirent *filename, int foo) {
     char *extension;
 
     extension = strrchr(filename->d_name,'.');
@@ -91,31 +91,13 @@ static int file_filter(struct dirent *filename) {
     return 1;
 }
 
-int check_extension(char *filename, char *pattern) {
-    char *extension;
-
-    extension = strrchr(filename,'.');
-    
-    if ( extension == NULL ) {
-        return 0;
-    }
-
-    extension++;
-
-   if (strnicmp(extension,pattern,3) !=0) {
-       return 0;
-   }
-
-   return 1;
-}
-
 int get_filelist_3d(opendcp_t *opendcp,char *in_path_left,char *in_path_right,filelist_t *filelist) {
     filelist_t  *filelist_left;
     filelist_t  *filelist_right;
     int x,y;
 
-    filelist_left = malloc(sizeof(filelist_t));
-    filelist_right = malloc(sizeof(filelist_t));
+    filelist_left  = filelist_alloc(filelist->file_count/2);
+    filelist_right = filelist_alloc(filelist->file_count/2);
 
     get_filelist(opendcp,in_path_left,filelist_left);
     get_filelist(opendcp,in_path_right,filelist_right);
@@ -129,12 +111,9 @@ int get_filelist_3d(opendcp_t *opendcp,char *in_path_left,char *in_path_right,fi
 
     y = 0;
     filelist->file_count = filelist_left->file_count * 2;
-    filelist->in = (char**) malloc(filelist->file_count*sizeof(char*));
     for (x=0;x<filelist_left->file_count;x++) {
-        filelist->in[y] = (char *) malloc(MAX_FILENAME_LENGTH);
-        filelist->in[y++] = filelist_left->in[x];
-        filelist->in[y] = (char *) malloc(MAX_FILENAME_LENGTH);
-        filelist->in[y++] = filelist_right->in[x];
+        strcpy(filelist->in[y++],filelist_left->in[x]);
+        strcpy(filelist->in[y++],filelist_right->in[x]);
     }
 
     filelist_free(filelist_left);
@@ -145,8 +124,10 @@ int get_filelist_3d(opendcp_t *opendcp,char *in_path_left,char *in_path_right,fi
 
 int get_filelist(opendcp_t *opendcp,char *in_path,filelist_t *filelist) {
     struct dirent **files;
+    struct dirent *file;
     struct stat st_in;
     int x = 0;
+    int count;
 
     if (stat(in_path, &st_in) != 0 ) {
         dcp_log(LOG_ERROR,"Could not open input file %s",in_path);
@@ -155,11 +136,13 @@ int get_filelist(opendcp_t *opendcp,char *in_path,filelist_t *filelist) {
 
     if (S_ISDIR(st_in.st_mode)) {
         /* if input is directory, it is jpeg2000 or pcm */
-        filelist->file_count = scandir(in_path,&files,(void *)file_filter,alphasort);
-        filelist->in = (char**) malloc(filelist->file_count*sizeof(char*));
+        count = scandir(in_path,&files,(void *)file_filter,alphasort);
+        if (count != filelist->file_count) {
+            printf("count mismatch\n");
+            return DCP_FATAL;
+        }
         if (filelist->file_count) {
             for (x=0;x<filelist->file_count;x++) {
-                filelist->in[x] = (char *) malloc(MAX_FILENAME_LENGTH);
                 sprintf(filelist->in[x],"%s/%s",in_path,files[x]->d_name);
             }
         }
@@ -174,16 +157,14 @@ int get_filelist(opendcp_t *opendcp,char *in_path,filelist_t *filelist) {
             return DCP_FATAL;
         }
         filelist->file_count = 1;
-        filelist->in = (char**) malloc(filelist->file_count*sizeof(char*));
-        filelist->in[0] = (char *) malloc(MAX_FILENAME_LENGTH);
-        filelist->in[0] = in_path;
+        sprintf(filelist->in[0],"%s",in_path);
     }
 
     return DCP_SUCCESS;
 }
 
 int main (int argc, char **argv) {
-    int c;
+    int c,count;
     opendcp_t *opendcp;
     char *in_path = NULL;
     char *in_path_left = NULL;
@@ -196,9 +177,6 @@ int main (int argc, char **argv) {
     }
 
     opendcp = create_opendcp();
-
-    filelist = malloc(sizeof(filelist_t));
-    memset(filelist,0,sizeof (filelist_t));
 
     /* set initial values */
     opendcp->xyz = 1;
@@ -320,7 +298,7 @@ int main (int argc, char **argv) {
     dcp_set_log_level(opendcp->log_level);
 
     if (opendcp->log_level > 0) {
-        printf("\nOpenDCP MXF %s %s\n",OPEN_DCP_VERSION,OPEN_DCP_COPYRIGHT);
+        printf("\nOpenDCP MXF %s %s\n",OPENDCP_VERSION,OPENDCP_COPYRIGHT);
     }
 
     if (opendcp->stereoscopic) {
@@ -340,8 +318,12 @@ int main (int argc, char **argv) {
     }
 
     if (opendcp->stereoscopic) {
+        count = get_file_count(in_path_left, MXF_INPUT);
+        filelist = filelist_alloc(count*2);
         get_filelist_3d(opendcp,in_path_left,in_path_right,filelist);
     } else {
+        count = get_file_count(in_path, MXF_INPUT);
+        filelist = filelist_alloc(count);
         get_filelist(opendcp,in_path,filelist);
     }
   

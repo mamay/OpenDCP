@@ -63,9 +63,9 @@ Result_t MxfWriter::fillWriterInfo(opendcp_t *opendcp, writer_info_t *writer_inf
     byte_t                  iv_buf[CBC_BLOCK_SIZE];
     Result_t                result = RESULT_OK;
 
-    writer_info->info.ProductVersion = OPEN_DCP_VERSION;
-    writer_info->info.CompanyName    = OPEN_DCP_NAME;
-    writer_info->info.ProductName    = OPEN_DCP_NAME;
+    writer_info->info.ProductVersion = OPENDCP_VERSION;
+    writer_info->info.CompanyName    = OPENDCP_NAME;
+    writer_info->info.ProductName    = OPENDCP_NAME;
 
     // set the label type
     if (opendcp->ns == XML_NS_INTEROP) {

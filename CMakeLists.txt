@@ -12,8 +12,9 @@ SET(VERSION_MINOR 0)
 SET(VERSION_BUILD 21)
 SET(OPENDCP_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD})
 SET(OPENDCP_NAME ${PROJECT_NAME})
-SET(OPENDCP_COPYRIGHT "Copyright (c) 2010-2011 Terrence Meiczinger. All rights reserved.")
-ADD_DEFINITIONS(-DOPENDCP_VERSION="${OPENDCP_VERSION}")
+SET(OPENDCP_COPYRIGHT "(c) 2010-2011 Terrence Meiczinger. All rights reserved.")
+SET(OPENDCP_LICENSE "The program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.")
+SET(OPENDCP_WEBSITE "http://www.opendcp.org")
 #-----------------------------------------------------------------------------
 
 #--check 32 or 64-bit---------------------------------------------------------

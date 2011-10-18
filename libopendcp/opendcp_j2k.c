@@ -273,8 +273,8 @@ int encode_openjpeg(opendcp_t *opendcp, opj_image_t *opj_image, char *out_file) 
     /* set default cinema parameters */
     set_cinema_encoder_parameters(opendcp, &parameters);
 
-    parameters.cp_comment = (char*)malloc(strlen(OPEN_DCP_NAME)+1);
-    sprintf(parameters.cp_comment,"%s", OPEN_DCP_NAME);
+    parameters.cp_comment = (char*)malloc(strlen(OPENDCP_NAME)+1);
+    sprintf(parameters.cp_comment,"%s", OPENDCP_NAME);
 
     /* adjust cinema enum type */
     if (opendcp->cinema_profile == DCP_CINEMA4K) {
