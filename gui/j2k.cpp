@@ -80,13 +80,13 @@ void MainWindow::j2kSetStereoscopicState() {
 void MainWindow::j2kCinemaProfileUpdate() {
     if (ui->profileComboBox->currentIndex() == 0) {
 #ifdef Q_WS_WIN
-        ui->threadsSpinBox->setMaximum(6);
+        //ui->threadsSpinBox->setMaximum(6);
 #endif
         ui->threadsSpinBox->setMaximum(QThreadPool::globalInstance()->maxThreadCount());
         ui->threadsSpinBox->setValue(QThread::idealThreadCount());
     } else {
 #ifdef Q_WS_WIN
-        ui->threadsSpinBox->setMaximum(2);
+        //ui->threadsSpinBox->setMaximum(2);
 #endif
         ui->threadsSpinBox->setMaximum(QThreadPool::globalInstance()->maxThreadCount());
         ui->threadsSpinBox->setValue(QThread::idealThreadCount());

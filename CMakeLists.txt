@@ -152,6 +152,8 @@ ELSEIF(WIN32)
     #-- Win32 Compiling
     SET(SYSROOT_PATH /usr/i686-pc-mingw32/sys-root/mingw)
     SET(LIB_DIR ${SYSROOT_PATH}/lib)
+    SET(PREFIX ${SYSROOT_PATH})
+    SET(PREFIX_ARG --prefix=${PREFIX})
 
     IF(ENABLE_XMLSEC)
         INCLUDE_DIRECTORIES(${SYSROOT_PATH}/include/libxml2)

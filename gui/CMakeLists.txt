@@ -92,9 +92,9 @@ ELSEIF(UNIX)
 ELSEIF(WIN32)
     SET(PROGNAME opendcp)
     IF(i386)
-        SET(WINDRES i686-w32-mingw32-windres)
+        SET(WINDRES x86_64-w32-mingw32-windres)
     ELSE()
-        SET(WINDRES i686-w64-mingw32-windres)
+        SET(WINDRES x86_64-w64-mingw32-windres)
     ENDIF()
     ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/opendcp_ico.o
                        COMMAND ${WINDRES} -I${CMAKE_CURRENT_SOURCE_DIR} -i${CMAKE_CURRENT_SOURCE_DIR}/resources/opendcp.rc 
