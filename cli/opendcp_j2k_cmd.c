@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <opendcp.h>
+#include "opendcp_cli.h"
 
 #ifndef WIN32
 #define strnicmp strncasecmp
@@ -96,17 +97,6 @@ void dcp_usage() {
     exit(0);
 }
 
-static int file_filter(struct dirent *filename) {
-    int return_code = 0;
-
-    if (check_extension(filename->d_name,"tif") ||
-        check_extension(filename->d_name,"dpx")) {
-        return_code = 1;
-    }
-
-    return return_code;
-}
-
 int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *filelist) {
     struct dirent **files;
     int x = 0;
@@ -128,12 +118,8 @@ int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *fil
 
         if (st_out.st_mode & S_IFDIR) {
             filelist->file_count = scandir(in_path,&files,(void *)file_filter,alphasort);
-            filelist->in  = (char**) malloc(filelist->file_count*sizeof(char*));
-            filelist->out = (char**) malloc(filelist->file_count*sizeof(char*));
             if (filelist->file_count) {
                 for (x=0;x<filelist->file_count;x++) {
-                        filelist->in[x] = (char *) malloc(MAX_FILENAME_LENGTH*sizeof(char*));
-                        filelist->out[x] = (char *) malloc(MAX_FILENAME_LENGTH*sizeof(char*));
                         sprintf(filelist->in[x],"%s/%s",in_path,files[x]->d_name);
                         sprintf(filelist->out[x],"%s/%s.j2c",out_path,get_basename(files[x]->d_name));
                 }
@@ -157,12 +143,8 @@ int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *fil
         extension = strrchr(in_path,'.');
         if (strnicmp(++extension,"tif",3) == 0 || strnicmp(++extension,"dpx",3)) {
             filelist->file_count = 1;
-            filelist->in  = (char**) malloc(filelist->file_count*sizeof(char*));
-            filelist->out = (char**) malloc(filelist->file_count*sizeof(char*));
-            filelist->in[0]  = (char *) malloc(MAX_FILENAME_LENGTH*sizeof(char*));
-            filelist->out[0] = (char *) malloc(MAX_FILENAME_LENGTH*sizeof(char*));
-            sprintf(filelist->in[x],"%s",in_path);
-            sprintf(filelist->out[x],"%s",out_path);
+            sprintf(filelist->in[0],"%s",in_path);
+            sprintf(filelist->out[0],"%s",out_path);
         }
     }
 
@@ -217,9 +199,6 @@ int main (int argc, char **argv) {
     }
 
     opendcp = create_opendcp();
-
-    filelist = malloc(sizeof(filelist_t));
-    memset(filelist,0,sizeof (filelist_t));
 
     /* set initial values */
     opendcp->xyz             = 1;
@@ -414,8 +393,12 @@ int main (int argc, char **argv) {
 
     /* get file list */
     dcp_log(LOG_DEBUG,"%-15.15s: getting files in %s","opendcp_j2k_cmd",in_path);
-    if (get_filelist(opendcp,in_path,out_path,filelist) != DCP_SUCCESS) {
-         dcp_fatal(opendcp,"No files found");
+    count = get_file_count(in_path, J2K_INPUT);
+    filelist = (filelist_t *)filelist_alloc(count);
+    get_filelist(opendcp,in_path,out_path,filelist);
+
+    if (filelist->file_count < 1) {
+        dcp_fatal(opendcp,"No input files located");
     }
 
     /* end frame check */

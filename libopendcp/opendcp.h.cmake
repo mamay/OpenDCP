@@ -342,16 +342,11 @@ void  dcp_fatal(opendcp_t *opendcp, char *error);
 void  get_timestamp(char *timestamp);
 int   get_asset_type(asset_t asset);
 int   get_file_essence_class(char *filename);
-char  *get_basename(const char *filename);
 int   validate_reel(opendcp_t *opendcp, cpl_t *cpl, int reel);
 int   add_reel(opendcp_t *opendcp, cpl_t *cpl, asset_list_t reel);
 int   add_cpl(opendcp_t *opendcp, pkl_t *pkl);
 int   add_pkl(opendcp_t *opendcp);
-int   check_sequential(char str1[],char str2[]);
-int   check_extension(char *filename, char *pattern);
 void  dcp_set_log_level(int log_level);
-filelist_t *filelist_alloc(int count);
-void  filelist_free(filelist_t *filelist);
 
 opendcp_t *create_opendcp();
 int       delete_opendcp(opendcp_t *opendcp);

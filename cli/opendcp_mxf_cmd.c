@@ -28,7 +28,8 @@
 #include <stdio.h>
 #include <time.h>
 #include <sys/stat.h>
-#include "opendcp.h"
+#include <opendcp.h>
+#include "opendcp_cli.h"
 
 #ifndef WIN32
 #define strnicmp strncasecmp
@@ -70,6 +71,7 @@ void dcp_usage() {
     exit(0);
 }
 
+/*
 static int file_filter(struct dirent *filename, int foo) {
     char *extension;
 
@@ -81,7 +83,6 @@ static int file_filter(struct dirent *filename, int foo) {
 
     extension++;
 
-    /* return only known asset types */
     if (strnicmp(extension,"j2c",3) != 0 && 
         strnicmp(extension,"j2k",3) != 0 && 
         strnicmp(extension,"wav",3) != 0) {
@@ -90,6 +91,7 @@ static int file_filter(struct dirent *filename, int foo) {
 
     return 1;
 }
+*/
 
 int get_filelist_3d(opendcp_t *opendcp,char *in_path_left,char *in_path_right,filelist_t *filelist) {
     filelist_t  *filelist_left;
@@ -319,14 +321,14 @@ int main (int argc, char **argv) {
 
     if (opendcp->stereoscopic) {
         count = get_file_count(in_path_left, MXF_INPUT);
-        filelist = filelist_alloc(count*2);
+        filelist = (filelist_t *)filelist_alloc(count*2);
         get_filelist_3d(opendcp,in_path_left,in_path_right,filelist);
     } else {
         count = get_file_count(in_path, MXF_INPUT);
-        filelist = filelist_alloc(count);
+        filelist = (filelist_t *)filelist_alloc(count);
         get_filelist(opendcp,in_path,filelist);
     }
-  
+
     if (filelist->file_count < 1) {
         dcp_fatal(opendcp,"No input files located");
     }

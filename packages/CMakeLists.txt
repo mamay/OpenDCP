@@ -14,6 +14,14 @@ SET(CPACK_PACKAGE_VERSION_PATCH ${VERSION_BUILD})
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "OpenDCP Digital Cinema Package Tool")
 SET(CPACK_PACKAGE_DESCRIPTION "This tool is used to created digital cinema packages (DCP)")
 SET(CPACK_PACKAGE_VENDOR "OpenDCP")
+#-----------------------------------------------------------------------------
+
+#--documentation--------------------------------------------------------------
+INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/licenses      DESTINATION share/doc/${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION})
+INSTALL(FILES     ${PROJECT_SOURCE_DIR}/COPYRIGHT.txt DESTINATION share/doc/${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION})
+INSTALL(FILES     ${PROJECT_SOURCE_DIR}/README.txt    DESTINATION share/doc/${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION})
+#-----------------------------------------------------------------------------
+
 #--OSX package-------------------------------------------------------------
 IF(MAKE_OSX)
     STRING(TOLOWER "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-mac.${ARCH}" CPACK_PACKAGE_FILE_NAME)
@@ -21,6 +29,8 @@ IF(MAKE_OSX)
     SET(CPACK_GENERATOR "DragNDrop")
     SET(CPACK_BINARY_DRAGNDROP ON)
 ENDIF()
+#-----------------------------------------------------------------------------
+
 #--debian package-------------------------------------------------------------
 IF(MAKE_DEB)
     IF(ARCH STREQUAL "x86_64")
@@ -34,6 +44,8 @@ IF(MAKE_DEB)
     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "openssl (>= 0.9.8),libxml2 (>= 2.7),libxslt1.1 (>= 1.1.26),xmlsec1 (>= 1.2),libxmlsec1-openssl (>= 1.2),libtiff4 (>= 3.9),libqtcore4 (>= 4.6),libqtgui4 (>= 4.6)")
     SET(CPACK_GENERATOR "DEB")
 ENDIF()
+#-----------------------------------------------------------------------------
+
 #--rpm package----------------------------------------------------------------
 IF(MAKE_RPM)
     STRING(TOLOWER "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}.${ARCH}" CPACK_PACKAGE_FILE_NAME)
@@ -44,5 +56,7 @@ IF(MAKE_RPM)
     SET(CPACK_GENERATOR "RPM")
 ENDIF()
 #-----------------------------------------------------------------------------
+
+#--package--------------------------------------------------------------------
 INCLUDE(CPack)
 #-----------------------------------------------------------------------------

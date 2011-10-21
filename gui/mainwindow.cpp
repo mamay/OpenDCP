@@ -132,6 +132,49 @@ int findSeqOffset(const char str1[], const char str2[]) {
     }
 }
 
+int MainWindow::checkSequential(const char str1[], const char str2[]) {
+    int i,x,y;
+    int offset, len;
+
+
+    if (strlen(str1) != strlen(str2)) {
+        return STRING_LENGTH_NOTEQUAL;
+    }
+    
+    i = 0;
+    while (1) {
+        if(str1[i] != str2[i])
+                offset = i;
+        if(str1[i] == '\0' || str2[i] == '\0')
+                offset = 0;
+        i++;
+    }
+
+    if (offset) {
+        len = offset;
+    } else {
+        len = strlen(str1);
+    }
+
+    char *seq = (char *)malloc(len+1);
+
+    strncpy(seq,str1+offset,len);
+    x = atoi(seq);
+
+    strncpy(seq,str2+offset,len);
+    y = atoi(seq);
+
+    if (seq) {
+        free(seq);
+    }
+
+    if ((y - x) == 1) {
+        return DCP_SUCCESS;
+    } else {
+        return STRING_NOTSEQUENTIAL;
+    }
+}
+
 /* check if filelist is sequential */
 int MainWindow::checkFileSequence(QStringList list) {
     QString msg;
@@ -139,7 +182,7 @@ int MainWindow::checkFileSequence(QStringList list) {
     int     x = 0;
 
     for (x = 0; x < (list.size()-1) && sequential == DCP_SUCCESS; x++) {
-        sequential = check_sequential((char *)list.at(x).toStdString().c_str(), (char *)list.at(x+1).toStdString().c_str());
+        sequential = checkSequential((char *)list.at(x).toStdString().c_str(), (char *)list.at(x+1).toStdString().c_str());
     }
 
     if (sequential == STRING_LENGTH_NOTEQUAL) {

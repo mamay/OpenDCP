@@ -24,10 +24,10 @@ TARGET_LINK_LIBRARIES(opendcp_largefile ${OPENDCP_LIB} ${LIBS})
 ADD_EXECUTABLE(opendcp_xml opendcp_xml_cmd.c opendcp_force_cpp.cpp)
 TARGET_LINK_LIBRARIES(opendcp_xml ${OPENDCP_LIB} ${ASDCP_LIBRARIES} ${LIBS})
 
-ADD_EXECUTABLE(opendcp_j2k opendcp_j2k_cmd.c opendcp_force_cpp.cpp)
+ADD_EXECUTABLE(opendcp_j2k opendcp_j2k_cmd.c opendcp_cli.c opendcp_force_cpp.cpp)
 TARGET_LINK_LIBRARIES(opendcp_j2k ${OPENDCP_LIB} ${ASDCP_LIBRARIES} ${LIBS})
 
-ADD_EXECUTABLE(opendcp_mxf opendcp_mxf_cmd.c opendcp_force_cpp.cpp)
+ADD_EXECUTABLE(opendcp_mxf opendcp_mxf_cmd.c opendcp_cli.c opendcp_force_cpp.cpp)
 TARGET_LINK_LIBRARIES(opendcp_mxf ${OPENDCP_LIB} ${ASDCP_LIBRARIES} ${LIBS})
 
 IF(ENABLE_XMLSEC)
