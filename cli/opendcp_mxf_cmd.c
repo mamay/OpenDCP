@@ -19,10 +19,8 @@
 #include <string.h>
 #ifdef WIN32
 #include "win32/opendcp_win32_getopt.h"
-#include "win32/opendcp_win32_dirent.h"
 #else
 #include <getopt.h>
-#include <dirent.h>
 #endif
 #include <stdlib.h>
 #include <stdio.h>
@@ -71,28 +69,6 @@ void dcp_usage() {
     exit(0);
 }
 
-/*
-static int file_filter(struct dirent *filename, int foo) {
-    char *extension;
-
-    extension = strrchr(filename->d_name,'.');
-
-    if ( extension == NULL ) {
-        return 0;
-    }
-
-    extension++;
-
-    if (strnicmp(extension,"j2c",3) != 0 && 
-        strnicmp(extension,"j2k",3) != 0 && 
-        strnicmp(extension,"wav",3) != 0) {
-        return 0;
-    }
-
-    return 1;
-}
-*/
-
 int get_filelist_3d(opendcp_t *opendcp,char *in_path_left,char *in_path_right,filelist_t *filelist) {
     filelist_t  *filelist_left;
     filelist_t  *filelist_right;
@@ -125,8 +101,6 @@ int get_filelist_3d(opendcp_t *opendcp,char *in_path_left,char *in_path_right,fi
 }
 
 int get_filelist(opendcp_t *opendcp,char *in_path,filelist_t *filelist) {
-    struct dirent **files;
-    struct dirent *file;
     struct stat st_in;
     int x = 0;
     int count;
@@ -137,21 +111,7 @@ int get_filelist(opendcp_t *opendcp,char *in_path,filelist_t *filelist) {
     }
 
     if (S_ISDIR(st_in.st_mode)) {
-        /* if input is directory, it is jpeg2000 or pcm */
-        count = scandir(in_path,&files,(void *)file_filter,alphasort);
-        if (count != filelist->file_count) {
-            printf("count mismatch\n");
-            return DCP_FATAL;
-        }
-        if (filelist->file_count) {
-            for (x=0;x<filelist->file_count;x++) {
-                sprintf(filelist->in[x],"%s/%s",in_path,files[x]->d_name);
-            }
-        }
-        for (x=0;x<filelist->file_count;x++) {
-            free(files[x]);
-        }
-        free(files);
+        build_filelist(in_path, NULL, filelist, MXF_INPUT);
     } else {
         /* mpeg2 or time_text */
         int essence_type = get_file_essence_type(in_path);

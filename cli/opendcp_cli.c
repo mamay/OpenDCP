@@ -18,10 +18,8 @@
 
 #include <string.h>
 #ifdef WIN32
-#include "win32/opendcp_win32_getopt.h"
 #include "win32/opendcp_win32_dirent.h"
 #else
-#include <getopt.h>
 #include <dirent.h>
 #endif
 #include <stdlib.h>
@@ -115,6 +113,32 @@ int get_file_count(char *path, int file_type) {
     }
 
     return count;
+}
+
+int build_filelist(char *input, char *output, filelist_t *filelist, int file_type) {
+    struct dirent **files;
+    int x = 0;
+    struct stat st_in;
+    char *extension;
+
+    if (stat(input, &st_in) != 0 ) {
+        dcp_log(LOG_ERROR,"Could not open input file %s",input);
+        return DCP_FATAL;
+    }
+
+    filelist->file_count = scandir(input,&files,(void *)file_filter,alphasort);
+    if (filelist->file_count) {
+        for (x=0;x<filelist->file_count;x++) {
+            sprintf(filelist->in[x],"%s/%s",input,files[x]->d_name);
+            if (file_type == J2K_INPUT) {
+                sprintf(filelist->out[x],"%s/%s.j2c",output,get_basename(files[x]->d_name));
+            }
+        }
+     }
+    for (x=0;x<filelist->file_count;x++) {
+        free(files[x]);
+    }
+    free(files);
 }
 
 filelist_t *filelist_alloc(int count) {

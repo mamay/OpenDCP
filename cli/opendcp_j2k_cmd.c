@@ -18,10 +18,8 @@
 
 #ifdef WIN32
 #include "win32/opendcp_win32_getopt.h"
-#include "win32/opendcp_win32_dirent.h"
 #else
 #include <getopt.h>
-#include <dirent.h>
 #include <signal.h>
 #endif
 #ifdef OPENMP
@@ -98,7 +96,6 @@ void dcp_usage() {
 }
 
 int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *filelist) {
-    struct dirent **files;
     int x = 0;
     struct stat st_in;
     struct stat st_out;
@@ -117,17 +114,7 @@ int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *fil
         }
 
         if (st_out.st_mode & S_IFDIR) {
-            filelist->file_count = scandir(in_path,&files,(void *)file_filter,alphasort);
-            if (filelist->file_count) {
-                for (x=0;x<filelist->file_count;x++) {
-                        sprintf(filelist->in[x],"%s/%s",in_path,files[x]->d_name);
-                        sprintf(filelist->out[x],"%s/%s.j2c",out_path,get_basename(files[x]->d_name));
-                }
-            }
-            for (x=0;x<filelist->file_count;x++) {
-                free(files[x]);
-            }
-            free(files);
+            build_filelist(in_path, out_path, filelist, J2K_INPUT);
         } else {
             dcp_log(LOG_ERROR,"If input is a directory, output must be as well");
             return DCP_FATAL;

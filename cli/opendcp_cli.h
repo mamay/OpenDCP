@@ -21,7 +21,6 @@
 
 int check_extension(char *filename, char *pattern);
 char *get_basename(const char *filename);
-int file_filter(struct dirent *filename);
 int get_file_count(char *path, int file_type);
 filelist_t *filelist_alloc(int count);
 void filelist_free(filelist_t *filelist);
@@ -30,5 +29,6 @@ int find_seq_offset (char str1[], char str2[]);
 int check_increment(char *str[], int index,int str_size);
 int check_sequential(char str1[],char str2[]);
 int check_file_sequence(char *str[], int count);
+int build_filelist(char *input, char *output, filelist_t *filelist, int file_type);
 
 #endif
