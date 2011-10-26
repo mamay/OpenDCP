@@ -27,6 +27,17 @@ INSTALL(FILES     ${PROJECT_SOURCE_DIR}/README.txt    DESTINATION share/doc/${CP
 
 #--Win32 package--------------------------------------------------------------
 IF(MAKE_WIN32)
+    SET(DLLS ${SYSROOT_PATH}/bin/mingwm10.dll
+             ${SYSROOT_PATH}/bin/libgcc_s_sjlj-1.dll
+             ${SYSROOT_PATH}/bin/libstdc++-6.dll
+             ${SYSROOT_PATH}/bin/zlib1.dll
+             ${SYSROOT_PATH}/bin/libgomp-1.dll
+             ${SYSROOT_PATH}/bin/pthreadGC2.dll
+             ${SYSROOT_PATH}/bin/libpng14-14.dll
+             ${SYSROOT_PATH}/bin/QtGui4.dll
+             ${SYSROOT_PATH}/bin/QtCore4.dll
+    )
+    INSTALL(FILES ${DLLS} DESTINATION bin)
     SET(CPACK_GENERATOR NSIS)
     SET(CPACK_NSIS_PACKAGE_NAME ${PROJECT_NAME})
     SET(CPACK_NSIS_DISPLAY_NAME ${PROJECT_NAME})
@@ -38,7 +49,6 @@ IF(MAKE_WIN32)
     SET(CPACK_NSIS_MUI_ICON  ${PROJECT_SOURCE_DIR}/gui/resources/opendcp.ico)
 ENDIF()
 #-----------------------------------------------------------------------------
-
 
 #--OSX package-------------------------------------------------------------
 IF(MAKE_OSX)
