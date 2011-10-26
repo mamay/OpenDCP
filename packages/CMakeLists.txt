@@ -27,17 +27,22 @@ INSTALL(FILES     ${PROJECT_SOURCE_DIR}/README.txt    DESTINATION share/doc/${CP
 
 #--Win32 package--------------------------------------------------------------
 IF(MAKE_WIN32)
-    SET(DLLS ${SYSROOT_PATH}/bin/mingwm10.dll
-             ${SYSROOT_PATH}/bin/libgcc_s_sjlj-1.dll
-             ${SYSROOT_PATH}/bin/libstdc++-6.dll
+    SET(GUI_DLLS
              ${SYSROOT_PATH}/bin/zlib1.dll
-             ${SYSROOT_PATH}/bin/libgomp-1.dll
-             ${SYSROOT_PATH}/bin/pthreadGC2.dll
              ${SYSROOT_PATH}/bin/libpng14-14.dll
              ${SYSROOT_PATH}/bin/QtGui4.dll
              ${SYSROOT_PATH}/bin/QtCore4.dll
     )
-    INSTALL(FILES ${DLLS} DESTINATION bin)
+    SET(COMMON_DLLS 
+             ${SYSROOT_PATH}/bin/mingwm10.dll
+             ${SYSROOT_PATH}/bin/libgomp-1.dll
+             ${SYSROOT_PATH}/bin/pthreadGC2.dll
+             ${SYSROOT_PATH}/bin/libgcc_s_sjlj-1.dll
+             ${SYSROOT_PATH}/bin/libstdc++-6.dll
+    )
+    INSTALL(FILES ${GUI_DLLS}    DESTINATION bin)
+    INSTALL(FILES ${COMMON_DLLS} DESTINATION bin)
+
     SET(CPACK_GENERATOR NSIS)
     SET(CPACK_NSIS_PACKAGE_NAME ${PROJECT_NAME})
     SET(CPACK_NSIS_DISPLAY_NAME ${PROJECT_NAME})
