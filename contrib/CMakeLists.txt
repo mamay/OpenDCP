@@ -45,6 +45,7 @@ IF(ENABLE_XMLSEC AND COMPILE_XMLSEC)
     EXTERNALPROJECT_ADD(03_XSLT
         URL ${OPENDCP_URL}/libxslt-1.1.26.tar.gz
         BUILD_IN_SOURCE 1
+        PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/libxslt-1.1.26.patch
         CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                           --disable-dependency-tracking --enable-static=yes --enable-shared=no
                           --with-libxml-prefix=${PREFIX}
@@ -57,7 +58,7 @@ IF(ENABLE_XMLSEC AND COMPILE_XMLSEC)
     EXTERNALPROJECT_ADD(06_XMLSEC1
         URL http://www.aleksey.com/xmlsec/download/xmlsec1-1.2.18.tar.gz
         BUILD_IN_SOURCE 1
-        PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/xmlsec1-1.1.26.patch
+        PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/xmlsec1-1.1.28.patch
         CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                           --enable-pkgconfig=no
                           --disable-dependency-tracking --enable-static=yes --enable-shared=no

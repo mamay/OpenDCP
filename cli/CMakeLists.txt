@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 MESSAGE(STATUS)
 MESSAGE(STATUS "-------------------------------------------------------------------------------")
-MESSAGE(STATUS "Creating Build Files")
+MESSAGE(STATUS "Creating CLI Build Files")
 MESSAGE(STATUS "-------------------------------------------------------------------------------")
 
 #--set cli source files-------------------------------------------------------

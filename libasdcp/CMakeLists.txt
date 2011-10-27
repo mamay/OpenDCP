@@ -5,7 +5,7 @@ MESSAGE(STATUS "----------------------------------------------------------------
 MESSAGE(STATUS "Creating ASDCPLIB Library Build Files")
 MESSAGE(STATUS "-------------------------------------------------------------------------------")
 
-#--Version--------------------------------------------------------------------
+#--Version----------------------------------------------------------------------
 SET(ASDCP_VERSION_MAJOR 1)
 SET(ASDCP_VERSION_MINOR 8)
 SET(ASDCP_VERSION_BUILD 41)
@@ -21,14 +21,14 @@ ELSE()
 ENDIF()
 ADD_DEFINITIONS(-DASDCP_PLATFORM="${PLATFORM}")
 ADD_DEFINITIONS(-DHAVE_EXPAT=1)
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 IF(WIN32)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DKM_WIN32")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DKM_WIN32")
 ENDIF()
 
-#--set source files-----------------------------------------------------------
+#--set source files-------------------------------------------------------------
 SET(KUMU_SRC_FILES
     KM_fileio.cpp
     KM_log.cpp
@@ -65,29 +65,25 @@ SET(ASDCP_SRC_FILES
     TimedText_Parser.cpp
     Wav.cpp
 )
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-#--compile libraries----------------------------------------------------------
-SET(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/libasdcp/")
-ADD_LIBRARY(opendcp-kumu  STATIC ${KUMU_SRC_FILES})
-ADD_LIBRARY(opendcp-asdcp STATIC ${ASDCP_SRC_FILES})
-TARGET_LINK_LIBRARIES(opendcp-asdcp opendcp-kumu ${LIBS})
-
+#--compile libraries------------------------------------------------------------
 IF(UNIX AND NOT APPLE)
     ADD_LIBRARY(opendcp-kumu-shared  SHARED ${KUMU_SRC_FILES})
     ADD_LIBRARY(opendcp-asdcp-shared SHARED ${ASDCP_SRC_FILES})
     SET_TARGET_PROPERTIES(opendcp-kumu-shared PROPERTIES OUTPUT_NAME "opendcp-kumu")
     SET_TARGET_PROPERTIES(opendcp-asdcp-shared PROPERTIES OUTPUT_NAME "opendcp-asdcp")
     TARGET_LINK_LIBRARIES(opendcp-kumu-shared opendcp-asdcp-shared ${LIB})
-ENDIF()
-#-----------------------------------------------------------------------------
-
-#--install libraries--------------------------------------------------------------------
-INSTALL(TARGETS opendcp-asdcp opendcp-kumu DESTINATION ${LIB_INSTALL_PATH})
-INSTALL(FILES AS_DCP.h DESTINATION include)
-
-IF(UNIX AND NOT APPLE)
     INSTALL(TARGETS opendcp-asdcp-shared opendcp-kumu-shared DESTINATION ${LIB_INSTALL_PATH})
-    INSTALL(FILES AS_DCP.h DESTINATION include)
+ELSE()
+    SET(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/libasdcp/")
+    ADD_LIBRARY(opendcp-kumu  STATIC ${KUMU_SRC_FILES})
+    ADD_LIBRARY(opendcp-asdcp STATIC ${ASDCP_SRC_FILES})
+    TARGET_LINK_LIBRARIES(opendcp-asdcp opendcp-kumu ${LIBS})
+    INSTALL(TARGETS opendcp-asdcp opendcp-kumu DESTINATION ${LIB_INSTALL_PATH})
 ENDIF()
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+
+#--install header---------------------------------------------------------------
+INSTALL(FILES AS_DCP.h DESTINATION include)
+#-------------------------------------------------------------------------------

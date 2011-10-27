@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-#--build Type-----------------------------------------------------------------
+#--build type-----------------------------------------------------------------
 PROJECT(OpenDCP)
 SET(CMAKE_BUILD_TYPE Release)
 STRING(TOLOWER ${PROJECT_NAME} PACKAGE_NAME)
@@ -53,8 +53,8 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 #-----------------------------------------------------------------------------
 
 #--set Base Compiler Flags----------------------------------------------------
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 ${OPENMP}")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 ${OPENMP}")
+SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -O3 ${OPENMP}")
+SET(CMAKE_CXX_FLAGS ${CMAKE_C_FLAGS})
 #-----------------------------------------------------------------------------
 
 #--set OS Specific Compiler Flags---------------------------------------------
@@ -84,7 +84,7 @@ ENDIF()
 #--build Paths----------------------------------------------------------------
 SET(LIB_INSTALL_PATH "lib")
 
-INCLUDE_DIRECTORIES(${OPENDCP_INCLUDE_DIR}//libopendcp
+INCLUDE_DIRECTORIES(${OPENDCP_INCLUDE_DIR}/libopendcp
                     ${PROJECT_BINARY_DIR}/libopendcp/include
 )
 SET(OPENDCP_LIB ${PROJECT_BINARY_DIR}/libopendcp/libopendcp.a)
