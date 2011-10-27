@@ -26,7 +26,7 @@ INSTALL(FILES     ${PROJECT_SOURCE_DIR}/README.txt    DESTINATION share/doc/${CP
 #-----------------------------------------------------------------------------
 
 #--Win32 package--------------------------------------------------------------
-IF(MAKE_WIN32)
+IF(WIN32)
     SET(GUI_DLLS
              ${SYSROOT_PATH}/bin/zlib1.dll
              ${SYSROOT_PATH}/bin/libpng14-14.dll
@@ -56,7 +56,7 @@ ENDIF()
 #-----------------------------------------------------------------------------
 
 #--OSX package-------------------------------------------------------------
-IF(MAKE_OSX)
+IF(APPLE)
     STRING(TOLOWER "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-mac.${ARCH}" CPACK_PACKAGE_FILE_NAME)
     SET(CPACK_PACKAGE_ICON ${PROJECT_SOURCE_DIR}/gui/resources/opendcp.icns) 
     SET(CPACK_GENERATOR "DragNDrop")
@@ -65,7 +65,7 @@ ENDIF()
 #-----------------------------------------------------------------------------
 
 #--debian package-------------------------------------------------------------
-IF(MAKE_DEB)
+IF(DEB)
     IF(ARCH STREQUAL "x86_64")
         SET(ARCH amd64)
     ENDIF()
@@ -80,7 +80,7 @@ ENDIF()
 #-----------------------------------------------------------------------------
 
 #--rpm package----------------------------------------------------------------
-IF(MAKE_RPM)
+IF(RPM)
     STRING(TOLOWER "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}.${ARCH}" CPACK_PACKAGE_FILE_NAME)
     SET(CPACK_RPM_PACKAGE_GROUP "Applications/Multimedia")
     SET(CPACK_RPM_PACKAGE_DESCRIPTION "This tool is used to created digital cinema packages (DCP)")
