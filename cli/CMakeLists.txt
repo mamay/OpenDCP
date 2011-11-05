@@ -19,7 +19,7 @@ SET(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}")
 
 #--compile cli tools----------------------------------------------------------
 ADD_EXECUTABLE(opendcp_largefile opendcp_largefile.c opendcp_force_cpp.cpp)
-TARGET_LINK_LIBRARIES(opendcp_largefile ${OPENDCP_LIB} ${LIBS})
+TARGET_LINK_LIBRARIES(opendcp_largefile ${LIBS})
 
 ADD_EXECUTABLE(opendcp_xml opendcp_xml_cmd.c opendcp_force_cpp.cpp)
 TARGET_LINK_LIBRARIES(opendcp_xml ${OPENDCP_LIB} ${ASDCP_LIBRARIES} ${LIBS})

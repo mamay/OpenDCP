@@ -21,7 +21,7 @@ SET(OPENDCP_WEBSITE "http://www.opendcp.org")
 IF(CMAKE_SIZEOF_VOID_P MATCHES "8")
     SET(ARCH x86_64)
 ELSE()
-    SET(ARCH i386)
+    SET(ARCH i686)
 ENDIF()
 #-----------------------------------------------------------------------------
 
@@ -30,6 +30,7 @@ OPTION(ENABLE_XMLSEC  "Enable XML digital singatures and security features" ON)
 OPTION(ENABLE_OSX10.5 "Enable OSX 10.5 compatibility" OFF)
 OPTION(ENABLE_OPENMP  "Enable OPENMP multithreading" ON)
 OPTION(ENABLE_GUI     "Enable GUI compiling" ON)
+OPTION(32BIT          "Enable 32-bit" OFF)
 OPTION(RPM       "Create RPM package" OFF)
 OPTION(DEB       "Create DEB package" OFF)
 
@@ -52,9 +53,23 @@ ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64)
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 #-----------------------------------------------------------------------------
 
-#--set Base Compiler Flags----------------------------------------------------
+#--set base compiler flags----------------------------------------------------
 SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -O3 ${OPENMP}")
 SET(CMAKE_CXX_FLAGS ${CMAKE_C_FLAGS})
+#-----------------------------------------------------------------------------
+
+#--set 32-bit compiler flags--------------------------------------------------
+IF(32BIT)
+    SET(CMAKE_CROSS_COMPILING ON)
+    SET(ARCH i686)
+    IF(EXISTS /usr/lib64)
+        SET(LIB_SEARCH  "lib64")
+        SET(LIB_REPLACE "lib")
+    ELSEIF(EXISTS /usr/lib32)
+        SET(LIB_SEARCH  "lib")
+        SET(LIB_REPLACE "lib32")
+    ENDIF()
+ENDIF()
 #-----------------------------------------------------------------------------
 
 #--set OS Specific Compiler Flags---------------------------------------------
@@ -77,6 +92,12 @@ ELSEIF(WIN32)
 ELSE(UNIX)
     IF(ARCH STREQUAL "x86_64")
         SET(AUTO_CFLAGS "CFLAGS=-fPIC -O3")
+    ELSE()
+        SET(AUTO_CFLAGS "CFLAGS=-m32")
+        SET(TARGET --target=i686)
+        SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -m32")
+        SET(CMAKE_CXX_FLAGS ${CMAKE_C_FLAGS})
+        SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -m32 -melf_i386")
     ENDIF()
 ENDIF()
 #-----------------------------------------------------------------------------
@@ -87,7 +108,7 @@ SET(LIB_INSTALL_PATH "lib")
 INCLUDE_DIRECTORIES(${OPENDCP_INCLUDE_DIR}/libopendcp
                     ${PROJECT_BINARY_DIR}/libopendcp/include
 )
-SET(OPENDCP_LIB ${PROJECT_BINARY_DIR}/libopendcp/libopendcp.a)
+SET(OPENDCP_LIB -L${PROJECT_BINARY_DIR}/libopendcp -lopendcp)
 
 SET(ASDCP_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/libasdcp)
 INCLUDE_DIRECTORIES(${ASDCP_INCLUDE_DIR})
@@ -146,6 +167,13 @@ ELSEIF(WIN32)
     SET(LIB_DIR ${SYSROOT_PATH}/lib)
     SET(PREFIX ${SYSROOT_PATH})
     SET(PREFIX_ARG --prefix=${PREFIX})
+    IF(ARCH STREQUAL "i686")
+        SET(CMAKE_RC_COMPILER /usr/bin/i686-w64-mingw32-windres) 
+    ELSE()
+        SET(CMAKE_RC_COMPILER /usr/bin/x86_64-w64-mingw32-windres) 
+    ENDIF()
+    MESSAGE(STATUS "Win32 sys-root: ${SYSROOT_PATH}")
+    MESSAGE(STATUS "Win32 windres:  ${CMAKE_RC_COMPILER}")
 
     IF(ENABLE_XMLSEC)
         INCLUDE_DIRECTORIES(${SYSROOT_PATH}/include/libxml2)
@@ -170,6 +198,7 @@ ELSEIF(WIN32)
 ELSEIF(UNIX)
     SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules/)
 
+    FIND_LIBRARY(ZLIB REQUIRED)
     FIND_PACKAGE(ZLIB REQUIRED)
     INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
     SET(LIBS ${LIBS} ${ZLIB_LIBRARIES})
@@ -209,6 +238,11 @@ ELSEIF(UNIX)
     SET(LIBS ${LIBS} ${PREFIX}/lib/libopenjpeg.a)
 
     ADD_SUBDIRECTORY(contrib)
+
+    IF(ARCH STREQUAL "x86_64" AND 32BIT)
+        STRING(REGEX REPLACE ${LIB_SEARCH} ${LIB_REPLACE} LIBS "${LIBS}")
+        MESSAGE(STATUS "Converting 64-bit path to 32-bit ${LIBS}")
+    ENDIF()
 ENDIF()
 #-----------------------------------------------------------------------------
 

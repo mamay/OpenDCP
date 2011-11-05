@@ -22,14 +22,14 @@ SET(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/COPYRIGHT.txt")
 
 #--Win32 package--------------------------------------------------------------
 IF(WIN32)
-    SET(GUI_DLLS
+    FILE(GLOB GUI_DLLS
              ${SYSROOT_PATH}/bin/zlib1.dll
-             ${SYSROOT_PATH}/bin/libpng14-14.dll
+             ${SYSROOT_PATH}/bin/libpng*.dll
              ${SYSROOT_PATH}/bin/QtGui4.dll
              ${SYSROOT_PATH}/bin/QtCore4.dll
     )
     SET(COMMON_DLLS 
-             ${SYSROOT_PATH}/bin/mingwm10.dll
+             #${SYSROOT_PATH}/bin/mingwm10.dll
              ${SYSROOT_PATH}/bin/libgomp-1.dll
              ${SYSROOT_PATH}/bin/pthreadGC2.dll
              ${SYSROOT_PATH}/bin/libgcc_s_sjlj-1.dll
