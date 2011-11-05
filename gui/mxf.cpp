@@ -280,7 +280,6 @@ void MainWindow::mxfCreateAudio() {
         inputList.append(QFileInfo(ui->aSubEdit->text()));
         inputList.append(QFileInfo(ui->aLeftSEdit->text()));
         inputList.append(QFileInfo(ui->aRightSEdit->text()));
-        inputList.append(QFileInfo(ui->aLeftEdit->text()));
     }
 
     outputFile = ui->aMxfOutEdit->text();
