@@ -188,6 +188,18 @@ void filelist_free(filelist_t *filelist) {
     return;
 }
 
+int find_seq_offset(char str1[], char str2[]) {
+    int i;
+    int offset = 0;
+
+    for (i = 0; (i < strlen(str1)) && (offset == 0); i++) {
+        if(str1[i] != str2[i])
+            offset = i;
+    }
+
+    return offset;
+}
+
 int find_ext_offset(char str[]) {
     int i = strlen(str);
     while(i) {
@@ -199,27 +211,16 @@ int find_ext_offset(char str[]) {
     return 0;
 }
 
-int find_seq_offset (char str1[], char str2[]) {
-    int i = 0;
-    while(1) {
-        if(str1[i] != str2[i])
-                return i;
-        if(str1[i] == '\0' || str2[i] == '\0')
-                return 0;
-        i++;
-    }
-}
-
 int check_increment(char *str[], int index,int str_size) {
-    int x;
-    int offset, ext_offset, diff_len;
+    int i,x;
+    int seq_offset, ext_offset, diff_len;
 
-    offset     = find_seq_offset(str[str_size-1],str[0]);
+    seq_offset = find_seq_offset(str[0], str[str_size-1]);
     ext_offset = find_ext_offset(str[0]);
-    diff_len   = ext_offset - offset;;
+    diff_len   = ext_offset - seq_offset;
 
     char *seq = (char *)malloc(diff_len+1);
-    strncpy(seq,str[index]+offset,diff_len);
+    strncpy(seq,str[index]+seq_offset,diff_len);
     x = atoi(seq);
 
     if (seq) {
@@ -235,28 +236,27 @@ int check_increment(char *str[], int index,int str_size) {
 
 /* check if two strings are sequential */
 int check_sequential(char str1[],char str2[]) {
-    int x,y;
-    int offset, len;
-
+    int i,x,y;
+    int offset = 0;
+    int diff_len    = 0;
 
     if (strlen(str1) != strlen(str2)) {
         return STRING_LENGTH_NOTEQUAL;
     }
 
-    offset = find_seq_offset(str2,str1);
-
-    if (offset) {
-        len = offset;
-    } else {
-        len = strlen(str1);
+    for (i = 0; (i < strlen(str1)) && (offset == 0); i++) {
+        if(str1[i] != str2[i])
+            offset = i;
     }
 
-    char *seq = (char *)malloc(len+1);
+    diff_len = strlen(str1) - offset;
 
-    strncpy(seq,str1+offset,len);
+    char *seq = (char *)malloc(diff_len+1);
+
+    strncpy(seq,str1+offset,diff_len);
     x = atoi(seq);
 
-    strncpy(seq,str2+offset,len);
+    strncpy(seq,str2+offset,diff_len);
     y = atoi(seq);
 
     if (seq) {

@@ -134,27 +134,20 @@ int findSeqOffset(const char str1[], const char str2[]) {
 
 int MainWindow::checkSequential(const char str1[], const char str2[]) {
     int i,x,y;
-    int offset, len;
+    int offset = 0;
+    int len    = 0;
 
 
     if (strlen(str1) != strlen(str2)) {
         return STRING_LENGTH_NOTEQUAL;
     }
-    
-    i = 0;
-    while (1) {
+  
+    for (i = 0; (i < strlen(str1)) && (offset == 0); i++) {
         if(str1[i] != str2[i])
-                offset = i;
-        if(str1[i] == '\0' || str2[i] == '\0')
-                offset = 0;
-        i++;
+            offset = i;
     }
 
-    if (offset) {
-        len = offset;
-    } else {
-        len = strlen(str1);
-    }
+    len = strlen(str1) - offset;
 
     char *seq = (char *)malloc(len+1);
 
@@ -178,10 +171,10 @@ int MainWindow::checkSequential(const char str1[], const char str2[]) {
 /* check if filelist is sequential */
 int MainWindow::checkFileSequence(QStringList list) {
     QString msg;
-    int     sequential = 0;
+    int     sequential = DCP_SUCCESS;
     int     x = 0;
 
-    for (x = 0; x < (list.size()-1) && sequential == DCP_SUCCESS; x++) {
+    for (x = 0; (x < (list.size()-1)) && (sequential == DCP_SUCCESS); x++) {
         sequential = checkSequential((char *)list.at(x).toStdString().c_str(), (char *)list.at(x+1).toStdString().c_str());
     }
 
