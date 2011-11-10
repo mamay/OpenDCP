@@ -114,7 +114,6 @@ void MainWindow::mxfSourceTypeUpdate() {
             }
         }
     }
-
     // WAV
     if (ui->mxfSourceTypeComboBox->currentIndex() == 2) {
         ui->mxfInputStack->setCurrentIndex(1);
@@ -179,6 +178,7 @@ void MainWindow::mxfDone() {
 }
 
 void MainWindow::mxfStart() {
+    // JPEG2000
     if(ui->mxfSourceTypeComboBox->currentIndex()== 0) {
         if (ui->pMxfOutEdit->text().isEmpty()) {
             QMessageBox::critical(this, tr("Destination file needed"),tr("Please select a destination picture MXF file."));
@@ -195,7 +195,16 @@ void MainWindow::mxfStart() {
                 return;
              }
         }
+        // check frame rate
+        if (ui->mxfStereoscopicCheckBox->checkState()) {
+            if (ui->mxfFrameRateComboBox->currentText().toInt() > 30) {
+                QMessageBox::critical(this, tr("Invalid frame rate"),tr("Stereoscopic MXF only supports 24, 25, or 30 fps."));
+                return;
+            }
+        }
     }
+
+    // MPEG2
     if(ui->mxfSourceTypeComboBox->currentIndex() == 1) {
         if (ui->pMxfOutEdit->text().isEmpty()) {
             QMessageBox::critical(this, tr("Destination file needed"),tr("Please select a destination picture MXF file."));
@@ -206,6 +215,8 @@ void MainWindow::mxfStart() {
             return;
         }
     }
+
+    // WAV
     if (ui->mxfSourceTypeComboBox->currentIndex() == 2) {
         if (ui->aMxfOutEdit->text().isEmpty()) {
             QMessageBox::critical(this, tr("Destination file needed"),tr("Please select a destination sound MXF file."));
@@ -226,14 +237,6 @@ void MainWindow::mxfStart() {
                 QMessageBox::critical(this, tr("Source content needed"),tr("Please specify at least 5.1 wav files to generate an MXF sound file."));
                     return;
             }
-        }
-    }
-
-    // check frame rate
-    if (ui->mxfStereoscopicCheckBox->checkState()) {
-        if (ui->mxfFrameRateComboBox->currentText().toInt() > 30) {
-            QMessageBox::critical(this, tr("Invalid frame rate"),tr("Stereoscopic MXF only supports 24, 25, or 30 fps."));
-            return;
         }
     }
 
@@ -302,9 +305,10 @@ void MainWindow::mxfCreateSubtitle() {
 }
 
 void MainWindow::mxfCreateAudio() {
-    opendcp_t     *mxfContext = create_opendcp();
     QFileInfoList inputList;
     QString       outputFile;
+
+    opendcp_t     *mxfContext = create_opendcp();
 
     // process options
     mxfContext->log_level = 0;
@@ -366,6 +370,7 @@ void MainWindow::mxfCreatePicture() {
     } else {
         mxfContext->ns = XML_NS_SMPTE;
     }
+
     mxfContext->frame_rate = ui->mxfFrameRateComboBox->currentText().toInt();
     mxfContext->stereoscopic = 0;
 
@@ -430,5 +435,6 @@ void MainWindow::mxfCreatePicture() {
 Done:
 
     delete_opendcp(mxfContext);
+
     return;
 }
