@@ -21,6 +21,7 @@
 
 extern "C" void uuid_random(char *uuid);
 extern "C" int calculate_digest(const char *filename, char *digest);
+extern "C" int get_wav_duration(const char *filename, int frame_rate);
 
 // internal functions
 int write_j2k_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file);

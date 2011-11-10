@@ -55,6 +55,7 @@ public slots:
     void mxfStart();
     void mxfSourceTypeUpdate();
     void mxfSetStereoscopicState();
+    void mxfSetHVState();
     void mxfSetSoundState();
     void mxfCreateSubtitle();
     void mxfDone();

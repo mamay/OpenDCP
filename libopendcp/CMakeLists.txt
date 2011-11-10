@@ -31,21 +31,27 @@ SET(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/libopendcp/")
 #-------------------------------------------------------------------------------
 
 #--compile opendcplib-----------------------------------------------------------
-IF(UNIX AND NOT APPLE)
+IF(BUILD_SHARED)
     ADD_LIBRARY(opendcp-lib-shared SHARED ${OPENDCP_SEC_FILES} ${OPENDCP_SRC_FILES})
     SET_TARGET_PROPERTIES(opendcp-lib-shared PROPERTIES OUTPUT_NAME "opendcp")
     SET_TARGET_PROPERTIES(opendcp-lib-shared PROPERTIES PREFIX "lib")
     TARGET_LINK_LIBRARIES(opendcp-lib-shared ${ASDCP_LIBRARIES} ${LIBS})
-    INSTALL(TARGETS opendcp-lib-shared DESTINATION ${LIB_INSTALL_PATH})
+    IF(INSTALL_LIB)
+        INSTALL(TARGETS opendcp-lib-shared DESTINATION ${LIB_INSTALL_PATH})
+    ENDIF()
 ELSE()
     ADD_LIBRARY(opendcp-lib-static STATIC ${OPENDCP_SEC_FILES} ${OPENDCP_SRC_FILES})
     SET_TARGET_PROPERTIES(opendcp-lib-static PROPERTIES OUTPUT_NAME "opendcp")
     SET_TARGET_PROPERTIES(opendcp-lib-static PROPERTIES PREFIX "lib")
     TARGET_LINK_LIBRARIES(opendcp-lib-static ${ASDCP_LIBRARIES} ${LIBS})
-    INSTALL(TARGETS opendcp-lib-static DESTINATION ${LIB_INSTALL_PATH})
+    IF(INSTALL_LIB)
+        INSTALL(TARGETS opendcp-lib-static DESTINATION ${LIB_INSTALL_PATH})
+    ENDIF()
 ENDIF()
 #-------------------------------------------------------------------------------
 
 #--install header---------------------------------------------------------------
-INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/opendcp.h DESTINATION include)
+IF(INSTALL_LIB)
+    INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/opendcp.h DESTINATION include)
+ENDIF()
 #-------------------------------------------------------------------------------

@@ -1,38 +1,46 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-#--build type-----------------------------------------------------------------
+#--build type-------------------------------------------------------------------
 PROJECT(OpenDCP)
 SET(CMAKE_BUILD_TYPE Release)
 STRING(TOLOWER ${PROJECT_NAME} PACKAGE_NAME)
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-#--version--------------------------------------------------------------------
+#--version----------------------------------------------------------------------
 SET(VERSION_MAJOR 0)
 SET(VERSION_MINOR 0)
-SET(VERSION_BUILD 21)
+SET(VERSION_BUILD 22)
 SET(OPENDCP_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD})
 SET(OPENDCP_NAME ${PROJECT_NAME})
 SET(OPENDCP_COPYRIGHT "(c) 2010-2011 Terrence Meiczinger. All rights reserved.")
 SET(OPENDCP_LICENSE "The program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.")
 SET(OPENDCP_WEBSITE "http://www.opendcp.org")
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-#--check 32 or 64-bit---------------------------------------------------------
+#--check 32 or 64-bit-----------------------------------------------------------
 IF(CMAKE_SIZEOF_VOID_P MATCHES "8")
-    SET(ARCH x86_64)
+    SET(HOST_ARCH x86_64)
 ELSE()
-    SET(ARCH i686)
+    SET(HOST_ARCH i686)
 ENDIF()
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-#--options--------------------------------------------------------------------
+#--options----------------------------------------------------------------------
 OPTION(ENABLE_XMLSEC  "Enable XML digital singatures and security features" ON)
 OPTION(ENABLE_OSX10.5 "Enable OSX 10.5 compatibility" OFF)
 OPTION(ENABLE_OPENMP  "Enable OPENMP multithreading" ON)
 OPTION(ENABLE_GUI     "Enable GUI compiling" ON)
 OPTION(32BIT          "Enable 32-bit" OFF)
-OPTION(RPM       "Create RPM package" OFF)
-OPTION(DEB       "Create DEB package" OFF)
+OPTION(RPM            "Create RPM package" OFF)
+OPTION(DEB            "Create DEB package" OFF)
+
+IF(UNIX)
+    IF(EXISTS /usr/bin/rpmbuild)
+        SET(RPM ON)
+    ELSEIF(EXISTS /usr/bin/dpkg)
+        SET(DEB ON)
+    ENDIF()
+ENDIF()
 
 IF(ENABLE_XMLSEC)
     ADD_DEFINITIONS(-DXMLSEC)
@@ -47,21 +55,21 @@ IF(ENABLE_OPENMP)
 ENDIF()
 
 ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64)
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-#--cmake options--------------------------------------------------------------
+#--cmake options----------------------------------------------------------------
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-#--set base compiler flags----------------------------------------------------
+#--set base compiler flags------------------------------------------------------
 SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -O3 ${OPENMP}")
 SET(CMAKE_CXX_FLAGS ${CMAKE_C_FLAGS})
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-#--set 32-bit compiler flags--------------------------------------------------
+#--adjust lib paths for 32-bit--------------------------------------------------
 IF(32BIT)
     SET(CMAKE_CROSS_COMPILING ON)
-    SET(ARCH i686)
+    SET(TARGET_ARCH i686)
     IF(EXISTS /usr/lib64)
         SET(LIB_SEARCH  "lib64")
         SET(LIB_REPLACE "lib")
@@ -69,10 +77,12 @@ IF(32BIT)
         SET(LIB_SEARCH  "lib")
         SET(LIB_REPLACE "lib32")
     ENDIF()
+ELSE()
+    SET(TARGET_ARCH ${HOST_ARCH})
 ENDIF()
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-#--set OS Specific Compiler Flags---------------------------------------------
+#--set OS Specific Compiler Flags-----------------------------------------------
 IF(APPLE)
     IF(ENABLE_OSX10.5)
         SET(CMAKE_OSX_SYSROOT /Developer/SDKs/MacOSX10.5.sdk)
@@ -90,7 +100,7 @@ ELSEIF(WIN32)
     SET(CMAKE_CXX_FLAGS ${CMAKE_C_FLAGS}) 
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 ELSE(UNIX)
-    IF(ARCH STREQUAL "x86_64")
+    IF(TARGET_ARCH STREQUAL "x86_64")
         SET(AUTO_CFLAGS "CFLAGS=-fPIC -O3")
     ELSE()
         SET(AUTO_CFLAGS "CFLAGS=-m32")
@@ -100,11 +110,9 @@ ELSE(UNIX)
         SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -m32 -melf_i386")
     ENDIF()
 ENDIF()
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-#--build Paths----------------------------------------------------------------
-SET(LIB_INSTALL_PATH "lib")
-
+#--build paths------------------------------------------------------------------
 INCLUDE_DIRECTORIES(${OPENDCP_INCLUDE_DIR}/libopendcp
                     ${PROJECT_BINARY_DIR}/libopendcp/include
 )
@@ -114,23 +122,25 @@ SET(ASDCP_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/libasdcp)
 INCLUDE_DIRECTORIES(${ASDCP_INCLUDE_DIR})
 SET(ASDCP_LIBRARIES -L${PROJECT_BINARY_DIR}/libasdcp -lopendcp-asdcp -lopendcp-kumu)
 
-IF(UNIX AND NOT APPLE AND ARCH STREQUAL "x86_64")
+IF(UNIX AND NOT APPLE AND TARGET_ARCH STREQUAL "x86_64")
     SET(LIB_INSTALL_PATH "lib64")
+ELSE()
+    SET(LIB_INSTALL_PATH "lib")
 ENDIF()
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-#--contrib Paths--------------------------------------------------------------
+#--contrib paths----------------------------------------------------------------
 SET(OPENDCP_URL http://opendcp.googlecode.com/files)
 SET(PREFIX ${PROJECT_BINARY_DIR}/contrib)
 SET(PREFIX_ARG --prefix=${PREFIX})
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 MESSAGE(STATUS)
-MESSAGE(STATUS "===============================================================================")
-MESSAGE(STATUS "OpenDCP Version ${OPENDCP_VERSION} CMake - ${CMAKE_GENERATOR} (${ARCH})")
-MESSAGE(STATUS "===============================================================================")
+MESSAGE(STATUS "================================================================================")
+MESSAGE(STATUS "OpenDCP Version ${OPENDCP_VERSION} CMake - ${CMAKE_SYSTEM_NAME} (${TARGET_ARCH})")
+MESSAGE(STATUS "================================================================================")
 
-#--set os specifc linking mode------------------------------------------------
+#--set os specifc linking mode--------------------------------------------------
 IF(APPLE)
     #-- Apple includes some old versions of certain libraries, so we want to compile the
     #-- recent versions of those. In other cases, we can use dynamic libraries.
@@ -162,18 +172,16 @@ IF(APPLE)
 
     ADD_SUBDIRECTORY(contrib)
 ELSEIF(WIN32)
-    #-- Win32 Compiling
+    #-- Win32 cross-compiling
     SET(SYSROOT_PATH ${CMAKE_INSTALL_PREFIX})
     SET(LIB_DIR ${SYSROOT_PATH}/lib)
     SET(PREFIX ${SYSROOT_PATH})
     SET(PREFIX_ARG --prefix=${PREFIX})
-    IF(ARCH STREQUAL "i686")
+    IF(TARGET_ARCH STREQUAL "i686")
         SET(CMAKE_RC_COMPILER /usr/bin/i686-w64-mingw32-windres) 
     ELSE()
         SET(CMAKE_RC_COMPILER /usr/bin/x86_64-w64-mingw32-windres) 
     ENDIF()
-    MESSAGE(STATUS "Win32 sys-root: ${SYSROOT_PATH}")
-    MESSAGE(STATUS "Win32 windres:  ${CMAKE_RC_COMPILER}")
 
     IF(ENABLE_XMLSEC)
         INCLUDE_DIRECTORIES(${SYSROOT_PATH}/include/libxml2)
@@ -239,22 +247,22 @@ ELSEIF(UNIX)
 
     ADD_SUBDIRECTORY(contrib)
 
-    IF(ARCH STREQUAL "x86_64" AND 32BIT)
+    IF(CMAKE_CROSS_COMPILING)
         STRING(REGEX REPLACE ${LIB_SEARCH} ${LIB_REPLACE} LIBS "${LIBS}")
         MESSAGE(STATUS "Converting 64-bit path to 32-bit ${LIBS}")
     ENDIF()
 ENDIF()
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-#--add source directories-----------------------------------------------------
+#--add source directories-------------------------------------------------------
 ADD_SUBDIRECTORY(libasdcp)
 ADD_SUBDIRECTORY(libopendcp)
 ADD_SUBDIRECTORY(cli)
 IF(ENABLE_GUI)
     ADD_SUBDIRECTORY(gui)
 ENDIF()
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-#--build packages-------------------------------------------------------------
+#--build packages---------------------------------------------------------------
 ADD_SUBDIRECTORY(packages)
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------

@@ -21,6 +21,7 @@
 #include <KM_prng.h>
 #include <KM_memio.h>
 #include <KM_util.h>
+#include <WavFileWriter.h>
 #include <openssl/sha.h>
 
 #include <iostream>
@@ -82,6 +83,27 @@ extern "C" int calculate_digest(const char *filename, char *digest)
     } else {
         return MXF_CALC_DIGEST_FAILED;
     }
+}
+
+/* get wav duration */
+extern "C" int get_wav_duration(const char *filename, int frame_rate) {
+    PCM::WAVParser       pcm_parser;
+    PCM::AudioDescriptor audio_desc;
+    Result_t             result = RESULT_OK;
+    ui32_t               duration;
+
+    Rational edit_rate(frame_rate,1);
+
+    result = pcm_parser.OpenRead(filename, edit_rate);
+
+    if (ASDCP_SUCCESS(result)) {
+        pcm_parser.FillAudioDescriptor(audio_desc);
+        duration =  PCM::CalcSamplesPerFrame(audio_desc);
+    } else {
+        duration = 0;
+    }
+
+    return duration;
 }
 
 /* get the essence class of a file */
@@ -325,9 +347,10 @@ extern "C" int write_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_
     int           rc;
     EssenceType_t essence_type;
 
-    result = ASDCP::RawEssenceType(filelist->in[0], essence_type);
+    result = ASDCP::EssenceType(filelist->in[0], essence_type);
 
     if (ASDCP_FAILURE(result)) {
+    printf("doo!\n");
         return MXF_COULD_NOT_DETECT_ESSENCE_TYPE;
     }
 
@@ -355,6 +378,7 @@ extern "C" int write_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_
             rc = MXF_UNKOWN_ESSENCE_TYPE;
             break;
     }
+ 
 
     return rc; 
 }
@@ -623,6 +647,8 @@ int write_pcm_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     }
 
     pcm_parser.FillAudioDescriptor(audio_desc);
+
+    /* check audio characteristics */
     audio_desc.EditRate = edit_rate;
     frame_buffer.Capacity(PCM::CalcFrameBufferSize(audio_desc));
 

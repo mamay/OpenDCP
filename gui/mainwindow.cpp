@@ -34,8 +34,8 @@ MainWindow::MainWindow(QWidget *parent) :
     dMxfConversion  = new DialogMxfConversion();
     mxfWriterThread = new MxfWriter(this);
 
-    setInitialUiState();
     connectSlots();
+    setInitialUiState();
 }
 
 MainWindow::~MainWindow()
@@ -63,6 +63,7 @@ void MainWindow::setInitialUiState()
     // set initial screen indexes
     j2kSetStereoscopicState();
     mxfSetStereoscopicState();
+    mxfSetHVState();
     mxfSetSoundState();
 
     // Check For Kakadu
@@ -82,6 +83,8 @@ void MainWindow::setInitialUiState()
     ui->threadsSpinBox->setMaximum(QThreadPool::globalInstance()->maxThreadCount());
     ui->threadsSpinBox->setValue(QThread::idealThreadCount());
 
+    ui->mxfSourceTypeComboBox->setCurrentIndex(0);
+    ui->mxfInputStack->setCurrentIndex(0);
     ui->mxfTypeComboBox->setCurrentIndex(1);
     ui->tabWidget->setCurrentIndex(0);
 
@@ -99,7 +102,9 @@ void MainWindow::getPath(QWidget *w)
     QString path;
     QString filter;
 
-    if (w->objectName().contains("picture") || w->objectName().contains("Image") || w->objectName().contains("J2k")) {
+    if (w->objectName().contains("picture") ||
+        w->objectName().contains("Image")   ||
+        w->objectName().contains("J2k")) {
         if (w->objectName().contains("picture") && ui->mxfSourceTypeComboBox->currentIndex() == 1) {
             filter = "*.m2v";
             path = QFileDialog::getOpenFileName(this, tr("Choose an mpeg2 file"),lastDir);
@@ -121,7 +126,8 @@ void MainWindow::getPath(QWidget *w)
     lastDir = path;
 }
 
-int findSeqOffset(const char str1[], const char str2[]) {
+int findSeqOffset(const char str1[], const char str2[])
+{
     int i = 0;
     while(1) {
         if(str1[i] != str2[i])
@@ -132,7 +138,8 @@ int findSeqOffset(const char str1[], const char str2[]) {
     }
 }
 
-int MainWindow::checkSequential(const char str1[], const char str2[]) {
+int MainWindow::checkSequential(const char str1[], const char str2[])
+{
     int i,x,y;
     int offset = 0;
     int len    = 0;
@@ -145,6 +152,10 @@ int MainWindow::checkSequential(const char str1[], const char str2[]) {
     for (i = 0; (i < strlen(str1)) && (offset == 0); i++) {
         if(str1[i] != str2[i])
             offset = i;
+    }
+ 
+    if (offset) {
+        offset--;
     }
 
     len = strlen(str1) - offset;
@@ -169,7 +180,8 @@ int MainWindow::checkSequential(const char str1[], const char str2[]) {
 }
 
 /* check if filelist is sequential */
-int MainWindow::checkFileSequence(QStringList list) {
+int MainWindow::checkFileSequence(QStringList list)
+{
     QString msg;
     int     sequential = DCP_SUCCESS;
     int     x = 0;

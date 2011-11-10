@@ -355,6 +355,7 @@ int       delete_opendcp(opendcp_t *opendcp);
 int read_asset_info(asset_t *asset);
 void uuid_random(char *uuid);
 int calculate_digest(const char *filename, char *digest);
+int get_wav_duration(const char *filename, int frame_rate);
 
 /* MXF Routines */
 int write_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output);

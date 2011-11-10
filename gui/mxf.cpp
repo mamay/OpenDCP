@@ -25,12 +25,13 @@
 #include <opendcp.h>
 #include "mxf-writer.h"
 
-void MainWindow::mxfConnectSlots()
-{
+void MainWindow::mxfConnectSlots() {
     // connect slots
     connect(ui->mxfStereoscopicCheckBox, SIGNAL(stateChanged(int)), this, SLOT(mxfSetStereoscopicState()));
     connect(ui->mxfSoundRadio2, SIGNAL(clicked()), this, SLOT(mxfSetSoundState()));
     connect(ui->mxfSoundRadio5, SIGNAL(clicked()), this, SLOT(mxfSetSoundState()));
+    connect(ui->mxfSoundRadio7, SIGNAL(clicked()), this, SLOT(mxfSetSoundState()));
+    connect(ui->mxfHVCheckBox, SIGNAL(stateChanged(int)), this, SLOT(mxfSetHVState()));
     connect(ui->mxfSourceTypeComboBox,SIGNAL(currentIndexChanged(int)),this, SLOT(mxfSourceTypeUpdate()));
     connect(ui->mxfButton,SIGNAL(clicked()),this,SLOT(mxfStart()));
     connect(ui->subCreateButton,SIGNAL(clicked()),this,SLOT(mxfCreateSubtitle()));
@@ -49,6 +50,8 @@ void MainWindow::mxfConnectSlots()
     signalMapper.setMapping(ui->aSubButton, ui->aSubEdit);
     signalMapper.setMapping(ui->aLeftSButton, ui->aLeftSEdit);
     signalMapper.setMapping(ui->aRightSButton, ui->aRightSEdit);
+    signalMapper.setMapping(ui->aHIButton, ui->aHIEdit);
+    signalMapper.setMapping(ui->aVIButton, ui->aVIEdit);
 
     // Subtitle input lines
     signalMapper.setMapping(ui->subInButton, ui->subInEdit);
@@ -67,6 +70,8 @@ void MainWindow::mxfConnectSlots()
     connect(ui->aSubButton, SIGNAL(clicked()), &signalMapper, SLOT(map()));
     connect(ui->aLeftSButton, SIGNAL(clicked()),&signalMapper, SLOT(map()));
     connect(ui->aRightSButton, SIGNAL(clicked()), &signalMapper, SLOT(map()));
+    connect(ui->aHIButton, SIGNAL(clicked()), &signalMapper, SLOT(map()));
+    connect(ui->aVIButton, SIGNAL(clicked()), &signalMapper, SLOT(map()));
     connect(ui->pMxfOutButton, SIGNAL(clicked()), &signalMapper, SLOT(map()));
     connect(ui->aMxfOutButton, SIGNAL(clicked()), &signalMapper, SLOT(map()));
     connect(ui->subInButton, SIGNAL(clicked()), &signalMapper, SLOT(map()));
@@ -123,6 +128,17 @@ void MainWindow::mxfSourceTypeUpdate() {
     }
 }
 
+void MainWindow::mxfSetHVState() {
+    int value = ui->mxfHVCheckBox->checkState();
+
+    ui->aHILabel->setEnabled(value);
+    ui->aHIEdit->setEnabled(value);
+    ui->aHIButton->setEnabled(value);
+    ui->aVILabel->setEnabled(value);
+    ui->aVIEdit->setEnabled(value);
+    ui->aVIButton->setEnabled(value);
+}
+
 void MainWindow::mxfSetStereoscopicState() {
     int value = ui->mxfStereoscopicCheckBox->checkState();
 
@@ -144,33 +160,19 @@ void MainWindow::mxfSetStereoscopicState() {
 }
 
 void MainWindow::mxfSetSoundState() {
-    if (ui->mxfSoundRadio2->isChecked()) {
-        ui->aCenterLabel->setEnabled(0);
-        ui->aCenterEdit->setEnabled(0);
-        ui->aCenterButton->setEnabled(0);
-        ui->aLeftSLabel->setEnabled(0);
-        ui->aLeftSEdit->setEnabled(0);
-        ui->aLeftSButton->setEnabled(0);
-        ui->aRightSLabel->setEnabled(0);
-        ui->aRightSEdit->setEnabled(0);
-        ui->aRightSButton->setEnabled(0);
-        ui->aSubLabel->setEnabled(0);
-        ui->aSubEdit->setEnabled(0);
-        ui->aSubButton->setEnabled(0);
-    } else {
-        ui->aCenterLabel->setEnabled(1);
-        ui->aCenterEdit->setEnabled(1);
-        ui->aCenterButton->setEnabled(1);
-        ui->aLeftSLabel->setEnabled(1);
-        ui->aLeftSEdit->setEnabled(1);
-        ui->aLeftSButton->setEnabled(1);
-        ui->aRightSLabel->setEnabled(1);
-        ui->aRightSEdit->setEnabled(1);
-        ui->aRightSButton->setEnabled(1);
-        ui->aSubLabel->setEnabled(1);
-        ui->aSubEdit->setEnabled(1);
-        ui->aSubButton->setEnabled(1);
-    }
+    int value = ui->mxfSoundRadio5->isChecked();
+    ui->aCenterLabel->setEnabled(value);
+    ui->aCenterEdit->setEnabled(value);
+    ui->aCenterButton->setEnabled(value);
+    ui->aLeftSLabel->setEnabled(value);
+    ui->aLeftSEdit->setEnabled(value);
+    ui->aLeftSButton->setEnabled(value);
+    ui->aRightSLabel->setEnabled(value);
+    ui->aRightSEdit->setEnabled(value);
+    ui->aRightSButton->setEnabled(value);
+    ui->aSubLabel->setEnabled(value);
+    ui->aSubEdit->setEnabled(value);
+    ui->aSubButton->setEnabled(value);
 }
 
 void MainWindow::mxfDone() {
@@ -322,10 +324,12 @@ void MainWindow::mxfCreateAudio() {
     mxfContext->frame_rate = ui->mxfFrameRateComboBox->currentText().toInt();
     mxfContext->stereoscopic = 0;
 
-    if (ui->mxfSoundRadio2->isChecked()) {
-        inputList.append(QFileInfo(ui->aLeftEdit->text()));
-        inputList.append(QFileInfo(ui->aRightEdit->text()));
-    } else {
+    // stereo files
+    inputList.append(QFileInfo(ui->aLeftEdit->text()));
+    inputList.append(QFileInfo(ui->aRightEdit->text()));
+
+    // add 5.1
+    if (ui->mxfSoundRadio5->isChecked()) {
         inputList.append(QFileInfo(ui->aLeftEdit->text()));
         inputList.append(QFileInfo(ui->aRightEdit->text()));
         inputList.append(QFileInfo(ui->aCenterEdit->text()));
@@ -333,6 +337,16 @@ void MainWindow::mxfCreateAudio() {
         inputList.append(QFileInfo(ui->aLeftSEdit->text()));
         inputList.append(QFileInfo(ui->aRightSEdit->text()));
     }
+
+    // add HI/VI
+    if (ui->mxfHVCheckBox->checkState()) {
+        inputList.append(QFileInfo(ui->aHIEdit->text()));
+        inputList.append(QFileInfo(ui->aVIEdit->text()));
+    }
+
+    // get wav duration
+    int duration = get_wav_duration(ui->aLeftEdit->text().toStdString().c_str(),
+                                    mxfContext->frame_rate); 
 
     outputFile = ui->aMxfOutEdit->text();
     mxfWriterThread->setMxfInputs(mxfContext, inputList, outputFile);

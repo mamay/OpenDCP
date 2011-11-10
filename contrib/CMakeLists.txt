@@ -4,7 +4,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 INCLUDE(ExternalProject)
 
 IF(WIN32)
-    IF(ARCH STREQUAL x86_64)
+    IF(TARGET_ARCH STREQUAL x86_64)
         SET(CONFIGURE mingw64-configure)
         SET(MAKE mingw64-make)
         SET(INSTALL sudo make)
