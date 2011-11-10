@@ -74,15 +74,53 @@ void MainWindow::mxfConnectSlots()
 }
 
 void MainWindow::mxfSourceTypeUpdate() {
+    // JPEG2000
     if (ui->mxfSourceTypeComboBox->currentIndex() == 0) {
         ui->mxfStereoscopicCheckBox->setEnabled(1);
         ui->mxfTypeComboBox->setCurrentIndex(1);
+        ui->mxfInputStack->setCurrentIndex(0);
+        ui->mxfSoundRadio2->setEnabled(0);
+        ui->mxfSoundRadio5->setEnabled(0);
         mxfSetStereoscopicState();
-    } else {
+    }
+    // MPEG2
+    if (ui->mxfSourceTypeComboBox->currentIndex() == 1) {
         ui->mxfStereoscopicCheckBox->setEnabled(0);
         ui->mxfStereoscopicCheckBox->setChecked(0);
         ui->mxfTypeComboBox->setCurrentIndex(0);
+        ui->mxfInputStack->setCurrentIndex(0);
+        ui->mxfSoundRadio2->setEnabled(0);
+        ui->mxfSoundRadio5->setEnabled(0);
         mxfSetStereoscopicState();
+        QStandardItemModel* model = qobject_cast<QStandardItemModel*>(ui->mxfTypeComboBox->model());
+        if (model) {
+            QModelIndex index = model->index(1,
+                                             ui->mxfTypeComboBox->modelColumn(),
+                                             ui->mxfTypeComboBox->rootModelIndex());
+            QStandardItem* item = model->itemFromIndex(index);
+            if (item) {
+                item->setEnabled(0);
+            }
+        }
+    } else {
+        QStandardItemModel* model = qobject_cast<QStandardItemModel*>(ui->mxfTypeComboBox->model());
+        if (model) {
+            QModelIndex index = model->index(1,
+                                             ui->mxfTypeComboBox->modelColumn(),
+                                             ui->mxfTypeComboBox->rootModelIndex());
+            QStandardItem* item = model->itemFromIndex(index);
+            if (item) {
+                item->setEnabled(1);
+            }
+        }
+    }
+
+    // WAV
+    if (ui->mxfSourceTypeComboBox->currentIndex() == 2) {
+        ui->mxfInputStack->setCurrentIndex(1);
+        ui->mxfStereoscopicCheckBox->setEnabled(0);
+        ui->mxfSoundRadio2->setEnabled(1);
+        ui->mxfSoundRadio5->setEnabled(1);
     }
 }
 
@@ -141,11 +179,11 @@ void MainWindow::mxfDone() {
 }
 
 void MainWindow::mxfStart() {
-    if (ui->aMxfOutEdit->text().isEmpty() && ui->pMxfOutEdit->text().isEmpty()) {
-        QMessageBox::critical(this, tr("Destination file needed"),tr("Please specify at least one destination MXF file."));
-        return;
-    }
-    if (!ui->pMxfOutEdit->text().isEmpty()) {
+    if(ui->mxfSourceTypeComboBox->currentIndex()== 0) {
+        if (ui->pMxfOutEdit->text().isEmpty()) {
+            QMessageBox::critical(this, tr("Destination file needed"),tr("Please select a destination picture MXF file."));
+            return;
+        }
         if (ui->mxfStereoscopicCheckBox->checkState()) {
             if ((ui->pictureLeftEdit->text().isEmpty() || ui->pictureRightEdit->text().isEmpty())) {
                 QMessageBox::critical(this, tr("Source content needed"),tr("Please select left and right source image directories to generate a stereoscopic MXF file."));
@@ -155,20 +193,30 @@ void MainWindow::mxfStart() {
             if ((ui->pictureLeftEdit->text().isEmpty())) {
                 QMessageBox::critical(this, tr("Source content needed"),tr("Please select a source image directory to generate an MXF picture file."));
                 return;
-            }
+             }
         }
     }
-    if (!ui->pictureLeftEdit->text().isEmpty() || !ui->pictureRightEdit->text().isEmpty()) {
+    if(ui->mxfSourceTypeComboBox->currentIndex() == 1) {
         if (ui->pMxfOutEdit->text().isEmpty()) {
             QMessageBox::critical(this, tr("Destination file needed"),tr("Please select a destination picture MXF file."));
             return;
         }
+        if ((ui->pictureLeftEdit->text().isEmpty() || ui->pictureRightEdit->text().isEmpty())) {
+            QMessageBox::critical(this, tr("Source content needed"),tr("Please select a source MPEG2 MXF file."));
+            return;
+        }
     }
-    if (!ui->aMxfOutEdit->text().isEmpty()) {
-        if (ui->aLeftEdit->text().isEmpty() ||
-            ui->aRightEdit->text().isEmpty()) {
-            QMessageBox::critical(this, tr("Source content needed"),tr("Please specify left and right wav files to generate an MXF sound file."));
+    if (ui->mxfSourceTypeComboBox->currentIndex() == 2) {
+        if (ui->aMxfOutEdit->text().isEmpty()) {
+            QMessageBox::critical(this, tr("Destination file needed"),tr("Please select a destination sound MXF file."));
+            return;
+        }
+        if (ui->mxfSoundRadio2->isChecked()) {
+            if (ui->aLeftEdit->text().isEmpty() ||
+                ui->aRightEdit->text().isEmpty()) {
+                QMessageBox::critical(this, tr("Source content needed"),tr("Please specify left and right wav files to generate an MXF sound file."));
                 return;
+            }
         }
         if (ui->mxfSoundRadio5->isChecked()) {
             if (ui->aCenterEdit->text().isEmpty() ||
@@ -190,12 +238,12 @@ void MainWindow::mxfStart() {
     }
 
     // create picture mxf file
-    if (!ui->pMxfOutEdit->text().isEmpty()) {
+    if (ui->mxfSourceTypeComboBox->currentIndex() == 0 || ui->mxfSourceTypeComboBox->currentIndex() == 1) {
         mxfCreatePicture();
     }
 
     // create sound mxf file
-    if (!ui->aMxfOutEdit->text().isEmpty()) {
+    if (ui->mxfSourceTypeComboBox->currentIndex() == 2) {
         mxfCreateAudio();
     }
 }
