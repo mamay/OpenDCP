@@ -143,8 +143,25 @@ void j2kEncode(int &iteration)
     }
 }
 
+void MainWindow::preview() {
+    QString filter = "*.tif;*.tiff;*.dpx";
+    QDir inLeftDir;
+    QFileInfo file;
+    QImage image;
+
+    inLeftDir.cd(ui->inImageLeftEdit->text());
+    inLeftDir.setFilter(QDir::Files | QDir::NoSymLinks);
+    inLeftDir.setNameFilters(filter.split(';'));
+    inLeftDir.setSorting(QDir::Name);
+    file = inLeftDir.entryList().at(0);
+    ui->outJ2kLeftEdit->setText(file.absoluteFilePath());
+    QPixmap pixmap(file.absoluteFilePath());
+    ui->previewLabel->setPixmap(pixmap);
+}
+
 void MainWindow::showImage(QImage image) {
     ui->previewLabel->setPixmap(QPixmap::fromImage(image));
+    ui->previewLabel->setEnabled(1);
 }
 
 void MainWindow::j2kConvert() {
@@ -201,13 +218,8 @@ void MainWindow::j2kCheckLeftInputFiles() {
         return;
     }
 
-    s = checkFileSequence(inLeftDir.entryList());
-
-    if (s) {
-        QString msg;
-        msg.sprintf("File list is not sequential between %s and %s.",inLeftDir.entryList().at(s-1).toAscii().constData(),
-                    inLeftDir.entryList().at(s).toAscii().constData());
-        QMessageBox::warning(this, tr("File Sequence Mismatch"), msg);
+    if (checkFileSequence(inLeftDir.entryList()) != DCP_SUCCESS) {
+       return;
     }
 
     ui->endSpinBox->setValue(inLeftList.size());
@@ -218,7 +230,6 @@ void MainWindow::j2kCheckLeftInputFiles() {
 void MainWindow::j2kCheckRightInputFiles() {
     QString filter = "*.tif;*.tiff;*.dpx";
     QDir inRightDir;
-    int  s;
 
     inRightDir.cd(ui->inImageRightEdit->text());
     inRightDir.setFilter(QDir::Files | QDir::NoSymLinks);
@@ -232,13 +243,8 @@ void MainWindow::j2kCheckRightInputFiles() {
         return;
     }
 
-    s = checkFileSequence(inRightDir.entryList());
-
-    if (s) {
-        QString msg;
-        msg.sprintf("File list is not sequential between %s and %s.",inRightDir.entryList().at(s-1).toAscii().constData(),
-                    inRightDir.entryList().at(s).toAscii().constData());
-        QMessageBox::warning(this, tr("File Sequence Mismatch"), msg);
+    if (checkFileSequence(inRightDir.entryList()) != DCP_SUCCESS) {
+       return;
     }
 
     ui->endSpinBox->setValue(inRightList.size());

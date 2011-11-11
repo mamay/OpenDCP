@@ -347,7 +347,7 @@ extern "C" int write_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_
     int           rc;
     EssenceType_t essence_type;
 
-    result = ASDCP::EssenceType(filelist->in[0], essence_type);
+    result = ASDCP::RawEssenceType(filelist->in[0], essence_type);
 
     if (ASDCP_FAILURE(result)) {
     printf("doo!\n");

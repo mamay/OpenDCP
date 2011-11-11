@@ -154,10 +154,6 @@ int MainWindow::checkSequential(const char str1[], const char str2[])
             offset = i;
     }
  
-    if (offset) {
-        offset--;
-    }
-
     len = strlen(str1) - offset;
 
     char *seq = (char *)malloc(len+1);
@@ -187,7 +183,10 @@ int MainWindow::checkFileSequence(QStringList list)
     int     x = 0;
 
     for (x = 0; (x < (list.size()-1)) && (sequential == DCP_SUCCESS); x++) {
-        sequential = checkSequential((char *)list.at(x).toStdString().c_str(), (char *)list.at(x+1).toStdString().c_str());
+        QFileInfo a(list.at(x));
+        QFileInfo b(list.at(x+1));
+        sequential = checkSequential((char *)a.completeBaseName().toStdString().c_str(),
+                                     (char *)b.completeBaseName().toStdString().c_str());
     }
 
     if (sequential == STRING_LENGTH_NOTEQUAL) {
