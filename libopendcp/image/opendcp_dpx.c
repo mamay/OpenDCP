@@ -365,9 +365,7 @@ int dpx_log_to_lin(int value, float gamma) {
         return ((int)((f_i*gain)-offset));
     }
     
-    if (value <= 4095) {
-        return 4095;
-    }
+    return 4095;
 }
 
 void buildLut() {
@@ -404,7 +402,7 @@ int read_dpx(opendcp_t *opendcp, odcp_image_t **image_ptr, const char *infile, i
     FILE            *dpx_fp;
     float           gamma;
     odcp_image_t    *image = 00;
-    int image_size,endian,logarithmic;
+    int image_size,endian,logarithmic = 0;
     int i,j,w,h,bps,spp;
 
     /* open dpx using filename or file descriptor */

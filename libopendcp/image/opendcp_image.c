@@ -30,6 +30,8 @@
 #define CLIP(m,max)                                 \
   (m)<0?0:((m)>max?max:(m))
 
+extern int odcp_to_opj(odcp_image_t *odcp, opj_image_t **opj_ptr);
+
 /* create opendcp image structure */
 odcp_image_t *odcp_image_create(int n_components, int w, int h) {
     int x;
@@ -266,9 +268,11 @@ float b_spline(float x) {
         return(((x+4.0f) * (x) * (-6.0f+3.0f*x)) * c);
     }
 
-    if (x< 2.0) {
+    if (x < 2.0) {
         return(((2.0f-x) * (2.0f-x) * (2.0f-x)) * c);
     }
+
+    return 0;
 }
 
 /* get the pixel index based on x,y */
@@ -287,7 +291,6 @@ static inline rgb_pixel_float_t get_pixel(odcp_image_t *image, int x, int y) {
 
 /* resize image */
 int resize(odcp_image_t **image,int w,int h,int method) {
-    int image_size;
     int num_components = 3;
     odcp_image_t *ptr = *image;
     rgb_pixel_float_t p;

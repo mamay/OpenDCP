@@ -345,8 +345,8 @@ void MainWindow::mxfCreateAudio() {
     }
 
     // get wav duration
-    int duration = get_wav_duration(ui->aLeftEdit->text().toStdString().c_str(),
-                                    mxfContext->frame_rate); 
+    //int duration = get_wav_duration(ui->aLeftEdit->text().toStdString().c_str(),
+    //                                mxfContext->frame_rate); 
 
     outputFile = ui->aMxfOutEdit->text();
     mxfWriterThread->setMxfInputs(mxfContext, inputList, outputFile);

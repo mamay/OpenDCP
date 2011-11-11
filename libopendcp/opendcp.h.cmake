@@ -16,12 +16,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef _OPENDCP_H_
+#define _OPENDCP_H_
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#ifndef _OPENDCP_H_
-#define _OPENDCP_H_
 
 #define MAX_ASSETS          10   /* Soft limit */
 #define MAX_REELS           30   /* Soft limit */
@@ -34,7 +34,7 @@ extern "C" {
 #define MAX_DCP_JPEG_BITRATE 250000000  /* Maximum DCI compliant bit rate for JPEG2000 */
 #define MAX_DCP_MPEG_BITRATE  80000000  /* Maximum DCI compliant bit rate for MPEG */
 
-static const char *OPENDCP_VERSION   = "${OPENDCP_VERSION}"; 
+static const char* OPENDCP_VERSION   = "${OPENDCP_VERSION}"; 
 static const char *OPENDCP_NAME      = "${OPENDCP_NAME}"; 
 static const char *OPENDCP_COPYRIGHT = "${OPENDCP_COPYRIGHT}"; 
 static const char *OPENDCP_LICENSE   = "${OPENDCP_LICENSE}"; 
@@ -356,6 +356,7 @@ int read_asset_info(asset_t *asset);
 void uuid_random(char *uuid);
 int calculate_digest(const char *filename, char *digest);
 int get_wav_duration(const char *filename, int frame_rate);
+int get_file_essence_type(char *in_path);
 
 /* MXF Routines */
 int write_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output);
@@ -365,9 +366,12 @@ int write_cpl(opendcp_t *opendcp, cpl_t *cpl);
 int write_pkl(opendcp_t *opendcp, pkl_t *pkl);
 int write_assetmap(opendcp_t *opendcp);
 int write_volumeindex(opendcp_t *opendcp);
+int xml_verify(char *filename);
 char *base64(const unsigned char *data, int length);
 char *strip_cert(const char *data);
 char *strip_cert_file(char *filename);
+int write_dsig_template(opendcp_t *opendcp, FILE *fp);
+int xml_sign(opendcp_t *opendcp, char *filename);
 
 /* J2K Routines */
 int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_path);
@@ -375,7 +379,8 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
 /* retrieve error string */
 char *error_string(int error_code);
 
-#endif // _OPENDCP_H_
 #ifdef __cplusplus
 }
 #endif
+
+#endif // _OPENDCP_H_

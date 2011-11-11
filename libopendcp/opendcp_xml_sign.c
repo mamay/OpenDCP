@@ -43,6 +43,9 @@
 #include "opendcp.h"
 #include "opendcp_certificates.h"
 
+extern int write_dsig_template(opendcp_t *opendcp, FILE *fp);
+extern int xml_sign(opendcp_t *opendcp, char *filename); 
+
 char *dn_oneline(X509_NAME *xn) {
     BIO* bio;
     int n;
@@ -320,7 +323,7 @@ int xml_sign(opendcp_t *opendcp, char *filename) {
     xmlNodePtr       sign_node;
     FILE *fp;
     int result = DCP_FATAL;
-    xmlSecKeysMngrPtr key_manager;
+    xmlSecKeysMngrPtr key_manager = NULL;
     
     dcp_log(LOG_DEBUG, "xml_sign: xmlsec_init");
     xmlsec_init();
@@ -343,7 +346,7 @@ int xml_sign(opendcp_t *opendcp, char *filename) {
     }
 
     /* find signature node */
-   sign_node = xmlSecFindNode(root_node, xmlSecNodeSignature, xmlSecDSigNs);
+    sign_node = xmlSecFindNode(root_node, xmlSecNodeSignature, xmlSecDSigNs);
     if(sign_node == NULL) {
         fprintf(stderr, "Error: start node not found");
         goto done;      
@@ -418,7 +421,7 @@ int xml_verify(char *filename) {
     xmlNodePtr       x509d_node;
     xmlNodePtr       cur_node;
     int              result = DCP_FATAL;
-    xmlSecKeysMngrPtr key_manager;
+    xmlSecKeysMngrPtr key_manager = NULL;
     char cert[5000];
     int  cert_l;
     xmlsec_init();

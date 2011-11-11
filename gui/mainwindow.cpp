@@ -140,32 +140,23 @@ int findSeqOffset(const char str1[], const char str2[])
 
 int MainWindow::checkSequential(const char str1[], const char str2[])
 {
-    int i,x,y;
-    int offset = 0;
-    int len    = 0;
+    long x,y;
+    int  i;
+    int  offset = 0;
 
     if (strlen(str1) != strlen(str2)) {
         return STRING_LENGTH_NOTEQUAL;
     }
-  
-    for (i = 0; (i < strlen(str1)) && (offset == 0); i++) {
-        if(str1[i] != str2[i])
+
+    for (i = 0; i < (int) strlen(str1); i++) {
+        if (str1[i] != str2[i]) {
             offset = i;
+            break;
+        }
     }
  
-    len = strlen(str1) - offset;
-
-    char *seq = (char *)malloc(len+1);
-
-    strncpy(seq,str1+offset,len);
-    x = atoi(seq);
-
-    strncpy(seq,str2+offset,len);
-    y = atoi(seq);
-
-    if (seq) {
-        free(seq);
-    }
+    x = strtol(str1+offset,NULL,10);
+    y = strtol(str2+offset,NULL,10);
 
     if ((y - x) == 1) {
         return DCP_SUCCESS;

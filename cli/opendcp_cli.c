@@ -33,6 +33,9 @@
 #define strnicmp strncasecmp
 #endif
 
+extern int build_filelist(char *input, char *output, filelist_t *filelist, int file_type);
+extern int get_file_count(char *path, int file_type);
+
 int check_extension(char *filename, char *pattern) {
     char *extension;
 
@@ -119,7 +122,6 @@ int build_filelist(char *input, char *output, filelist_t *filelist, int file_typ
     struct dirent **files;
     int x = 0;
     struct stat st_in;
-    char *extension;
 
     if (stat(input, &st_in) != 0 ) {
         dcp_log(LOG_ERROR,"Could not open input file %s",input);
@@ -139,6 +141,8 @@ int build_filelist(char *input, char *output, filelist_t *filelist, int file_typ
         free(files[x]);
     }
     free(files);
+
+    return DCP_SUCCESS;
 }
 
 filelist_t *filelist_alloc(int count) {
@@ -212,20 +216,13 @@ int find_ext_offset(char str[]) {
 }
 
 int check_increment(char *str[], int index,int str_size) {
-    int i,x;
-    int seq_offset, ext_offset, diff_len;
+    long x;
+    int seq_offset, ext_offset;
 
     seq_offset = find_seq_offset(str[0], str[str_size-1]);
     ext_offset = find_ext_offset(str[0]);
-    diff_len   = ext_offset - seq_offset;
 
-    char *seq = (char *)malloc(diff_len+1);
-    strncpy(seq,str[index]+seq_offset,diff_len);
-    x = atoi(seq);
-
-    if (seq) {
-        free(seq);
-    }
+    x = strtol(str[index]+seq_offset,NULL,10);
 
     if (x == index) {
         return 0;
@@ -236,32 +233,22 @@ int check_increment(char *str[], int index,int str_size) {
 
 /* check if two strings are sequential */
 int check_sequential(char str1[],char str2[]) {
-    int i,x,y;
-    int offset = 0;
-    int diff_len    = 0;
+    long i,x,y;
+    int  offset = 0;
 
     if (strlen(str1) != strlen(str2)) {
         return STRING_LENGTH_NOTEQUAL;
     }
 
-    for (i = 0; (i < strlen(str1)) && (offset == 0); i++) {
-        if(str1[i] != str2[i])
+    for (i = 0; i < strlen(str1); i++) {
+        if(str1[i] != str2[i]) {
             offset = i;
+            break;
+        }
     }
 
-    diff_len = strlen(str1) - offset;
-
-    char *seq = (char *)malloc(diff_len+1);
-
-    strncpy(seq,str1+offset,diff_len);
-    x = atoi(seq);
-
-    strncpy(seq,str2+offset,diff_len);
-    y = atoi(seq);
-
-    if (seq) {
-        free(seq);
-    }
+    x = strtol(str1+offset,NULL,10);
+    y = strtol(str2+offset,NULL,10);
 
     if ((y - x) == 1) {
         return DCP_SUCCESS;

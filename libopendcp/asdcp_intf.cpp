@@ -344,7 +344,7 @@ extern "C" int read_asset_info(asset_t *asset)
 /* write the asset to an mxf file */
 extern "C" int write_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     Result_t      result = RESULT_OK; 
-    int           rc;
+    int           rc = 0;
     EssenceType_t essence_type;
 
     result = ASDCP::RawEssenceType(filelist->in[0], essence_type);

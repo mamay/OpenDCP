@@ -34,6 +34,11 @@
 #define strnicmp strncasecmp
 #endif
 
+int encode_kakadu(opendcp_t *opendcp, char *in_file, char *out_file);
+int encode_openjpeg(opendcp_t *opendcp, opj_image_t *opj_image, char *out_file); 
+
+
+
 static int initialize_4K_poc(opj_poc_t *POC, int numres){
     POC[0].tile  = 1; 
     POC[0].resno0  = 0; 
@@ -114,9 +119,9 @@ int check_image_compliance(opendcp_t *opendcp, odcp_image_t *image) {
 }
 
 int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_path) {
-    char *extension;
+    char         *extension;
     odcp_image_t *odcp_image;
-    int result;
+    int result = 0;
 
     if (tmp_path == NULL) {
         tmp_path = "./";
@@ -200,7 +205,6 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
 }
 
 int encode_kakadu(opendcp_t *opendcp, char *in_file, char *out_file) {
-    FILE *f = NULL;
     int j,result;
     int max_cs_len;
     int max_comp_size;

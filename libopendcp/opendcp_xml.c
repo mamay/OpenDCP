@@ -79,7 +79,6 @@ int write_cpl(opendcp_t *opendcp, cpl_t *cpl) {
     FILE *fp;
     int a,r;
     struct stat st;
-    char uuid_s[40];
     char filename[MAX_PATH_LENGTH];
 
     sprintf(filename,"%s",cpl->filename);
@@ -125,7 +124,7 @@ int write_cpl(opendcp_t *opendcp, cpl_t *cpl) {
     for (r=0;r<cpl->reel_count;r++) {
         reel_t reel = cpl->reel[r];
         fprintf(fp,"    <Reel>\n");
-        fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",cpl->reel[r].uuid);
+        fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",reel.uuid);
         fprintf(fp,"      <AssetList>\n");
 
         /* Asset(s) Start */
@@ -207,11 +206,13 @@ int write_cpl(opendcp_t *opendcp, cpl_t *cpl) {
 }
 
 int write_cpl_list(opendcp_t *opendcp) {
-   int placeholder;
+   int placeholder = 0;
+   return placeholder;
 }
 
 int write_pkl_list(opendcp_t *opendcp) {
-   int placeholder;
+   int placeholder = 0;
+   return placeholder;
 }
 
 int write_pkl(opendcp_t *opendcp, pkl_t *pkl) {

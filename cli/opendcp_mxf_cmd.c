@@ -33,6 +33,8 @@
 #define strnicmp strncasecmp
 #endif
 
+int get_filelist(opendcp_t *opendcp,char *in_path,filelist_t *filelist);
+
 void version() {
     FILE *fp;
 
@@ -102,8 +104,6 @@ int get_filelist_3d(opendcp_t *opendcp,char *in_path_left,char *in_path_right,fi
 
 int get_filelist(opendcp_t *opendcp,char *in_path,filelist_t *filelist) {
     struct stat st_in;
-    int x = 0;
-    int count;
 
     if (stat(in_path, &st_in) != 0 ) {
         dcp_log(LOG_ERROR,"Could not open input file %s",in_path);

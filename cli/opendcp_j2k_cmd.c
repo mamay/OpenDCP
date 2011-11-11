@@ -96,7 +96,6 @@ void dcp_usage() {
 }
 
 int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *filelist) {
-    int x = 0;
     struct stat st_in;
     struct stat st_out;
     char *extension;
@@ -248,7 +247,7 @@ int main (int argc, char **argv) {
                 opendcp->stereoscopic = 1;
                 break;
             case 'd':
-                opendcp->j2k.end_frame = atoi(optarg);
+                opendcp->j2k.end_frame = strtol(optarg, NULL, 10);
                 break;
             case 's':
                 opendcp->j2k.start_frame = atoi(optarg);
@@ -455,8 +454,6 @@ int main (int argc, char **argv) {
                 dcp_log(LOG_INFO,"JPEG2000 conversion %s complete",filelist->in[c]);
             }
             count++;
-        } else {
-            cleanup(opendcp, 1);
         }
     }
 
@@ -467,8 +464,6 @@ int main (int argc, char **argv) {
     if (opendcp->log_level > 0) {
         printf("\n");
     }
-
-    cleanup(opendcp,0);
 
     delete_opendcp(opendcp);
 

@@ -32,15 +32,8 @@
 #define strnicmp strncasecmp
 #endif
 
-void cleanup(opendcp_t *opendcp, int exit_flag) {
-    if (exit_flag) {
-        exit(1);
-    }
-}
-
 void dcp_fatal(opendcp_t *opendcp, char *error) {
     dcp_log(LOG_ERROR, "%s",error);
-    cleanup(opendcp,0);
     exit(DCP_FATAL);
 }
 
@@ -209,7 +202,6 @@ int init_asset(asset_t *asset) {
 int validate_reel(opendcp_t *opendcp, cpl_t *cpl, int reel) {
     int d = 0;
     int x,a;
-    int result = 0;
     int picture = 0;
     int duration_mismatch = 0;
 

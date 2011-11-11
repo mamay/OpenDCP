@@ -204,7 +204,6 @@ void MainWindow::j2kUpdateEndSpinBox() {
 void MainWindow::j2kCheckLeftInputFiles() {
     QString filter = "*.tif;*.tiff;*.dpx";
     QDir inLeftDir;
-    int  s;
 
     inLeftDir.cd(ui->inImageLeftEdit->text());
     inLeftDir.setFilter(QDir::Files | QDir::NoSymLinks);
