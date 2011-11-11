@@ -144,7 +144,6 @@ int MainWindow::checkSequential(const char str1[], const char str2[])
     int offset = 0;
     int len    = 0;
 
-
     if (strlen(str1) != strlen(str2)) {
         return STRING_LENGTH_NOTEQUAL;
     }
