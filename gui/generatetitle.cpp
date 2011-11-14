@@ -42,7 +42,7 @@ GenerateTitle::GenerateTitle(QWidget *parent) :
     connect(ui->studioComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(updateTitle()));
     connect(ui->territoryComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(updateTitle()));
     connect(ui->typeComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(updateTitle()));
-    connect(ui->facilityComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(updateTitle()));
+    connect(ui->facilityComboBox,SIGNAL(editTextChanged(const QString &)),this,SLOT(updateTitle()));
     connect(ui->stereoscopicComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(updateTitle()));
     connect(ui->packageComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(updateTitle()));
     connect(ui->filmEdit,SIGNAL(textChanged(QString)),this,SLOT(updateTitle()));
@@ -105,7 +105,7 @@ QString GenerateTitle::getTitle()
         text.append("_" + ui->studioComboBox->currentText().split(" ").first());
     }
     text.append("_" + ui->dateYearSB->text() + QString().sprintf("%02d%02d",ui->dateMonthSB->text().toInt(),ui->dateDaySB->text().toInt()));
-    if (ui->facilityComboBox->currentIndex() != 0) {
+    if (ui->facilityComboBox->currentIndex() >= 0) {
         text.append("_" + ui->facilityComboBox->currentText().split(" ").first());
     }
     if (ui->stereoscopicComboBox->currentIndex() != 0) {
