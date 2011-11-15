@@ -60,3 +60,6 @@ INCLUDEPATH += ../libopendcp \
 
 RESOURCES += \
     resources/opendcp.qrc
+
+OTHER_FILES += \
+    main.qml

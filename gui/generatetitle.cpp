@@ -106,7 +106,7 @@ QString GenerateTitle::getTitle()
     }
     text.append("_" + ui->dateYearSB->text() + QString().sprintf("%02d%02d",ui->dateMonthSB->text().toInt(),ui->dateDaySB->text().toInt()));
     if (ui->facilityComboBox->currentIndex() >= 0) {
-        text.append("_" + ui->facilityComboBox->currentText().split(" ").first());
+        text.append("_" + ui->facilityComboBox->currentText().split(" ").first().left(3));
     }
     if (ui->stereoscopicComboBox->currentIndex() != 0) {
         text.append("_" + ui->stereoscopicComboBox->currentText().split(" ").first());
