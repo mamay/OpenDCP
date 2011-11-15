@@ -476,6 +476,9 @@
       <family>Courier</family>
      </font>
     </property>
+    <property name="editable">
+     <bool>false</bool>
+    </property>
     <item>
      <property name="text">
       <string/>
@@ -602,6 +605,9 @@
      <font>
       <family>Courier</family>
      </font>
+    </property>
+    <property name="editable">
+     <bool>true</bool>
     </property>
     <item>
      <property name="text">
