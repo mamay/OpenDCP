@@ -60,5 +60,5 @@ int  read_dpx(opendcp_t *opendcp, odcp_image_t **image_ptr, const char *infile, 
 odcp_image_t *odcp_image_create(int n_components, int w, int h);
 void odcp_image_free(odcp_image_t *image);
 int odcp_image_readline(odcp_image_t *image, int y, unsigned char *data); 
-int rgb_to_xyz(odcp_image_t *image, int gamma);
+int rgb_to_xyz(odcp_image_t *image, int gamma, int method);
 rgb_pixel_float_t yuv444toRGB888(int y, int cb, int cr);

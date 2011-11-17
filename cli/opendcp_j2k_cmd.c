@@ -187,7 +187,7 @@ int main (int argc, char **argv) {
     opendcp = create_opendcp();
 
     /* set initial values */
-    opendcp->xyz             = 1;
+    opendcp->j2k.xyz         = 1;
     opendcp->log_level       = LOG_WARN;
     opendcp->cinema_profile  = DCP_CINEMA2K;
     opendcp->j2k.encoder     = J2K_OPENJPEG;
@@ -303,7 +303,7 @@ int main (int argc, char **argv) {
                 opendcp->threads = atoi(optarg);
                 break;
             case 'x':
-                opendcp->xyz = 0;
+                opendcp->j2k.xyz = 0;
                 break;
             case 'n':
                 opendcp->no_overwrite = 1;
@@ -315,7 +315,7 @@ int main (int argc, char **argv) {
                 tmp_path = optarg;
                 break;
             case 'c':
-                opendcp->lut = atoi(optarg);
+                opendcp->j2k.lut = atoi(optarg);
                 break;
         }
     }

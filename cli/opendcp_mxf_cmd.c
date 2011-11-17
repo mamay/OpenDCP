@@ -141,7 +141,6 @@ int main (int argc, char **argv) {
     opendcp = create_opendcp();
 
     /* set initial values */
-    opendcp->xyz = 1;
     opendcp->log_level = LOG_WARN;
     opendcp->ns = XML_NS_SMPTE;
     opendcp->frame_rate = 24;

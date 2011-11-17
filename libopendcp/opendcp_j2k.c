@@ -161,9 +161,9 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
         //return DCP_FATAL;
     }
     
-    if (opendcp->xyz) {
+    if (opendcp->j2k.xyz) {
         dcp_log(LOG_INFO,"RGB->XYZ color conversion %s",in_file);
-        if (rgb_to_xyz(odcp_image,opendcp->lut)) {
+        if (rgb_to_xyz(odcp_image,opendcp->j2k.lut,opendcp->j2k.xyz_method)) {
             dcp_log(LOG_ERROR,"Color conversion failed %s",in_file);
             odcp_image_free(odcp_image);
             return DCP_FATAL;

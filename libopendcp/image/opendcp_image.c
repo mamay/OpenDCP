@@ -162,6 +162,16 @@ int odcp_image_readline(odcp_image_t *image, int y, unsigned char *data) {
     return DCP_SUCCESS;
 }
 
+rgb_pixel_float_t yuv444toRGB888(int y, int cb, int cr) {
+    rgb_pixel_float_t p;
+
+    p.r = CLIP(y+1.402*(cr-128),255);
+    p.g = CLIP(y-0.344*(cb-128)-0.714*(cr-128),255);
+    p.b = CLIP(y+1.772*(cb-128),255);
+
+    return(p);
+}
+
 /* complex gamma function */
 float complex_gamma(float p, float gamma) {
     float v;
@@ -175,8 +185,21 @@ float complex_gamma(float p, float gamma) {
     return v;
 }
 
+int rgb_to_xyz(odcp_image_t *image, int index, int method) {
+    int result;
+
+    if (method) {
+        dcp_log(LOG_DEBUG,"rgb_to_xyz_calculate");
+        result = rgb_to_xyz_calculate(image, index);
+    } else {
+        result = rgb_to_xyz_lut(image, index);
+    }
+
+    return result;
+}
+
 /* rgb to xyz color conversion 12-bit LUT */
-int rgb_to_xyz(odcp_image_t *image, int index) {
+int rgb_to_xyz_lut(odcp_image_t *image, int index) {
     int i;
     int size;
     rgb_pixel_float_t s;
@@ -207,16 +230,6 @@ int rgb_to_xyz(odcp_image_t *image, int index) {
     }
 
     return DCP_SUCCESS;
-}
-
-rgb_pixel_float_t yuv444toRGB888(int y, int cb, int cr) {
-    rgb_pixel_float_t p;
-
-    p.r = CLIP(y+1.402*(cr-128),255);
-    p.g = CLIP(y-0.344*(cb-128)-0.714*(cr-128),255);
-    p.b = CLIP(y+1.772*(cb-128),255);
-
-    return(p);
 }
 
 /* rgb to xyz color conversion hard calculations */

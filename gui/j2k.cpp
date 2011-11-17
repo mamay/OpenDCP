@@ -286,9 +286,9 @@ void MainWindow::j2kStart() {
     }
 
     if (ui->xyzCheckBox->checkState()) {
-        context->xyz = 1;
+        context->j2k.xyz = 1;
     } else {
-        context->xyz = 0;
+        context->j2k.xyz = 0;
     }
 
     if (ui->overwritej2kCB->checkState())

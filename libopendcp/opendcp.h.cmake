@@ -277,6 +277,9 @@ typedef struct {
     int            encoder;
     int            duration;
     int            dpx;
+    int            lut;
+    int            xyz;
+    int            xyz_method;
 } j2k_options_t;
 
 typedef struct {
@@ -312,11 +315,9 @@ typedef struct {
     int            encrypt_header_flag;
     int            key_flag;
     int            delete_intermediate;
-    int            lut;
     byte_t         key_id[16];
     byte_t         key_value[16];
     int            write_hmac;
-    int            xyz;
     int            no_overwrite;
     int            bw;
     int            threads;
