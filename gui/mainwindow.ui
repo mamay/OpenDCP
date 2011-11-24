@@ -313,7 +313,7 @@
            <widget class="QLabel" name="bwValueLabel">
             <property name="geometry">
              <rect>
-              <x>349</x>
+              <x>360</x>
               <y>120</y>
               <width>63</width>
               <height>25</height>
@@ -478,7 +478,7 @@
            <widget class="QSlider" name="bwSlider">
             <property name="geometry">
              <rect>
-              <x>88</x>
+              <x>100</x>
               <y>120</y>
               <width>250</width>
               <height>25</height>
