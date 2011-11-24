@@ -296,7 +296,7 @@
              <rect>
               <x>11</x>
               <y>180</y>
-              <width>43</width>
+              <width>90</width>
               <height>27</height>
              </rect>
             </property>
@@ -313,7 +313,7 @@
            <widget class="QLabel" name="bwValueLabel">
             <property name="geometry">
              <rect>
-              <x>360</x>
+              <x>370</x>
               <y>120</y>
               <width>63</width>
               <height>25</height>
@@ -349,7 +349,7 @@
              <rect>
               <x>11</x>
               <y>90</y>
-              <width>81</width>
+              <width>90</width>
               <height>27</height>
              </rect>
             </property>
@@ -372,9 +372,9 @@
            <widget class="QCheckBox" name="dpxLogCheckBox">
             <property name="geometry">
              <rect>
-              <x>370</x>
+              <x>380</x>
               <y>180</y>
-              <width>191</width>
+              <width>141</width>
               <height>25</height>
              </rect>
             </property>
@@ -408,7 +408,7 @@
              <rect>
               <x>11</x>
               <y>30</y>
-              <width>55</width>
+              <width>90</width>
               <height>27</height>
              </rect>
             </property>
@@ -437,7 +437,7 @@
            <widget class="QComboBox" name="encoderComboBox">
             <property name="geometry">
              <rect>
-              <x>98</x>
+              <x>108</x>
               <y>30</y>
               <width>125</width>
               <height>26</height>
@@ -478,7 +478,7 @@
            <widget class="QSlider" name="bwSlider">
             <property name="geometry">
              <rect>
-              <x>100</x>
+              <x>110</x>
               <y>120</y>
               <width>250</width>
               <height>25</height>
@@ -524,7 +524,7 @@
            <widget class="QSpinBox" name="threadsSpinBox">
             <property name="geometry">
              <rect>
-              <x>98</x>
+              <x>108</x>
               <y>150</y>
               <width>45</width>
               <height>25</height>
@@ -549,7 +549,7 @@
            <widget class="QCheckBox" name="stereoscopicCheckBox">
             <property name="geometry">
              <rect>
-              <x>240</x>
+              <x>250</x>
               <y>60</y>
               <width>191</width>
               <height>25</height>
@@ -576,7 +576,7 @@
              <rect>
               <x>11</x>
               <y>60</y>
-              <width>44</width>
+              <width>90</width>
               <height>27</height>
              </rect>
             </property>
@@ -605,7 +605,7 @@
            <widget class="QComboBox" name="profileComboBox">
             <property name="geometry">
              <rect>
-              <x>98</x>
+              <x>108</x>
               <y>60</y>
               <width>125</width>
               <height>26</height>
@@ -645,7 +645,7 @@
              <rect>
               <x>11</x>
               <y>120</y>
-              <width>81</width>
+              <width>90</width>
               <height>27</height>
              </rect>
             </property>
@@ -676,7 +676,7 @@
              <rect>
               <x>10</x>
               <y>150</y>
-              <width>55</width>
+              <width>90</width>
               <height>27</height>
              </rect>
             </property>
@@ -693,7 +693,7 @@
            <widget class="QCheckBox" name="overwritej2kCB">
             <property name="geometry">
              <rect>
-              <x>240</x>
+              <x>250</x>
               <y>30</y>
               <width>201</width>
               <height>25</height>
@@ -724,7 +724,7 @@
            <widget class="QComboBox" name="frameRateComboBox">
             <property name="geometry">
              <rect>
-              <x>98</x>
+              <x>108</x>
               <y>90</y>
               <width>71</width>
               <height>26</height>
@@ -776,9 +776,9 @@
            <widget class="QCheckBox" name="xyzCheckBox">
             <property name="geometry">
              <rect>
-              <x>220</x>
+              <x>240</x>
               <y>180</y>
-              <width>141</width>
+              <width>131</width>
               <height>25</height>
              </rect>
             </property>
@@ -810,7 +810,7 @@
            <widget class="QComboBox" name="colorComboBox">
             <property name="geometry">
              <rect>
-              <x>98</x>
+              <x>108</x>
               <y>180</y>
               <width>111</width>
               <height>26</height>
