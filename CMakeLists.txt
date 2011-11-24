@@ -115,12 +115,10 @@ ENDIF()
 #--build paths------------------------------------------------------------------
 INCLUDE_DIRECTORIES(${OPENDCP_INCLUDE_DIR}/libopendcp
                     ${PROJECT_BINARY_DIR}/libopendcp/include
+                    ${PROJECT_SOURCE_DIR}/libasdcp
 )
-SET(OPENDCP_LIB -L${PROJECT_BINARY_DIR}/libopendcp -lopendcp)
-
-SET(ASDCP_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/libasdcp)
-INCLUDE_DIRECTORIES(${ASDCP_INCLUDE_DIR})
-SET(ASDCP_LIBRARIES -L${PROJECT_BINARY_DIR}/libasdcp -lopendcp-asdcp -lopendcp-kumu)
+SET(OPENDCP_LIB opendcp-lib)
+SET(ASDCP_LIBRARIES opendcp-asdcp opendcp-kumu)
 
 IF(UNIX AND NOT APPLE AND TARGET_ARCH STREQUAL "x86_64")
     SET(LIB_INSTALL_PATH "lib64")

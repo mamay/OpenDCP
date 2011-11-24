@@ -80,7 +80,8 @@ int file_filter(struct dirent *filename) {
     /* return only known asset types */
     if (filter == MXF_INPUT) {
         if (strnicmp(extension,"j2c",3) != 0 &&
-            strnicmp(extension,"j2k",3) != 0)
+            strnicmp(extension,"j2k",3) != 0 &&
+            strnicmp(extension,"wav",3) != 0)
         return 0;
     } else if (filter == J2K_INPUT) {
         if (strnicmp(extension,"tif",3) != 0 &&

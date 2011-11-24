@@ -233,7 +233,12 @@ int encode_kakadu(opendcp_t *opendcp, char *in_file, char *out_file) {
     for (j=0;j<3;j++) {
         sprintf(k_lengths,"%s Creslengths:C%d=%d,%d",k_lengths,j,max_cs_len,max_comp_size);
     }
-    sprintf(cmd,"kdu_compress -i %s -o %s Sprofile=CINEMA2K %s -num_threads 1 -quiet -precise",in_file,out_file,k_lengths);
+
+    if (opendcp->cinema_profile == DCP_CINEMA2K) {
+        sprintf(cmd,"kdu_compress -i \"%s\" -o \"%s\" Sprofile=CINEMA2K %s -quiet",in_file,out_file,k_lengths);
+    } else { 
+        sprintf(cmd,"kdu_compress -i \"%s\" -o \"%s\" Sprofile=CINEMA4K %s -quiet",in_file,out_file,k_lengths);
+    }
     cmdfp=popen(cmd,"r");
     result=pclose(cmdfp);
     

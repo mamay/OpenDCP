@@ -74,7 +74,7 @@
            <property name="geometry">
             <rect>
              <x>80</x>
-             <y>230</y>
+             <y>250</y>
              <width>600</width>
              <height>121</height>
             </rect>
@@ -285,19 +285,38 @@
              <x>80</x>
              <y>20</y>
              <width>600</width>
-             <height>201</height>
+             <height>221</height>
             </rect>
            </property>
            <property name="title">
             <string>JPEG2000 Encoder Parameters</string>
            </property>
-           <widget class="QWidget" name="gridLayoutWidget">
+           <widget class="QLabel" name="colorLabel">
             <property name="geometry">
              <rect>
-              <x>10</x>
-              <y>30</y>
-              <width>585</width>
-              <height>161</height>
+              <x>11</x>
+              <y>180</y>
+              <width>43</width>
+              <height>27</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Color :</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="bwValueLabel">
+            <property name="geometry">
+             <rect>
+              <x>349</x>
+              <y>120</y>
+              <width>63</width>
+              <height>25</height>
              </rect>
             </property>
             <property name="sizePolicy">
@@ -312,463 +331,502 @@
               <height>25</height>
              </size>
             </property>
-            <layout class="QGridLayout" name="endoderGridLayout">
-             <property name="spacing">
-              <number>5</number>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>125 mb/s</string>
+            </property>
+            <property name="indent">
+             <number>0</number>
+            </property>
+           </widget>
+           <widget class="QLabel" name="frameRateLabel">
+            <property name="geometry">
+             <rect>
+              <x>11</x>
+              <y>90</y>
+              <width>75</width>
+              <height>27</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>27</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Frame Rate:</string>
+            </property>
+           </widget>
+           <widget class="QCheckBox" name="dpxLogCheckBox">
+            <property name="geometry">
+             <rect>
+              <x>340</x>
+              <y>180</y>
+              <width>130</width>
+              <height>25</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>25</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>DPX Logarithmic</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="QLabel" name="encoderLabel">
+            <property name="geometry">
+             <rect>
+              <x>11</x>
+              <y>30</y>
+              <width>55</width>
+              <height>27</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>27</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Encoder:</string>
+            </property>
+           </widget>
+           <widget class="QComboBox" name="encoderComboBox">
+            <property name="geometry">
+             <rect>
+              <x>88</x>
+              <y>30</y>
+              <width>125</width>
+              <height>26</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>25</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>27</height>
+             </size>
+            </property>
+            <property name="editable">
+             <bool>false</bool>
+            </property>
+            <item>
+             <property name="text">
+              <string>OpenJPEG</string>
              </property>
-             <item row="0" column="0">
-              <widget class="QLabel" name="encoderLabel">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>27</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Encoder:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QComboBox" name="encoderComboBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>25</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>27</height>
-                </size>
-               </property>
-               <property name="editable">
-                <bool>false</bool>
-               </property>
-               <item>
-                <property name="text">
-                 <string>OpenJPEG</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Kakadu</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QSlider" name="bwSlider">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>25</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="minimum">
-                <number>50</number>
-               </property>
-               <property name="maximum">
-                <number>250</number>
-               </property>
-               <property name="value">
-                <number>125</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="3">
-              <widget class="QLabel" name="bwValueLabel">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>25</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>125 mb/s</string>
-               </property>
-               <property name="indent">
-                <number>0</number>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="profileLabel">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>27</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Profile:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QComboBox" name="profileComboBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>25</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>27</height>
-                </size>
-               </property>
-               <item>
-                <property name="text">
-                 <string>Cinema 2K</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Cinema 4K</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="bwLabel">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>27</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Bandwidth:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="3">
-              <widget class="QCheckBox" name="stereoscopicCheckBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>25</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Stereoscopic</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="frameRateLabel">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>27</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Frame Rate:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QComboBox" name="frameRateComboBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>25</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <item>
-                <property name="text">
-                 <string>24</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>25</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>30</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>48</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>50</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>60</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="4" column="0">
-              <widget class="QLabel" name="threadsLabel">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Threads:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QSpinBox" name="threadsSpinBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>25</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="minimum">
-                <number>1</number>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="3">
-              <widget class="QCheckBox" name="overwritej2kCB">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>25</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="toolTip">
-                <string>Overwrite existing j2c files. Uncheck if you are resuming a previous conversion, which will save time.</string>
-               </property>
-               <property name="text">
-                <string>Overwrite</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="4">
-              <widget class="QCheckBox" name="xyzCheckBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>25</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>XYZ Color Conversion</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="2">
-              <spacer name="horizontalSpacer_2">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>10</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="4" column="3">
-              <spacer name="horizontalSpacer">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>115</width>
-                 <height>25</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="0" column="4">
-              <widget class="QCheckBox" name="dpxLogCheckBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>25</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>DPX Logarithmic</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            </item>
+            <item>
+             <property name="text">
+              <string>Kakadu</string>
+             </property>
+            </item>
+           </widget>
+           <widget class="QSlider" name="bwSlider">
+            <property name="geometry">
+             <rect>
+              <x>88</x>
+              <y>120</y>
+              <width>250</width>
+              <height>25</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>25</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="minimum">
+             <number>50</number>
+            </property>
+            <property name="maximum">
+             <number>250</number>
+            </property>
+            <property name="value">
+             <number>125</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+           <widget class="QSpinBox" name="threadsSpinBox">
+            <property name="geometry">
+             <rect>
+              <x>88</x>
+              <y>150</y>
+              <width>45</width>
+              <height>25</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>25</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+           </widget>
+           <widget class="QCheckBox" name="stereoscopicCheckBox">
+            <property name="geometry">
+             <rect>
+              <x>230</x>
+              <y>60</y>
+              <width>105</width>
+              <height>25</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>25</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Stereoscopic</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="profileLabel">
+            <property name="geometry">
+             <rect>
+              <x>11</x>
+              <y>60</y>
+              <width>44</width>
+              <height>27</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>27</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Profile:</string>
+            </property>
+           </widget>
+           <widget class="QComboBox" name="profileComboBox">
+            <property name="geometry">
+             <rect>
+              <x>88</x>
+              <y>60</y>
+              <width>125</width>
+              <height>26</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>25</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>27</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>Cinema 2K</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Cinema 4K</string>
+             </property>
+            </item>
+           </widget>
+           <widget class="QLabel" name="bwLabel">
+            <property name="geometry">
+             <rect>
+              <x>11</x>
+              <y>120</y>
+              <width>70</width>
+              <height>27</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>27</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Bandwidth:</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="threadsLabel">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>150</y>
+              <width>55</width>
+              <height>27</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Threads:</string>
+            </property>
+           </widget>
+           <widget class="QCheckBox" name="overwritej2kCB">
+            <property name="geometry">
+             <rect>
+              <x>230</x>
+              <y>30</y>
+              <width>151</width>
+              <height>25</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>25</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Overwrite existing j2c files. Uncheck if you are resuming a previous conversion, which will save time.</string>
+            </property>
+            <property name="text">
+             <string>Overwrite Existing</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="QComboBox" name="frameRateComboBox">
+            <property name="geometry">
+             <rect>
+              <x>88</x>
+              <y>90</y>
+              <width>71</width>
+              <height>26</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>25</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>24</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>25</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>30</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>48</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>50</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>60</string>
+             </property>
+            </item>
+           </widget>
+           <widget class="QCheckBox" name="xyzCheckBox">
+            <property name="geometry">
+             <rect>
+              <x>210</x>
+              <y>180</y>
+              <width>124</width>
+              <height>25</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>25</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>XYZ Conversion</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="QComboBox" name="colorComboBox">
+            <property name="geometry">
+             <rect>
+              <x>88</x>
+              <y>180</y>
+              <width>111</width>
+              <height>26</height>
+             </rect>
+            </property>
+            <item>
+             <property name="text">
+              <string>sRGB</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Rec. 709</string>
+             </property>
+            </item>
            </widget>
           </widget>
           <widget class="QGroupBox" name="outputGroupBox">
            <property name="geometry">
             <rect>
              <x>80</x>
-             <y>360</y>
+             <y>380</y>
              <width>600</width>
              <height>95</height>
             </rect>
@@ -871,7 +929,7 @@
            <property name="geometry">
             <rect>
              <x>570</x>
-             <y>480</y>
+             <y>490</y>
              <width>115</width>
              <height>40</height>
             </rect>
@@ -884,9 +942,9 @@
            <property name="geometry">
             <rect>
              <x>80</x>
-             <y>460</y>
+             <y>480</y>
              <width>280</width>
-             <height>180</height>
+             <height>171</height>
             </rect>
            </property>
            <property name="title">

@@ -208,7 +208,7 @@ int rgb_to_xyz_lut(odcp_image_t *image, int index) {
     size = image->w * image->h;
 
     for (i=0;i<size;i++) {
-        /* in gamma LUT */
+        /* in gamma lut */
         s.r = lut_in[index][image->component[0].data[i]];
         s.g = lut_in[index][image->component[1].data[i]];
         s.b = lut_in[index][image->component[2].data[i]];
@@ -219,11 +219,11 @@ int rgb_to_xyz_lut(odcp_image_t *image, int index) {
         d.z = ((s.r * color_matrix[index][2][0]) + (s.g * color_matrix[index][2][1]) + (s.b * color_matrix[index][2][2]));
 
         /* DCI Companding */
-        d.x = ((d.x > 1.0) ? 1.0 : d.x) * (DCI_COEFFICENT) * (DCI_LUT_SIZE-1);
-        d.y = ((d.y > 1.0) ? 1.0 : d.y) * (DCI_COEFFICENT) * (DCI_LUT_SIZE-1);
-        d.z = ((d.z > 1.0) ? 1.0 : d.z) * (DCI_COEFFICENT) * (DCI_LUT_SIZE-1);
+        d.x = d.x * DCI_COEFFICENT * (DCI_LUT_SIZE-1);
+        d.y = d.y * DCI_COEFFICENT * (DCI_LUT_SIZE-1);
+        d.z = d.z * DCI_COEFFICENT * (DCI_LUT_SIZE-1);
 
-        /* out gamma LUT */
+        /* out gamma lut */
         image->component[0].data[i] = lut_out[LO_DCI][(int)d.x];
         image->component[1].data[i] = lut_out[LO_DCI][(int)d.y];
         image->component[2].data[i] = lut_out[LO_DCI][(int)d.z];

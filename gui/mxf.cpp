@@ -130,7 +130,11 @@ void MainWindow::mxfSourceTypeUpdate() {
 
 void MainWindow::mxfSetHVState() {
     int value = ui->mxfHVCheckBox->checkState();
-
+    ui->mxfSoundRadio2->setEnabled(!value);
+    if (value) {
+        ui->mxfSoundRadio5->setChecked(1); 
+    }
+    mxfSetSoundState();
     ui->aHILabel->setEnabled(value);
     ui->aHIEdit->setEnabled(value);
     ui->aHIButton->setEnabled(value);
@@ -330,8 +334,6 @@ void MainWindow::mxfCreateAudio() {
 
     // add 5.1
     if (ui->mxfSoundRadio5->isChecked()) {
-        inputList.append(QFileInfo(ui->aLeftEdit->text()));
-        inputList.append(QFileInfo(ui->aRightEdit->text()));
         inputList.append(QFileInfo(ui->aCenterEdit->text()));
         inputList.append(QFileInfo(ui->aSubEdit->text()));
         inputList.append(QFileInfo(ui->aLeftSEdit->text()));
@@ -345,13 +347,13 @@ void MainWindow::mxfCreateAudio() {
     }
 
     // get wav duration
-    //int duration = get_wav_duration(ui->aLeftEdit->text().toStdString().c_str(),
-    //                                mxfContext->frame_rate); 
+    int duration = get_wav_duration(ui->aLeftEdit->text().toStdString().c_str(),
+                                    mxfContext->frame_rate); 
 
     outputFile = ui->aMxfOutEdit->text();
     mxfWriterThread->setMxfInputs(mxfContext, inputList, outputFile);
 
-    dMxfConversion->init(inputList.size(), outputFile);
+    dMxfConversion->init(duration, outputFile);
     mxfWriterThread->start();
     dMxfConversion->exec();
 

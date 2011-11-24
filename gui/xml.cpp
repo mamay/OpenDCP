@@ -62,9 +62,6 @@ void MainWindow::startDcp()
 
     opendcp_t *xmlContext = create_opendcp();
 
-    // get date
-    QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
-
     // process options
     xmlContext->log_level = 0;
 
@@ -79,8 +76,6 @@ void MainWindow::startDcp()
     strcpy(xmlContext->xml.issuer, ui->cplIssuerEdit->text().toStdString().c_str());
     strcpy(xmlContext->xml.kind, ui->cplKindComboBox->currentText().toStdString().c_str());
     strcpy(xmlContext->xml.rating, ui->cplRatingComboBox->currentText().toStdString().c_str());
-    sprintf(xmlContext->xml.creator,"%s-%s",OPENDCP_NAME,OPENDCP_VERSION);
-    strcpy(xmlContext->xml.timestamp,timestamp.toStdString().c_str());
 
     // check picture track is supplied
     if (ui->reelPictureEdit->text().isEmpty()) {

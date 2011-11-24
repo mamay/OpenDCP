@@ -273,6 +273,8 @@ void MainWindow::j2kStart() {
         context->j2k.encoder = J2K_KAKADU;
     }
 
+    context->j2k.lut = ui->colorComboBox->currentIndex();
+
     if (ui->dpxLogCheckBox->checkState()) {
         context->j2k.dpx = 1;
     } else {

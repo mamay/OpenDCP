@@ -416,55 +416,76 @@ void filelistFree(filelist_t *filelist) {
 
 Result_t MxfWriter::writePcmMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, QString mxfOutputFile)
 {
-    PCMParserList        pcm_parser;
-    PCM::MXFWriter       mxf_writer;
     PCM::FrameBuffer     frame_buffer;
     PCM::AudioDescriptor audio_desc;
-    PCM::AudioDescriptor audio_desc_tmp;
+    PCM::WAVParser       pcm_parser_channel[mxfFileList.size()];
+    PCM::FrameBuffer     frame_buffer_channel[mxfFileList.size()];
+    PCM::AudioDescriptor audio_desc_channel[mxfFileList.size()];
+    PCM::MXFWriter       mxf_writer;
     writer_info_t        writer_info;
     Result_t             result = RESULT_OK;
     ui32_t               mxf_duration;
-    filelist_t           *filelist;
+    ui32_t               file_count = 0;
   
     Rational edit_rate(opendcp->frame_rate,1);
 
-    filelist = (filelist_t *)malloc(sizeof(filelist_t));
-    memset(filelist,0,sizeof (filelist_t));
-    filelist->in = (char**) malloc(mxfFileList.size()*sizeof(char*));
-
-    for (int i = 0; i < mxfFileList.size(); i++) {
-        filelist->in[i] = (char *) malloc(MAX_FILENAME_LENGTH);
-        sprintf(filelist->in[i],"%s",mxfFileList.at(i).absoluteFilePath().toAscii().constData());
-    }
-
-    result = pcm_parser.OpenRead(mxfFileList.size(), (const char **)filelist->in, edit_rate);
-
-    filelistFree(filelist);
-
-    pcm_parser.FillAudioDescriptor(audio_desc);
-    audio_desc.EditRate = edit_rate;
-    frame_buffer.Capacity(PCM::CalcFrameBufferSize(audio_desc));
+    /* read first file */
+    result = pcm_parser_channel[0].OpenRead(mxfFileList.at(0).absoluteFilePath().toStdString().c_str(), edit_rate);
 
     if (ASDCP_FAILURE(result)) {
-        printf("Failed to open file %s\n",mxfFileList.at(0).absoluteFilePath().toAscii().constData());
-        return result;
+        dcp_log(LOG_ERROR,"Could not open %s",mxfFileList.at(0).absoluteFilePath().toStdString().c_str());
+        return RESULT_FILEOPEN;
     }
 
+    /* read audio descriptor */
+    pcm_parser_channel[0].FillAudioDescriptor(audio_desc);
+
+    for (file_count = 0; file_count < mxfFileList.size(); file_count++) {
+        result = pcm_parser_channel[file_count].OpenRead(
+                 mxfFileList.at(file_count).absoluteFilePath().toStdString().c_str(), edit_rate);
+        if (ASDCP_FAILURE(result)) {
+            dcp_log(LOG_ERROR,"Could not open %s",mxfFileList.at(0).absoluteFilePath().toStdString().c_str());
+            return RESULT_FILEOPEN;
+        }
+        pcm_parser_channel[file_count].FillAudioDescriptor(audio_desc_channel[file_count]);
+        if (audio_desc_channel[file_count].AudioSamplingRate != audio_desc.AudioSamplingRate) {
+            dcp_log(LOG_ERROR,"Mismatched sampling rate");
+            return RESULT_FILEOPEN;
+        }
+        if (audio_desc_channel[file_count].QuantizationBits != audio_desc.QuantizationBits) {
+            dcp_log(LOG_ERROR,"Mismatched bit rate");
+            return RESULT_FILEOPEN;
+        }
+        if (audio_desc_channel[file_count].ContainerDuration != audio_desc.ContainerDuration) {
+            dcp_log(LOG_ERROR,"Mismatched duration");
+            return RESULT_FILEOPEN;
+        }
+        frame_buffer_channel[file_count].Capacity(PCM::CalcFrameBufferSize(audio_desc_channel[file_count]));
+    }
+
+    if (ASDCP_FAILURE(result)) {
+        return RESULT_FILEOPEN;
+    }
+
+    /*  set total audio characteristics */
+    audio_desc.EditRate     = edit_rate;
+    audio_desc.ChannelCount = mxfFileList.size();
+    audio_desc.BlockAlign   = audio_desc.BlockAlign * mxfFileList.size();
+    audio_desc.AvgBps       = audio_desc.AvgBps * mxfFileList.size();
+
+    /* set total frame buffer size */
+    frame_buffer.Capacity(PCM::CalcFrameBufferSize(audio_desc));
+    frame_buffer.Size(PCM::CalcFrameBufferSize(audio_desc));
+
+    /* fill write info */
     fillWriterInfo(opendcp, &writer_info);
     result = mxf_writer.OpenWrite(mxfOutputFile.toAscii().constData(), writer_info.info, audio_desc);
 
     if (ASDCP_FAILURE(result)) {
-        printf("failed to open output file %s\n",mxfOutputFile.toAscii().constData());
-        return result;
+        return RESULT_FILEOPEN;
     }
 
-    result = pcm_parser.Reset();
-
-    if (ASDCP_FAILURE(result)) {
-        printf("parser reset failed\n");
-        return result;
-    }
-
+    /* set duration */
     if (!opendcp->duration) {
         mxf_duration = 0xffffffff;
     } else {
@@ -472,16 +493,40 @@ Result_t MxfWriter::writePcmMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
     }
 
     while (ASDCP_SUCCESS(result) && mxf_duration--) {
-        result = pcm_parser.ReadFrame(frame_buffer);
+        byte_t *data_s = frame_buffer.Data();
+        byte_t *data_e = data_s + frame_buffer.Capacity();
+        byte_t sample_size = PCM::CalcSampleSize(audio_desc_channel[0]);
+        int    offset = 0;
 
-        if (ASDCP_FAILURE(result)) {
-            continue;
-        } else {
-            if (frame_buffer.Size() != frame_buffer.Capacity()) {
+        /* read a frame from each file */
+        for (file_count = 0; file_count < mxfFileList.size(); file_count++) {
+            memset(frame_buffer_channel[file_count].Data(), 0, frame_buffer_channel[file_count].Capacity());
+            result = pcm_parser_channel[file_count].ReadFrame(frame_buffer_channel[file_count]);
+            if (ASDCP_FAILURE(result)) {
+                continue;
+            }
+            if (frame_buffer_channel[file_count].Size() != frame_buffer_channel[file_count].Capacity()) {
+                dcp_log(LOG_INFO,"frame was short, expect size: %d actual size: %d. MXF Duration will be reduced by one frame",
+                                  frame_buffer_channel[file_count].Size(), frame_buffer_channel[file_count].Capacity());
                 result = RESULT_ENDOFFILE;
                 continue;
             }
+        }
+
+        /* write sample from each frame to output buffer */
+        if (ASDCP_SUCCESS(result)) {
+            while (data_s < data_e) {
+                for (file_count = 0; file_count < mxfFileList.size(); file_count++) {
+                    byte_t *frame = frame_buffer_channel[file_count].Data()+offset;
+                    memcpy(data_s,frame,sample_size);
+                    data_s += sample_size;
+                }
+                offset += sample_size;
+            }
+
+            /* write the frame */
             result = mxf_writer.WriteFrame(frame_buffer, writer_info.aes_context, writer_info.hmac_context);
+            emit frameDone();
         }
     }
 
@@ -490,15 +535,14 @@ Result_t MxfWriter::writePcmMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
     }
 
     if (ASDCP_FAILURE(result)) {
-        printf("not end of file\n");
-        return result;
+        return RESULT_WRITEFAIL;
     }
 
+    /* write footer information */
     result = mxf_writer.Finalize();
 
     if (ASDCP_FAILURE(result)) {
-        printf("failed to finalize\n");
-        return result;
+        return RESULT_WRITEFAIL;
     }
 
     return result;
