@@ -142,7 +142,7 @@ int write_cpl(opendcp_t *opendcp, cpl_t *cpl) {
                 fprintf(fp,"        <MainSound>\n");
             }
             if (asset.essence_class == ACT_TIMED_TEXT) {
-                fprintf(fp,"        <MainSubtitle\n");
+                fprintf(fp,"        <MainSubtitle>\n");
             }
             fprintf(fp,"          <Id>urn:uuid:%s</Id>\n",asset.uuid);
             fprintf(fp,"          <AnnotationText>%s</AnnotationText>\n",asset.annotation);
@@ -152,11 +152,12 @@ int write_cpl(opendcp_t *opendcp, cpl_t *cpl) {
             fprintf(fp,"          <Duration>%d</Duration>\n",asset.duration);
             if (asset.essence_class == ACT_PICTURE) {
                 if (opendcp->ns == XML_NS_SMPTE) {
+                    fprintf(fp,"          <FrameRate>%s</FrameRate>\n",asset.frame_rate);
                     fprintf(fp,"          <ScreenAspectRatio>%s</ScreenAspectRatio>\n",asset.aspect_ratio);
                 } else {
                     fprintf(fp,"          <ScreenAspectRatio>%s</ScreenAspectRatio>\n",get_aspect_ratio(asset.aspect_ratio));
+                    fprintf(fp,"          <FrameRate>%s</FrameRate>\n",asset.frame_rate);
                 }
-                fprintf(fp,"          <FrameRate>%s</FrameRate>\n",asset.frame_rate);
             }
             if ( opendcp->digest_flag ) {
                 fprintf(fp,"          <Hash>%s</Hash>\n",asset.digest);
@@ -172,7 +173,7 @@ int write_cpl(opendcp_t *opendcp, cpl_t *cpl) {
                 fprintf(fp,"        </MainSound>\n");
             }
             if (asset.essence_class == ACT_TIMED_TEXT) {
-                fprintf(fp,"        </MainSubtitle\n");
+                fprintf(fp,"        </MainSubtitle>\n");
             }
          }
         fprintf(fp,"      </AssetList>\n");
