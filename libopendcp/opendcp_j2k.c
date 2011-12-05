@@ -103,7 +103,7 @@ int check_image_compliance(opendcp_t *opendcp, odcp_image_t *image) {
     switch (opendcp->cinema_profile) {
         case DCP_CINEMA2K:
             if (!((image->w == 2048) | (image->h == 1080))) {
-                return DCP_FATAL;
+                return DCP_ERROR;
             }
         break;
         case DCP_CINEMA4K:
@@ -152,13 +152,20 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
         return DCP_FATAL;
     }
 
-    /* resize image */
-    //resize(&odcp_image,999,540,0);
-
     /* verify image is dci compliant */
     if (check_image_compliance(opendcp, odcp_image) != DCP_SUCCESS) {
         dcp_log(LOG_WARN,"The image resolution of %s is not DCI Compliant",in_file);
-        //return DCP_FATAL;
+
+        /* resize image */
+        if (opendcp->j2k.resize) {
+            if (resize(&odcp_image,NEAREST_PIXEL) != DCP_SUCCESS) {
+                odcp_image_free(odcp_image);
+                return DCP_FATAL;
+            }
+        } else {
+            odcp_image_free(odcp_image);
+            return DCP_FATAL;
+        }
     }
     
     if (opendcp->j2k.xyz) {

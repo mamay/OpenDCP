@@ -293,6 +293,12 @@ void MainWindow::j2kStart() {
         context->j2k.xyz = 0;
     }
 
+    if (ui->resizeCheckBox->checkState()) {
+        context->j2k.resize = 1;
+    } else {
+        context->j2k.resize = 0;
+    }
+
     if (ui->overwritej2kCB->checkState())
         context->no_overwrite = 0;
     else {

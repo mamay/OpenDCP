@@ -280,6 +280,7 @@ typedef struct {
     int            lut;
     int            xyz;
     int            xyz_method;
+    int            resize;
 } j2k_options_t;
 
 typedef struct {

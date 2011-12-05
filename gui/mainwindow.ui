@@ -372,7 +372,7 @@
            <widget class="QCheckBox" name="dpxLogCheckBox">
             <property name="geometry">
              <rect>
-              <x>380</x>
+              <x>400</x>
               <y>180</y>
               <width>141</width>
               <height>25</height>
@@ -395,6 +395,9 @@
               <width>16777215</width>
               <height>25</height>
              </size>
+            </property>
+            <property name="toolTip">
+             <string>If input is DPX, use logarithmic conversion</string>
             </property>
             <property name="text">
              <string>DPX Logarithmic</string>
@@ -551,7 +554,7 @@
              <rect>
               <x>250</x>
               <y>60</y>
-              <width>191</width>
+              <width>131</width>
               <height>25</height>
              </rect>
             </property>
@@ -566,6 +569,9 @@
               <width>0</width>
               <height>25</height>
              </size>
+            </property>
+            <property name="toolTip">
+             <string>Stereoscopic image sequence</string>
             </property>
             <property name="text">
              <string>Stereoscopic</string>
@@ -695,7 +701,7 @@
              <rect>
               <x>250</x>
               <y>30</y>
-              <width>201</width>
+              <width>191</width>
               <height>25</height>
              </rect>
             </property>
@@ -776,7 +782,7 @@
            <widget class="QCheckBox" name="xyzCheckBox">
             <property name="geometry">
              <rect>
-              <x>240</x>
+              <x>250</x>
               <y>180</y>
               <width>131</width>
               <height>25</height>
@@ -799,6 +805,9 @@
               <width>16777215</width>
               <height>25</height>
              </size>
+            </property>
+            <property name="toolTip">
+             <string>Perform RGB to XYZ colorspace conversion</string>
             </property>
             <property name="text">
              <string>XYZ Conversion</string>
@@ -826,6 +835,22 @@
               <string>Rec. 709</string>
              </property>
             </item>
+           </widget>
+           <widget class="QCheckBox" name="resizeCheckBox">
+            <property name="geometry">
+             <rect>
+              <x>400</x>
+              <y>60</y>
+              <width>191</width>
+              <height>25</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string>Resize the image to DCI compliant resolution</string>
+            </property>
+            <property name="text">
+             <string>DCI Resolution Resize</string>
+            </property>
            </widget>
           </widget>
           <widget class="QGroupBox" name="outputGroupBox">

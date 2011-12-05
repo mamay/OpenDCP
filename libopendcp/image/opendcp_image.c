@@ -302,11 +302,52 @@ static inline rgb_pixel_float_t get_pixel(odcp_image_t *image, int x, int y) {
     return p;
 } 
 
+int letterbox(odcp_image_t **image, int w, int h) {
+    int num_components = 3;
+    int i,x,y;
+    odcp_image_t *ptr = *image;
+    rgb_pixel_float_t p;
+
+    /* create the image */
+    odcp_image_t *d_image = odcp_image_create(num_components, w, h);
+
+    if (!d_image) {
+        return -1;
+    }
+
+    for(y=0; y<h; y++) {
+        for(x=0; x<w; x++) {
+            p = get_pixel(ptr, x, y);
+            d_image->component[0].data[i] = (int)p.r;
+            d_image->component[1].data[i] = (int)p.g;
+            d_image->component[2].data[i] = (int)p.b;
+         }
+    }
+
+
+    odcp_image_free(*image);
+    *image = d_image;
+
+    return DCP_SUCCESS;
+} 
+
 /* resize image */
-int resize(odcp_image_t **image,int w,int h,int method) {
+int resize(odcp_image_t **image, int method) {
     int num_components = 3;
     odcp_image_t *ptr = *image;
     rgb_pixel_float_t p;
+    int w,h;
+
+    /* calculate letterbox/pillarbox */
+    if ((float)(ptr->w/ptr->h) <= (float)(2048/853)) {
+        w = (ptr->w*1080/ptr->h);
+        h = 1080;
+    } else {
+        dcp_log(LOG_ERROR,"Unsupport image resolution, cannot resize");
+        return DCP_ERROR;
+    }
+
+    dcp_log(LOG_INFO,"Resizing to %dx%d",w,h);
 
     /* create the image */
     odcp_image_t *d_image = odcp_image_create(num_components, w, h);

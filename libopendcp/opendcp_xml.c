@@ -24,6 +24,10 @@
 #include <inttypes.h>
 #include <sys/stat.h>
 #include "opendcp.h"
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
+
+#define XML_ENCODING "UTF-8"
 
 #ifdef WIN32
 char *strsep (char **stringp, const char *delim) {
@@ -76,133 +80,124 @@ char *get_aspect_ratio(char *dimension_string) {
 }
 
 int write_cpl(opendcp_t *opendcp, cpl_t *cpl) {
-    FILE *fp;
-    int a,r;
+    int a,r, rc;
     struct stat st;
-    char filename[MAX_PATH_LENGTH];
+    xmlIndentTreeOutput = 1;
+    xmlDocPtr        doc; 
+    xmlTextWriterPtr xml;
 
-    sprintf(filename,"%s",cpl->filename);
+    /* create XML document */
+    xml = xmlNewTextWriterDoc(&doc,0);
 
-    fp = fopen(filename, "w");
-
-    if ( fp == NULL ) {
-        dcp_log(LOG_ERROR,"Could not open file %s for writing",filename);
+    /* cpl start */
+    rc = xmlTextWriterStartDocument(xml, NULL, XML_ENCODING, NULL);
+    if (rc < 0) {
+        dcp_log(LOG_ERROR,"xmlTextWriterStartDocument failed");
         return DCP_FATAL;
     }
 
-    dcp_log(LOG_INFO,"Writing CPL file %.256s",filename);
+    xmlTextWriterStartElement(xml, BAD_CAST "CompositionPlaylist");
+    xmlTextWriterWriteAttribute(xml, BAD_CAST "xmlns", BAD_CAST NS_CPL[opendcp->ns]);
+    if (opendcp->xml_sign) {
+        xmlTextWriterWriteAttribute(xml, BAD_CAST "xmlns:dsig", BAD_CAST DS_DSIG);
+    }
 
-    /* CPL XML Start */
-    fprintf(fp,"%s\n",XML_HEADER);
-    fprintf(fp,"<CompositionPlaylist xmlns=\"%s\" xmlns:dsig=\"%s\">\n",NS_CPL[opendcp->ns],DS_DSIG);
-    fprintf(fp,"  <Id>urn:uuid:%s</Id>\n",cpl->uuid);
-    fprintf(fp,"  <AnnotationText>%s</AnnotationText>\n",cpl->annotation);
-    fprintf(fp,"  <IssueDate>%s</IssueDate>\n",cpl->timestamp);
-    fprintf(fp,"  <Issuer>%s</Issuer>\n",cpl->issuer);
-    fprintf(fp,"  <Creator>%s</Creator>\n",cpl->creator);
-    fprintf(fp,"  <ContentTitleText>%s</ContentTitleText>\n",cpl->title);
-    fprintf(fp,"  <ContentKind>%s</ContentKind>\n",cpl->kind);
+    /* cpl attributes */
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "Id","%s%s","urn:uuid:",cpl->uuid);
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "AnnotationText","%s",cpl->annotation);
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "IssueDate","%s",cpl->timestamp);
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "Creator","%s",cpl->creator);
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "ContentTitleText","%s",cpl->title);
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "ContentKind","%s",cpl->kind);
 
+    /* content version */
     if (opendcp->ns == XML_NS_SMPTE) {
-        fprintf(fp,"  <ContentVersion>\n");
-        fprintf(fp,"    <Id>urn:uri:%s_%s</Id>\n",cpl->uuid,cpl->timestamp);
-        fprintf(fp,"    <LabelText>%s_%s</LabelText>\n",cpl->uuid,cpl->timestamp);
-        fprintf(fp,"  </ContentVersion>\n");
+        xmlTextWriterStartElement(xml, BAD_CAST "ContentVersion"); 
+        xmlTextWriterWriteFormatElement(xml, BAD_CAST "Id","%s%s_%s","urn:uri:",cpl->uuid,cpl->timestamp);
+        xmlTextWriterWriteFormatElement(xml, BAD_CAST "LabelText","%s_%s",cpl->uuid,cpl->timestamp);
+        xmlTextWriterEndElement(xml);
     }
 
+    /* rating */
+    xmlTextWriterStartElement(xml, BAD_CAST "RatingList");
     if (strcmp(cpl->rating,"")) {
-        fprintf(fp,"  <RatingList>\n");
-        fprintf(fp,"    <Agency>%s</Agency>\n",RATING_AGENCY[1]);
-        fprintf(fp,"    <Label>%s</Label>\n",cpl->rating);
-        fprintf(fp,"  </RatingList>\n");
-    } else {
-        fprintf(fp,"  <RatingList/>\n");
+        xmlTextWriterStartElement(xml, BAD_CAST "RatingList");
+        xmlTextWriterWriteFormatElement(xml, BAD_CAST "Agency","%s",RATING_AGENCY[1]);
+        xmlTextWriterWriteFormatElement(xml, BAD_CAST "Label","%s",cpl->rating);
     }
+    xmlTextWriterEndElement(xml);
 
-    /* Reel(s) Start */
-    fprintf(fp,"  <ReelList>\n");
+    /* reel(s) Start */
+    xmlTextWriterStartElement(xml, BAD_CAST "ReelList");
     for (r=0;r<cpl->reel_count;r++) {
         reel_t reel = cpl->reel[r];
-        fprintf(fp,"    <Reel>\n");
-        fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",reel.uuid);
-        fprintf(fp,"      <AssetList>\n");
+        xmlTextWriterStartElement(xml, BAD_CAST "Reel");
+        xmlTextWriterWriteFormatElement(xml, BAD_CAST "Id","%s%s","urn:uuid:",reel.uuid);
+        xmlTextWriterStartElement(xml, BAD_CAST "AssetList");
 
         /* Asset(s) Start */
         for (a=0;a<cpl->reel[r].asset_count;a++) {
             asset_t asset = cpl->reel[r].asset[a];
-
             if (asset.essence_class == ACT_PICTURE) {
                 if (asset.stereoscopic) {
-                    fprintf(fp,"        <msp-cpl:MainStereoscopicPicture xmlns:msp-cpl=\"%s\">\n",NS_CPL_3D[opendcp->ns]);
+                    xmlTextWriterStartElement(xml, BAD_CAST "msp-cpl:MainStereoscopicPicture");
+                    xmlTextWriterWriteAttribute(xml, BAD_CAST "xmlns:msp-cpl", BAD_CAST NS_CPL_3D[opendcp->ns]);
                 } else {
-                    fprintf(fp,"        <MainPicture>\n");
+                    xmlTextWriterStartElement(xml, BAD_CAST "MainPicture");
                 }
-            } 
+            }
             if (asset.essence_class == ACT_SOUND) {
-                fprintf(fp,"        <MainSound>\n");
+                xmlTextWriterStartElement(xml, BAD_CAST "MainSound");
             }
             if (asset.essence_class == ACT_TIMED_TEXT) {
-                fprintf(fp,"        <MainSubtitle>\n");
+                xmlTextWriterStartElement(xml, BAD_CAST "MainSubtitle");
             }
-            fprintf(fp,"          <Id>urn:uuid:%s</Id>\n",asset.uuid);
-            fprintf(fp,"          <AnnotationText>%s</AnnotationText>\n",asset.annotation);
-            fprintf(fp,"          <EditRate>%s</EditRate>\n",asset.edit_rate);
-            fprintf(fp,"          <IntrinsicDuration>%d</IntrinsicDuration>\n",asset.intrinsic_duration);
-            fprintf(fp,"          <EntryPoint>%d</EntryPoint>\n",asset.entry_point);
-            fprintf(fp,"          <Duration>%d</Duration>\n",asset.duration);
+
+            xmlTextWriterWriteFormatElement(xml, BAD_CAST "Id","%s%s","urn:uuid:",asset.uuid);
+            xmlTextWriterWriteFormatElement(xml, BAD_CAST "AnnotationText","%s",asset.annotation);
+            xmlTextWriterWriteFormatElement(xml, BAD_CAST "EditRate","%s",asset.edit_rate);
+            xmlTextWriterWriteFormatElement(xml, BAD_CAST "IntrinsicDuration","%d",asset.intrinsic_duration);
+            xmlTextWriterWriteFormatElement(xml, BAD_CAST "EntryPoint","%d",asset.entry_point);
+            xmlTextWriterWriteFormatElement(xml, BAD_CAST "Duration","%d",asset.duration);
+
             if (asset.essence_class == ACT_PICTURE) {
+                xmlTextWriterWriteFormatElement(xml, BAD_CAST "FrameRate","%s",asset.frame_rate);
                 if (opendcp->ns == XML_NS_SMPTE) {
-                    fprintf(fp,"          <FrameRate>%s</FrameRate>\n",asset.frame_rate);
-                    fprintf(fp,"          <ScreenAspectRatio>%s</ScreenAspectRatio>\n",asset.aspect_ratio);
+                    xmlTextWriterWriteFormatElement(xml, BAD_CAST "ScreenAspectRatio","%s",asset.aspect_ratio);
                 } else {
-                    fprintf(fp,"          <ScreenAspectRatio>%s</ScreenAspectRatio>\n",get_aspect_ratio(asset.aspect_ratio));
-                    fprintf(fp,"          <FrameRate>%s</FrameRate>\n",asset.frame_rate);
+                    xmlTextWriterWriteFormatElement(xml, BAD_CAST "ScreenAspectRatio","%s",get_aspect_ratio(asset.aspect_ratio));
                 }
             }
+
             if ( opendcp->digest_flag ) {
-                fprintf(fp,"          <Hash>%s</Hash>\n",asset.digest);
+                xmlTextWriterWriteFormatElement(xml, BAD_CAST "Hash","%s",asset.digest);
             }
-            if (asset.essence_class == ACT_PICTURE) {
-                if (asset.stereoscopic) {
-                    fprintf(fp,"        </msp-cpl:MainStereoscopicPicture>\n");
-                } else {
-                    fprintf(fp,"        </MainPicture>\n");
-                }
-            }
-            if (asset.essence_class == ACT_SOUND) {
-                fprintf(fp,"        </MainSound>\n");
-            }
-            if (asset.essence_class == ACT_TIMED_TEXT) {
-                fprintf(fp,"        </MainSubtitle>\n");
-            }
-         }
-        fprintf(fp,"      </AssetList>\n");
-        fprintf(fp,"    </Reel>\n");
+            
+            xmlTextWriterEndElement(xml); /* end asset */
+        }
+     
+        xmlTextWriterEndElement(xml);     /* end assetlist */
+        xmlTextWriterEndElement(xml);     /* end reel */
     }
-    fprintf(fp,"  </ReelList>\n");
+    xmlTextWriterEndElement(xml);         /* end reel list */
+    xmlTextWriterEndElement(xml);         /* end compositionplaylist */
 
-#ifdef XMLSEC
-    if (opendcp->xml_sign) {
-        write_dsig_template(opendcp, fp);
+    rc = xmlTextWriterEndDocument(xml);
+    if (rc < 0) {
+        dcp_log(LOG_ERROR,"xmlTextWriterEndDocument failed %s",cpl->filename);
+        return DCP_FATAL;
     }
-#endif
 
-    fprintf(fp,"</CompositionPlaylist>\n");
-    fclose(fp);
+    xmlFreeTextWriter(xml);
+    xmlSaveFormatFile(cpl->filename, doc, 1);
+    xmlFreeDoc(doc);
 
-#ifdef XMLSEC
-    /* sign the XML file */
-    if (opendcp->xml_sign) {
-        xml_sign(opendcp, filename);
-    }
-#endif
-
-    /* Store CPL file size */
+    /* store CPL file size */
     dcp_log(LOG_INFO,"Writing CPL file info");
-    stat(filename, &st);
+    stat(cpl->filename, &st);
     sprintf(cpl->size,"%"PRIu64,st.st_size);
-    calculate_digest(filename,cpl->digest);
-
+    calculate_digest(cpl->filename,cpl->digest);
+    
     return DCP_SUCCESS;
 }
 
@@ -217,36 +212,39 @@ int write_pkl_list(opendcp_t *opendcp) {
 }
 
 int write_pkl(opendcp_t *opendcp, pkl_t *pkl) {
-    FILE *fp;
-    int a,c,r;
+    int a,r,c,rc;
     struct stat st;
-    char filename[MAX_PATH_LENGTH];
+    xmlIndentTreeOutput = 1;
+    xmlDocPtr        doc;
+    xmlTextWriterPtr xml;
 
-    sprintf(filename,"%s",pkl->filename);
+    /* create XML document */
+    xml = xmlNewTextWriterDoc(&doc,0);
 
-    fp = fopen(filename, "w");
-
-    if ( fp == NULL ) {
-        dcp_log(LOG_ERROR,"Could not open file %.256s for writing",filename);
+    /* pkl start */
+    rc = xmlTextWriterStartDocument(xml, NULL, XML_ENCODING, NULL);
+    if (rc < 0) {
+        dcp_log(LOG_ERROR,"xmlTextWriterStartDocument failed");
         return DCP_FATAL;
     }
 
-    dcp_log(LOG_INFO,"Writing PKL file %.256s",filename);
+    xmlTextWriterStartElement(xml, BAD_CAST "PackingList");
+    xmlTextWriterWriteAttribute(xml, BAD_CAST "xmlns", BAD_CAST NS_PKL[opendcp->ns]);
+    if (opendcp->xml_sign) {
+        xmlTextWriterWriteAttribute(xml, BAD_CAST "xmlns:dsig", BAD_CAST DS_DSIG);
+    }
 
-    /* PKL XML Start */
-    fprintf(fp,"%s\n",XML_HEADER);
-    fprintf(fp,"<PackingList xmlns=\"%s\" xmlns:dsig=\"%s\">\n",NS_PKL[opendcp->ns],DS_DSIG);
-    fprintf(fp,"  <Id>urn:uuid:%s</Id>\n",pkl->uuid);
-    fprintf(fp,"  <AnnotationText>%s</AnnotationText>\n",pkl->annotation);
-    fprintf(fp,"  <IssueDate>%s</IssueDate>\n",opendcp->xml.timestamp);
-    fprintf(fp,"  <Issuer>%s</Issuer>\n",opendcp->xml.issuer);
-    fprintf(fp,"  <Creator>%s</Creator>\n",opendcp->xml.creator);
-    fprintf(fp,"  <AssetList>\n");
-
+    /* cpl attributes */
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "Id","%s%s","urn:uuid:",pkl->uuid);
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "AnnotationText","%s",pkl->annotation);
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "IssueDate","%s",opendcp->xml.timestamp);
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "Issuer","%s",opendcp->xml.issuer);
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "Creator","%s",opendcp->xml.creator);
 
     dcp_log(LOG_INFO,"CPLS: %d",pkl->cpl_count);
 
-    /* Asset(s) Start */
+    /* asset(s) Start */
+    xmlTextWriterStartElement(xml, BAD_CAST "AssetList");
     for (c=0;c<pkl->cpl_count;c++) {
         cpl_t cpl = pkl->cpl[c];
         dcp_log(LOG_INFO,"REELS: %d",cpl.reel_count);
@@ -255,73 +253,83 @@ int write_pkl(opendcp_t *opendcp, pkl_t *pkl) {
 
             for (a=0;a<reel.asset_count;a++) {
                 asset_t asset = reel.asset[a];
-                fprintf(fp,"    <Asset>\n");
-                fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",asset.uuid);
-                fprintf(fp,"      <AnnotationText>%s</AnnotationText>\n",asset.annotation);
-                fprintf(fp,"      <Hash>%s</Hash>\n",asset.digest);
-                fprintf(fp,"      <Size>%s</Size>\n",asset.size);
+                xmlTextWriterStartElement(xml, BAD_CAST "Asset");
+                xmlTextWriterWriteFormatElement(xml, BAD_CAST "Id","%s%s","urn:uuid:",asset.uuid);
+                xmlTextWriterWriteFormatElement(xml, BAD_CAST "AnnotationText","%s",asset.annotation);
+                xmlTextWriterWriteFormatElement(xml, BAD_CAST "Hash","%s",asset.digest);
+                xmlTextWriterWriteFormatElement(xml, BAD_CAST "Size","%s",asset.size);
                 if (opendcp->ns == XML_NS_SMPTE) {
-                    fprintf(fp,"      <Type>%s</Type>\n","application/mxf");
+                    xmlTextWriterWriteFormatElement(xml, BAD_CAST "Type","%s","application/mxf");
                 } else {
                     if (asset.essence_class == ACT_PICTURE) {
-                        fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Picture");
+                        xmlTextWriterWriteFormatElement(xml, BAD_CAST "Type","%s","application/x-smpte-mxf;asdcpKind=Picture");
                     }
                     if (asset.essence_class == ACT_SOUND) {
-                        fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Sound");
+                        xmlTextWriterWriteFormatElement(xml, BAD_CAST "Type","%s","application/x-smpte-mxf;asdcpKind=Sound");
                     }
                     if (asset.essence_class == ACT_TIMED_TEXT) {
-                        fprintf(fp,"      <Type>%s</Type>\n","application/x-smpte-mxf;asdcpKind=Subtitle");
+                        xmlTextWriterWriteFormatElement(xml, BAD_CAST "Type","%s","application/x-smpte-mxf;asdcpKind=Subtitle");
                     }
                 }
-                fprintf(fp,"    </Asset>\n");
+                xmlTextWriterEndElement(xml);      /* end asset */
             }
         }
 
-        /* CPL */
-        fprintf(fp,"    <Asset>\n");
-        fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",cpl.uuid);
-        fprintf(fp,"      <Hash>%s</Hash>\n",cpl.digest);
-        fprintf(fp,"      <Size>%s</Size>\n",cpl.size);
+        /* cpl */
+        xmlTextWriterStartElement(xml, BAD_CAST "Asset");
+        xmlTextWriterWriteFormatElement(xml, BAD_CAST "Id","%s%s","urn:uuid:",cpl.uuid);
+        xmlTextWriterWriteFormatElement(xml, BAD_CAST "Hash","%s",cpl.digest);
+        xmlTextWriterWriteFormatElement(xml, BAD_CAST "Size","%s",cpl.size);
         if (opendcp->ns == XML_NS_SMPTE) {
-            fprintf(fp,"      <Type>%s</Type>\n","text/xml");
+            xmlTextWriterWriteFormatElement(xml, BAD_CAST "Type","%s","text/xml");
         } else {
-            fprintf(fp,"      <Type>%s</Type>\n","text/xml;asdcpKind=CPL");
+            xmlTextWriterWriteFormatElement(xml, BAD_CAST "Type","%s","text/xml;asdcpKind=CPL");
         }
-        fprintf(fp,"    </Asset>\n");
+        xmlTextWriterEndElement(xml);      /* end cpl asset */
     }
-    fprintf(fp,"  </AssetList>\n");
+    xmlTextWriterEndElement(xml);      /* end assetlist */
 
 #ifdef XMLSEC
     if (opendcp->xml_sign) {
-        write_dsig_template(opendcp, fp);
+        //write_dsig_template(opendcp, fp);
     }
 #endif
 
-    fprintf(fp,"</PackingList>\n");
-
-    fclose(fp);
+    xmlTextWriterEndElement(xml);      /* end packinglist */
 
 #ifdef XMLSEC
     /* sign the XML file */
     if (opendcp->xml_sign) {
-        xml_sign(opendcp, filename);
+        xml_sign(opendcp, pkl->filename);
     }
 #endif
 
-    /* Store PKL file size */
-    stat(filename, &st);
+    rc = xmlTextWriterEndDocument(xml);
+    if (rc < 0) {
+        dcp_log(LOG_ERROR,"xmlTextWriterEndDocument failed %s",pkl->filename);
+        return DCP_FATAL;
+    }
+
+    xmlFreeTextWriter(xml);
+    xmlSaveFormatFile(pkl->filename, doc, 1);
+    xmlFreeDoc(doc);
+
+    /* store PKL file size */
+    stat(pkl->filename, &st);
     sprintf(pkl->size,"%"PRIu64,st.st_size);
 
     return DCP_SUCCESS;
 }
 
 int write_assetmap(opendcp_t *opendcp) {
-    FILE *fp;
-    int a,c,r;
-    char filename[MAX_PATH_LENGTH];
-    char uuid_s[40];
-    cpl_t cpl;
-    reel_t reel;
+    xmlIndentTreeOutput = 1;
+    xmlDocPtr        doc;
+    xmlTextWriterPtr xml;
+    char             filename[MAX_PATH_LENGTH];
+    int              a,c,r,rc;
+    char             uuid_s[40];
+    cpl_t            cpl;
+    reel_t           reel;
 
     if(opendcp->assetmap.filename == 0) {
         if (opendcp->ns == XML_NS_INTEROP) {
@@ -333,88 +341,108 @@ int write_assetmap(opendcp_t *opendcp) {
         sprintf(filename,"%s",opendcp->assetmap.filename);
     }
 
-    fp = fopen(filename, "w");
-
-    if ( fp == NULL ) {
-        dcp_log(LOG_ERROR,"Could not open file %.256s for writing",filename);
-        return DCP_FATAL;
-    }
+    /* generate assetmap UUID */
+    uuid_random(uuid_s);
 
     dcp_log(LOG_INFO,"Writing ASSETMAP file %.256s",filename);
 
-    /* Generate Assetmap UUID */
-    uuid_random(uuid_s);
+    /* create XML document */
+    xml = xmlNewTextWriterDoc(&doc,0);
 
-    /* Assetmap XML Start */
-    fprintf(fp,"%s\n",XML_HEADER);
-    fprintf(fp,"<AssetMap xmlns=\"%s\">\n",NS_AM[opendcp->ns]);
-    fprintf(fp,"  <Id>urn:uuid:%s</Id>\n",uuid_s);
-    fprintf(fp,"  <Creator>%s</Creator>\n",opendcp->xml.creator);
-    fprintf(fp,"  <VolumeCount>1</VolumeCount>\n");
-    fprintf(fp,"  <IssueDate>%s</IssueDate>\n",opendcp->xml.timestamp);
-    fprintf(fp,"  <Issuer>%s</Issuer>\n",opendcp->xml.issuer);
-    fprintf(fp,"  <AssetList>\n");
- 
+    /* assetmap XML Start */
+    rc = xmlTextWriterStartDocument(xml, NULL, XML_ENCODING, NULL);
+    if (rc < 0) {
+        dcp_log(LOG_ERROR,"xmlTextWriterStartDocument failed");
+        return DCP_FATAL;
+    }
+
+    xmlTextWriterStartElement(xml, BAD_CAST "AssetMap");
+    xmlTextWriterWriteAttribute(xml, BAD_CAST "xmlns", BAD_CAST NS_AM[opendcp->ns]);
+
+    /* assetmap attributes */
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "Id","%s%s","urn:uuid:",uuid_s);
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "Creator","%s",opendcp->xml.creator);
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "VolumeCount","%d",1);
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "IssueDate","%s",opendcp->xml.timestamp);
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "Issuer","%s",opendcp->xml.issuer);
+
+    xmlTextWriterStartElement(xml, BAD_CAST "AssetList");
+
+    dcp_log(LOG_INFO,"Writing ASSETMAP PKL");
+
     /* PKL */
-    fprintf(fp,"    <Asset>\n");
-    fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",opendcp->pkl[0].uuid);
-    fprintf(fp,"      <PackingList>true</PackingList>\n");
-    fprintf(fp,"      <ChunkList>\n");
-    fprintf(fp,"        <Chunk>\n");
-    fprintf(fp,"          <Path>%s</Path>\n",basename(opendcp->pkl[0].filename));
-    fprintf(fp,"          <VolumeIndex>1</VolumeIndex>\n");
-    fprintf(fp,"          <Offset>0</Offset>\n");
-    fprintf(fp,"          <Length>%s</Length>\n",opendcp->pkl[0].size);
-    fprintf(fp,"        </Chunk>\n");
-    fprintf(fp,"      </ChunkList>\n");
-    fprintf(fp,"    </Asset>\n");
+    xmlTextWriterStartElement(xml, BAD_CAST "Asset");
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "Id","%s%s","urn:uuid:",opendcp->pkl[0].uuid);
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "PackingList","%s","true");
+    xmlTextWriterStartElement(xml, BAD_CAST "ChunkList");
+    xmlTextWriterStartElement(xml, BAD_CAST "Chunk");
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "Path","%s",basename(opendcp->pkl[0].filename));
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "VolumeIndex","%d",1);
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "Offset","%d",0);
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "Length","%s",opendcp->pkl[0].size);
+    xmlTextWriterEndElement(xml); /* end chunk */
+    xmlTextWriterEndElement(xml); /* end chunklist */
+    xmlTextWriterEndElement(xml); /* end pkl asset */
+  
+    dcp_log(LOG_INFO,"Writing ASSETMAP CPLs");
 
     /* CPL */
     for (c=0;c<opendcp->pkl[0].cpl_count;c++) {
         cpl = opendcp->pkl[0].cpl[c];
-        fprintf(fp,"    <Asset>\n");
-        fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",cpl.uuid);
-        fprintf(fp,"      <ChunkList>\n");
-        fprintf(fp,"        <Chunk>\n");
-        fprintf(fp,"          <Path>%s</Path>\n",basename(cpl.filename));
-        fprintf(fp,"          <VolumeIndex>1</VolumeIndex>\n");
-        fprintf(fp,"          <Offset>0</Offset>\n");
-        fprintf(fp,"          <Length>%s</Length>\n",cpl.size);
-        fprintf(fp,"        </Chunk>\n");
-        fprintf(fp,"      </ChunkList>\n");
-        fprintf(fp,"    </Asset>\n");
+        xmlTextWriterStartElement(xml, BAD_CAST "Asset");
+        xmlTextWriterWriteFormatElement(xml, BAD_CAST "Id","%s%s","urn:uuid:",cpl.uuid);
+        xmlTextWriterStartElement(xml, BAD_CAST "ChunkList");
+        xmlTextWriterStartElement(xml, BAD_CAST "Chunk");
+        xmlTextWriterWriteFormatElement(xml, BAD_CAST "Path","%s",basename(cpl.filename));
+        xmlTextWriterWriteFormatElement(xml, BAD_CAST "VolumeIndex","%d",1);
+        xmlTextWriterWriteFormatElement(xml, BAD_CAST "Offset","%d",0);
+        xmlTextWriterWriteFormatElement(xml, BAD_CAST "Length","%s",cpl.size);
+        xmlTextWriterEndElement(xml); /* end chunk */
+        xmlTextWriterEndElement(xml); /* end chunklist */
+        xmlTextWriterEndElement(xml); /* end cpl asset */
 
-        /* Assets(s) Start */
+        /* assets(s) start */
         for (r=0;r<cpl.reel_count;r++) {
             reel = cpl.reel[r];
             for (a=0;a<reel.asset_count;a++) {
                 asset_t asset = reel.asset[a];
-                fprintf(fp,"    <Asset>\n");
-                fprintf(fp,"      <Id>urn:uuid:%s</Id>\n",asset.uuid);
-                fprintf(fp,"      <ChunkList>\n");
-                fprintf(fp,"        <Chunk>\n");
-                fprintf(fp,"          <Path>%s</Path>\n",basename(asset.filename));
-                fprintf(fp,"          <VolumeIndex>1</VolumeIndex>\n");
-                fprintf(fp,"          <Offset>0</Offset>\n");
-                fprintf(fp,"          <Length>%s</Length>\n",asset.size);
-                fprintf(fp,"        </Chunk>\n");
-                fprintf(fp,"      </ChunkList>\n");
-                fprintf(fp,"    </Asset>\n");
+                xmlTextWriterStartElement(xml, BAD_CAST "Asset");
+                xmlTextWriterWriteFormatElement(xml, BAD_CAST "Id","%s%s","urn:uuid:",asset.uuid);
+                xmlTextWriterStartElement(xml, BAD_CAST "ChunkList");
+                xmlTextWriterStartElement(xml, BAD_CAST "Chunk");
+                xmlTextWriterWriteFormatElement(xml, BAD_CAST "Path","%s",basename(asset.filename));
+                xmlTextWriterWriteFormatElement(xml, BAD_CAST "VolumeIndex","%d",1);
+                xmlTextWriterWriteFormatElement(xml, BAD_CAST "Offset","%d",0);
+                xmlTextWriterWriteFormatElement(xml, BAD_CAST "Length","%s",asset.size);
+                xmlTextWriterEndElement(xml); /* end chunk */
+                xmlTextWriterEndElement(xml); /* end chunklist */
+                xmlTextWriterEndElement(xml); /* end cpl asset */
             }
         }
     }
 
-    fprintf(fp,"  </AssetList>\n");
-    fprintf(fp,"</AssetMap>\n");
-   
-    fclose(fp);
+    xmlTextWriterEndElement(xml); /* end assetlist */
+    xmlTextWriterEndElement(xml); /* end assetmap */
+
+    rc = xmlTextWriterEndDocument(xml);
+    if (rc < 0) {
+        dcp_log(LOG_ERROR,"xmlTextWriterEndDocument failed %s",filename);
+        return DCP_FATAL;
+    }
+
+    xmlFreeTextWriter(xml);
+    xmlSaveFormatFile(filename, doc, 1);
+    xmlFreeDoc(doc);
 
     return DCP_SUCCESS;
 }
 
 int write_volumeindex(opendcp_t *opendcp) {
-    FILE *fp;
-    char filename[MAX_PATH_LENGTH];
+    xmlIndentTreeOutput = 1;
+    xmlDocPtr        doc;
+    xmlTextWriterPtr xml;
+    char             filename[MAX_PATH_LENGTH];
+    int              rc;
 
     if(opendcp->volindex.filename == 0) {
         if (opendcp->ns == XML_NS_INTEROP) {
@@ -426,22 +454,32 @@ int write_volumeindex(opendcp_t *opendcp) {
         sprintf(filename,"%s",opendcp->volindex.filename);
     }
 
-    fp = fopen(filename, "w");
-
-    if ( fp == NULL ) {
-       dcp_log(LOG_ERROR,"Could not open file %.256s for writing",filename);
-       return DCP_FATAL;
-    }
-
     dcp_log(LOG_INFO,"Writing VOLINDEX file %.256s",filename);
 
-    /* Volumeindex XML Start */
-    fprintf(fp,"%s\n",XML_HEADER);
-    fprintf(fp,"<VolumeIndex xmlns=\"%s\">\n",NS_AM[opendcp->ns]);
-    fprintf(fp,"  <Index>1</Index>\n");
-    fprintf(fp,"</VolumeIndex>\n");
+    /* create XML document */
+    xml = xmlNewTextWriterDoc(&doc,0);
 
-    fclose(fp);
+    /* volumeindex XML Start */
+    rc = xmlTextWriterStartDocument(xml, NULL, XML_ENCODING, NULL);
+    if (rc < 0) {
+        dcp_log(LOG_ERROR,"xmlTextWriterStartDocument failed");
+        return DCP_FATAL;
+    }
+
+    xmlTextWriterStartElement(xml, BAD_CAST "VolumeIndex");
+    xmlTextWriterWriteAttribute(xml, BAD_CAST "xmlns", BAD_CAST NS_AM[opendcp->ns]);
+    xmlTextWriterWriteFormatElement(xml, BAD_CAST "Index","%d",1);
+    xmlTextWriterEndElement(xml); 
+
+    rc = xmlTextWriterEndDocument(xml);
+    if (rc < 0) {
+        dcp_log(LOG_ERROR,"xmlTextWriterEndDocument failed %s",filename);
+        return DCP_FATAL;
+    }
+
+    xmlFreeTextWriter(xml);
+    xmlSaveFormatFile(filename, doc, 1);
+    xmlFreeDoc(doc);
 
     return DCP_SUCCESS;
 }

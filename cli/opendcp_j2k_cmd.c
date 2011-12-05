@@ -81,7 +81,8 @@ void dcp_usage() {
     fprintf(fp,"       -n | --no_overwrite                - do not overwrite existing jpeg2000 files\n");
     fprintf(fp,"       -l | --log_level <level>           - sets the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
     fprintf(fp,"       -h | --help                        - show help\n");
-    //fprintf(fp,"       -c | --lut                         - select color conversion LUT, 0:srgb, 1:rec709\n");
+    fprintf(fp,"       -c | --lut                         - select color conversion LUT, 0:srgb, 1:rec709\n");
+    fprintf(fp,"       -z | --resize                      - resize image to DCI compliant resolution\n");
     fprintf(fp,"       -s | --start                       - start frame\n");
     fprintf(fp,"       -d | --end                         - end frame\n");
     fprintf(fp,"       -v | --version                     - show version\n");
@@ -220,6 +221,7 @@ int main (int argc, char **argv) {
             {"no_overwrite",   no_argument,       0, 'n'},
             {"3d",             no_argument,       0, '3'},
             {"version",        no_argument,       0, 'v'},
+            {"resize",         no_argument,       0, 'z'},
             {"tmp_dir",        required_argument, 0, 'm'},
             {"lut",            required_argument, 0, 'c'},
             {0, 0, 0, 0}
@@ -316,6 +318,9 @@ int main (int argc, char **argv) {
                 break;
             case 'c':
                 opendcp->j2k.lut = atoi(optarg);
+                break;
+            case 'z':
+                opendcp->j2k.resize = 1;
                 break;
         }
     }
