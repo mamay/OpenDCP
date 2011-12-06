@@ -397,7 +397,7 @@ void print_dpx_header(dpx_image_t *dpx, int endian) {
     dcp_log(LOG_DEBUG,"%-15.15s: data offset: %d","read_dpx",r_32(dpx->image.image_element[0].data_offset,endian));
 }
 
-int read_dpx(opendcp_t *opendcp, odcp_image_t **image_ptr, const char *infile, int fd) {
+int read_dpx(odcp_image_t **image_ptr, int dpx_log, const char *infile, int fd) {
     dpx_image_t     dpx;
     FILE            *dpx_fp;
     float           gamma;
@@ -463,12 +463,12 @@ int read_dpx(opendcp_t *opendcp, odcp_image_t **image_ptr, const char *infile, i
 
     print_dpx_header(&dpx,endian);
 
-    if (opendcp->j2k.dpx == DPX_LINEAR) {
+    if (dpx_log == DPX_LINEAR) {
         logarithmic = 0;
-    } else if (opendcp->j2k.dpx == DPX_FILM) {
+    } else if (dpx_log == DPX_FILM) {
         logarithmic = 1;
         gamma = FILM_GAMMA;
-    } else if (opendcp->j2k.dpx == DPX_VIDEO) {
+    } else if (dpx_log == DPX_VIDEO) {
         logarithmic = 1;
         gamma = VIDEO_GAMMA;
     }
@@ -495,9 +495,9 @@ int read_dpx(opendcp_t *opendcp, odcp_image_t **image_ptr, const char *infile, i
                 fread(&data,sizeof(data),1,dpx_fp);
                 for (j=0; j<spp; j++) {
                     p = yuv444toRGB888(data[1+(2*j)], data[0], data[2]);
-                    image->component[0].data[i+j] = lut[opendcp->j2k.dpx][((int)p.r << 2)];
-                    image->component[1].data[i+j] = lut[opendcp->j2k.dpx][((int)p.g << 2)];
-                    image->component[2].data[i+j] = lut[opendcp->j2k.dpx][((int)p.b << 2)];
+                    image->component[0].data[i+j] = lut[dpx_log][((int)p.r << 2)];
+                    image->component[1].data[i+j] = lut[dpx_log][((int)p.g << 2)];
+                    image->component[2].data[i+j] = lut[dpx_log][((int)p.b << 2)];
                 }
             }
         }
@@ -535,7 +535,7 @@ int read_dpx(opendcp_t *opendcp, odcp_image_t **image_ptr, const char *infile, i
                         image->component[j].data[i] = ((comp & 0xFFF0) >> 4) | ((comp & 0x00CF) >> 6); 
                     }
                     if (logarithmic) {
-                        image->component[j].data[i] = lut[opendcp->j2k.dpx][(image->component[j].data[i] >> 2)]; 
+                        image->component[j].data[i] = lut[dpx_log][(image->component[j].data[i] >> 2)]; 
                     }
                 }
             }

@@ -37,8 +37,6 @@
 int encode_kakadu(opendcp_t *opendcp, char *in_file, char *out_file);
 int encode_openjpeg(opendcp_t *opendcp, opj_image_t *opj_image, char *out_file); 
 
-
-
 static int initialize_4K_poc(opj_poc_t *POC, int numres){
     POC[0].tile  = 1; 
     POC[0].resno0  = 0; 
@@ -99,15 +97,50 @@ void set_cinema_encoder_parameters(opendcp_t *opendcp, opj_cparameters_t *parame
     }
 }
 
-int check_image_compliance(opendcp_t *opendcp, odcp_image_t *image) {
-    switch (opendcp->cinema_profile) {
+int check_image_compliance(int profile, odcp_image_t *image, char *file) {
+    char         *extension;
+    int          w,h;
+    int          result   = 0;
+    odcp_image_t *odcp_image;
+
+
+    if (image == NULL) {
+        extension = strrchr(file,'.');
+        extension++;
+
+        /* TODO: move to common */
+        if (strnicmp(extension,"tif",3) == 0) {
+            result = read_tif(&odcp_image, file,0);
+        } else if (strnicmp(extension,"dpx",3) == 0) {
+            result = read_dpx(&odcp_image, 0, file,0);
+        }
+
+        if (result != DCP_SUCCESS) {
+            dcp_log(LOG_ERROR,"Unable to read tiff file %s", file);
+            return DCP_FATAL;
+        }
+
+        if (!odcp_image) {
+            dcp_log(LOG_ERROR,"Unable to load tiff file %s", file);
+            return DCP_FATAL;
+        }
+
+        h = odcp_image->h;
+        w = odcp_image->w;
+        odcp_image_free(odcp_image);
+    } else {
+        h = image->h;
+        w = image->w;
+    }
+
+    switch (profile) {
         case DCP_CINEMA2K:
-            if (!((image->w == 2048) | (image->h == 1080))) {
+            if (!((w == 2048) | (h == 1080))) {
                 return DCP_ERROR;
             }
         break;
         case DCP_CINEMA4K:
-            if (!((image->w == 4096) | (image->h == 2160))) {
+            if (!((w == 4096) | (h == 2160))) {
                 return DCP_FATAL;
             }
             break;
@@ -136,9 +169,9 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
     #endif
     {
     if (strnicmp(extension,"tif",3) == 0) {
-        result = read_tif(opendcp, &odcp_image, in_file,0);
+        result = read_tif(&odcp_image, in_file,0);
     } else if (strnicmp(extension,"dpx",3) == 0) {
-        result = read_dpx(opendcp, &odcp_image, in_file,0);
+        result = read_dpx(&odcp_image, opendcp->j2k.dpx, in_file, 0);
     }
     }
 
@@ -153,7 +186,7 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
     }
 
     /* verify image is dci compliant */
-    if (check_image_compliance(opendcp, odcp_image) != DCP_SUCCESS) {
+    if (check_image_compliance(opendcp->cinema_profile, odcp_image, NULL) != DCP_SUCCESS) {
         dcp_log(LOG_WARN,"The image resolution of %s is not DCI Compliant",in_file);
 
         /* resize image */

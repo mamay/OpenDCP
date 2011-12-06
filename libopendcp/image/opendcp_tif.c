@@ -48,7 +48,7 @@ void tif_set_strip(tiff_image_t *tif) {
     tif->strip_data = _TIFFmalloc(tif->strip_size);
 }
 
-int read_tif(opendcp_t *opendcp, odcp_image_t **image_ptr, const char *infile, int fd) {
+int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
     tiff_image_t tif;
     int          i,index;
     odcp_image_t *image = 00;
