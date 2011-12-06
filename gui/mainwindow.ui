@@ -983,7 +983,7 @@
              <rect>
               <x>10</x>
               <y>30</y>
-              <width>90</width>
+              <width>101</width>
               <height>27</height>
              </rect>
             </property>
@@ -994,7 +994,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Color :</string>
+             <string>Source Color :</string>
             </property>
            </widget>
            <widget class="QLabel" name="dciResizeLabel">
@@ -1002,7 +1002,7 @@
              <rect>
               <x>10</x>
               <y>60</y>
-              <width>91</width>
+              <width>101</width>
               <height>27</height>
              </rect>
             </property>
