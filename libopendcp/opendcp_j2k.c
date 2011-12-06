@@ -28,7 +28,6 @@
 #include <omp.h>
 #endif
 #include "opendcp.h"
-#include "image/opendcp_image.h"
 
 #ifndef WIN32
 #define strnicmp strncasecmp
@@ -97,62 +96,7 @@ void set_cinema_encoder_parameters(opendcp_t *opendcp, opj_cparameters_t *parame
     }
 }
 
-int check_image_compliance(int profile, odcp_image_t *image, char *file) {
-    char         *extension;
-    int          w,h;
-    int          result   = 0;
-    odcp_image_t *odcp_image;
-
-
-    if (image == NULL) {
-        extension = strrchr(file,'.');
-        extension++;
-
-        /* TODO: move to common */
-        if (strnicmp(extension,"tif",3) == 0) {
-            result = read_tif(&odcp_image, file,0);
-        } else if (strnicmp(extension,"dpx",3) == 0) {
-            result = read_dpx(&odcp_image, 0, file,0);
-        }
-
-        if (result != DCP_SUCCESS) {
-            dcp_log(LOG_ERROR,"Unable to read tiff file %s", file);
-            return DCP_FATAL;
-        }
-
-        if (!odcp_image) {
-            dcp_log(LOG_ERROR,"Unable to load tiff file %s", file);
-            return DCP_FATAL;
-        }
-
-        h = odcp_image->h;
-        w = odcp_image->w;
-        odcp_image_free(odcp_image);
-    } else {
-        h = image->h;
-        w = image->w;
-    }
-
-    switch (profile) {
-        case DCP_CINEMA2K:
-            if (!((w == 2048) | (h == 1080))) {
-                return DCP_ERROR;
-            }
-        break;
-        case DCP_CINEMA4K:
-            if (!((w == 4096) | (h == 2160))) {
-                return DCP_FATAL;
-            }
-            break;
-        default:
-            break;
-    }
- 
-    return DCP_SUCCESS;
-}
-
 int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_path) {
-    char         *extension;
     odcp_image_t *odcp_image;
     int result = 0;
 
@@ -161,18 +105,11 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
     }
     dcp_log(LOG_DEBUG,"%-15.15s: reading input file %s","convert_to_j2k",in_file);
      
-    extension = strrchr(in_file,'.');
-    extension++;
-
     #ifdef OPENMP
     #pragma omp critical
     #endif
     {
-    if (strnicmp(extension,"tif",3) == 0) {
-        result = read_tif(&odcp_image, in_file,0);
-    } else if (strnicmp(extension,"dpx",3) == 0) {
-        result = read_dpx(&odcp_image, opendcp->j2k.dpx, in_file, 0);
-    }
+    result = read_image(&odcp_image,in_file); 
     }
 
     if (result != DCP_SUCCESS) {
@@ -191,7 +128,7 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
 
         /* resize image */
         if (opendcp->j2k.resize) {
-            if (resize(&odcp_image,NEAREST_PIXEL) != DCP_SUCCESS) {
+            if (resize(&odcp_image, opendcp->j2k.resize) != DCP_SUCCESS) {
                 odcp_image_free(odcp_image);
                 return DCP_FATAL;
             }

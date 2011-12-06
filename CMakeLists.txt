@@ -115,6 +115,7 @@ ENDIF()
 #--build paths------------------------------------------------------------------
 INCLUDE_DIRECTORIES(${OPENDCP_INCLUDE_DIR}/libopendcp
                     ${PROJECT_BINARY_DIR}/libopendcp/include
+                    ${PROJECT_SOURCE_DIR}/libopendcp/image
                     ${PROJECT_SOURCE_DIR}/libasdcp
 )
 SET(OPENDCP_LIB opendcp-lib)

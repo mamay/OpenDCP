@@ -16,8 +16,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef _OPENDCP_IMAGE_H_
+#define _OPENDCP_IMAGE_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum SAMPLE_METHOD {
-    NEAREST_PIXEL = 0,
+    SAMPLE_NONE = 0,
+    NEAREST_PIXEL,
     BICUBIC
 };
 
@@ -62,3 +70,9 @@ void odcp_image_free(odcp_image_t *image);
 int odcp_image_readline(odcp_image_t *image, int y, unsigned char *data); 
 int rgb_to_xyz(odcp_image_t *image, int gamma, int method);
 rgb_pixel_float_t yuv444toRGB888(int y, int cb, int cr);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif  //_OPENDCP_H_

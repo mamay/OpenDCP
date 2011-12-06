@@ -274,6 +274,7 @@ void MainWindow::j2kStart() {
     }
 
     context->j2k.lut = ui->colorComboBox->currentIndex();
+    context->j2k.resize = ui->resizeComboBox->currentIndex();
 
     if (ui->dpxLogCheckBox->checkState()) {
         context->j2k.dpx = 1;
@@ -291,12 +292,6 @@ void MainWindow::j2kStart() {
         context->j2k.xyz = 1;
     } else {
         context->j2k.xyz = 0;
-    }
-
-    if (ui->resizeCheckBox->checkState()) {
-        context->j2k.resize = 1;
-    } else {
-        context->j2k.resize = 0;
     }
 
     if (ui->overwritej2kCB->checkState())
@@ -324,6 +319,14 @@ void MainWindow::j2kStart() {
         } else if (ui->outJ2kLeftEdit->text().isEmpty() || ui->outJ2kRightEdit->text().isEmpty()) {
             QMessageBox::warning(this, tr("Destination Directories Needed"),tr("Please select destination directories"));
             goto Done;
+        }
+    }
+
+    if (context->j2k.resize == SAMPLE_NONE) {
+        if (check_image_compliance(context->cinema_profile, NULL, inLeftList.at(0).absoluteFilePath().toAscii().data()) != DCP_SUCCESS) {
+            QMessageBox::warning(this, tr("Invalid DCI Resolution"),
+                                 tr("Images are not DCI compliant, select DCI resize to automatically resize or supply DCI compliant images"));
+            return;
         }
     }
 

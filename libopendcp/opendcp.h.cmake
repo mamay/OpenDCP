@@ -23,6 +23,8 @@
 extern "C" {
 #endif
 
+#include <opendcp_image.h>
+
 #define MAX_ASSETS          10   /* Soft limit */
 #define MAX_REELS           30   /* Soft limit */
 #define MAX_PKL             1    /* Soft limit */
@@ -338,7 +340,7 @@ typedef struct {
     pkl_t          pkl[MAX_PKL];
 } opendcp_t;
 
-/* Common Routines */
+/* common functions */
 void  dcp_log(int level, const char *fmt, ...);
 void  dcp_fatal(opendcp_t *opendcp, char *error);
 void  get_timestamp(char *timestamp);
@@ -350,20 +352,24 @@ int   add_cpl(opendcp_t *opendcp, pkl_t *pkl);
 int   add_pkl(opendcp_t *opendcp);
 void  dcp_set_log_level(int log_level);
 
+/* opendcp context */
 opendcp_t *create_opendcp();
 int       delete_opendcp(opendcp_t *opendcp);
 
-/* ASDCPLIB Routines */
+/* image functions */
+int check_image_compliance(int profile, odcp_image_t *image, char *file);
+
+/* ASDCPLIB functions */
 int read_asset_info(asset_t *asset);
 void uuid_random(char *uuid);
 int calculate_digest(const char *filename, char *digest);
 int get_wav_duration(const char *filename, int frame_rate);
 int get_file_essence_type(char *in_path);
 
-/* MXF Routines */
+/* MXF functions */
 int write_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output);
 
-/* XML Routines */
+/* XML functions */
 int write_cpl(opendcp_t *opendcp, cpl_t *cpl);
 int write_pkl(opendcp_t *opendcp, pkl_t *pkl);
 int write_assetmap(opendcp_t *opendcp);
@@ -375,7 +381,7 @@ char *strip_cert_file(char *filename);
 int write_dsig_template(opendcp_t *opendcp, FILE *fp);
 int xml_sign(opendcp_t *opendcp, char *filename);
 
-/* J2K Routines */
+/* J2K functions */
 int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_path);
 
 /* retrieve error string */

@@ -30,6 +30,10 @@
 #define CLIP(m,max)                                 \
   (m)<0?0:((m)>max?max:(m))
 
+#ifndef WIN32
+#define strnicmp strncasecmp
+#endif
+
 extern int odcp_to_opj(odcp_image_t *odcp, opj_image_t **opj_ptr);
 
 /* create opendcp image structure */
@@ -141,6 +145,27 @@ int odcp_to_opj(odcp_image_t *odcp, opj_image_t **opj_ptr) {
     return DCP_SUCCESS;
 }
 
+int read_image(odcp_image_t **image, char *file) {
+    char *extension;
+    int  result;
+
+    extension = strrchr(file,'.');
+    extension++;
+
+    if (strnicmp(extension,"tif",3) == 0) {
+        result = read_tif(image, file,0);
+    } else if (strnicmp(extension,"dpx",3) == 0) {
+        result = read_dpx(image, 0, file,0);
+    }
+
+    if (result != DCP_SUCCESS) {
+        dcp_log(LOG_ERROR,"Unable to read tiff file %s", file);
+        return DCP_FATAL;
+    }
+
+    return DCP_SUCCESS;
+}
+
 int odcp_image_readline(odcp_image_t *image, int y, unsigned char *data) {
     int x,i;
     int d = 0;
@@ -157,6 +182,44 @@ int odcp_image_readline(odcp_image_t *image, int y, unsigned char *data) {
         data[d+7] = ((image->component[1].data[i+1] & 0x0f)<< 4 )|((image->component[2].data[i+1] >> 8)& 0x0f);
         data[d+8] = image->component[2].data[i+1];
         d+=9;
+    }
+
+    return DCP_SUCCESS;
+}
+
+int check_image_compliance(int profile, odcp_image_t *image, char *file) {
+    char         *extension;
+    int          w,h;
+    int          result   = 0;
+    odcp_image_t *odcp_image;
+
+    if (image == NULL) {
+        if (read_image(&odcp_image, file) == DCP_SUCCESS) {
+            h = odcp_image->h;
+            w = odcp_image->w;
+            odcp_image_free(odcp_image);
+        } else {
+            odcp_image_free(odcp_image);
+            return DCP_FATAL;
+        }
+    } else {
+        h = image->h;
+        w = image->w;
+    }
+
+    switch (profile) {
+        case DCP_CINEMA2K:
+            if (!((w == 2048) | (h == 1080))) {
+                return DCP_ERROR;
+            }
+        break;
+        case DCP_CINEMA4K:
+            if (!((w == 4096) | (h == 2160))) {
+                return DCP_FATAL;
+            }
+            break;
+        default:
+            break;
     }
 
     return DCP_SUCCESS;
