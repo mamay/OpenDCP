@@ -221,8 +221,9 @@ void MainWindow::j2kCheckLeftInputFiles() {
        return;
     }
 
-    ui->endSpinBox->setValue(inLeftList.size());
+
     ui->endSpinBox->setMaximum(inLeftList.size());
+    ui->endSpinBox->setValue(inLeftList.size());
     ui->startSpinBox->setMaximum(ui->endSpinBox->value());
 }
 
