@@ -395,22 +395,44 @@ int letterbox(odcp_image_t **image, int w, int h) {
 } 
 
 /* resize image */
-int resize(odcp_image_t **image, int method) {
+int resize(odcp_image_t **image, int profile, int method) {
     int num_components = 3;
     odcp_image_t *ptr = *image;
     rgb_pixel_float_t p;
     int w,h;
+    float aspect;
+  
+    /* aspect ratio */
+    aspect = (float)ptr->w/(float)ptr->h;
 
-    /* calculate letterbox/pillarbox */
-    if ((float)(ptr->w/ptr->h) <= (float)(2048/853)) {
-        w = (ptr->w*1080/ptr->h);
-        h = 1080;
+    /* depending on the aspect ratio, set height or weight priority */
+    if (aspect <= 2.10) {
+        w = (ptr->w*MAX_HEIGHT_2K/ptr->h);
+        h = MAX_HEIGHT_2K;
     } else {
-        dcp_log(LOG_ERROR,"Unsupport image resolution, cannot resize");
-        return DCP_ERROR;
+        w = MAX_WIDTH_2K;
+        h = (ptr->h*MAX_WIDTH_2K/ptr->w);
     }
 
-    dcp_log(LOG_INFO,"Resizing to %dx%d",w,h);
+    /* if we overshot width, scale back */
+    if (w > MAX_WIDTH_2K) {
+        w = MAX_WIDTH_2K;
+        h = w / aspect;
+    }
+
+    /* if we overshot height, scale back */
+    if (h > MAX_HEIGHT_2K) {
+        h = MAX_HEIGHT_2K;
+        w = h * aspect;
+    }
+
+    /* adjust for 4K */
+    if (profile == DCP_CINEMA4K) {
+        w *= 2;
+        h *= 2;
+    }
+
+    dcp_log(LOG_INFO,"Resizing from %dx%d to %dx%d (%f)",ptr->w, ptr->h,w,h,aspect);
 
     /* create the image */
     odcp_image_t *d_image = odcp_image_create(num_components, w, h);

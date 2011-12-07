@@ -36,6 +36,9 @@ extern "C" {
 #define MAX_DCP_JPEG_BITRATE 250000000  /* Maximum DCI compliant bit rate for JPEG2000 */
 #define MAX_DCP_MPEG_BITRATE  80000000  /* Maximum DCI compliant bit rate for MPEG */
 
+#define MAX_WIDTH_2K        2048 
+#define MAX_HEIGHT_2K       1080 
+
 static const char* OPENDCP_VERSION   = "${OPENDCP_VERSION}"; 
 static const char *OPENDCP_NAME      = "${OPENDCP_NAME}"; 
 static const char *OPENDCP_COPYRIGHT = "${OPENDCP_COPYRIGHT}"; 

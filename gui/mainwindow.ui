@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>925</height>
+    <height>872</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -30,6 +30,12 @@
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
      <widget class="QScrollArea" name="scrollArea">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="frameShape">
        <enum>QFrame::NoFrame</enum>
       </property>
@@ -41,8 +47,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>776</width>
-         <height>858</height>
+         <width>775</width>
+         <height>800</height>
         </rect>
        </property>
        <widget class="QTabWidget" name="tabWidget">
@@ -50,8 +56,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>774</width>
-          <height>858</height>
+          <width>775</width>
+          <height>800</height>
          </rect>
         </property>
         <property name="currentIndex">
@@ -67,7 +73,7 @@
             <x>0</x>
             <y>0</y>
             <width>760</width>
-            <height>1000</height>
+            <height>750</height>
            </rect>
           </property>
           <widget class="QGroupBox" name="inputGroupBox">
@@ -3021,7 +3027,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

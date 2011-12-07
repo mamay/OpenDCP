@@ -128,7 +128,7 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
 
         /* resize image */
         if (opendcp->j2k.resize) {
-            if (resize(&odcp_image, opendcp->j2k.resize) != DCP_SUCCESS) {
+            if (resize(&odcp_image, opendcp->cinema_profile, opendcp->j2k.resize) != DCP_SUCCESS) {
                 odcp_image_free(odcp_image);
                 return DCP_FATAL;
             }
