@@ -70,7 +70,7 @@ void MainWindow::startDcp()
         xmlContext->xml_use_external_certs = 0;
     }
 
-    dcp_set_log_level(xmlContext->log_level);
+    dcp_log_init(xmlContext->log_level, "opendcp.log");
     strcpy(xmlContext->xml.title, ui->cplTitleEdit->text().toStdString().c_str());
     strcpy(xmlContext->xml.annotation, ui->cplAnnotationEdit->text().toStdString().c_str());
     strcpy(xmlContext->xml.issuer, ui->cplIssuerEdit->text().toStdString().c_str());

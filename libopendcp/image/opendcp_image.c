@@ -215,7 +215,7 @@ int check_image_compliance(int profile, odcp_image_t *image, char *file) {
         break;
         case DCP_CINEMA4K:
             if (!((w == 4096) | (h == 2160))) {
-                return DCP_FATAL;
+                return DCP_ERROR;
             }
             break;
         default:

@@ -260,7 +260,7 @@ void MainWindow::j2kStart() {
 
     // process options
     context->log_level = 0;
-    dcp_set_log_level(context->log_level);
+    dcp_log_init(context->log_level, "opendcp.log");
 
     if (ui->profileComboBox->currentIndex() == 0) {
         context->cinema_profile = DCP_CINEMA2K;

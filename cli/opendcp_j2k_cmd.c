@@ -170,6 +170,7 @@ int main (int argc, char **argv) {
     char *in_path = NULL;
     char *out_path = NULL;
     char *tmp_path = NULL;
+    char *log_file = NULL;
     filelist_t *filelist;
 
 #ifndef _WIN32
@@ -213,10 +214,11 @@ int main (int argc, char **argv) {
             {"rate",           required_argument, 0, 'r'},
             {"profile",        required_argument, 0, 'p'},
             {"log_level",      required_argument, 0, 'l'},
+            {"log_file",       required_argument, 0, 'w'},
             {"threads",        required_argument, 0, 't'},
             {"encoder",        required_argument, 0, 'e'},
             {"start",          required_argument, 0, 's'},
-            {"end",            required_argument, 0, 'e'},
+            {"end",            required_argument, 0, 'd'},
             {"no_xyz",         no_argument,       0, 'x'},
             {"no_overwrite",   no_argument,       0, 'n'},
             {"3d",             no_argument,       0, '3'},
@@ -230,7 +232,7 @@ int main (int argc, char **argv) {
         /* getopt_long stores the option index here. */
         int option_index = 0;
      
-        c = getopt_long (argc, argv, "b:c:d:e:i:o:r:s:p:l:t:m:g:3hvxn",
+        c = getopt_long (argc, argv, "b:c:d:e:g:i:l:m:o:p:r:s:t:w:3hnvxz",
                          long_options, &option_index);
      
         /* Detect the end of the options. */
@@ -313,6 +315,9 @@ int main (int argc, char **argv) {
             case 'v':
                 version();
                 break;
+            case 'w':
+                log_file = optarg;
+                break;
             case 'm':
                 tmp_path = optarg;
                 break;
@@ -326,7 +331,7 @@ int main (int argc, char **argv) {
     }
 
     /* set log level */
-    dcp_set_log_level(opendcp->log_level);
+    dcp_log_init(opendcp->log_level, log_file);
 
     if (opendcp->log_level > 0) {
         printf("\nOpenDCP J2K %s %s\n",OPENDCP_VERSION,OPENDCP_COPYRIGHT);

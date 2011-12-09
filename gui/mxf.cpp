@@ -246,6 +246,9 @@ void MainWindow::mxfStart() {
         }
     }
 
+    // set log level
+    dcp_log_init(4, "opendcp.log");
+
     // create picture mxf file
     if (ui->mxfSourceTypeComboBox->currentIndex() == 0 || ui->mxfSourceTypeComboBox->currentIndex() == 1) {
         mxfCreatePicture();
@@ -269,9 +272,6 @@ void MainWindow::mxfCreateSubtitle() {
     }
 
     opendcp_t *mxfContext = create_opendcp();
-
-    // process options
-    mxfContext->log_level = 0;
 
     if (ui->mxfTypeComboBox->currentIndex() == 0) {
         mxfContext->ns = XML_NS_INTEROP;
@@ -315,9 +315,6 @@ void MainWindow::mxfCreateAudio() {
     QString       outputFile;
 
     opendcp_t     *mxfContext = create_opendcp();
-
-    // process options
-    mxfContext->log_level = 0;
 
     if (ui->mxfTypeComboBox->currentIndex() == 0) {
         mxfContext->ns = XML_NS_INTEROP;
@@ -378,9 +375,6 @@ void MainWindow::mxfCreatePicture() {
 
     opendcp_t *mxfContext = create_opendcp();
 
-    // process options
-    mxfContext->log_level = 0;
-
     if (ui->mxfTypeComboBox->currentIndex() == 0) {
         mxfContext->ns = XML_NS_INTEROP;
     } else {
@@ -389,9 +383,6 @@ void MainWindow::mxfCreatePicture() {
 
     mxfContext->frame_rate = ui->mxfFrameRateComboBox->currentText().toInt();
     mxfContext->stereoscopic = 0;
-
-    // set log level
-    dcp_set_log_level(mxfContext->log_level);
 
     if (ui->mxfSourceTypeComboBox->currentIndex() == 0) {
         pLeftDir.cd(ui->pictureLeftEdit->text());

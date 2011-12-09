@@ -28,27 +28,57 @@
 #endif
 
 static int dcp_log_level = LOG_INFO;
+static int dcp_log_file  = 0;
+static FILE *fp;
 
-void dcp_log_callback(int level, const char* fmt, va_list vl)
-{
+void dcp_log_init(int level, const char *file);
+char *dcp_log_timestamp();
+
+void dcp_log_callback(int level, const char* fmt, va_list vl) {
     char msg[1024];
 
+    snprintf(msg, sizeof(msg), "%s [%5.5s] ",dcp_log_timestamp(), DCP_LOG[level]);
+    vsnprintf(msg + strlen(msg), sizeof(msg) - strlen(msg), fmt, vl);
+
+    /* print only desired levels to screen */
     if (dcp_log_level>=level) {
-        snprintf(msg, sizeof(msg), "[%5.5s] ", DCP_LOG[level]);
-        vsnprintf(msg + strlen(msg), sizeof(msg) - strlen(msg), fmt, vl);
         fprintf(stderr,"%s\n",msg);
+    }
+
+    /* log all levels to file, if enabled */
+    if (dcp_log_file) {
+       fprintf(fp,"%s\n",msg);
     }
 }
 
-void dcp_log(int level, const char *fmt, ...)
-{
+void dcp_log(int level, const char *fmt, ...) {
     va_list vl;
     va_start(vl, fmt);
     dcp_log_callback(level, fmt, vl);
     va_end(vl);
 }
 
-void dcp_set_log_level(int level)
-{
+void dcp_set_log_level(int level) {
     dcp_log_level = level;
+}
+
+char *dcp_log_timestamp() {
+    time_t time_ptr;
+    struct tm *time_struct;
+    static char buffer[30];
+
+    time(&time_ptr);
+    time_struct = localtime(&time_ptr);
+    strftime(buffer,30,"%Y%m%d%I%M%S",time_struct);
+
+    return buffer;
+}
+
+void dcp_log_init(int level, const char *file) {
+    if (file != NULL) {
+        dcp_log_file  = 1;
+        fp = fopen("opendcp.log", "w");
+        fprintf(fp,"======================\nOpenDCP Version %s\n======================\n",OPENDCP_VERSION);
+    }
+    dcp_set_log_level(level);
 }
