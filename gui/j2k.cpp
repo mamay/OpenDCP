@@ -143,14 +143,14 @@ void j2kEncode(int &iteration)
     }
 }
 
-void MainWindow::preview() {
+void MainWindow::preview(int index = 0) {
     QString filter = "*.tif;*.tiff;*.dpx";
     QDir inLeftDir;
     QFileInfo fileInfo;
     QString file;
     QImage image;
 
-    fileInfo = inLeftList.at(0);
+    fileInfo = inLeftList.at(index);
     file = fileInfo.absoluteFilePath();
     if (!image.load(file)) {
         ui->previewLabel->setText("Image preview not supported for this file");

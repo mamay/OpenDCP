@@ -67,7 +67,7 @@ public slots:
 
     void getTitle();
     void about();
-    void preview();
+    void preview(int index);
 
 protected:
     void setInitialUiState();
