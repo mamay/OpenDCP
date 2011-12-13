@@ -109,40 +109,6 @@ QFileInfoList inRightList;
 QString outLeftDir;
 QString outRightDir;
 
-void j2kEncode(int &iteration)
-{
-    QFileInfo fileinfo;
-    QString inputFile;
-    QString outputFile;
-    QString baseName;
-    int status = 0;
-
-    fileinfo = inLeftList.at(iteration);
-    inputFile = fileinfo.absoluteFilePath();
-    baseName = fileinfo.completeBaseName();
-
-    outputFile.sprintf("%s/%s.%s",outLeftDir.toAscii().constData(),baseName.toAscii().constData(),"j2c");
-
-    QFile f(outputFile);
-    if (!f.exists() || context->no_overwrite == 0) {
-        f.close();
-        convert_to_j2k(context,inputFile.toAscii().data(),outputFile.toAscii().data(), NULL);
-    }
-
-    if (context->stereoscopic) {
-        fileinfo = inRightList.at(iteration);
-        inputFile = fileinfo.absoluteFilePath();
-        baseName = fileinfo.completeBaseName();
-
-        outputFile.sprintf("%s/%s.%s",outRightDir.toStdString().c_str(),baseName.toStdString().c_str(),"j2c");
-        QFile f(outputFile);
-        if (!f.exists() || context->no_overwrite == 0) {
-            f.close();
-            status = convert_to_j2k(context,inputFile.toAscii().data(),outputFile.toAscii().data(), NULL);
-        }
-    }
-}
-
 void MainWindow::preview(int index = 0) {
     QString filter = "*.tif;*.tiff;*.dpx";
     QDir inLeftDir;
@@ -160,17 +126,47 @@ void MainWindow::preview(int index = 0) {
     }
 }
 
+void j2kEncode(QStringList pair) {
+    convert_to_j2k(context,pair.at(0).toAscii().data(),pair.at(1).toAscii().data(), NULL);
+}
+
 void MainWindow::j2kConvert() {
-    iterations = ui->endSpinBox->value() - ui->startSpinBox->value() + 1;
-    int threadCount = 0;
+     int threadCount = 0;
+     QString inFile;
+     QString outFile;
+     QList<QStringList> list; 
+
+    // reset iterations
+    iterations = 0;
 
     // set thread limit
     QThreadPool::globalInstance()->setMaxThreadCount(ui->threadsSpinBox->value());
 
-    // Prepare the vector.
-    QVector<int> vector;
-    for (int i = ui->startSpinBox->value() - 1; i < ui->endSpinBox->value(); i++)
-        vector.append(i);
+    // build conversion list 
+    for (int i = ui->startSpinBox->value() - 1; i < ui->endSpinBox->value(); i++) {
+        QStringList pair;
+
+        inFile  = inLeftList.at(i).absoluteFilePath();
+        outFile = outLeftDir % "/" % inLeftList.at(i).completeBaseName() % ".j2c";
+        pair << inFile << outFile ;
+
+        if (!QFileInfo(outFile).exists() || context->no_overwrite == 0) {
+            list.append(pair);
+            iterations++;
+        }
+
+        if (context->stereoscopic) {
+            pair.clear();
+            inFile  = inRightList.at(i).absoluteFilePath();
+            outFile = outRightDir % "/" % inRightList.at(i).completeBaseName() % ".j2c";
+            pair << inFile << outFile ;
+
+            if (!QFileInfo(outFile).exists() || context->no_overwrite == 0) {
+                list.append(pair);
+                iterations++;
+            }
+        }
+    }
 
     threadCount = QThreadPool::globalInstance()->maxThreadCount();
     dJ2kConversion->init(iterations, threadCount);
@@ -182,7 +178,7 @@ void MainWindow::j2kConvert() {
     QObject::connect(&futureWatcher, SIGNAL(finished()), dJ2kConversion, SLOT(finished()));
 
     // Start the computation
-    futureWatcher.setFuture(QtConcurrent::map(vector, j2kEncode));
+    futureWatcher.setFuture(QtConcurrent::map(list, j2kEncode));
 
     // open conversion dialog box
     dJ2kConversion->exec();
@@ -250,10 +246,7 @@ void MainWindow::j2kCheckRightInputFiles() {
 }
 
 void MainWindow::j2kStart() {
-    QString filter = "*.tif;*.tiff;*.dpx";
-    QDir inLeftDir;
-    QDir inRightDir;
-
+    // create opendcp context
     context = create_opendcp();
 
     // process options
@@ -303,15 +296,10 @@ void MainWindow::j2kStart() {
     context->bw = ui->bwSlider->value() * 1000000;
 
     // validate destination directories
-    if (ui->stereoscopicCheckBox->checkState() == 0) {
-        if (ui->inImageLeftEdit->text().isEmpty()) {
-            QMessageBox::warning(this, tr("Source Directory Needed"),tr("Please select a source directory"));
-            goto Done;
-        } else if (ui->outJ2kLeftEdit->text().isEmpty()) {
-            QMessageBox::warning(this, tr("Destination Directory Needed"),tr("Please select a destination directory"));
-            goto Done;
-        }
-    } else {
+    if (context->stereoscopic) {
+        outLeftDir = ui->outJ2kLeftEdit->text();
+        outRightDir = ui->outJ2kRightEdit->text();
+
         if (ui->inImageLeftEdit->text().isEmpty() || ui->inImageRightEdit->text().isEmpty()) {
             QMessageBox::warning(this, tr("Source Directories Needed"),tr("Please select source directories"));
             goto Done;
@@ -319,29 +307,33 @@ void MainWindow::j2kStart() {
             QMessageBox::warning(this, tr("Destination Directories Needed"),tr("Please select destination directories"));
             goto Done;
         }
+    } else {
+        outLeftDir = ui->outJ2kLeftEdit->text();
+
+        if (ui->inImageLeftEdit->text().isEmpty()) {
+            QMessageBox::warning(this, tr("Source Directory Needed"),tr("Please select a source directory"));
+            goto Done;
+        } else if (ui->outJ2kLeftEdit->text().isEmpty()) {
+            QMessageBox::warning(this, tr("Destination Directory Needed"),tr("Please select a destination directory"));
+            goto Done;
+        }
     }
 
+    // check left and right files are equal
+    if (context->stereoscopic) {
+        if (inLeftList.size() != inRightList.size()) {
+            QMessageBox::critical(this, tr("File Count Mismatch"),
+                                 tr("The left and right image directories have different file counts. They must be the same. Please fix and try again."));
+            goto Done;
+        }
+    }
+
+    // check images
     if (context->j2k.resize == SAMPLE_NONE) {
         if (check_image_compliance(context->cinema_profile, NULL, inLeftList.at(0).absoluteFilePath().toAscii().data()) != DCP_SUCCESS) {
             QMessageBox::warning(this, tr("Invalid DCI Resolution"),
                                  tr("Images are not DCI compliant, select DCI resize to automatically resize or supply DCI compliant images"));
             return;
-        }
-    }
-
-    outLeftDir = ui->outJ2kLeftEdit->text();
-
-    if (ui->stereoscopicCheckBox->checkState()) {
-        inRightDir.cd(ui->inImageRightEdit->text());
-        inRightDir.setFilter(QDir::Files | QDir::NoSymLinks);
-        inRightDir.setNameFilters(filter.split(';'));
-        inRightDir.setSorting(QDir::Name);
-        inRightList = inRightDir.entryInfoList();
-        outRightDir = ui->outJ2kRightEdit->text();
-        if (inLeftList.size() != inRightList.size()) {
-            QMessageBox::critical(this, tr("File Count Mismatch"),
-                                 tr("The left and right image directories have different file counts. They must be the same. Please fix and try again."));
-            goto Done;
         }
     }
 

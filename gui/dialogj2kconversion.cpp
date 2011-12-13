@@ -39,8 +39,11 @@ void DialogJ2kConversion::init(int imageCount, int threadCount)
     totalCount   = imageCount;
 
     progressBar->reset();
-    progressBar->setMinimum(0);
-    progressBar->setMaximum(totalCount);
+    if (totalCount) {
+        progressBar->setRange(0, totalCount);
+    } else {
+        progressBar->setRange(0, 100);
+    }
 
     labelText.sprintf("Conversion using %d threads(s)",threadCount);
     labelThreadCount->setText(labelText);
@@ -51,12 +54,24 @@ void DialogJ2kConversion::init(int imageCount, int threadCount)
 void DialogJ2kConversion::step()
 {
     QString labelText;
-
-    if (done == 1 && cancelled == 0) {
+  
+    if (cancelled) {
+        labelText.sprintf("Completed %d of %d. Conversion cancelled.",currentCount,totalCount);
         currentCount = totalCount;
+        setButtons(0);
+    } else if (done) {
+        currentCount = totalCount;
+        labelText.sprintf("Completed %d of %d. Conversion done.",currentCount,totalCount);
+        setButtons(0);
+    } else {
+        labelText.sprintf("Completed %d of %d.",currentCount,totalCount);
     }
 
-    labelText.sprintf("Completed %d of %d",currentCount,totalCount);
+    // hack to handle case where total count was 0
+    if (totalCount < 1) {
+        currentCount = 100;
+    }
+
     labelTotal->setText(labelText);
     progressBar->setValue(currentCount);
 
@@ -66,13 +81,12 @@ void DialogJ2kConversion::step()
 void DialogJ2kConversion::finished()
 {
     done = 1;
-    setButtons(0);
     step();
 }
 
 void DialogJ2kConversion::abort()
 {
-    setButtons(0);
+    labelTotal->setText("Cancelling...");
     cancelled = 1;
     emit cancel();
 }
