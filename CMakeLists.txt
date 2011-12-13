@@ -152,13 +152,17 @@ IF(APPLE)
     SET(COMPILE_OPENSSL 1)
     SET(LIBS ${LIBS} -L${LIB_DIR} -lssl -lcrypto)
 
+    INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/contrib/include/libxml2)
+
     IF(ENABLE_XMLSEC)
-        INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/contrib/include/libxml2)
         INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/contrib/include/libxslt)
         INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/contrib/include/xmlsec1)
         SET(COMPILE_XMLSEC 1)
-        SET(LIBS ${LIBS} -L${LIB_DIR} -lxmlsec1-openssl -lxmlsec1 -lxslt -lxml2)
+        SET(LIBS ${LIBS} -L${LIB_DIR} -lxmlsec1-openssl -lxmlsec1 -lxslt)
     ENDIF(ENABLE_XMLSEC)
+
+    SET(COMPILE_LIBXML 1)
+    SET(LIBS ${LIBS} -L${LIB_DIR} -lxml2)
 
     SET(COMPILE_EXPAT 1)
     SET(LIBS ${LIBS} -L${LIB_DIR} -lexpat)
@@ -182,14 +186,18 @@ ELSEIF(WIN32)
         SET(CMAKE_RC_COMPILER /usr/bin/x86_64-w64-mingw32-windres) 
     ENDIF()
 
+    INCLUDE_DIRECTORIES(${SYSROOT_PATH}/include/libxml2)
+
     IF(ENABLE_XMLSEC)
-        INCLUDE_DIRECTORIES(${SYSROOT_PATH}/include/libxml2)
         INCLUDE_DIRECTORIES(${SYSROOT_PATH}/include/libxslt)
         INCLUDE_DIRECTORIES(${SYSROOT_PATH}/include/xmlsec1)
         SET(COMPILE_XMLSEC 1)
         SET(LIBS ${LIBS} ${LIB_DIR}/libxmlsec1-openssl.a ${LIB_DIR}/libxmlsec1.a)
-        SET(LIBS ${LIBS} ${LIB_DIR}/libxslt.a ${LIB_DIR}/libxml2.a)
+        SET(LIBS ${LIBS} ${LIB_DIR}/libxslt.a)
     ENDIF(ENABLE_XMLSEC)
+
+    SET(COMPILE_LIBXML 1)
+    SET(LIBS ${LIBS} ${LIB_DIR}/libxml2.a)
 
     SET(COMPILE_EXPAT 1)
     SET(LIBS ${LIBS} ${LIB_DIR}/libexpat.a)
@@ -214,10 +222,11 @@ ELSEIF(UNIX)
     INCLUDE_DIRECTORIES(${OPENSSL_INCLUDE_DIR})
     SET(LIBS ${LIBS} ${OPENSSL_LIBRARIES})
 
+    FIND_PACKAGE(LibXml2 REQUIRED)
+    INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
+    SET(LIBS ${LIBS} ${LIBXML2_LIBRARIES})
+
     IF(ENABLE_XMLSEC)
-        FIND_PACKAGE(LibXml2 REQUIRED)
-        INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
-        SET(LIBS ${LIBS} ${LIBXML2_LIBRARIES})
 
         FIND_PACKAGE(LibXslt REQUIRED)
         INCLUDE_DIRECTORIES(${LIBXSLT_INCLUDE_DIR})
