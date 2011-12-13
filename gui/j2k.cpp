@@ -146,22 +146,18 @@ void j2kEncode(int &iteration)
 void MainWindow::preview() {
     QString filter = "*.tif;*.tiff;*.dpx";
     QDir inLeftDir;
-    QFileInfo file;
+    QFileInfo fileInfo;
+    QString file;
     QImage image;
 
-    inLeftDir.cd(ui->inImageLeftEdit->text());
-    inLeftDir.setFilter(QDir::Files | QDir::NoSymLinks);
-    inLeftDir.setNameFilters(filter.split(';'));
-    inLeftDir.setSorting(QDir::Name);
-    file = inLeftDir.entryList().at(0);
-    ui->outJ2kLeftEdit->setText(file.absoluteFilePath());
-    QPixmap pixmap(file.absoluteFilePath());
-    ui->previewLabel->setPixmap(pixmap);
-}
-
-void MainWindow::showImage(QImage image) {
-    ui->previewLabel->setPixmap(QPixmap::fromImage(image));
-    ui->previewLabel->setEnabled(1);
+    fileInfo = inLeftList.at(0);
+    file = fileInfo.absoluteFilePath();
+    if (!image.load(file)) {
+        ui->previewLabel->setText("Image preview not supported for this file");
+    } else {
+        QPixmap pixmap(QPixmap::fromImage(image).scaled(ui->previewLabel->size(), Qt::KeepAspectRatio));
+        ui->previewLabel->setPixmap(pixmap);
+    }
 }
 
 void MainWindow::j2kConvert() {
@@ -225,6 +221,8 @@ void MainWindow::j2kCheckLeftInputFiles() {
     ui->endSpinBox->setMaximum(inLeftList.size());
     ui->endSpinBox->setValue(inLeftList.size());
     ui->startSpinBox->setMaximum(ui->endSpinBox->value());
+
+    preview();
 }
 
 void MainWindow::j2kCheckRightInputFiles() {

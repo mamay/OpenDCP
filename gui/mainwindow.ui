@@ -852,7 +852,7 @@
              <x>80</x>
              <y>570</y>
              <width>280</width>
-             <height>171</height>
+             <height>170</height>
             </rect>
            </property>
            <property name="title">
@@ -861,17 +861,23 @@
            <widget class="QLabel" name="previewLabel">
             <property name="geometry">
              <rect>
-              <x>12</x>
-              <y>30</y>
-              <width>256</width>
-              <height>135</height>
+              <x>5</x>
+              <y>22</y>
+              <width>270</width>
+              <height>143</height>
              </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
             <property name="text">
              <string/>
             </property>
             <property name="scaledContents">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -3027,7 +3033,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
