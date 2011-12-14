@@ -92,32 +92,11 @@ void MainWindow::mxfSourceTypeUpdate() {
     if (ui->mxfSourceTypeComboBox->currentIndex() == 1) {
         ui->mxfStereoscopicCheckBox->setEnabled(0);
         ui->mxfStereoscopicCheckBox->setChecked(0);
-        ui->mxfTypeComboBox->setCurrentIndex(0);
+        ui->mxfTypeComboBox->setCurrentIndex(1);
         ui->mxfInputStack->setCurrentIndex(0);
         ui->mxfSoundRadio2->setEnabled(0);
         ui->mxfSoundRadio5->setEnabled(0);
         mxfSetStereoscopicState();
-        QStandardItemModel* model = qobject_cast<QStandardItemModel*>(ui->mxfTypeComboBox->model());
-        if (model) {
-            QModelIndex index = model->index(1,
-                                             ui->mxfTypeComboBox->modelColumn(),
-                                             ui->mxfTypeComboBox->rootModelIndex());
-            QStandardItem* item = model->itemFromIndex(index);
-            if (item) {
-                item->setEnabled(0);
-            }
-        }
-    } else {
-        QStandardItemModel* model = qobject_cast<QStandardItemModel*>(ui->mxfTypeComboBox->model());
-        if (model) {
-            QModelIndex index = model->index(1,
-                                             ui->mxfTypeComboBox->modelColumn(),
-                                             ui->mxfTypeComboBox->rootModelIndex());
-            QStandardItem* item = model->itemFromIndex(index);
-            if (item) {
-                item->setEnabled(1);
-            }
-        }
     }
     // WAV
     if (ui->mxfSourceTypeComboBox->currentIndex() == 2) {
@@ -216,7 +195,7 @@ void MainWindow::mxfStart() {
             QMessageBox::critical(this, tr("Destination file needed"),tr("Please select a destination picture MXF file."));
             return;
         }
-        if ((ui->pictureLeftEdit->text().isEmpty() || ui->pictureRightEdit->text().isEmpty())) {
+        if ((ui->pictureLeftEdit->text().isEmpty())) {
             QMessageBox::critical(this, tr("Source content needed"),tr("Please select a source MPEG2 MXF file."));
             return;
         }
@@ -390,6 +369,12 @@ void MainWindow::mxfCreatePicture() {
         pLeftDir.setFilter(QDir::Files | QDir::NoSymLinks);
         pLeftDir.setSorting(QDir::Name);
         pLeftList = pLeftDir.entryInfoList();
+        if (checkFileSequence(pLeftDir.entryList()) != DCP_SUCCESS) {
+            goto Done;
+        }
+        if (ui->mxfStereoscopicCheckBox->checkState() && checkFileSequence(pRightDir.entryList()) != DCP_SUCCESS) {
+            goto Done;
+        }
     } else {
         pLeftList.append(ui->pictureLeftEdit->text());
     }
@@ -407,14 +392,6 @@ void MainWindow::mxfCreatePicture() {
                                  tr("The left and right image directories have different file counts. They must be the same. Please fix and try again."));
             goto Done;
         }
-    }
-
-    if (checkFileSequence(pLeftDir.entryList()) != DCP_SUCCESS) {
-        goto Done;
-    }
-
-    if (ui->mxfStereoscopicCheckBox->checkState() && checkFileSequence(pRightDir.entryList()) != DCP_SUCCESS) {
-        goto Done;
     }
 
     for (int x=0;x<pLeftList.size();x++) {

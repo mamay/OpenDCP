@@ -172,6 +172,12 @@ int MainWindow::checkFileSequence(QStringList list)
     int     sequential = DCP_SUCCESS;
     int     x = 0;
 
+    qDebug() << "file number: " << list.size();
+
+    if (list.size() <= 1) {
+        return DCP_SUCCESS;
+    }
+
     for (x = 0; (x < (list.size()-1)) && (sequential == DCP_SUCCESS); x++) {
         QFileInfo a(list.at(x));
         QFileInfo b(list.at(x+1));
