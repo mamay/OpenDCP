@@ -128,8 +128,6 @@ opendcp_t *create_opendcp() {
     sprintf(opendcp->xml.title,"%.80s",DCP_TITLE);
     sprintf(opendcp->xml.kind,"%.15s",DCP_KIND);
     get_timestamp(opendcp->xml.timestamp);
-    sprintf(opendcp->assetmap.filename,"%.128s","ASSETMAP.xml");
-    sprintf(opendcp->volindex.filename,"%.128s","VOLINDEX.xml");
 
     return opendcp;
 }
@@ -289,7 +287,7 @@ int add_reel(opendcp_t *opendcp, cpl_t *cpl, asset_list_t reel) {
         sprintf(asset.size,"%"PRIu64, st.st_size);
 
         /* read asset information */
-        dcp_log(LOG_INFO,"Reading %s asset information",filename);
+        dcp_log(LOG_INFO,"add_reel: Reading %s asset information",filename);
 
         result = read_asset_info(&asset);
 
@@ -300,6 +298,7 @@ int add_reel(opendcp_t *opendcp, cpl_t *cpl, asset_list_t reel) {
 
         if (x == 0) {
             opendcp->ns = asset.xml_ns;
+            dcp_log(LOG_DEBUG,"add_reel: Label type detected: %d",opendcp->ns);
         } else {
             if (opendcp->ns != asset.xml_ns) {
                 dcp_log(LOG_ERROR,"Warning DCP specification mismatch in assets. Please make sure all assets are MXF Interop or SMPTE");

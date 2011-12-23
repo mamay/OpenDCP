@@ -331,7 +331,8 @@ int write_assetmap(opendcp_t *opendcp) {
     cpl_t            cpl;
     reel_t           reel;
 
-    if(opendcp->assetmap.filename == 0) {
+    dcp_log(LOG_DEBUG,"write_assetmap: labeltype: %d",opendcp->ns);
+    if (opendcp->assetmap.filename) {
         if (opendcp->ns == XML_NS_INTEROP) {
             sprintf(filename,"%s","ASSETMAP");
         } else {
@@ -444,7 +445,7 @@ int write_volumeindex(opendcp_t *opendcp) {
     char             filename[MAX_PATH_LENGTH];
     int              rc;
 
-    if(opendcp->volindex.filename == 0) {
+    if(opendcp->volindex.filename) {
         if (opendcp->ns == XML_NS_INTEROP) {
             sprintf(filename,"%s","VOLINDEX");
         } else {
