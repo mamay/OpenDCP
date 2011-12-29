@@ -44,18 +44,20 @@ IF(COMPILE_LIBXML2)
 ENDIF(COMPILE_LIBXML2)
 
 IF(ENABLE_XMLSEC AND COMPILE_XMLSEC)
-    EXTERNALPROJECT_ADD(03_XSLT
-        URL ${OPENDCP_URL}/libxslt-1.1.26.tar.gz
-        BUILD_IN_SOURCE 1
-        PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/libxslt-1.1.26.patch
-        CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
-                          --disable-dependency-tracking --enable-static=yes --enable-shared=no
-                          --with-libxml-prefix=${PREFIX}
-                          --with-libxml-include-prefix=${PREFIX}/include/libxml2
-                          --with-libxml-libs-prefix=${PREFIX}/lib
-        BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
-        INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+    IF(COMPILE_LIBXSLT)
+        EXTERNALPROJECT_ADD(03_XSLT
+            URL ${OPENDCP_URL}/libxslt-1.1.26.tar.gz
+            BUILD_IN_SOURCE 1
+            PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/libxslt-1.1.26.patch
+            CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
+                             --disable-dependency-tracking --enable-static=yes --enable-shared=no
+                             --with-libxml-prefix=${PREFIX}
+                             --with-libxml-include-prefix=${PREFIX}/include/libxml2
+                             --with-libxml-libs-prefix=${PREFIX}/lib
+            BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
+            INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
     )
+    ENDIF(COMPILE_LIBXSLT)
 
     EXTERNALPROJECT_ADD(06_XMLSEC1
         URL http://www.aleksey.com/xmlsec/download/xmlsec1-1.2.18.tar.gz
@@ -77,13 +79,13 @@ IF(ENABLE_XMLSEC AND COMPILE_XMLSEC)
 ENDIF(ENABLE_XMLSEC AND COMPILE_XMLSEC)
 
 IF(COMPILE_EXPAT)
-EXTERNALPROJECT_ADD(04_EXPAT
-   URL ${OPENDCP_URL}/expat-2.0.1.tar.gz
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
-                      --disable-dependency-tracking --enable-static=yes --enable-shared=no
-    BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
-    INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+    EXTERNALPROJECT_ADD(04_EXPAT
+        URL ${OPENDCP_URL}/expat-2.0.1.tar.gz
+        BUILD_IN_SOURCE 1
+        CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
+                          --disable-dependency-tracking --enable-static=yes --enable-shared=no
+        BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
+        INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
 )
 ENDIF(COMPILE_EXPAT)
 

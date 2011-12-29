@@ -23,6 +23,9 @@ SET(DOCUMENTATION_PATH share/doc/${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION})
 
 #--Win32 package--------------------------------------------------------------
 IF(WIN32)
+    IF(TARGET_ARCH STREQUAL "i686")
+        SET(TARGET_ARCH i386)
+    ENDIF()
     FILE(GLOB GUI_DLLS
              ${SYSROOT_PATH}/bin/zlib1.dll
              ${SYSROOT_PATH}/bin/libpng*.dll
@@ -35,11 +38,17 @@ IF(WIN32)
              ${SYSROOT_PATH}/bin/pthreadGC2.dll
              ${SYSROOT_PATH}/bin/libgcc_s_sjlj-1.dll
              ${SYSROOT_PATH}/bin/libstdc++-6.dll
+             ${SYSROOT_PATH}/bin/libcrypto-10.dll
+             ${SYSROOT_PATH}/bin/libssl-10.dll
+             ${SYSROOT_PATH}/bin/libxml2-2.dll
+             ${SYSROOT_PATH}/bin/libxslt-1.dll
+             ${SYSROOT_PATH}/bin/libexpat-1.dll
+             ${SYSROOT_PATH}/bin/iconv.dll
     )
     INSTALL(FILES ${GUI_DLLS}    DESTINATION bin)
     INSTALL(FILES ${COMMON_DLLS} DESTINATION bin)
 
-    STRING(TOLOWER "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}.${ARCH}" CPACK_PACKAGE_FILE_NAME)
+    STRING(TOLOWER "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}.${TARGET_ARCH}" CPACK_PACKAGE_FILE_NAME)
     SET(CPACK_GENERATOR NSIS)
     SET(CPACK_NSIS_PACKAGE_NAME ${PROJECT_NAME})
     SET(CPACK_NSIS_DISPLAY_NAME ${PROJECT_NAME})
