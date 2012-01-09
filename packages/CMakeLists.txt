@@ -87,7 +87,7 @@ IF(DEB)
     SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Terrence Meiczinger <terrence72@gmail.com>")
     SET(CPACK_DEBIAN_PACKAGE_DESCRIPTION "This tool is used to created digital cinema packages (DCP)")
     SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE ${TARGET_ARCH})
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libssl (>= 0.9.8), libcrypto (>=0.9.8), libxml2 (>= 2.7),libxslt1.1 (>= 1.1.26),xmlsec1 (>= 1.2),libxmlsec1-openssl (>= 1.2),libtiff4 (>= 3.9),libqtcore4 (>= 4.6),libqtgui4 (>= 4.6)")
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "openssl (>= 0.9.8),libxml2 (>= 2.7),libxslt1.1 (>= 1.1.26),xmlsec1 (>= 1.2),libxmlsec1-openssl (>= 1.2),libtiff4 (>= 3.9),libqtcore4 (>= 4.6),libqtgui4 (>= 4.6)")
     SET(DOCUMENTATION_PATH share/doc/${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION})
 ENDIF()
 #-----------------------------------------------------------------------------
