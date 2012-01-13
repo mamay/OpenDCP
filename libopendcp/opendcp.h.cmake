@@ -382,7 +382,6 @@ int xml_verify(char *filename);
 char *base64(const unsigned char *data, int length);
 char *strip_cert(const char *data);
 char *strip_cert_file(char *filename);
-int write_dsig_template(opendcp_t *opendcp, FILE *fp);
 int xml_sign(opendcp_t *opendcp, char *filename);
 
 /* J2K functions */
