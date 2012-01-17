@@ -119,7 +119,7 @@ ENDIF()
 
 IF(COMPILE_TIFF)
 EXTERNALPROJECT_ADD(08_TIFF
-    URL http://download.osgeo.org/libtiff/tiff-3.9.5.tar.gz
+    URL http://download.osgeo.org/libtiff/tiff-4.0.0.tar.gz
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                       --disable-dependency-tracking --enable-static=yes --enable-shared=no
