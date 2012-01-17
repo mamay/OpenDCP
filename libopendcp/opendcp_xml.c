@@ -180,6 +180,13 @@ int write_cpl(opendcp_t *opendcp, cpl_t *cpl) {
         xmlTextWriterEndElement(xml);     /* end reel */
     }
     xmlTextWriterEndElement(xml);         /* end reel list */
+
+#ifdef XMLSEC
+    if (opendcp->xml_sign) {
+        write_dsig_template(opendcp, xml);
+    }
+#endif
+
     xmlTextWriterEndElement(xml);         /* end compositionplaylist */
 
     rc = xmlTextWriterEndDocument(xml);
@@ -191,6 +198,13 @@ int write_cpl(opendcp_t *opendcp, cpl_t *cpl) {
     xmlFreeTextWriter(xml);
     xmlSaveFormatFile(cpl->filename, doc, 1);
     xmlFreeDoc(doc);
+
+#ifdef XMLSEC
+    /* sign the XML file */
+    if (opendcp->xml_sign) {
+        xml_sign(opendcp, cpl->filename);
+    }
+#endif
 
     /* store CPL file size */
     dcp_log(LOG_INFO,"Writing CPL file info");
@@ -291,18 +305,11 @@ int write_pkl(opendcp_t *opendcp, pkl_t *pkl) {
 
 #ifdef XMLSEC
     if (opendcp->xml_sign) {
-        //write_dsig_template(opendcp, fp);
+        write_dsig_template(opendcp, xml);
     }
 #endif
 
     xmlTextWriterEndElement(xml);      /* end packinglist */
-
-#ifdef XMLSEC
-    /* sign the XML file */
-    if (opendcp->xml_sign) {
-        xml_sign(opendcp, pkl->filename);
-    }
-#endif
 
     rc = xmlTextWriterEndDocument(xml);
     if (rc < 0) {
@@ -313,6 +320,13 @@ int write_pkl(opendcp_t *opendcp, pkl_t *pkl) {
     xmlFreeTextWriter(xml);
     xmlSaveFormatFile(pkl->filename, doc, 1);
     xmlFreeDoc(doc);
+
+#ifdef XMLSEC
+    /* sign the XML file */
+    if (opendcp->xml_sign) {
+        xml_sign(opendcp, pkl->filename);
+    }
+#endif
 
     /* store PKL file size */
     stat(pkl->filename, &st);

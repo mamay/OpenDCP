@@ -25,6 +25,7 @@
 #include <libxml/tree.h>
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
+#include <libxml/xmlwriter.h>
 
 #ifndef XMLSEC_NO_XSLT
 #include <libxslt/xslt.h>
@@ -43,7 +44,7 @@
 #include "opendcp.h"
 #include "opendcp_certificates.h"
 
-extern int write_dsig_template(opendcp_t *opendcp, FILE *fp);
+extern int write_dsig_template(opendcp_t *opendcp, xmlTextWriterPtr xml);
 extern int xml_sign(opendcp_t *opendcp, char *filename); 
 
 char *dn_oneline(X509_NAME *xn) {
@@ -66,13 +67,15 @@ char *dn_oneline(X509_NAME *xn) {
     return result;
 }
 
-int write_dsig_template(opendcp_t *opendcp, FILE *fp) {
+int write_dsig_template(opendcp_t *opendcp, xmlTextWriterPtr xml) {
     BIO *bio[3];
     X509 *x[3];
     X509_NAME *issuer_xn[3];
     X509_NAME *subject_xn[3];
     char *cert[3];
     int i;
+
+    dcp_log(LOG_DEBUG, "xml_sign: write_dsig_template");
 
     if (opendcp->xml_use_external_certs) {
         /* read certificates from file */
@@ -132,43 +135,121 @@ int write_dsig_template(opendcp_t *opendcp, FILE *fp) {
         }
     }
 
+    dcp_log(LOG_DEBUG, "xml_sign: write_dsig_template: start signer");
+
     /* signer */
-    fprintf(fp,"  <Signer>\n");
-    fprintf(fp,"    <dsig:X509Data>\n");
-    fprintf(fp,"      <dsig:X509IssuerSerial>\n");
-    fprintf(fp,"        <dsig:X509IssuerName>%s</dsig:X509IssuerName>\n",dn_oneline(issuer_xn[0]));
-    fprintf(fp,"        <dsig:X509SerialNumber>%ld</dsig:X509SerialNumber>\n",ASN1_INTEGER_get(X509_get_serialNumber(x[0])));
-    fprintf(fp,"      </dsig:X509IssuerSerial>\n");
-    fprintf(fp,"      <dsig:X509SubjectName>%s</dsig:X509SubjectName>\n",dn_oneline(subject_xn[0]));
-    fprintf(fp,"    </dsig:X509Data>\n");
-    fprintf(fp,"  </Signer>\n");
+    xmlTextWriterStartElement(xml, BAD_CAST "Signer");
+    xmlTextWriterStartElementNS(xml, BAD_CAST "dsig",
+                                BAD_CAST "X509Data", NULL);
+
+    xmlTextWriterStartElementNS(xml, BAD_CAST "dsig",
+                                BAD_CAST "X509IssuerSerial", NULL);
+
+    xmlTextWriterWriteFormatElementNS(xml, BAD_CAST "dsig",
+                                      BAD_CAST "X509IssuerName", NULL, "%s",
+                                      dn_oneline(issuer_xn[0]));
+
+    xmlTextWriterWriteFormatElementNS(xml, BAD_CAST "dsig",
+                                      BAD_CAST "X509SerialNumber", NULL, "%ld",
+                                      ASN1_INTEGER_get(X509_get_serialNumber(x[0])));
+    xmlTextWriterEndElement(xml);
+
+    xmlTextWriterWriteFormatElementNS(xml, BAD_CAST "dsig",
+                                      BAD_CAST "X509SubjectName", NULL,
+                                     "%s", dn_oneline(subject_xn[0]));
+
+    xmlTextWriterEndElement(xml);
+    xmlTextWriterEndElement(xml);
 
     /* template */
-    fprintf(fp,"  <dsig:Signature>\n");
-    fprintf(fp,"    <dsig:SignedInfo>\n");
-    fprintf(fp,"      <dsig:CanonicalizationMethod Algorithm=\"%s\"/>\n",DS_CMA);
-    fprintf(fp,"      <dsig:SignatureMethod Algorithm=\"%s\"/>\n",DS_SMA[opendcp->ns]);
-    fprintf(fp,"      <dsig:Reference URI=\"\">\n");
-    fprintf(fp,"        <dsig:Transforms>\n");
-    fprintf(fp,"          <dsig:Transform Algorithm=\"%s\"/>\n",DS_TMA);
-    fprintf(fp,"        </dsig:Transforms>\n");
-    fprintf(fp,"        <dsig:DigestMethod Algorithm=\"%s\"/>\n",DS_DMA);
-    fprintf(fp,"        <dsig:DigestValue/>\n");
-    fprintf(fp,"      </dsig:Reference>\n");
-    fprintf(fp,"    </dsig:SignedInfo>\n");
-    fprintf(fp,"    <dsig:SignatureValue/>\n");
-    fprintf(fp,"    <dsig:KeyInfo>\n");
+    xmlTextWriterStartElementNS(xml, BAD_CAST "dsig",
+                                BAD_CAST "Signature", NULL);
+
+    xmlTextWriterStartElementNS(xml, BAD_CAST "dsig",
+                                BAD_CAST "SignedInfo", NULL);
+
+    xmlTextWriterStartElementNS(xml, BAD_CAST "dsig",
+                                BAD_CAST "CanonicalizationMethod", NULL);
+
+    xmlTextWriterWriteAttribute(xml, BAD_CAST "Algorithm",
+                                BAD_CAST DS_CMA);
+
+    xmlTextWriterEndElement(xml);
+
+    xmlTextWriterStartElementNS(xml, BAD_CAST "dsig",
+                                BAD_CAST "SignatureMethod", NULL);
+
+    xmlTextWriterWriteAttribute(xml, BAD_CAST "Algorithm",
+                                BAD_CAST DS_SMA[opendcp->ns]);
+
+    xmlTextWriterEndElement(xml);
+
+    xmlTextWriterStartElementNS(xml, BAD_CAST "dsig",
+                                BAD_CAST "Reference",
+                                NULL);
+
+    xmlTextWriterWriteAttribute(xml, BAD_CAST "URI", BAD_CAST NULL);
+
+    xmlTextWriterStartElementNS(xml, BAD_CAST "dsig",
+                                BAD_CAST"Transforms",
+                                NULL);
+
+    xmlTextWriterStartElementNS(xml, BAD_CAST "dsig",
+                                BAD_CAST "Transform",
+                                NULL);
+
+    xmlTextWriterWriteAttribute(xml, BAD_CAST "Algorithm",
+                                BAD_CAST DS_TMA);
+
+    xmlTextWriterEndElement(xml);
+    xmlTextWriterEndElement(xml);
+
+    xmlTextWriterStartElementNS(xml, BAD_CAST "dsig",
+                                BAD_CAST "DigestMethod", NULL);
+
+    xmlTextWriterWriteAttribute(xml, BAD_CAST "Algorithm",
+                                BAD_CAST DS_DMA);
+
+    xmlTextWriterEndElement(xml);
+
+    xmlTextWriterWriteElementNS(xml, BAD_CAST "dsig",
+                                BAD_CAST "DigestValue",
+                                NULL, BAD_CAST "");
+
+    xmlTextWriterEndElement(xml);
+    xmlTextWriterEndElement(xml);
+
+    xmlTextWriterWriteElementNS(xml, BAD_CAST "dsig",
+                                BAD_CAST "SignatureValue",
+                                NULL, BAD_CAST "");
+
+    xmlTextWriterStartElementNS(xml, BAD_CAST "dsig",
+                                BAD_CAST "KeyInfo", NULL);
+
     for (i=0;i<3;i++) {
-        fprintf(fp,"      <dsig:X509Data>\n");
-        fprintf(fp,"        <dsig:X509IssuerSerial>\n");
-        fprintf(fp,"          <dsig:X509IssuerName>%s</dsig:X509IssuerName>\n",dn_oneline(issuer_xn[i]));
-        fprintf(fp,"          <dsig:X509SerialNumber>%ld</dsig:X509SerialNumber>\n",ASN1_INTEGER_get(X509_get_serialNumber(x[i])));
-        fprintf(fp,"        </dsig:X509IssuerSerial>\n");
-        fprintf(fp,"        <dsig:X509Certificate>%s</dsig:X509Certificate>\n",cert[i]);
-        fprintf(fp,"      </dsig:X509Data>\n");
+        xmlTextWriterStartElementNS(xml, BAD_CAST "dsig",
+                                    BAD_CAST "X509Data", NULL);
+        xmlTextWriterStartElementNS(xml, BAD_CAST "dsig",
+                                    BAD_CAST "X509IssuerSerial", NULL);
+
+        xmlTextWriterWriteFormatElementNS(xml, BAD_CAST "dsig",
+                                          BAD_CAST "X509IssuerName", NULL, "%s",
+                                          dn_oneline(issuer_xn[i]));
+
+        xmlTextWriterWriteFormatElementNS(xml, BAD_CAST "dsig",
+                                          BAD_CAST "X509SerialNumber", NULL, "%ld",
+                                          ASN1_INTEGER_get(X509_get_serialNumber(x[i])));
+        xmlTextWriterEndElement(xml);
+
+        xmlTextWriterWriteFormatElementNS(xml, BAD_CAST "dsig",
+                                          BAD_CAST "X509Certificate", NULL, "%s",
+                                          cert[i]);
+
+        xmlTextWriterEndElement(xml);
     }
-    fprintf(fp,"    </dsig:KeyInfo>\n");
-    fprintf(fp,"  </dsig:Signature>\n");
+
+    xmlTextWriterEndElement(xml); /* KeyInfo */
+    xmlTextWriterEndElement(xml); /* Signature */
 
     if (subject_xn[0]) {
        free(subject_xn[0]);
@@ -455,6 +536,7 @@ int xml_verify(char *filename) {
         dcp_log(LOG_ERROR,"create key manager failed");
         goto done;
     }
+
     /* find certificates */
     cur_node = sign_node;
     while (x509d_node = xmlSecFindNode(cur_node, xmlSecNodeX509Data, xmlSecDSigNs)) {
@@ -480,7 +562,7 @@ int xml_verify(char *filename) {
         goto done;
     }
 
-    /* sign the template */
+    /* verify the signature */
     if (xmlSecDSigCtxVerify(dsig_ctx, sign_node) < 0) {
         dcp_log(LOG_ERROR,"signature verify failed");
         goto done;

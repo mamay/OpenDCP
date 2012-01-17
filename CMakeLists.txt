@@ -154,6 +154,9 @@ IF(APPLE)
 
     INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/contrib/include/libxml2)
 
+    SET(COMPILE_LIBXML2 1)
+    SET(LIBS ${LIBS} -L${LIB_DIR} -lxml2)
+
     IF(ENABLE_XMLSEC)
         INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/contrib/include/libxslt)
         INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/contrib/include/xmlsec1)
@@ -161,9 +164,6 @@ IF(APPLE)
         SET(COMPILE_XMLSEC 1)
         SET(LIBS ${LIBS} -L${LIB_DIR} -lxmlsec1-openssl -lxmlsec1 -lxslt)
     ENDIF(ENABLE_XMLSEC)
-
-    SET(COMPILE_LIBXML 1)
-    SET(LIBS ${LIBS} -L${LIB_DIR} -lxml2)
 
     SET(COMPILE_EXPAT 1)
     SET(LIBS ${LIBS} -L${LIB_DIR} -lexpat)
@@ -197,7 +197,7 @@ ELSEIF(WIN32)
         SET(LIBS ${LIBS} -L${LIB_DIR} -lxslt)
     ENDIF(ENABLE_XMLSEC)
 
-    SET(COMPILE_LIBXML 0)
+    SET(COMPILE_LIBXML2 0)
     SET(LIBS ${LIBS} -L{LIB_DIR} -lxml2)
 
     SET(COMPILE_EXPAT 0)
