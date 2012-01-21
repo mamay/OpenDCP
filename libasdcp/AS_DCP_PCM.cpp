@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    AS_DCP_PCM.cpp
-    \version $Id: AS_DCP_PCM.cpp,v 1.33 2011/06/14 23:38:33 jhurst Exp $       
+    \version $Id: AS_DCP_PCM.cpp,v 1.34 2011/08/30 22:51:33 jhurst Exp $       
     \brief   AS-DCP library, PCM essence reader and writer implementation
 */
 
@@ -236,6 +236,9 @@ ASDCP::PCM::MXFReader::h__Reader::OpenRead(const char* filename)
        && m_ADesc.EditRate != EditRate_48
        && m_ADesc.EditRate != EditRate_50
        && m_ADesc.EditRate != EditRate_60
+       && m_ADesc.EditRate != EditRate_96
+       && m_ADesc.EditRate != EditRate_100
+       && m_ADesc.EditRate != EditRate_120
        && m_ADesc.EditRate != EditRate_23_98 )
     {
       DefaultLogSink().Error("PCM file EditRate is not a supported value: %d/%d\n", // lu
@@ -452,6 +455,9 @@ ASDCP::PCM::MXFWriter::h__Writer::SetSourceStream(const AudioDescriptor& ADesc)
        && ADesc.EditRate != EditRate_48
        && ADesc.EditRate != EditRate_50
        && ADesc.EditRate != EditRate_60
+       && ADesc.EditRate != EditRate_96
+       && ADesc.EditRate != EditRate_100
+       && ADesc.EditRate != EditRate_120
        && ADesc.EditRate != EditRate_23_98 )
     {
       DefaultLogSink().Error("AudioDescriptor.EditRate is not a supported value: %d/%d\n",

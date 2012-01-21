@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    MXF.cpp
-    \version $Id: MXF.cpp,v 1.58 2010/01/05 04:12:14 jhurst Exp $
+    \version $Id: MXF.cpp,v 1.59 2011/11/30 22:45:39 jhurst Exp $
     \brief   MXF objects
 */
 
@@ -713,15 +713,15 @@ ASDCP::MXF::OPAtomHeader::InitFromFile(const Kumu::FileReader& Reader)
   UL OPAtomUL(SMPTE_390_OPAtom_Entry().ul);
   UL InteropOPAtomUL(MXFInterop_OPAtom_Entry().ul);
 
-  if ( OperationalPattern == OPAtomUL ) // SMPTE
+  if ( OperationalPattern.ExactMatch(OPAtomUL) ) // SMPTE
     {
       if ( m_Dict == &DefaultCompositeDict() )
 	m_Dict = &DefaultSMPTEDict();
     }
-  else if ( OperationalPattern == InteropOPAtomUL ) // Interop
+  else if ( OperationalPattern.ExactMatch(InteropOPAtomUL) ) // Interop
     {
       if ( m_Dict == &DefaultCompositeDict() )
-      	m_Dict = &DefaultInteropDict();
+	m_Dict = &DefaultInteropDict();
     }
   else
     {

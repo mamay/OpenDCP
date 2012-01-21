@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    KLV.h
-  \version $Id: KLV.h,v 1.22 2011/06/14 23:38:33 jhurst Exp $
+  \version $Id: KLV.h,v 1.23 2011/10/27 22:07:13 jhurst Exp $
   \brief   KLV objects
 */
 
@@ -107,6 +107,7 @@ inline const char* ui64sz(ui64_t i, char* buf)
 
       const char* EncodeString(char* str_buf, ui32_t buf_len) const;
       bool operator==(const UL& rhs) const;
+      bool MatchIgnoreStream(const UL& rhs) const;
       bool ExactMatch(const UL& rhs) const;
     };
 

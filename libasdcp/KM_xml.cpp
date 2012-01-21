@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    KM_xml.cpp
-    \version $Id: KM_xml.cpp,v 1.18 2011/08/15 23:03:26 jhurst Exp $
+    \version $Id: KM_xml.cpp,v 1.19 2011/12/01 18:42:39 jhurst Exp $
     \brief   XML writer
 */
 
@@ -990,7 +990,7 @@ Kumu::StringIsXML(const char* document, ui32_t len)
 
 //
 bool
-Kumu::XMLElement::ParseString(const std::string& document)
+Kumu::XMLElement::ParseString(const char* document, ui32_t doc_len)
 {
   DefaultLogSink().Error("Kumu compiled without XML parser support.\n");
   return false;
