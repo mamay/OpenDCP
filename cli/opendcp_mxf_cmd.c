@@ -53,8 +53,8 @@ void dcp_usage() {
     fprintf(fp,"       opendcp_mxf -i <file> -o <file> [options ...]\n\n");
     fprintf(fp,"Required:\n");
     fprintf(fp,"       -i | --input <file | dir>      - input file or directory.\n");
-    fprintf(fp,"       -1 | --input_left <dir>        - left channel input images when creating a 3D essence\n");
-    fprintf(fp,"       -2 | --input_right <dir>       - right channel input images when creating a 3D essence\n");
+    fprintf(fp,"       -1 | --left <dir>              - left channel input images when creating a 3D essence\n");
+    fprintf(fp,"       -2 | --right <dir>             - right channel input images when creating a 3D essence\n");
     fprintf(fp,"       -o | --output <file>           - output mxf file\n");
     fprintf(fp,"\n");
     fprintf(fp,"Options:\n");
