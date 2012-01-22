@@ -548,7 +548,7 @@ int xml_verify(char *filename) {
         sprintf(cert,"-----BEGIN CERTIFICATE-----\n%s\n-----END CERTIFICATE-----\n",xmlNodeGetContent(cert_node));
         cert_l = strlen(cert);
         if (xmlSecCryptoAppKeysMngrCertLoadMemory(key_manager, cert, cert_l, xmlSecKeyDataFormatPem, xmlSecKeyDataTypeTrusted) < 0) {
-            dcp_log(LOG_ERROR, "could read X509certificate node value");
+            dcp_log(LOG_ERROR, "couldn't read X509certificate node value");
             goto done;
         }
         cur_node = xmlNextElementSibling(x509d_node);

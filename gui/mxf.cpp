@@ -35,6 +35,7 @@ void MainWindow::mxfConnectSlots() {
     connect(ui->mxfSourceTypeComboBox,SIGNAL(currentIndexChanged(int)),this, SLOT(mxfSourceTypeUpdate()));
     connect(ui->mxfButton,SIGNAL(clicked()),this,SLOT(mxfStart()));
     connect(ui->subCreateButton,SIGNAL(clicked()),this,SLOT(mxfCreateSubtitle()));
+    connect(ui->mxfSlideCheckBox, SIGNAL(stateChanged(int)), this, SLOT(mxfSetSlideState()));
 
     connect(mxfWriterThread, SIGNAL(frameDone()), dMxfConversion, SLOT(step()));
     connect(mxfWriterThread, SIGNAL(finished()), this, SLOT(mxfDone()));
@@ -76,6 +77,12 @@ void MainWindow::mxfConnectSlots() {
     connect(ui->aMxfOutButton, SIGNAL(clicked()), &signalMapper, SLOT(map()));
     connect(ui->subInButton, SIGNAL(clicked()), &signalMapper, SLOT(map()));
     connect(ui->sMxfOutButton, SIGNAL(clicked()), &signalMapper, SLOT(map()));
+}
+
+void MainWindow::mxfSetSlideState() {
+    int value = ui->mxfSlideCheckBox->checkState();
+    ui->mxfSlideSpinBox->setEnabled(value);
+    ui->mxfSlideDurationLabel->setEnabled(value);
 }
 
 void MainWindow::mxfSourceTypeUpdate() {
@@ -252,11 +259,7 @@ void MainWindow::mxfCreateSubtitle() {
 
     opendcp_t *mxfContext = create_opendcp();
 
-    if (ui->mxfTypeComboBox->currentIndex() == 0) {
-        mxfContext->ns = XML_NS_INTEROP;
-    } else {
-        mxfContext->ns = XML_NS_SMPTE;
-    }
+    mxfContext->ns = XML_NS_SMPTE;
 
     filelist_t *fileList = (filelist_t*) malloc(sizeof(filelist_t));
 
@@ -372,9 +375,6 @@ void MainWindow::mxfCreatePicture() {
         if (checkFileSequence(pLeftDir.entryList()) != DCP_SUCCESS) {
             goto Done;
         }
-        if (ui->mxfStereoscopicCheckBox->checkState() && checkFileSequence(pRightDir.entryList()) != DCP_SUCCESS) {
-            goto Done;
-        }
     } else {
         pLeftList.append(ui->pictureLeftEdit->text());
     }
@@ -386,6 +386,10 @@ void MainWindow::mxfCreatePicture() {
         pRightDir.setFilter(QDir::Files | QDir::NoSymLinks);
         pRightDir.setSorting(QDir::Name);
         pRightList = pRightDir.entryInfoList();
+
+        if (checkFileSequence(pRightDir.entryList()) != DCP_SUCCESS) {
+            goto Done;
+        }
 
         if (pLeftList.size() != pRightList.size()) {
             QMessageBox::critical(this, tr("File Count Mismatch"),
@@ -403,12 +407,19 @@ void MainWindow::mxfCreatePicture() {
 
     outputFile = ui->pMxfOutEdit->text();
 
+    if (ui->mxfSlideCheckBox->checkState()) {
+        mxfContext->slide = (ui->mxfSlideCheckBox->checkState());
+        mxfContext->mxf.duration = ui->mxfSlideSpinBox->value() * mxfContext->frame_rate * inputList.size();
+    } else {
+        mxfContext->mxf.duration = inputList.size();
+    }
+
     if (inputList.size() < 1) {
         QMessageBox::critical(this, tr("MXF Creation Error"), tr("No input files found"));
         goto Done;
     } else {
         mxfWriterThread->setMxfInputs(mxfContext,inputList,outputFile);
-        dMxfConversion->init(inputList.size(), outputFile);
+        dMxfConversion->init(mxfContext->mxf.duration, outputFile);
         mxfWriterThread->start();
         dMxfConversion->exec();
         if (!mxfWriterThread->success)  {

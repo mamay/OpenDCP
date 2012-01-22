@@ -65,6 +65,7 @@ void MainWindow::setInitialUiState()
     mxfSetStereoscopicState();
     mxfSetHVState();
     mxfSetSoundState();
+    mxfSetSlideState();
 
     // Check For Kakadu
     QProcess *kdu;

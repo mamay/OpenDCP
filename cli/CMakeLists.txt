@@ -5,15 +5,11 @@ MESSAGE(STATUS "----------------------------------------------------------------
 MESSAGE(STATUS "Creating CLI Build Files")
 MESSAGE(STATUS "-------------------------------------------------------------------------------")
 
-#--set cli source files-------------------------------------------------------
-SET(OPENDCP_TARGETS opendcp_xml opendcp_j2k opendcp_mxf)
+#--set output targets and paths-----------------------------------------------
+SET(OPENDCP_TARGETS opendcp_xml opendcp_j2k opendcp_mxf opendcp_largefile)
 IF(ENABLE_XMLSEC)
     SET(OPENDCP_TARGETS ${OPENDCP_TARGETS} opendcp_xml_verify)
 ENDIF(ENABLE_XMLSEC)
-#-----------------------------------------------------------------------------
-
-#--set output targets and paths-----------------------------------------------
-SET(OPENDCP_TARGETS opendcp_xml opendcp_j2k opendcp_mxf opendcp_largefile)
 SET(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}")
 #-----------------------------------------------------------------------------
 
