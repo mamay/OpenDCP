@@ -121,7 +121,6 @@ int write_cpl(opendcp_t *opendcp, cpl_t *cpl) {
     /* rating */
     xmlTextWriterStartElement(xml, BAD_CAST "RatingList");
     if (strcmp(cpl->rating,"")) {
-        xmlTextWriterStartElement(xml, BAD_CAST "RatingList");
         xmlTextWriterWriteFormatElement(xml, BAD_CAST "Agency","%s",RATING_AGENCY[1]);
         xmlTextWriterWriteFormatElement(xml, BAD_CAST "Label","%s",cpl->rating);
     }
