@@ -53,7 +53,6 @@ public:
     void reset();
     ~MxfWriter();
     void run();
-    void cancel();
     void setMxfInputs(opendcp_t *opendcp, QFileInfoList fileList, QString outputFile);
     int  success;
 
@@ -77,7 +76,7 @@ signals:
     void frameDone();
 
 private slots:
-    void conversionCompleted();
+
 };
 
 #endif // __MXF_WRITER_H__

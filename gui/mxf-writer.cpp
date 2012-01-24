@@ -25,7 +25,6 @@
 #include <KM_prng.h>
 #include <KM_memio.h>
 #include <KM_util.h>
-#include <PCMParserList.h>
 #include <openssl/sha.h>
 
 #include "opendcp.h"
@@ -38,8 +37,6 @@ MxfWriter::MxfWriter(QObject *parent)
     : QThread(parent)
 {
     reset();
-
-    //connect(this, SIGNAL(finished()), this, SLOT(mxfCompleted()));
 }
 
 MxfWriter::~MxfWriter()
@@ -51,11 +48,6 @@ void MxfWriter::reset()
 {
     cancelled = 0;
     success = 0;
-}
-
-void MxfWriter::conversionCompleted()
-{
-    //emit nextConversion();
 }
 
 Result_t MxfWriter::fillWriterInfo(opendcp_t *opendcp, writer_info_t *writer_info) {
@@ -193,6 +185,7 @@ Result_t MxfWriter::writeJ2kMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
     Result_t                result = RESULT_OK;
     ui32_t                  start_frame;
     ui32_t                  mxf_duration;
+    ui32_t                  slide_duration;
 
     // set the starting frame
     if (opendcp->mxf.start_frame && mxfFileList.size() >= (opendcp->mxf.start_frame-1)) {
@@ -222,17 +215,21 @@ Result_t MxfWriter::writeJ2kMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
     }
 
     // set the duration of the output mxf
-    if (opendcp->mxf.duration && mxfFileList.size() >= opendcp->mxf.duration) {
+    if (opendcp->slide) {
+        mxf_duration = opendcp->mxf.duration;
+        slide_duration = mxf_duration / mxfFileList.size();
+    } else if (opendcp->mxf.duration && (mxfFileList.size() >= opendcp->mxf.duration)) {
         mxf_duration = opendcp->mxf.duration;
     } else {
         mxf_duration = mxfFileList.size();
     }
 
     ui32_t i = start_frame;
+    ui32_t read = 1;
 
     // read each input frame and write to the output mxf until duration is reached
-    while (ASDCP_SUCCESS(result) && mxf_duration--) {
-        if ((opendcp->slide == 0 || i == start_frame) && cancelled == 0) {
+    while (!cancelled && ASDCP_SUCCESS(result) && mxf_duration--) {
+        if (read) {
             result = j2k_parser.OpenReadFrame(mxfFileList.at(i).absoluteFilePath().toAscii().constData(), frame_buffer);
 
             if (opendcp->delete_intermediate) {
@@ -247,8 +244,21 @@ Result_t MxfWriter::writeJ2kMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
             if (opendcp->encrypt_header_flag) {
                 frame_buffer.PlaintextOffset(0);
             }
+
+            if (opendcp->slide) {
+                read = 0;
+            }
+        }
+
+        if (opendcp->slide) {
+            if (mxf_duration % slide_duration == 0) {
+                i++;
+                read = 1;
+            }
+        } else {
             i++;
         }
+
         result = mxf_writer.WriteFrame(frame_buffer, writer_info.aes_context, writer_info.hmac_context);
         emit frameDone();
     }
@@ -283,6 +293,7 @@ Result_t MxfWriter::writeJ2kStereoscopicMxf(opendcp_t *opendcp, QFileInfoList mx
     writer_info_t           writer_info;
     Result_t                result = RESULT_OK;
     ui32_t                  mxf_duration;
+    ui32_t                  slide_duration;
     ui32_t                  start_frame;
 
     // set the starting frame
@@ -319,17 +330,22 @@ Result_t MxfWriter::writeJ2kStereoscopicMxf(opendcp_t *opendcp, QFileInfoList mx
         return result;
     }
 
-    /* set the duration of the output mxf, set to half the filecount since it is 3D */
-    if ((mxfFileList.size()/2) < opendcp->duration || !opendcp->duration) {
-        mxf_duration = mxfFileList.size()/2;
+    // set the duration of the output mxf
+    if (opendcp->slide) {
+        mxf_duration = opendcp->mxf.duration;
+        slide_duration = mxf_duration / (mxfFileList.size() / 2);
+    } else if (opendcp->mxf.duration && (mxfFileList.size()/2 >= opendcp->mxf.duration)) {
+        mxf_duration = opendcp->mxf.duration;
     } else {
-        mxf_duration = opendcp->duration;
+        mxf_duration = mxfFileList.size()/2;
     }
 
     ui32_t i = 0;
-    /* read each input frame and write to the output mxf until duration is reached */
-    while (ASDCP_SUCCESS(result) && mxf_duration--) {
-        if ((opendcp->slide == 0 || i == 0) && cancelled == 0) {
+    ui32_t read = 1;
+
+    // read each input frame and write to the output mxf until duration is reached 
+    while (!cancelled & ASDCP_SUCCESS(result) && mxf_duration--) {
+        if (read) {
             result = j2k_parser_left.OpenReadFrame(mxfFileList.at(i).absoluteFilePath().toAscii().constData(), frame_buffer_left);
 
             if (opendcp->delete_intermediate) {
@@ -340,6 +356,7 @@ Result_t MxfWriter::writeJ2kStereoscopicMxf(opendcp_t *opendcp, QFileInfoList mx
                 printf("Failed to open file %s\n",mxfFileList.at(i).absoluteFilePath().toAscii().constData());
                 return result;
             }
+
             i++;
 
             result = j2k_parser_right.OpenReadFrame(mxfFileList.at(i).absoluteFilePath().toAscii().constData(), frame_buffer_right);
@@ -352,16 +369,29 @@ Result_t MxfWriter::writeJ2kStereoscopicMxf(opendcp_t *opendcp, QFileInfoList mx
                 printf("Failed to open file %s\n",mxfFileList.at(i).absoluteFilePath().toAscii().constData());
                 return result;
             }
-            i++;
 
             if (opendcp->encrypt_header_flag) {
                 frame_buffer_left.PlaintextOffset(0);
             }
 
-            if (opendcp->encrypt_header_flag) {
+           if (opendcp->encrypt_header_flag) {
                 frame_buffer_right.PlaintextOffset(0);
             }
+
+            if (opendcp->slide) {
+                read = 0;
+            }
         }
+
+        if (opendcp->slide) {
+            if (mxf_duration % slide_duration == 0) {
+                i++;
+                read = 1;
+            }
+        } else {
+            i++;
+        }
+
         result = mxf_writer.WriteFrame(frame_buffer_left, JP2K::SP_LEFT, writer_info.aes_context, writer_info.hmac_context);
         result = mxf_writer.WriteFrame(frame_buffer_right, JP2K::SP_RIGHT, writer_info.aes_context, writer_info.hmac_context);
         emit frameDone();
@@ -429,7 +459,7 @@ Result_t MxfWriter::writePcmMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
   
     Rational edit_rate(opendcp->frame_rate,1);
 
-    /* read first file */
+    // read first file
     result = pcm_parser_channel[0].OpenRead(mxfFileList.at(0).absoluteFilePath().toStdString().c_str(), edit_rate);
 
     if (ASDCP_FAILURE(result)) {
@@ -437,7 +467,7 @@ Result_t MxfWriter::writePcmMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
         return RESULT_FILEOPEN;
     }
 
-    /* read audio descriptor */
+    // read audio descriptor 
     pcm_parser_channel[0].FillAudioDescriptor(audio_desc);
 
     for (file_count = 0; file_count < mxfFileList.size(); file_count++) {
@@ -467,17 +497,17 @@ Result_t MxfWriter::writePcmMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
         return RESULT_FILEOPEN;
     }
 
-    /*  set total audio characteristics */
+    //  set total audio characteristics 
     audio_desc.EditRate     = edit_rate;
     audio_desc.ChannelCount = mxfFileList.size();
     audio_desc.BlockAlign   = audio_desc.BlockAlign * mxfFileList.size();
     audio_desc.AvgBps       = audio_desc.AvgBps * mxfFileList.size();
 
-    /* set total frame buffer size */
+    // set total frame buffer size 
     frame_buffer.Capacity(PCM::CalcFrameBufferSize(audio_desc));
     frame_buffer.Size(PCM::CalcFrameBufferSize(audio_desc));
 
-    /* fill write info */
+    // fill write info 
     fillWriterInfo(opendcp, &writer_info);
     result = mxf_writer.OpenWrite(mxfOutputFile.toAscii().constData(), writer_info.info, audio_desc);
 
@@ -485,7 +515,7 @@ Result_t MxfWriter::writePcmMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
         return RESULT_FILEOPEN;
     }
 
-    /* set duration */
+    // set duration
     if (!opendcp->duration) {
         mxf_duration = 0xffffffff;
     } else {
@@ -498,7 +528,7 @@ Result_t MxfWriter::writePcmMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
         byte_t sample_size = PCM::CalcSampleSize(audio_desc_channel[0]);
         int    offset = 0;
 
-        /* read a frame from each file */
+        // read a frame from each file
         for (file_count = 0; file_count < mxfFileList.size(); file_count++) {
             memset(frame_buffer_channel[file_count].Data(), 0, frame_buffer_channel[file_count].Capacity());
             result = pcm_parser_channel[file_count].ReadFrame(frame_buffer_channel[file_count]);
@@ -513,7 +543,7 @@ Result_t MxfWriter::writePcmMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
             }
         }
 
-        /* write sample from each frame to output buffer */
+        // write sample from each frame to output buffer
         if (ASDCP_SUCCESS(result)) {
             while (data_s < data_e) {
                 for (file_count = 0; file_count < mxfFileList.size(); file_count++) {
@@ -524,7 +554,7 @@ Result_t MxfWriter::writePcmMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
                 offset += sample_size;
             }
 
-            /* write the frame */
+            // write the frame
             result = mxf_writer.WriteFrame(frame_buffer, writer_info.aes_context, writer_info.hmac_context);
             emit frameDone();
         }
@@ -538,7 +568,7 @@ Result_t MxfWriter::writePcmMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
         return RESULT_WRITEFAIL;
     }
 
-    /* write footer information */
+    // write footer information
     result = mxf_writer.Finalize();
 
     if (ASDCP_FAILURE(result)) {
@@ -689,9 +719,4 @@ Result_t MxfWriter::writeTTMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, QS
     }
 
     return result;
-}
-
-void MxfWriter::cancel()
-{
-    //m_process_stopped = 1;
 }

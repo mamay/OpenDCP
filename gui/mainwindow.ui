@@ -1452,6 +1452,48 @@
               <string>Stereoscopic</string>
              </property>
             </widget>
+            <widget class="QCheckBox" name="mxfSlideCheckBox">
+             <property name="geometry">
+              <rect>
+               <x>120</x>
+               <y>30</y>
+               <width>87</width>
+               <height>27</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Slideshow</string>
+             </property>
+            </widget>
+            <widget class="QSpinBox" name="mxfSlideSpinBox">
+             <property name="geometry">
+              <rect>
+               <x>220</x>
+               <y>30</y>
+               <width>57</width>
+               <height>25</height>
+              </rect>
+             </property>
+             <property name="maximum">
+              <number>300</number>
+             </property>
+             <property name="value">
+              <number>1</number>
+             </property>
+            </widget>
+            <widget class="QLabel" name="mxfSlideDurationLabel">
+             <property name="geometry">
+              <rect>
+               <x>280</x>
+               <y>30</y>
+               <width>141</width>
+               <height>27</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>s (duration per slide)</string>
+             </property>
+            </widget>
            </widget>
           </widget>
           <widget class="QWidget" name="page_2">
@@ -2028,11 +2070,6 @@
              <height>27</height>
             </rect>
            </property>
-           <item>
-            <property name="text">
-             <string>MXF Interop</string>
-            </property>
-           </item>
            <item>
             <property name="text">
              <string>SMPTE</string>

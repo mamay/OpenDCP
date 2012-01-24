@@ -547,7 +547,7 @@ int read_dpx(odcp_image_t **image_ptr, int dpx_log, const char *infile, int fd) 
                     data[0] = fgetc(dpx_fp);
                     data[1] = fgetc(dpx_fp);
                     if (j < 3) {
-                        image->component[j].data[i] = (data[!endian]<<4) | (data[!endian]>>4);
+                        image->component[j].data[i] = (data[!endian]<<4) | (data[endian]>>4);
                     }
                 }
             }
@@ -559,7 +559,7 @@ int read_dpx(odcp_image_t **image_ptr, int dpx_log, const char *infile, int fd) 
                     data[0] = fgetc(dpx_fp);
                     data[1] = fgetc(dpx_fp);
                     if (j < 3) { // Skip alpha channel
-                        image->component[j].data[i] = ( data[!endian] << 8 ) | data[!endian];
+                        image->component[j].data[i] = ( data[!endian] << 8 ) | data[endian];
                         image->component[j].data[i] = (image->component[j].data[i]) >> 4; 
                     }
                 }
