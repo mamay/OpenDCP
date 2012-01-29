@@ -9,10 +9,10 @@ STRING(TOLOWER ${PROJECT_NAME} PACKAGE_NAME)
 #--version----------------------------------------------------------------------
 SET(VERSION_MAJOR 0)
 SET(VERSION_MINOR 0)
-SET(VERSION_BUILD 23)
+SET(VERSION_BUILD 24)
 SET(OPENDCP_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD})
 SET(OPENDCP_NAME ${PROJECT_NAME})
-SET(OPENDCP_COPYRIGHT "(c) 2010-2011 Terrence Meiczinger. All rights reserved.")
+SET(OPENDCP_COPYRIGHT "(c) 2010-2012 Terrence Meiczinger. All rights reserved.")
 SET(OPENDCP_LICENSE "The program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.")
 SET(OPENDCP_WEBSITE "http://www.opendcp.org")
 #-------------------------------------------------------------------------------
