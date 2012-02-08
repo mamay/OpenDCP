@@ -459,6 +459,7 @@ int write_j2k_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
 
     /* set the starting frame */
     if (opendcp->mxf.start_frame && filelist->file_count >= (opendcp->mxf.start_frame-1)) {
+        dcp_log(LOG_WARN,"write_j2k_mxf: start frame is greater than total frames");
         start_frame = opendcp->mxf.start_frame - 1; // adjust for zero base
     } else {
         start_frame = 0;
