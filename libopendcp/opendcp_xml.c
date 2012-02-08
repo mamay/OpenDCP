@@ -338,27 +338,15 @@ int write_assetmap(opendcp_t *opendcp) {
     xmlIndentTreeOutput = 1;
     xmlDocPtr        doc;
     xmlTextWriterPtr xml;
-    char             filename[MAX_PATH_LENGTH];
     int              a,c,r,rc;
     char             uuid_s[40];
     cpl_t            cpl;
     reel_t           reel;
 
-    dcp_log(LOG_DEBUG,"write_assetmap: labeltype: %d",opendcp->ns);
-    if (opendcp->assetmap.filename) {
-        if (opendcp->ns == XML_NS_INTEROP) {
-            sprintf(filename,"%s","ASSETMAP");
-        } else {
-            sprintf(filename,"%s","ASSETMAP.xml");
-        }
-    } else {
-        sprintf(filename,"%s",opendcp->assetmap.filename);
-    }
-
     /* generate assetmap UUID */
     uuid_random(uuid_s);
 
-    dcp_log(LOG_INFO,"Writing ASSETMAP file %.256s",filename);
+    dcp_log(LOG_INFO,"Writing ASSETMAP file %.256s",opendcp->assetmap.filename);
 
     /* create XML document */
     xml = xmlNewTextWriterDoc(&doc,0);
@@ -440,12 +428,12 @@ int write_assetmap(opendcp_t *opendcp) {
 
     rc = xmlTextWriterEndDocument(xml);
     if (rc < 0) {
-        dcp_log(LOG_ERROR,"xmlTextWriterEndDocument failed %s",filename);
+        dcp_log(LOG_ERROR,"xmlTextWriterEndDocument failed %s",opendcp->assetmap.filename);
         return DCP_FATAL;
     }
 
     xmlFreeTextWriter(xml);
-    xmlSaveFormatFile(filename, doc, 1);
+    xmlSaveFormatFile(opendcp->assetmap.filename, doc, 1);
     xmlFreeDoc(doc);
 
     return DCP_SUCCESS;
@@ -458,17 +446,7 @@ int write_volumeindex(opendcp_t *opendcp) {
     char             filename[MAX_PATH_LENGTH];
     int              rc;
 
-    if(opendcp->volindex.filename) {
-        if (opendcp->ns == XML_NS_INTEROP) {
-            sprintf(filename,"%s","VOLINDEX");
-        } else {
-            sprintf(filename,"%s","VOLINDEX.xml");
-        }
-    } else {
-        sprintf(filename,"%s",opendcp->volindex.filename);
-    }
-
-    dcp_log(LOG_INFO,"Writing VOLINDEX file %.256s",filename);
+    dcp_log(LOG_INFO,"Writing VOLINDEX file %.256s",opendcp->volindex.filename);
 
     /* create XML document */
     xml = xmlNewTextWriterDoc(&doc,0);
@@ -487,12 +465,12 @@ int write_volumeindex(opendcp_t *opendcp) {
 
     rc = xmlTextWriterEndDocument(xml);
     if (rc < 0) {
-        dcp_log(LOG_ERROR,"xmlTextWriterEndDocument failed %s",filename);
+        dcp_log(LOG_ERROR,"xmlTextWriterEndDocument failed %s",opendcp->volindex.filename);
         return DCP_FATAL;
     }
 
     xmlFreeTextWriter(xml);
-    xmlSaveFormatFile(filename, doc, 1);
+    xmlSaveFormatFile(opendcp->volindex.filename, doc, 1);
     xmlFreeDoc(doc);
 
     return DCP_SUCCESS;
