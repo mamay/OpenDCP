@@ -338,6 +338,15 @@ int main (int argc, char **argv) {
        }
     }
 
+    /* set ASSETMAP/VOLINDEX path */
+    if (opendcp->ns == XML_NS_SMPTE) {
+        sprintf(opendcp->assetmap.filename,"%s","ASSETMAP.xml");
+        sprintf(opendcp->volindex.filename,"%s","VOLINDEX.xml");
+    } else {
+        sprintf(opendcp->assetmap.filename,"%s","ASSETMAP");
+        sprintf(opendcp->volindex.filename,"%s","VOLINDEX");
+    }
+
     /* Write XML Files */
     if (write_cpl(opendcp, &opendcp->pkl[0].cpl[0]) != DCP_SUCCESS)
         dcp_fatal(opendcp,"Writing composition playlist failed");
