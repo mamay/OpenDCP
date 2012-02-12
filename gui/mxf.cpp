@@ -80,7 +80,16 @@ void MainWindow::mxfConnectSlots() {
 }
 
 void MainWindow::mxfSetSlideState() {
-    int value = ui->mxfSlideCheckBox->checkState();
+    int value;
+
+    if (ui->mxfSourceTypeComboBox->currentIndex() == 0) {
+        value = ui->mxfSlideCheckBox->checkState();
+        ui->mxfSlideCheckBox->setEnabled(1);
+    } else {
+        ui->mxfSlideCheckBox->setEnabled(0);
+        value = 0;
+    }
+
     ui->mxfSlideSpinBox->setEnabled(value);
     ui->mxfSlideDurationLabel->setEnabled(value);
 }
@@ -93,7 +102,6 @@ void MainWindow::mxfSourceTypeUpdate() {
         ui->mxfInputStack->setCurrentIndex(0);
         ui->mxfSoundRadio2->setEnabled(0);
         ui->mxfSoundRadio5->setEnabled(0);
-        mxfSetStereoscopicState();
     }
     // MPEG2
     if (ui->mxfSourceTypeComboBox->currentIndex() == 1) {
@@ -103,7 +111,6 @@ void MainWindow::mxfSourceTypeUpdate() {
         ui->mxfInputStack->setCurrentIndex(0);
         ui->mxfSoundRadio2->setEnabled(0);
         ui->mxfSoundRadio5->setEnabled(0);
-        mxfSetStereoscopicState();
     }
     // WAV
     if (ui->mxfSourceTypeComboBox->currentIndex() == 2) {
@@ -112,6 +119,10 @@ void MainWindow::mxfSourceTypeUpdate() {
         ui->mxfSoundRadio2->setEnabled(1);
         ui->mxfSoundRadio5->setEnabled(1);
     }
+
+    // update
+    mxfSetStereoscopicState();
+    mxfSetSlideState();
 }
 
 void MainWindow::mxfSetHVState() {
