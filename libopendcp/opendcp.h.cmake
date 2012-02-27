@@ -96,16 +96,13 @@ static const char *DCP_ANNOTATION = "OPENDCP-FILM";
 static const char *DCP_TITLE      = "OPENDCP-FILM-TITLE";
 static const char *DCP_KIND       = "feature";
 
+typedef unsigned char byte_t; 
+
 enum DCP_ERROR {
     DCP_FATAL   = -1,
     DCP_SUCCESS =  0,
     DCP_WARN    =  1,
     DCP_QUIT    =  2
-};
-
-enum FILE_FILTER {
-    J2K_INPUT,
-    MXF_INPUT
 };
 
 enum LOG_LEVEL {
@@ -280,6 +277,8 @@ typedef struct {
     int            start_frame;
     int            end_frame;
     int            encoder;
+    int            no_overwrite;
+    int            bw;
     int            duration;
     int            dpx;
     int            lut;
@@ -292,6 +291,14 @@ typedef struct {
     int            start_frame;
     int            end_frame;
     int            duration;
+    int            slide;
+
+    int            encrypt_header_flag;
+    int            key_flag;
+    int            delete_intermediate;
+    byte_t         key_id[16];
+    byte_t         key_value[16];
+    int            write_hmac;
 } mxf_options_t;
 
 typedef struct {
@@ -304,43 +311,36 @@ typedef struct {
     char           kind[15];
     char           rating[5];
     char           aspect_ratio[20];
+    int            digest_flag;
 } xml_options_t;
 
-typedef unsigned char byte_t; 
+typedef struct {
+    int  sign;
+    int  use_external;
+    char *root;
+    char *ca;
+    char *signer;
+    char *private_key;
+} xml_signature_t;
 
 typedef struct {
-    int            cinema_profile;
-    int            frame_rate;
-    int            duration;
-    int            entry_point;
-    int            stereoscopic;
-    int            slide;
-    int            log_level;
-    int            digest_flag;
-    int            ns;
-    int            encrypt_header_flag;
-    int            key_flag;
-    int            delete_intermediate;
-    byte_t         key_id[16];
-    byte_t         key_value[16];
-    int            write_hmac;
-    int            no_overwrite;
-    int            bw;
-    int            threads;
-    int            xml_sign;
-    int            xml_use_external_certs;
-    char           *root_cert_file;
-    char           *ca_cert_file;
-    char           *signer_cert_file;
-    char           *private_key_file; 
-    char           dcp_path[MAX_BASENAME_LENGTH];
-    j2k_options_t  j2k;
-    mxf_options_t  mxf;
-    xml_options_t  xml;
-    assetmap_t     assetmap;
-    volindex_t     volindex;
-    int            pkl_count;
-    pkl_t          pkl[MAX_PKL];
+    int             cinema_profile;
+    int             frame_rate;
+    int             duration;
+    int             entry_point;
+    int             stereoscopic;
+    int             log_level;
+    int             ns;
+    int             threads;
+    char            dcp_path[MAX_BASENAME_LENGTH];
+    j2k_options_t   j2k;
+    mxf_options_t   mxf;
+    xml_options_t   xml;
+    assetmap_t      assetmap;
+    volindex_t      volindex;
+    int             pkl_count;
+    pkl_t           pkl[MAX_PKL];
+    xml_signature_t xml_signature;
 } opendcp_t;
 
 /* common functions */

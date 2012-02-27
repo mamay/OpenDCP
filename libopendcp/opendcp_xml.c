@@ -98,7 +98,7 @@ int write_cpl(opendcp_t *opendcp, cpl_t *cpl) {
 
     xmlTextWriterStartElement(xml, BAD_CAST "CompositionPlaylist");
     xmlTextWriterWriteAttribute(xml, BAD_CAST "xmlns", BAD_CAST NS_CPL[opendcp->ns]);
-    if (opendcp->xml_sign) {
+    if (opendcp->xml_signature.sign) {
         xmlTextWriterWriteAttribute(xml, BAD_CAST "xmlns:dsig", BAD_CAST DS_DSIG);
     }
 
@@ -168,7 +168,7 @@ int write_cpl(opendcp_t *opendcp, cpl_t *cpl) {
                 }
             }
 
-            if ( opendcp->digest_flag ) {
+            if ( opendcp->xml.digest_flag ) {
                 xmlTextWriterWriteFormatElement(xml, BAD_CAST "Hash","%s",asset.digest);
             }
             
@@ -181,7 +181,7 @@ int write_cpl(opendcp_t *opendcp, cpl_t *cpl) {
     xmlTextWriterEndElement(xml);         /* end reel list */
 
 #ifdef XMLSEC
-    if (opendcp->xml_sign) {
+    if (opendcp->xml_signature.sign) {
         write_dsig_template(opendcp, xml);
     }
 #endif
@@ -200,7 +200,7 @@ int write_cpl(opendcp_t *opendcp, cpl_t *cpl) {
 
 #ifdef XMLSEC
     /* sign the XML file */
-    if (opendcp->xml_sign) {
+    if (opendcp->xml_signature.sign) {
         xml_sign(opendcp, cpl->filename);
     }
 #endif
@@ -243,7 +243,7 @@ int write_pkl(opendcp_t *opendcp, pkl_t *pkl) {
 
     xmlTextWriterStartElement(xml, BAD_CAST "PackingList");
     xmlTextWriterWriteAttribute(xml, BAD_CAST "xmlns", BAD_CAST NS_PKL[opendcp->ns]);
-    if (opendcp->xml_sign) {
+    if (opendcp->xml_signature.sign) {
         xmlTextWriterWriteAttribute(xml, BAD_CAST "xmlns:dsig", BAD_CAST DS_DSIG);
     }
 
@@ -303,7 +303,7 @@ int write_pkl(opendcp_t *opendcp, pkl_t *pkl) {
     xmlTextWriterEndElement(xml);      /* end assetlist */
 
 #ifdef XMLSEC
-    if (opendcp->xml_sign) {
+    if (opendcp->xml_signature.sign) {
         write_dsig_template(opendcp, xml);
     }
 #endif
@@ -322,7 +322,7 @@ int write_pkl(opendcp_t *opendcp, pkl_t *pkl) {
 
 #ifdef XMLSEC
     /* sign the XML file */
-    if (opendcp->xml_sign) {
+    if (opendcp->xml_signature.sign) {
         xml_sign(opendcp, pkl->filename);
     }
 #endif

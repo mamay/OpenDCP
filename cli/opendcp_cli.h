@@ -19,6 +19,11 @@
 #ifndef OPENDCP_CLI_H
 #define OPENDCP_CLI_H
 
+enum FILE_FILTER {
+    J2K_INPUT,
+    MXF_INPUT
+};
+
 int check_extension(char *filename, char *pattern);
 char *get_basename(const char *filename);
 int get_file_count(char *path, int file_type);

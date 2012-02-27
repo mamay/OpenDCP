@@ -154,7 +154,7 @@ int main (int argc, char **argv) {
             break;
 
             case 'd':
-               opendcp->digest_flag = 1;
+               opendcp->xml.digest_flag = 1;
             break;
 
             case 'e':
@@ -205,7 +205,7 @@ int main (int argc, char **argv) {
 
 #ifdef XMLSEC
             case 's':
-                opendcp->xml_sign = 1;
+                opendcp->xml_signature.sign = 1;
 
             break;
 #endif
@@ -223,23 +223,23 @@ int main (int argc, char **argv) {
             break;
 
             case '1':
-               opendcp->root_cert_file = optarg;
-               opendcp->xml_use_external_certs = 1;
+               opendcp->xml_signature.root = optarg;
+               opendcp->xml_signature.use_external = 1;
             break;
 
             case '2':
-               opendcp->ca_cert_file = optarg;
-               opendcp->xml_use_external_certs = 1;
+               opendcp->xml_signature.ca = optarg;
+               opendcp->xml_signature.use_external = 1;
             break;
 
             case '3':
-               opendcp->signer_cert_file = optarg;
-               opendcp->xml_use_external_certs = 1;
+               opendcp->xml_signature.signer = optarg;
+               opendcp->xml_signature.use_external = 1;
             break;
 
             case 'p':
-               opendcp->private_key_file = optarg;
-               opendcp->xml_use_external_certs = 1;
+               opendcp->xml_signature.private_key = optarg;
+               opendcp->xml_signature.use_external = 1;
             break;
 
             case 'v':
@@ -263,10 +263,10 @@ int main (int argc, char **argv) {
     }
 
     /* check cert files */
-    if (opendcp->xml_sign && opendcp->xml_use_external_certs == 1) {
+    if (opendcp->xml_signature.sign && opendcp->xml_signature.use_external == 1) {
         FILE *tp;
-        if (opendcp->root_cert_file) {
-            tp = fopen(opendcp->root_cert_file,"rb");
+        if (opendcp->xml_signature.root) {
+            tp = fopen(opendcp->xml_signature.root,"rb");
             if (tp) {
                 fclose(tp);
             } else {
@@ -275,8 +275,8 @@ int main (int argc, char **argv) {
         } else {
             dcp_fatal(opendcp,"XML digital signature certifcates enabled, but root certificate file not specified");
         }
-        if (opendcp->ca_cert_file) {
-            tp = fopen(opendcp->ca_cert_file,"rb");
+        if (opendcp->xml_signature.ca) {
+            tp = fopen(opendcp->xml_signature.ca,"rb");
             if (tp) {
                 fclose(tp);
             } else {
@@ -285,8 +285,8 @@ int main (int argc, char **argv) {
         } else {
             dcp_fatal(opendcp,"XML digital signature certifcates enabled, but ca certificate file not specified");
         }
-        if (opendcp->signer_cert_file) {
-            tp = fopen(opendcp->signer_cert_file,"rb");
+        if (opendcp->xml_signature.signer) {
+            tp = fopen(opendcp->xml_signature.signer,"rb");
             if (tp) {
                 fclose(tp);
             } else {
@@ -295,8 +295,8 @@ int main (int argc, char **argv) {
         } else {
             dcp_fatal(opendcp,"XML digital signature certifcates enabled, but signer certificate file not specified");
         }
-        if (opendcp->private_key_file) {
-            tp = fopen(opendcp->private_key_file,"rb");
+        if (opendcp->xml_signature.private_key) {
+            tp = fopen(opendcp->xml_signature.private_key,"rb");
             if (tp) {
                 fclose(tp);
             } else {

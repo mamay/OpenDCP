@@ -72,18 +72,18 @@ Result_t MxfWriter::fillWriterInfo(opendcp_t *opendcp, writer_info_t *writer_inf
     Kumu::GenRandomUUID(writer_info->info.AssetUUID);
 
     // start encryption, if set
-    if (opendcp->key_flag) {
+    if (opendcp->mxf.key_flag) {
         Kumu::GenRandomUUID(writer_info->info.ContextID);
         writer_info->info.EncryptedEssence = true;
 
-        if (opendcp->key_id) {
-            memcpy(writer_info->info.CryptographicKeyID, opendcp->key_id, UUIDlen);
+        if (opendcp->mxf.key_id) {
+            memcpy(writer_info->info.CryptographicKeyID, opendcp->mxf.key_id, UUIDlen);
         } else {
             rng.FillRandom(writer_info->info.CryptographicKeyID, UUIDlen);
         }
 
         writer_info->aes_context = new AESEncContext;
-        result = writer_info->aes_context->InitKey(opendcp->key_value);
+        result = writer_info->aes_context->InitKey(opendcp->mxf.key_value);
 
         if (ASDCP_FAILURE(result)) {
             delete[] writer_info->aes_context;
@@ -97,10 +97,10 @@ Result_t MxfWriter::fillWriterInfo(opendcp_t *opendcp, writer_info_t *writer_inf
             return result;
         }
 
-        if (opendcp->write_hmac) {
+        if (opendcp->mxf.write_hmac) {
             writer_info->info.UsesHMAC = true;
             writer_info->hmac_context = new HMACContext;
-            result = writer_info->hmac_context->InitKey(opendcp->key_value, writer_info->info.LabelSetType);
+            result = writer_info->hmac_context->InitKey(opendcp->mxf.key_value, writer_info->info.LabelSetType);
 
             if (ASDCP_FAILURE(result)) {
                 delete[] writer_info->aes_context;
@@ -215,7 +215,7 @@ Result_t MxfWriter::writeJ2kMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
     }
 
     // set the duration of the output mxf
-    if (opendcp->slide) {
+    if (opendcp->mxf.slide) {
         mxf_duration = opendcp->mxf.duration;
         slide_duration = mxf_duration / mxfFileList.size();
     } else if (opendcp->mxf.duration && (mxfFileList.size() >= opendcp->mxf.duration)) {
@@ -232,7 +232,7 @@ Result_t MxfWriter::writeJ2kMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
         if (read) {
             result = j2k_parser.OpenReadFrame(mxfFileList.at(i).absoluteFilePath().toAscii().constData(), frame_buffer);
 
-            if (opendcp->delete_intermediate) {
+            if (opendcp->mxf.delete_intermediate) {
                 unlink(mxfFileList.at(i).absoluteFilePath().toAscii().constData());
             }
 
@@ -241,16 +241,16 @@ Result_t MxfWriter::writeJ2kMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
                 return result;
             }
 
-            if (opendcp->encrypt_header_flag) {
+            if (opendcp->mxf.encrypt_header_flag) {
                 frame_buffer.PlaintextOffset(0);
             }
 
-            if (opendcp->slide) {
+            if (opendcp->mxf.slide) {
                 read = 0;
             }
         }
 
-        if (opendcp->slide) {
+        if (opendcp->mxf.slide) {
             if (mxf_duration % slide_duration == 0) {
                 i++;
                 read = 1;
@@ -331,7 +331,7 @@ Result_t MxfWriter::writeJ2kStereoscopicMxf(opendcp_t *opendcp, QFileInfoList mx
     }
 
     // set the duration of the output mxf
-    if (opendcp->slide) {
+    if (opendcp->mxf.slide) {
         mxf_duration = opendcp->mxf.duration;
         slide_duration = mxf_duration / (mxfFileList.size() / 2);
     } else if (opendcp->mxf.duration && (mxfFileList.size()/2 >= opendcp->mxf.duration)) {
@@ -348,7 +348,7 @@ Result_t MxfWriter::writeJ2kStereoscopicMxf(opendcp_t *opendcp, QFileInfoList mx
         if (read) {
             result = j2k_parser_left.OpenReadFrame(mxfFileList.at(i).absoluteFilePath().toAscii().constData(), frame_buffer_left);
 
-            if (opendcp->delete_intermediate) {
+            if (opendcp->mxf.delete_intermediate) {
                 unlink(mxfFileList.at(i).absoluteFilePath().toAscii().constData());
             }
 
@@ -361,7 +361,7 @@ Result_t MxfWriter::writeJ2kStereoscopicMxf(opendcp_t *opendcp, QFileInfoList mx
 
             result = j2k_parser_right.OpenReadFrame(mxfFileList.at(i).absoluteFilePath().toAscii().constData(), frame_buffer_right);
 
-            if (opendcp->delete_intermediate) {
+            if (opendcp->mxf.delete_intermediate) {
                 unlink(mxfFileList.at(i).absoluteFilePath().toAscii().constData());
             }
 
@@ -370,20 +370,20 @@ Result_t MxfWriter::writeJ2kStereoscopicMxf(opendcp_t *opendcp, QFileInfoList mx
                 return result;
             }
 
-            if (opendcp->encrypt_header_flag) {
+            if (opendcp->mxf.encrypt_header_flag) {
                 frame_buffer_left.PlaintextOffset(0);
             }
 
-           if (opendcp->encrypt_header_flag) {
+           if (opendcp->mxf.encrypt_header_flag) {
                 frame_buffer_right.PlaintextOffset(0);
             }
 
-            if (opendcp->slide) {
+            if (opendcp->mxf.slide) {
                 read = 0;
             }
         }
 
-        if (opendcp->slide) {
+        if (opendcp->mxf.slide) {
             if (mxf_duration % slide_duration == 0) {
                 i++;
                 read = 1;
@@ -626,7 +626,7 @@ Result_t MxfWriter::writeMpeg2Mxf(opendcp_t *opendcp, QFileInfoList mxfFileList,
             continue;
         }
 
-        if (opendcp->encrypt_header_flag) {
+        if (opendcp->mxf.encrypt_header_flag) {
             frame_buffer.PlaintextOffset(0);
         }
 

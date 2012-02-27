@@ -28,6 +28,7 @@
 #include <sys/stat.h>
 
 #include "opendcp.h"
+#include "opendcp_cli.h"
 
 #ifndef WIN32
 #define strnicmp strncasecmp

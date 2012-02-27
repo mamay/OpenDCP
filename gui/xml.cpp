@@ -66,8 +66,8 @@ void MainWindow::startDcp()
     xmlContext->log_level = 0;
 
     if (ui->digitalSignatureCheckBox->checkState()) {
-        xmlContext->xml_sign = 1;
-        xmlContext->xml_use_external_certs = 0;
+        xmlContext->xml_signature.sign = 1;
+        xmlContext->xml_signature.use_external = 0;
     }
 
     dcp_log_init(xmlContext->log_level, "opendcp.log");

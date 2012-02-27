@@ -77,28 +77,28 @@ int write_dsig_template(opendcp_t *opendcp, xmlTextWriterPtr xml) {
 
     dcp_log(LOG_DEBUG, "xml_sign: write_dsig_template");
 
-    if (opendcp->xml_use_external_certs) {
+    if (opendcp->xml_signature.use_external) {
         /* read certificates from file */
         FILE *cp;
 
-        cp = fopen(opendcp->signer_cert_file,"rb");
+        cp = fopen(opendcp->xml_signature.signer,"rb");
         if (cp) {
             x[0] = PEM_read_X509(cp,NULL,NULL,NULL);
             fclose(cp);
         }
-        cp = fopen(opendcp->ca_cert_file,"rb");
+        cp = fopen(opendcp->xml_signature.ca,"rb");
         if (cp) {
             x[1] = PEM_read_X509(cp,NULL,NULL,NULL);
             fclose(cp);
         }
-        cp = fopen(opendcp->root_cert_file,"rb");
+        cp = fopen(opendcp->xml_signature.root,"rb");
         if (cp) {
             x[2] = PEM_read_X509(cp,NULL,NULL,NULL);
             fclose(cp);
         }
-        cert[0] = strip_cert_file(opendcp->signer_cert_file);
-        cert[1] = strip_cert_file(opendcp->ca_cert_file);
-        cert[2] = strip_cert_file(opendcp->root_cert_file);
+        cert[0] = strip_cert_file(opendcp->xml_signature.signer);
+        cert[1] = strip_cert_file(opendcp->xml_signature.ca);
+        cert[2] = strip_cert_file(opendcp->xml_signature.root);
     } else {
         /* read certificate from memory */
         bio[0] = BIO_new_mem_buf((void *)opendcp_signer_cert, -1);
@@ -336,8 +336,8 @@ xmlSecKeysMngrPtr load_certificates_sign(opendcp_t *opendcp) {
     }    
 
     /* read key file */
-    if (opendcp->private_key_file) {
-        key = xmlSecCryptoAppKeyLoad(opendcp->private_key_file, xmlSecKeyDataFormatPem, NULL, NULL, NULL);
+    if (opendcp->xml_signature.private_key) {
+        key = xmlSecCryptoAppKeyLoad(opendcp->xml_signature.private_key, xmlSecKeyDataFormatPem, NULL, NULL, NULL);
     } else {
         key = xmlSecCryptoAppKeyLoadMemory(opendcp_private_key, strlen(opendcp_private_key),xmlSecKeyDataFormatPem, NULL, NULL, NULL);
     }
@@ -349,9 +349,9 @@ xmlSecKeysMngrPtr load_certificates_sign(opendcp_t *opendcp) {
     }
  
     /* load root certificate */
-    if (opendcp->root_cert_file) {
-        if (xmlSecCryptoAppKeysMngrCertLoad(key_manager, opendcp->root_cert_file, xmlSecKeyDataFormatPem, xmlSecKeyDataTypeTrusted) < 0) {
-            fprintf(stderr,"Error: failed to load pem certificate \"%s\"\n", opendcp->root_cert_file);
+    if (opendcp->xml_signature.root) {
+        if (xmlSecCryptoAppKeysMngrCertLoad(key_manager, opendcp->xml_signature.root, xmlSecKeyDataFormatPem, xmlSecKeyDataTypeTrusted) < 0) {
+            fprintf(stderr,"Error: failed to load pem certificate \"%s\"\n", opendcp->xml_signature.root);
             xmlSecKeysMngrDestroy(key_manager);
             return(NULL);
         }
@@ -364,9 +364,9 @@ xmlSecKeysMngrPtr load_certificates_sign(opendcp_t *opendcp) {
     }
     
     /* load ca (intermediate) certificate */
-    if (opendcp->ca_cert_file) {
-        if (xmlSecCryptoAppKeysMngrCertLoad(key_manager, opendcp->ca_cert_file, xmlSecKeyDataFormatPem, xmlSecKeyDataTypeTrusted) < 0) {
-            fprintf(stderr,"Error: failed to load pem certificate \"%s\"\n", opendcp->ca_cert_file);
+    if (opendcp->xml_signature.ca) {
+        if (xmlSecCryptoAppKeysMngrCertLoad(key_manager, opendcp->xml_signature.ca, xmlSecKeyDataFormatPem, xmlSecKeyDataTypeTrusted) < 0) {
+            fprintf(stderr,"Error: failed to load pem certificate \"%s\"\n", opendcp->xml_signature.ca);
             xmlSecKeysMngrDestroy(key_manager);
             return(NULL);
         }

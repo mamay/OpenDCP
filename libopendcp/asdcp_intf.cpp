@@ -409,18 +409,18 @@ Result_t fill_writer_info(opendcp_t *opendcp, writer_info_t *writer_info) {
     Kumu::GenRandomUUID(writer_info->info.AssetUUID);
 
     /* start encryption, if set */
-    if (opendcp->key_flag) {
+    if (opendcp->mxf.key_flag) {
         Kumu::GenRandomUUID(writer_info->info.ContextID);
         writer_info->info.EncryptedEssence = true;
 
-        if (opendcp->key_id) {
-            memcpy(writer_info->info.CryptographicKeyID, opendcp->key_id, UUIDlen);
+        if (opendcp->mxf.key_id) {
+            memcpy(writer_info->info.CryptographicKeyID, opendcp->mxf.key_id, UUIDlen);
         } else {
             rng.FillRandom(writer_info->info.CryptographicKeyID, UUIDlen);
         }
 
         writer_info->aes_context = new AESEncContext;
-        result = writer_info->aes_context->InitKey(opendcp->key_value);
+        result = writer_info->aes_context->InitKey(opendcp->mxf.key_value);
 
         if (ASDCP_FAILURE(result)) {
             return result;
@@ -432,10 +432,10 @@ Result_t fill_writer_info(opendcp_t *opendcp, writer_info_t *writer_info) {
             return result;
         }
 
-        if (opendcp->write_hmac) {
+        if (opendcp->mxf.write_hmac) {
             writer_info->info.UsesHMAC = true;
             writer_info->hmac_context = new HMACContext;
-            result = writer_info->hmac_context->InitKey(opendcp->key_value, writer_info->info.LabelSetType);
+            result = writer_info->hmac_context->InitKey(opendcp->mxf.key_value, writer_info->info.LabelSetType);
 
             if (ASDCP_FAILURE(result)) {
                 return result;
@@ -493,10 +493,10 @@ int write_j2k_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     ui32_t i = start_frame;
     /* read each input frame and write to the output mxf until duration is reached */
     while (ASDCP_SUCCESS(result) && mxf_duration--) {
-        if (opendcp->slide == 0 || i == start_frame) {
+        if (opendcp->mxf.slide == 0 || i == start_frame) {
             result = j2k_parser.OpenReadFrame(filelist->in[i], frame_buffer);
 
-            if (opendcp->delete_intermediate) {
+            if (opendcp->mxf.delete_intermediate) {
                 unlink(filelist->in[i]);
             }
 
@@ -504,7 +504,7 @@ int write_j2k_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
                 return MXF_J2K_FILE_OPEN_ERROR;
             }
 
-            if (opendcp->encrypt_header_flag) {
+            if (opendcp->mxf.encrypt_header_flag) {
                 frame_buffer.PlaintextOffset(0);
             }
             i++;
@@ -575,10 +575,10 @@ int write_j2k_s_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file)
     ui32_t i = 0;
     /* read each input frame and write to the output mxf until duration is reached */
     while (ASDCP_SUCCESS(result) && mxf_duration--) {
-        if (opendcp->slide == 0 || i == 0) {
+        if (opendcp->mxf.slide == 0 || i == 0) {
             result = j2k_parser_left.OpenReadFrame(filelist->in[i], frame_buffer_left);
 
-            if (opendcp->delete_intermediate) {
+            if (opendcp->mxf.delete_intermediate) {
                 unlink(filelist->in[i]);
             }
 
@@ -589,7 +589,7 @@ int write_j2k_s_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file)
 
             result = j2k_parser_right.OpenReadFrame(filelist->in[i], frame_buffer_right);
 
-            if (opendcp->delete_intermediate) {
+            if (opendcp->mxf.delete_intermediate) {
                 unlink(filelist->in[i]);
             }
 
@@ -598,11 +598,11 @@ int write_j2k_s_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file)
             }
             i++;
 
-            if (opendcp->encrypt_header_flag) {
+            if (opendcp->mxf.encrypt_header_flag) {
                 frame_buffer_left.PlaintextOffset(0);
             }
 
-            if (opendcp->encrypt_header_flag) {
+            if (opendcp->mxf.encrypt_header_flag) {
                 frame_buffer_right.PlaintextOffset(0);
             }
         }
@@ -866,7 +866,7 @@ int write_mpeg2_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file)
             continue;
         }
 
-        if (opendcp->encrypt_header_flag) {
+        if (opendcp->mxf.encrypt_header_flag) {
             frame_buffer.PlaintextOffset(0);
         }
 

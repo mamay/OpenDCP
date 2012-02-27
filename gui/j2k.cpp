@@ -150,7 +150,7 @@ void MainWindow::j2kConvert() {
         outFile = outLeftDir % "/" % inLeftList.at(i).completeBaseName() % ".j2c";
         pair << inFile << outFile ;
 
-        if (!QFileInfo(outFile).exists() || context->no_overwrite == 0) {
+        if (!QFileInfo(outFile).exists() || context->j2k.no_overwrite == 0) {
             list.append(pair);
             iterations++;
         }
@@ -161,7 +161,7 @@ void MainWindow::j2kConvert() {
             outFile = outRightDir % "/" % inRightList.at(i).completeBaseName() % ".j2c";
             pair << inFile << outFile ;
 
-            if (!QFileInfo(outFile).exists() || context->no_overwrite == 0) {
+            if (!QFileInfo(outFile).exists() || context->j2k.no_overwrite == 0) {
                 list.append(pair);
                 iterations++;
             }
@@ -287,13 +287,13 @@ void MainWindow::j2kStart() {
     }
 
     if (ui->overwritej2kCB->checkState())
-        context->no_overwrite = 0;
+        context->j2k.no_overwrite = 0;
     else {
-        context->no_overwrite = 1;
+        context->j2k.no_overwrite = 1;
     }
 
     context->frame_rate = ui->frameRateComboBox->currentText().toInt();
-    context->bw = ui->bwSlider->value() * 1000000;
+    context->j2k.bw = ui->bwSlider->value() * 1000000;
 
     // validate destination directories
     if (context->stereoscopic) {

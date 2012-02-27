@@ -190,8 +190,8 @@ int encode_kakadu(opendcp_t *opendcp, char *in_file, char *out_file) {
     FILE *cmdfp = NULL;
     int bw;
 
-    if (opendcp->bw) {
-        bw = opendcp->bw;
+    if (opendcp->j2k.bw) {
+        bw = opendcp->j2k.bw;
     } else {
         bw = MAX_DCP_JPEG_BITRATE;
     }
@@ -237,8 +237,8 @@ int encode_openjpeg(opendcp_t *opendcp, opj_image_t *opj_image, char *out_file) 
     FILE *f = NULL; 
     int bw;
    
-    if (opendcp->bw) {
-        bw = opendcp->bw;
+    if (opendcp->j2k.bw) {
+        bw = opendcp->j2k.bw;
     } else {
         bw = MAX_DCP_JPEG_BITRATE;
     }

@@ -195,7 +195,7 @@ int main (int argc, char **argv) {
     opendcp->j2k.encoder     = J2K_OPENJPEG;
     opendcp->frame_rate      = 24;
     opendcp->j2k.start_frame = 1;
-    opendcp->bw              = 250;
+    opendcp->j2k.bw          = 250;
 #ifdef OPENMP
     openmp_flag              = 1;
     opendcp->threads = omp_get_num_procs();
@@ -301,7 +301,7 @@ int main (int argc, char **argv) {
                 }
                 break;
             case 'b':
-                opendcp->bw = atoi(optarg);
+                opendcp->j2k.bw = atoi(optarg);
                 break;
             case 't':
                 opendcp->threads = atoi(optarg);
@@ -310,7 +310,7 @@ int main (int argc, char **argv) {
                 opendcp->j2k.xyz = 0;
                 break;
             case 'n':
-                opendcp->no_overwrite = 1;
+                opendcp->j2k.no_overwrite = 1;
                 break;
             case 'v':
                 version();
@@ -371,10 +371,10 @@ int main (int argc, char **argv) {
     }
 
     /* bandwidth check */
-    if (opendcp->bw < 50 || opendcp->bw > 250) {
+    if (opendcp->j2k.bw < 50 || opendcp->j2k.bw > 250) {
         dcp_fatal(opendcp,"Bandwidth must be between 50 and 250");
     } else {
-        opendcp->bw *= 1000000;
+        opendcp->j2k.bw *= 1000000;
     }
 
     /* input path check */
@@ -448,7 +448,7 @@ int main (int argc, char **argv) {
         #pragma omp flush(SIGINT_received)
         if (!SIGINT_received) {
             dcp_log(LOG_INFO,"JPEG2000 conversion %s started OPENMP: %d",filelist->in[c],openmp_flag);
-            if(access(filelist->out[c], F_OK) != 0 || opendcp->no_overwrite == 0) {
+            if(access(filelist->out[c], F_OK) != 0 || opendcp->j2k.no_overwrite == 0) {
                 result = convert_to_j2k(opendcp,filelist->in[c],filelist->out[c], tmp_path);
             } else {
                 result = DCP_SUCCESS;

@@ -419,7 +419,7 @@ void MainWindow::mxfCreatePicture() {
     outputFile = ui->pMxfOutEdit->text();
 
     if (ui->mxfSlideCheckBox->checkState()) {
-        mxfContext->slide = (ui->mxfSlideCheckBox->checkState());
+        mxfContext->mxf.slide = (ui->mxfSlideCheckBox->checkState());
         mxfContext->mxf.duration = ui->mxfSlideSpinBox->value() * mxfContext->frame_rate * inputList.size();
     } else {
         mxfContext->mxf.duration = inputList.size();
