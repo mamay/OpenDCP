@@ -4,7 +4,9 @@ This program builds the XML files for Digital Cinema Packages.
 
 Requirements
 ------------
-The program requires the following libraries. The versions listed are the ones tested with OpenDCP. Other versions may work, except where indicated.
+The program requires the following libraries. The versions listed are the ones tested with OpenDCP.
+Other versions may work, except where indicated.
+
     Library                       Version Tested    Minimum Required    Website 
     -------                       --------------    ----------------    -------
     AS-DCP File Access Library**  1.8.41            1.7.40              http://www.cinecert.com/asdcplib
@@ -50,16 +52,30 @@ Once cmake completes, you should have the necessary make files. To compile issue
 
 $ make
 
-You should end up with opendcp_xml, opendcp_xml, opendc_xml_verify (if XMLSEC enabled) opendcp_j2k in the cli directory of the build tree.
+You should end up with opendcp_xml, opendcp_xml, opendc_xml_verify (if XMLSEC enabled) opendcp_j2k
+in the cli directory of the build tree.
 
 GUI 
 ------------
-If you wish to compile the GUI, you will need install QT4 development and runtime libraries (4.7 or higher). On Linux you can usually install this through the package manager. Otherwise, you can download it from http://qt.nokia.com/.
+If you wish to compile the GUI, you will need install QT4 development and runtime
+libraries (4.7 or higher). On Linux you can usually install this through the package manager. 
+Otherwise, you can download it from http://qt.nokia.com/.
 
-To enable GUI compiling, follow the steps to compile the GUI, but pass -DENABLE_GUI=ON to cmake.
+GUI compiling is enabled by default, to disable it pass -DENABLE_GUI=OFF to cmake.
 
 Install
 ------------
-You can install OpenDCP so you can invoke the command from anywhere. The behavior of where the binaries are installed varies between OSes.
+You can install OpenDCP so you can invoke the command from anywhere. The behavior of where
+the binaries are installed varies between OSes.
 
 # make install
+
+Packages
+------------
+You can also create package/installers. Windows and OSX are detected automatically,
+but when compiling under linux you need to specify whether you want DEB or RPMS. This
+is done by passing -DRPM=ON or -DDEB=ON during the initial cmake.
+
+To then build the package:
+
+# make package
