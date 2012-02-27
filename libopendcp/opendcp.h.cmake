@@ -238,9 +238,6 @@ typedef struct {
     char           annotation[128];
     int            asset_count; 
     asset_t        asset[MAX_ASSETS];
-    asset_t        MainPicture;
-    asset_t        MainSound;
-    asset_t        MainSubtitle;
 } reel_t;
 
 typedef struct {
@@ -379,9 +376,6 @@ int write_pkl(opendcp_t *opendcp, pkl_t *pkl);
 int write_assetmap(opendcp_t *opendcp);
 int write_volumeindex(opendcp_t *opendcp);
 int xml_verify(char *filename);
-char *base64(const unsigned char *data, int length);
-char *strip_cert(const char *data);
-char *strip_cert_file(char *filename);
 int xml_sign(opendcp_t *opendcp, char *filename);
 
 /* J2K functions */

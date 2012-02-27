@@ -67,6 +67,35 @@ char *dn_oneline(X509_NAME *xn) {
     return result;
 }
 
+char *strip_cert(const char *data) {
+    int i,len;
+    int offset = 28;
+    char *buffer;
+
+    len = strlen(data) - 53;
+    buffer = (char *)malloc(len);
+    memset(buffer,0,(len));
+    for (i=0;i<len-2;i++) {
+        buffer[i] = data[i+offset];
+    }
+
+    return buffer;
+}
+
+char *strip_cert_file(char *filename) {
+    int i=0;
+    char text[5000];
+    char *ptr;
+    FILE *fp=fopen(filename, "rb");
+
+    while (!feof(fp)) {
+        text[i++] = fgetc(fp);
+    }
+    text[i-1]='\0';
+    ptr = strip_cert(text);
+    return(ptr);
+}
+
 int write_dsig_template(opendcp_t *opendcp, xmlTextWriterPtr xml) {
     BIO *bio[3];
     X509 *x[3];
@@ -505,6 +534,7 @@ int xml_verify(char *filename) {
     xmlSecKeysMngrPtr key_manager = NULL;
     char cert[5000];
     int  cert_l;
+
     xmlsec_init();
 
     /* load doc file */

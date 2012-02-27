@@ -24,8 +24,6 @@
 #include <dirent.h>
 #include <inttypes.h>
 #include <time.h>
-#include <openssl/x509.h>
-#include <openssl/bio.h>
 #include "opendcp.h"
 
 #ifndef WIN32
@@ -37,6 +35,7 @@ void dcp_fatal(opendcp_t *opendcp, char *error) {
     exit(DCP_FATAL);
 }
 
+/*
 char *base64(const unsigned char *data, int length) {
     int len; 
     char *b_ptr;
@@ -53,35 +52,7 @@ char *base64(const unsigned char *data, int length) {
 
     return b_ptr;
 }
-
-char *strip_cert(const char *data) {
-    int i,len;
-    int offset = 28;
-    char *buffer;
-
-    len = strlen(data) - 53;
-    buffer = (char *)malloc(len);
-    memset(buffer,0,(len));
-    for (i=0;i<len-2;i++) {
-        buffer[i] = data[i+offset];
-    }
-
-    return buffer;
-}
-
-char *strip_cert_file(char *filename) {
-    int i=0;
-    char text[5000];
-    char *ptr; 
-    FILE *fp=fopen(filename, "rb");
-
-    while (!feof(fp)) {
-        text[i++] = fgetc(fp);
-    }
-    text[i-1]='\0';
-    ptr = strip_cert(text);
-    return(ptr);
-}
+*/
 
 void get_timestamp(char *timestamp) { 
     time_t time_ptr;
