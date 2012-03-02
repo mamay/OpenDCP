@@ -19,6 +19,7 @@ SET(CPACK_PACKAGE_VENDOR "OpenDCP")
 sET(CPACK_RESOURCE_FILE_README ${PROJECT_SOURCE_DIR}/README.txt)
 SET(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/COPYRIGHT.txt")
 SET(DOCUMENTATION_PATH share/doc/${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION})
+SET(SHARE_PATH         share/${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION})
 #-----------------------------------------------------------------------------
 
 #--Win32 package--------------------------------------------------------------
@@ -105,9 +106,9 @@ ENDIF()
 #-----------------------------------------------------------------------------
 
 #--documentation--------------------------------------------------------------
-INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/licenses      DESTINATION ${DOCUMENTATION_PATH})
-INSTALL(FILES     ${PROJECT_SOURCE_DIR}/COPYRIGHT.txt DESTINATION ${DOCUMENTATION_PATH})
-INSTALL(FILES     ${PROJECT_SOURCE_DIR}/README.txt    DESTINATION ${DOCUMENTATION_PATH})
+INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/licenses        DESTINATION ${DOCUMENTATION_PATH})
+INSTALL(FILES     ${PROJECT_SOURCE_DIR}/COPYRIGHT.txt   DESTINATION ${DOCUMENTATION_PATH})
+INSTALL(FILES     ${PROJECT_SOURCE_DIR}/README.txt      DESTINATION ${DOCUMENTATION_PATH})
 #-----------------------------------------------------------------------------
 
 #--package--------------------------------------------------------------------

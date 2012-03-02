@@ -311,7 +311,7 @@ void MainWindow::setSoundTrack()
 void MainWindow::setSubtitleTrack()
 {
     QString path;
-    QString filter = "*.mxf;*.xml";
+    QString filter = "*.mxf";
     char *file;
 
     path = QFileDialog::getOpenFileName(this, tr("Choose an file to open"),QString::null,filter);

@@ -51,6 +51,26 @@ SET(OPENDCP_GUI_RES_CXX
 )
 #-----------------------------------------------------------------------------
 
+#--set language support-------------------------------------------------------
+SET(LANGUAGES 
+    en 
+    fr 
+    gm 
+)
+
+SET(GENERATE_LANGUAGE_FILES ON)
+
+SET(LANGUAGE_TS_FILES)
+FOREACH(LANGUAGE ${LANGUAGES})
+    SET(TS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/languages/opendcp_${LANGUAGE}.ts")
+    IF(EXISTS ${TS_FILE} OR GENERATE_LANGUAGE_FILES)
+        SET(LANGUAGE_TS_FILES ${LANGUAGE_TS_FILES} ${TS_FILE})
+        SET_SOURCE_FILES_PROPERTIES(${TS_FILE} PROPERTIES OUTPUT_LOCATION
+                                   "${CMAKE_CURRENT_BINARY_DIR}/languages/i18n")
+    ENDIF()
+ENDFOREACH(LANGUAGE ${LANGUAGES})
+#-----------------------------------------------------------------------------
+
 #--set application icon and information---------------------------------------
 IF(APPLE)
     SET(EXE_NAME ${OPENDCP_NAME})
@@ -106,17 +126,22 @@ ADD_CUSTOM_COMMAND(OUTPUT ${OPENDCP_GUI_RES_CXX}
     DEPENDS ${_RC_DEPENDS})
 QT4_WRAP_UI(OPENDCP_FORM_H ${OPENDCP_GUI_UI})
 QT4_WRAP_CPP(OPENDCP_MOC_H ${OPENDCP_GUI_H_SRC})
+IF(LANGUAGE_TS_FILES)
+  MESSAGE(STATUS "Building Language files ${LANGUAGE_TS_FILES}")
+  QT4_CREATE_TRANSLATION(OPENDCP_QM_FILES ${OPENDCP_GUI_CXX_SRC} ${LANGUAGE_TS_FILES})
+  #QT4_ADD_TRANSLATION(OPENDCP_QM_FILES ${LANGUAGE_TS_FILES})
+ENDIF(LANGUAGE_TS_FILES)
 #-----------------------------------------------------------------------------
 
 #--compile gui----------------------------------------------------------------
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 IF(APPLE)
-    ADD_EXECUTABLE(${EXE_NAME} MACOSX_BUNDLE ${OPENDCP_GUI_CXX_SRC} ${OPENDCP_GUI_RES_CXX} ${OPENDCP_FORM_H} ${OPENDCP_MOC_H})
+    ADD_EXECUTABLE(${EXE_NAME} MACOSX_BUNDLE ${OPENDCP_GUI_CXX_SRC} ${OPENDCP_GUI_RES_CXX} ${OPENDCP_FORM_H} ${OPENDCP_MOC_H} ${OPENDCP_QM_FILES})
 ELSEIF(WIN32)
     ADD_EXECUTABLE(${EXE_NAME} WIN32 ${OPENDCP_GUI_CXX_SRC} ${OPENDCP_GUI_RES_CXX} ${OPENDCP_FORM_H} ${OPENDCP_MOC_H})
 ELSE()
-    ADD_EXECUTABLE(${EXE_NAME} ${OPENDCP_GUI_CXX_SRC} ${OPENDCP_GUI_RES_CXX} ${OPENDCP_FORM_H} ${OPENDCP_MOC_H})
+    ADD_EXECUTABLE(${EXE_NAME} ${OPENDCP_GUI_CXX_SRC} ${OPENDCP_GUI_RES_CXX} ${OPENDCP_FORM_H} ${OPENDCP_MOC_H} ${OPENDCP_QM_FILES})
 ENDIF()
 #----------------------------------------------------------------------------
 
@@ -134,27 +159,46 @@ INSTALL(
 )
 
 IF(APPLE)
-    SET(PLUGIN_DEST_DIR opendcp.app/Contents/MacOS)
-    SET(QTCONF_DEST_DIR opendcp.app/Contents/Resources)
+    SET(APPLICATION_DIR "\${CMAKE_INSTALL_PREFIX}/${EXE_NAME}.app")
+    SET(PLUGIN_DEST_DIR ${APPLICATION_DIR}/Contents/MacOS/plugins)
+    SET(QTCONF_DEST_DIR ${APPLICATION_DIR}/Contents/Resources)
     SET(OSX_LIB_DIRS ${QT_LIBRARY_DIRS})
-    SET(APPLICATION "\${CMAKE_INSTALL_PREFIX}/${EXE_NAME}.app")
+
+    SET(TRANSLATION_DEST_DIR ${EXE_NAME}.app/Contents/Resources/translations)
+
+    FOREACH(LANGUAGE ${LANGUAGES})
+        SET(LPROJ ${LPROJ} ${APPLICATION_DIR}/Contents/Resources/${LANGUAGE}.lproj)
+    ENDFOREACH(LANGUAGE ${LANGUAGES})
 
     INSTALL(
         CODE "
-        file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")
+        file(MAKE_DIRECTORY ${LPROJ})
+        "
+    )
+
+    INSTALL(
+        CODE "
+        file(WRITE \"${QTCONF_DEST_DIR}/qt.conf\" \"\")
         "
     )
 
     INSTALL(
         CODE "
         file(GLOB_RECURSE QTPLUGINS
-             \"\${CMAKE_INSTALL_PREFIX}/${PLUGIN_DEST_DIR}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+             \"${PLUGIN_DEST_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
         include(BundleUtilities)
-        fixup_bundle(\"${APPLICATION}\" \"\${QTPLUGINS}\" \"${OSX_LIB_DIRS}\")
+        fixup_bundle(\"${APPLICATION_DIR}\" \"\${QTPLUGINS}\" \"${OSX_LIB_DIRS}\")
         "
     )
 ELSEIF(UNIX)
+    SET(TRANSLATION_DEST_DIR share/opendcp/translations)
     INSTALL(FILES ${APP_ICON} DESTINATION share/icons)
     INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/opendcp.desktop DESTINATION share/applications)
+ELSEIF(WIN32)
+    SET(TRANSLATION_DEST_DIR translations)
 ENDIF()
+
+FILE(GLOB LANGUAGE_FILES "${CMAKE_CURRENT_BINARY_DIR}/languages/i18n/*.qm")
+MESSAGE(STATUS "Installing language files ${LANGUAGE_FILES} into ${TRANSLATION_DEST_DIR}")
+INSTALL(FILES     ${LANGUAGE_FILES} DESTINATION ${TRANSLATION_DEST_DIR})
 #----------------------------------------------------------------------------

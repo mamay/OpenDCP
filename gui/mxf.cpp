@@ -285,6 +285,9 @@ void MainWindow::mxfCreateSubtitle() {
     if (write_mxf(mxfContext,fileList,outputFile) != 0 )  {
         QMessageBox::critical(this, tr("MXF Creation Error"),
                              tr("Subtitle MXF creation failed."));
+    } else {
+        QMessageBox::information(this, tr("MXF Creation Error"),
+                         tr("Subtitle MXF creation failed."));
     }
 
     delete_opendcp(mxfContext);
