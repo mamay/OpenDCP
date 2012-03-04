@@ -37,10 +37,15 @@ int main(int argc, char *argv[])
 
     langCode = "fr";
 
+#ifdef Q_WS_MAC
     QFileInfo appFileInfo(QApplication::applicationDirPath());
     QString appPath = appFileInfo.absoluteDir().absolutePath();
-#ifdef Q_WS_MAC
     appPath = appPath + "/Resources";
+#elif Q_WS_WIN
+    QFileInfo appFileInfo(QApplication::applicationDirPath());
+    QString appPath = appFileInfo.absoluteDir().absolutePath();
+#else
+    QString appPath = "/usr/share";
 #endif
     QString fname = appPath + "/" + "translation/opendcp_" + langCode + ".qm";
 
