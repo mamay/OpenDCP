@@ -34,6 +34,10 @@ MainWindow::MainWindow(QWidget *parent) :
     dMxfConversion  = new DialogMxfConversion();
     mxfWriterThread = new MxfWriter(this);
 
+    /* create menus */
+    createActions();
+    createMenus();
+
     connectSlots();
     setInitialUiState();
 }
@@ -54,6 +58,92 @@ void MainWindow::connectSlots()
 
     // connect tool button to line edits
     connect(&signalMapper, SIGNAL(mapped(QWidget*)),this, SLOT(getPath(QWidget*)));
+}
+
+void MainWindow::createMenus()
+{
+    fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(newAct);
+    fileMenu->addAction(openAct);
+    fileMenu->addAction(saveAct);
+    fileMenu->addAction(saveAsAct);
+    fileMenu->addSeparator();
+    fileMenu->addAction(exitAct);
+
+    editMenu = menuBar()->addMenu(tr("&Edit"));
+    editMenu->addAction(cutAct);
+    editMenu->addAction(copyAct);
+    editMenu->addAction(pasteAct);
+    editMenu->addAction(preferencesAct);
+
+    menuBar()->addSeparator();
+
+    helpMenu = menuBar()->addMenu(tr("&Help"));
+    helpMenu->addAction(aboutAct);
+}
+
+void MainWindow::createActions()
+{
+    /*
+    newAct = new QAction(QIcon(":/images/new.png"), tr("&New"), this);
+    newAct->setShortcuts(QKeySequence::New);
+    newAct->setStatusTip(tr("Create a new file"));
+    connect(newAct, SIGNAL(triggered()), this, SLOT(newFile()));
+
+    openAct = new QAction(QIcon(":/images/open.png"), tr("&Open..."), this);
+    openAct->setShortcuts(QKeySequence::Open);
+    openAct->setStatusTip(tr("Open an existing file"));
+    connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+
+    saveAct = new QAction(QIcon(":/images/save.png"), tr("&Save"), this);
+    saveAct->setShortcuts(QKeySequence::Save);
+    saveAct->setStatusTip(tr("Save the document to disk"));
+    connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
+
+    saveAsAct = new QAction(tr("Save &As..."), this);
+    saveAsAct->setShortcuts(QKeySequence::SaveAs);
+    saveAsAct->setStatusTip(tr("Save the document under a new name"));
+    connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
+    */
+
+    exitAct = new QAction(tr("E&xit"), this);
+    exitAct->setShortcuts(QKeySequence::Quit);
+    exitAct->setStatusTip(tr("Exit the application"));
+    connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
+
+    cutAct = new QAction(QIcon(":/images/cut.png"), tr("Cu&t"), this);
+    cutAct->setShortcuts(QKeySequence::Cut);
+    cutAct->setStatusTip(tr("Cut the current selection's contents to the "
+                            "clipboard"));
+    connect(cutAct, SIGNAL(triggered()), textEdit, SLOT(cut()));
+
+    copyAct = new QAction(QIcon(":/images/copy.png"), tr("&Copy"), this);
+    copyAct->setShortcuts(QKeySequence::Copy);
+    copyAct->setStatusTip(tr("Copy the current selection's contents to the "
+                             "clipboard"));
+    connect(copyAct, SIGNAL(triggered()), textEdit, SLOT(copy()));
+
+    pasteAct = new QAction(QIcon(":/images/paste.png"), tr("&Paste"), this);
+    pasteAct->setShortcuts(QKeySequence::Paste);
+    pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current "
+                              "selection"));
+    connect(pasteAct, SIGNAL(triggered()), textEdit, SLOT(paste()));
+
+    aboutAct = new QAction(tr("&About"), this);
+    aboutAct->setStatusTip(tr("Show the application's About box"));
+    connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+
+    preferencesAct = new QAction(tr("&Preference"), this);
+    preferencesAct->setStatusTip(tr("Application preferences"));
+    preferencesAct->setMenuRole(QAction::PreferencesRole);
+    connect(preferencesAct, SIGNAL(triggered()), this, SLOT(preferences()));
+
+    cutAct->setEnabled(false);
+    copyAct->setEnabled(false);
+    connect(textEdit, SIGNAL(copyAvailable(bool)),
+            cutAct, SLOT(setEnabled(bool)));
+    connect(textEdit, SIGNAL(copyAvailable(bool)),
+            copyAct, SLOT(setEnabled(bool)));
 }
 
 void MainWindow::setInitialUiState()
@@ -90,12 +180,13 @@ void MainWindow::setInitialUiState()
     ui->tabWidget->setCurrentIndex(0);
 
     // File Menu
-    ui->menuFile->addSeparator();
-    ui->menuFile->addAction(tr("E&xit"), this, SLOT(close()),QKeySequence(tr("Ctrl+Q")));
+    //ui->menuFile->addSeparator();
+   // ui->menuFile->addAction(tr("E&xit"), this, SLOT(close()),QKeySequence(tr("Ctrl+Q")));
+   // ui->menuFile->addAction(tr("Preferences"), this, SLOT(close()),QKeySequence(tr("Ctrl+,")));
 
     // Help Menu
-    ui->menuHelp->addSeparator();
-    ui->menuHelp->addAction(tr("About OpenDCP"), this, SLOT(about()));
+    //ui->menuHelp->addSeparator();
+    //ui->menuHelp->addAction(tr("About OpenDCP"), this, SLOT(about()));
 }
 
 void MainWindow::getPath(QWidget *w)
@@ -212,4 +303,9 @@ void MainWindow::about()
     QTextStream(&msg) << OPENDCP_NAME << " Version " << OPENDCP_VERSION << "\n\n";
     QTextStream(&msg) << OPENDCP_COPYRIGHT << "\n\n" << OPENDCP_LICENSE << "\n\n" << OPENDCP_WEBSITE << "\n\n";
     QMessageBox::about(this, "About OpenDCP",msg);
+}
+
+void MainWindow::preferences()
+{
+    QString msg = "goo";
 }

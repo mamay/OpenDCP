@@ -162,7 +162,7 @@ IF(APPLE)
     SET(QTCONF_DEST_DIR ${APPLICATION_DIR}/Contents/Resources)
     SET(OSX_LIB_DIRS ${QT_LIBRARY_DIRS})
 
-    SET(TRANSLATION_DEST_DIR ${EXE_NAME}.app/Contents/Resources/translations)
+    SET(TRANSLATION_DEST_DIR ${EXE_NAME}.app/Contents/Resources/translation)
 
     FOREACH(LANGUAGE ${LANGUAGES})
         SET(LPROJ ${LPROJ} ${APPLICATION_DIR}/Contents/Resources/${LANGUAGE}.lproj)
@@ -189,11 +189,11 @@ IF(APPLE)
         "
     )
 ELSEIF(UNIX)
-    SET(TRANSLATION_DEST_DIR share/opendcp/translations)
+    SET(TRANSLATION_DEST_DIR share/opendcp/translation)
     INSTALL(FILES ${APP_ICON} DESTINATION share/icons)
     INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/opendcp.desktop DESTINATION share/applications)
 ELSEIF(WIN32)
-    SET(TRANSLATION_DEST_DIR translations)
+    SET(TRANSLATION_DEST_DIR translation)
 ENDIF()
 
 FILE(GLOB LANGUAGE_FILES "${CMAKE_CURRENT_BINARY_DIR}/translation/i18n/*.qm")

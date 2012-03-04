@@ -24,6 +24,38 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    QString langCode;
+
+    qDebug() << QLocale().name();
+
+    if  (QLocale().name().isEmpty()) {
+        langCode = "en";
+    } else {
+        langCode = QLocale().name();
+        langCode.truncate(langCode.lastIndexOf('_'));
+    }
+
+    langCode = "fr";
+
+    QFileInfo appFileInfo(QApplication::applicationDirPath());
+    QString appPath = appFileInfo.absoluteDir().absolutePath();
+#ifdef Q_WS_MAC
+    appPath = appPath + "/Resources";
+#endif
+    QString fname = appPath + "/" + "translation/opendcp_" + langCode + ".qm";
+
+    qDebug() << fname;
+
+     QTranslator qtTranslator;
+     qtTranslator.load("qt_" + QLocale::system().name(),
+             QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+     a.installTranslator(&qtTranslator);
+
+     QTranslator myTranslator;
+     myTranslator.load(fname);
+     //myappTranslator.load("/Users/tmeiczin/Development/OpenDCP/build/gui/translation/opendcp_" + QLocale::system().name());
+     a.installTranslator(&myTranslator);
+
     MainWindow w;
     GenerateTitle g;
     w.show();

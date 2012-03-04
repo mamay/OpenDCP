@@ -67,8 +67,15 @@ public slots:
     void updateSubtitleDuration();
 
     void getTitle();
-    void about();
     void preview(int index);
+
+private slots:
+    //void newFile();
+    //void open();
+    //bool save();
+    //bool saveAs();
+    void preferences();
+    void about();
 
 protected:
     void setInitialUiState();
@@ -89,6 +96,9 @@ public:
     ~MainWindow();
 
 private:
+    void createActions();
+    void createMenus();
+
     Ui::MainWindow      *ui;
     QSignalMapper       signalMapper;
     GenerateTitle       *generateTitle;
@@ -96,6 +106,24 @@ private:
     DialogJ2kConversion *dJ2kConversion;
     DialogMxfConversion *dMxfConversion;
     MxfWriter           *mxfWriterThread;
+
+    QPlainTextEdit *textEdit;
+
+    QMenu *fileMenu;
+    QMenu *editMenu;
+    QMenu *helpMenu;
+    QToolBar *fileToolBar;
+    QToolBar *editToolBar;
+    QAction *newAct;
+    QAction *openAct;
+    QAction *saveAct;
+    QAction *saveAsAct;
+    QAction *exitAct;
+    QAction *cutAct;
+    QAction *copyAct;
+    QAction *pasteAct;
+    QAction *aboutAct;
+    QAction *preferencesAct;
 };
 
 #endif // MAINWINDOW_H
