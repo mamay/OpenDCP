@@ -58,15 +58,13 @@ SET(LANGUAGES
     gm 
 )
 
-SET(GENERATE_LANGUAGE_FILES ON)
-
 SET(LANGUAGE_TS_FILES)
 FOREACH(LANGUAGE ${LANGUAGES})
-    SET(TS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/languages/opendcp_${LANGUAGE}.ts")
+    SET(TS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/translation/opendcp_${LANGUAGE}.ts")
     IF(EXISTS ${TS_FILE} OR GENERATE_LANGUAGE_FILES)
         SET(LANGUAGE_TS_FILES ${LANGUAGE_TS_FILES} ${TS_FILE})
         SET_SOURCE_FILES_PROPERTIES(${TS_FILE} PROPERTIES OUTPUT_LOCATION
-                                   "${CMAKE_CURRENT_BINARY_DIR}/languages/i18n")
+                                   "${CMAKE_CURRENT_BINARY_DIR}/translation/i18n")
     ENDIF()
 ENDFOREACH(LANGUAGE ${LANGUAGES})
 #-----------------------------------------------------------------------------
@@ -198,7 +196,7 @@ ELSEIF(WIN32)
     SET(TRANSLATION_DEST_DIR translations)
 ENDIF()
 
-FILE(GLOB LANGUAGE_FILES "${CMAKE_CURRENT_BINARY_DIR}/languages/i18n/*.qm")
+FILE(GLOB LANGUAGE_FILES "${CMAKE_CURRENT_BINARY_DIR}/translation/i18n/*.qm")
 MESSAGE(STATUS "Installing language files ${LANGUAGE_FILES} into ${TRANSLATION_DEST_DIR}")
 INSTALL(FILES     ${LANGUAGE_FILES} DESTINATION ${TRANSLATION_DEST_DIR})
 #----------------------------------------------------------------------------
