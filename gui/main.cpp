@@ -41,12 +41,18 @@ int main(int argc, char *argv[])
     QFileInfo appFileInfo(QApplication::applicationDirPath());
     QString appPath = appFileInfo.absoluteDir().absolutePath();
     appPath = appPath + "/Resources";
-#elif Q_WS_WIN
+#endif 
+
+#ifdef Q_WS_WIN
     QFileInfo appFileInfo(QApplication::applicationDirPath());
     QString appPath = appFileInfo.absoluteDir().absolutePath();
-#else
+    appPath.truncate(appPath.lastIndexOf('/'));
+#endif
+
+#ifdef Q_WS_X11
     QString appPath = "/usr/share";
 #endif
+
     QString fname = appPath + "/" + "translation/opendcp_" + langCode + ".qm";
 
     qDebug() << fname;
