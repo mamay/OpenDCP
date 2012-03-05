@@ -114,7 +114,7 @@ void MainWindow::createLanguageMenu(void)
 #endif
 
 #ifdef Q_WS_WIN
-    m_langPath = QApplication::applicationDirPath().;
+    m_langPath = QApplication::applicationDirPath();
     m_langPath.truncate(m_langPath.lastIndexOf('/'));
 #endif
 
