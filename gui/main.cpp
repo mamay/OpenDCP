@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef Q_WS_X11
-    QString appPath = "/usr/share";
+    QString appPath = "/usr/share/opendcp";
 #endif
 
     QString fname = appPath + "/" + "translation/opendcp_" + langCode + ".qm";
