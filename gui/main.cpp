@@ -24,9 +24,10 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    QString langCode;
 
-    qDebug() << QLocale().name();
+    /*
+    QString langCode;
+    //qDebug() << QLocale().name();
 
     if  (QLocale().name().isEmpty()) {
         langCode = "en";
@@ -34,6 +35,7 @@ int main(int argc, char *argv[])
         langCode = QLocale().name();
         langCode.truncate(langCode.lastIndexOf('_'));
     }
+
 
     langCode = "fr";
 
@@ -46,7 +48,6 @@ int main(int argc, char *argv[])
 #ifdef Q_WS_WIN
     QFileInfo appFileInfo(QApplication::applicationDirPath());
     QString appPath = appFileInfo.absoluteDir().absolutePath();
-    appPath.truncate(appPath.lastIndexOf('/'));
 #endif
 
 #ifdef Q_WS_X11
@@ -66,6 +67,7 @@ int main(int argc, char *argv[])
      myTranslator.load(fname);
      //myappTranslator.load("/Users/tmeiczin/Development/OpenDCP/build/gui/translation/opendcp_" + QLocale::system().name());
      a.installTranslator(&myTranslator);
+     */
 
     MainWindow w;
     GenerateTitle g;

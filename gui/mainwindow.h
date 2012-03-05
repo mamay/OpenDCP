@@ -78,6 +78,7 @@ private slots:
     void about();
 
 protected:
+    void changeEvent(QEvent*);
     void setInitialUiState();
     void connectSlots();
     void j2kConnectSlots();
@@ -91,6 +92,9 @@ protected:
     int  checkFileSequence(QStringList list);
     int  checkSequential(const char str1[], const char str2[]); 
 
+protected slots:
+    void slotLanguageChanged(QAction* action);
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -99,7 +103,16 @@ private:
     void createActions();
     void createMenus();
 
+    void loadLanguage(const QString& rLanguage);
+    void createLanguageMenu(void);
+
     Ui::MainWindow      *ui;
+
+    QTranslator     m_translator;   /**< contains the translations for this application */
+    QTranslator     m_translatorQt; /**< contains the translations for qt */
+    QString         m_currLang;     /**< contains the currently loaded language */
+    QString         m_langPath;     /**< Path of language files. This is always fixed to /translation. */
+
     QSignalMapper       signalMapper;
     GenerateTitle       *generateTitle;
     QString             lastDir;
@@ -107,11 +120,13 @@ private:
     DialogMxfConversion *dMxfConversion;
     MxfWriter           *mxfWriterThread;
 
+
     QPlainTextEdit *textEdit;
 
     QMenu *fileMenu;
     QMenu *editMenu;
     QMenu *helpMenu;
+    QMenu *languageMenu;
     QToolBar *fileToolBar;
     QToolBar *editToolBar;
     QAction *newAct;
