@@ -24,6 +24,7 @@
 #include <opendcp.h>
 #include "dialogj2kconversion.h"
 #include "dialogmxfconversion.h"
+#include "dialogSettings.h"
 #include "mxf-writer.h"
 
 class GenerateTitle;
@@ -107,11 +108,7 @@ private:
     void createLanguageMenu(void);
 
     Ui::MainWindow      *ui;
-
-    QTranslator     m_translator;   /**< contains the translations for this application */
-    QTranslator     m_translatorQt; /**< contains the translations for qt */
-    QString         m_currLang;     /**< contains the currently loaded language */
-    QString         m_langPath;     /**< Path of language files. This is always fixed to /translation. */
+    DialogSettings      *settingsDialog;
 
     QSignalMapper       signalMapper;
     GenerateTitle       *generateTitle;
@@ -126,7 +123,6 @@ private:
     QMenu *fileMenu;
     QMenu *editMenu;
     QMenu *helpMenu;
-    QMenu *languageMenu;
     QToolBar *fileToolBar;
     QToolBar *editToolBar;
     QAction *newAct;

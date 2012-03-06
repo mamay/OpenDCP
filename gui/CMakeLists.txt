@@ -24,7 +24,9 @@ SET(OPENDCP_GUI_CXX_SRC
     generatetitle.cpp
     dialogj2kconversion.cpp
     dialogmxfconversion.cpp
+    dialogSettings.cpp
     mxf-writer.cpp
+    translator.cpp
 )
 
 SET(OPENDCP_GUI_H_SRC
@@ -32,7 +34,9 @@ SET(OPENDCP_GUI_H_SRC
     generatetitle.h
     dialogj2kconversion.h
     dialogmxfconversion.h
+    dialogSettings.h
     mxf-writer.h
+    translator.h
 )
 
 SET(OPENDCP_GUI_UI
@@ -40,6 +44,7 @@ SET(OPENDCP_GUI_UI
     generatetitle.ui
     dialogj2kconversion.ui
     dialogmxfconversion.ui
+    dialogSettings.ui
 )
 
 SET(OPENDCP_GUI_RES

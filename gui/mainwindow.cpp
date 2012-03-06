@@ -21,6 +21,7 @@
 #include "generatetitle.h"
 #include "dialogj2kconversion.h"
 #include "dialogmxfconversion.h"
+#include "dialogSettings.h"
 #include "mxf-writer.h"
 #include "opendcp.h"
 #include <QtGui>
@@ -30,6 +31,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    settingsDialog = 0;
 
     textEdit = new QPlainTextEdit;
 
@@ -69,86 +72,8 @@ void MainWindow::slotLanguageChanged(QAction* action)
 {
     if (action != 0) {
         // load the language dependant on the action content
-        loadLanguage(action->data().toString());
+        //loadLanguage(action->data().toString());
         setWindowIcon(action->icon());
-    }
-}
-
-void switchTranslator(QTranslator& translator, const QString& filename)
-{
-    // remove the old translator
-    qApp->removeTranslator(&translator);
-
-    // load the new translator
-    if (translator.load(filename)) {
-        qApp->installTranslator(&translator);
-    }
-}
-
-void MainWindow::loadLanguage(const QString& rLanguage)
-{
-    if(m_currLang != rLanguage) {
-        m_currLang = rLanguage;
-        QLocale::setDefault(QLocale(m_currLang));
-        switchTranslator(m_translator, QString(m_langPath + "/opendcp_%1.qm").arg(m_currLang));
-        switchTranslator(m_translatorQt, QString("qt_%1.qm").arg(m_currLang));
-    }
-}
-
-// we create the menu entries dynamically, dependant on the existing translations.
-void MainWindow::createLanguageMenu(void)
-{
-    QActionGroup* langGroup = new QActionGroup(this);
-    langGroup->setExclusive(true);
-
-    connect(langGroup, SIGNAL(triggered(QAction *)), this, SLOT(slotLanguageChanged(QAction *)));
-
-    // format systems language
-    QString defaultLocale = QLocale::system().name();       // e.g. "en_US"
-    defaultLocale.truncate(defaultLocale.lastIndexOf('_')); // e.g. "en"
-
-#ifdef Q_WS_MAC
-    m_langPath = qApp->applicationDirPath();
-    m_langPath.truncate(m_langPath.lastIndexOf('/'));
-    m_langPath.append("/Resources");
-#endif
-
-#ifdef Q_WS_WIN
-    m_langPath = QApplication::applicationDirPath();
-    m_langPath.truncate(m_langPath.lastIndexOf('/'));
-#endif
-
-#ifdef Q_WS_X11
-    m_langPath = "/usr/share/opendcp";
-#endif
-
-    m_langPath.append("/translation");
-
-    QDir dir(m_langPath);
-    QStringList fileNames = dir.entryList(QStringList("opendcp_*.qm"));
-
-    for (int i = 0; i < fileNames.size(); ++i) {
-        // get locale extracted by filename
-        QString locale;
-        locale = fileNames[i];                      // "opendcp_xx.qm"
-        locale.truncate(locale.lastIndexOf('.'));   // "opendcp_xx"
-        locale.remove(0, locale.indexOf('_') + 1);  // "xx"
-
-        QString lang = QLocale::languageToString(QLocale(locale).language());
-        //QIcon ico(QString("%1/%2.png").arg(m_langPath).arg(locale));
-
-        //QAction *action = new QAction(ico, lang, this);
-        QAction *action = new QAction(lang, this);
-        action->setCheckable(true);
-        action->setData(locale);
-
-        languageMenu->addAction(action);
-        langGroup->addAction(action);
-
-        // set default translators and language checked
-        if (defaultLocale == locale) {
-            action->setChecked(true);
-        }
     }
 }
 
@@ -170,12 +95,12 @@ void MainWindow::createMenus()
 
     menuBar()->addSeparator();
 
-    languageMenu = menuBar()->addMenu(tr("&Language"));
+    //languageMenu = menuBar()->addMenu(tr("&Language"));
 
     helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(aboutAct);
 
-    createLanguageMenu();
+    //createLanguageMenu();
 }
 
 void MainWindow::createActions()
@@ -199,7 +124,6 @@ void MainWindow::createActions()
     saveAsAct->setShortcuts(QKeySequence::SaveAs);
     saveAsAct->setStatusTip(tr("Save the document under a new name"));
     connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
-
 
     exitAct = new QAction(tr("E&xit"), this);
     exitAct->setShortcuts(QKeySequence::Quit);
@@ -263,7 +187,7 @@ void MainWindow::setInitialUiState()
     delete kdu;
 
     // Set thread count
-#ifdef Q_WS_WIN
+#ifdef Q_OS_WIN32
     ui->threadsSpinBox->setMaximum(6);
 #endif
     ui->threadsSpinBox->setMaximum(QThreadPool::globalInstance()->maxThreadCount());
@@ -396,7 +320,7 @@ void MainWindow::changeEvent(QEvent* event)
             {
                 QString locale = QLocale::system().name();
                 locale.truncate(locale.lastIndexOf('_'));
-                loadLanguage(locale);
+                //loadLanguage(locale);
             }
             break;
         }
@@ -415,5 +339,15 @@ void MainWindow::about()
 
 void MainWindow::preferences()
 {
-    QString msg = "goo";
+    if (!settingsDialog) {
+        settingsDialog = new DialogSettings(this);
+    }
+
+    if (settingsDialog->exec()) {
+        //QSettings *settings = new QSettings(locationDialog->format());
+        //setSettingsObject(settings);
+        //fallbacksAct->setEnabled(true);
+    }
+
+
 }

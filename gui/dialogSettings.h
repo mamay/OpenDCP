@@ -1,6 +1,6 @@
 /*
      OpenDCP: Builds Digital Cinema Packages
-     Copyright (c) 2010-2011 Terrence Meiczinger, All Rights Reserved
+     Copyright (c) 2010-2012 Terrence Meiczinger, All Rights Reserved
 
      This program is free software: you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -16,23 +16,31 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <QtGui/QApplication>
-#include "mainwindow.h"
+#ifndef DIALOGSETTINGS_H
+#define DIALOGSETTINGS_H 
+
+#include <QSettings>
+#include <QDir>
+#include "ui_dialogSettings.h"
 #include "translator.h"
 
-int main(int argc, char *argv[])
+class DialogSettings : public QDialog, private Ui::DialogSettings
 {
-    QApplication a(argc, argv);
+    Q_OBJECT
 
-    QCoreApplication::setOrganizationName("OpenDCP");
-    QCoreApplication::setOrganizationDomain("opendcp.org");
-    QCoreApplication::setApplicationName("OpenDCP");
+public:
+    DialogSettings(QWidget *parent = 0);
 
-    Translator t;
-    a.installTranslator(t.Qtranslation());
+private:
+    void setLanguage();
+    void setOverwriteMode();
+    void load();
 
-    MainWindow w;
-    w.show();
+    Translator translator;
 
-    return a.exec();
-}
+private slots:
+    void save();
+
+};
+
+#endif // DIALOGSETTINGS_H
