@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     settingsDialog = 0;
 
+    // used for copy/paste
     textEdit = new QPlainTextEdit;
 
     generateTitle   = new GenerateTitle(this);
@@ -41,7 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dMxfConversion  = new DialogMxfConversion();
     mxfWriterThread = new MxfWriter(this);
 
-    /* create menus */
+    // create menus
     createActions();
     createMenus();
 
@@ -67,16 +68,6 @@ void MainWindow::connectSlots()
     connect(&signalMapper, SIGNAL(mapped(QWidget*)),this, SLOT(getPath(QWidget*)));
 }
 
-// Called every time, when a menu entry of the language menu is called
-void MainWindow::slotLanguageChanged(QAction* action)
-{
-    if (action != 0) {
-        // load the language dependant on the action content
-        //loadLanguage(action->data().toString());
-        setWindowIcon(action->icon());
-    }
-}
-
 void MainWindow::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
@@ -95,12 +86,8 @@ void MainWindow::createMenus()
 
     menuBar()->addSeparator();
 
-    //languageMenu = menuBar()->addMenu(tr("&Language"));
-
     helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(aboutAct);
-
-    //createLanguageMenu();
 }
 
 void MainWindow::createActions()
@@ -228,6 +215,7 @@ void MainWindow::getPath(QWidget *w)
     lastDir = path;
 }
 
+// get the sequence number
 int findSeqOffset(const char str1[], const char str2[])
 {
     int i = 0;
@@ -240,6 +228,7 @@ int findSeqOffset(const char str1[], const char str2[])
     }
 }
 
+// check if two files are sequential
 int MainWindow::checkSequential(const char str1[], const char str2[])
 {
     long x,y;
@@ -267,7 +256,7 @@ int MainWindow::checkSequential(const char str1[], const char str2[])
     }
 }
 
-/* check if filelist is sequential */
+// check if filelist is sequential
 int MainWindow::checkFileSequence(QStringList list)
 {
     QString msg;
@@ -307,28 +296,6 @@ int MainWindow::checkFileSequence(QStringList list)
     }
 }
 
-void MainWindow::changeEvent(QEvent* event)
-{
-    if (event != 0) {
-        switch(event->type()) {
-        // this event is send if a translator is loaded
-        case QEvent::LanguageChange:
-            //ui.retranslateUi(this);
-            break;
-        // this event is send, if the system, language changes
-        case QEvent::LocaleChange:
-            {
-                QString locale = QLocale::system().name();
-                locale.truncate(locale.lastIndexOf('_'));
-                //loadLanguage(locale);
-            }
-            break;
-        }
-    }
-
-    QMainWindow::changeEvent(event);
-}
-
 void MainWindow::about()
 {
     QString msg;
@@ -350,4 +317,24 @@ void MainWindow::preferences()
     }
 
 
+}
+
+void MainWindow::newFile()
+{
+    return;
+}
+
+void MainWindow::open()
+{
+    return;
+}
+
+bool MainWindow::save()
+{
+    return true;
+}
+
+bool MainWindow::saveAs()
+{
+    return true;
 }

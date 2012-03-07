@@ -28,7 +28,7 @@ DialogSettings::DialogSettings(QWidget *parent) :
     connect(pushOk, SIGNAL(clicked()), this, SLOT(save()));
     connect(pushCancel, SIGNAL(clicked()), this, SLOT(close()));
 
-    QStringList languageList = translator.loadLanguages();
+    QStringList languageList = translator.languageList();
 
     for (int i = 0; i < languageList.count(); i++) {
         comboLanguages->addItem(languageList[i]);
@@ -49,8 +49,8 @@ void DialogSettings::save()
 {
     QSettings settings;
 
-    int index = comboLanguages->currentIndex();
-    translator.saveSettings(index);
+    QString language = comboLanguages->currentText();
+    translator.saveSettings(language);
 
     settings.setValue("user","Terrence Meiczinger");
 

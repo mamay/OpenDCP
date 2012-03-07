@@ -39,7 +39,6 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public slots:
-
     void getPath(QWidget *w);
     void setPictureTrack();
     void setSoundTrack();
@@ -71,15 +70,14 @@ public slots:
     void preview(int index);
 
 private slots:
-    //void newFile();
-    //void open();
-    //bool save();
-    //bool saveAs();
+    void newFile();
+    void open();
+    bool save();
+    bool saveAs();
     void preferences();
     void about();
 
 protected:
-    void changeEvent(QEvent*);
     void setInitialUiState();
     void connectSlots();
     void j2kConnectSlots();
@@ -94,7 +92,6 @@ protected:
     int  checkSequential(const char str1[], const char str2[]); 
 
 protected slots:
-    void slotLanguageChanged(QAction* action);
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -117,9 +114,10 @@ private:
     DialogMxfConversion *dMxfConversion;
     MxfWriter           *mxfWriterThread;
 
-
+    // copy/paste
     QPlainTextEdit *textEdit;
 
+    // menu information
     QMenu *fileMenu;
     QMenu *editMenu;
     QMenu *helpMenu;

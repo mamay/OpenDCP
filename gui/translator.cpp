@@ -23,6 +23,7 @@ Translator::Translator()
 
     m_langPath.append("/translation");
 
+    loadLanguages();
     loadSettings();
 }
 
@@ -36,15 +37,12 @@ QTranslator *Translator::Qtranslation()
 }
 
 
-void Translator::saveSettings(int index)
+void Translator::saveSettings(QString language)
 {
     QSettings settings;
 
-     QDir dir(m_langPath);
-     QStringList fileList = dir.entryList(QStringList("opendcp_*.qm"));
- 
-     m_currLang = filenameToLanguage(fileList[index]);
-     m_langFile = fileList[index];
+    m_currLang = language;
+    m_langFile = m_langHash[language];
 
     settings.setValue("Options/language",m_langFile);
 }
@@ -62,6 +60,16 @@ void Translator::loadSettings()
     }
 }
 
+void Translator::loadLanguages(void)
+{
+    QDir dir(m_langPath);
+    QStringList fileNames = dir.entryList(QStringList("opendcp_*.qm"));
+
+    for (int i = 0; i < fileNames.size(); ++i) {
+        m_langHash.insert(filenameToLanguage(fileNames[i]), fileNames[i]);
+    }
+}
+
 QString Translator::filenameToLanguage(const QString &filename)
 {
     QString locale;
@@ -75,29 +83,11 @@ QString Translator::filenameToLanguage(const QString &filename)
     return(language);
 }
 
-QString Translator::filenameToLocale(const QString &filename)
+QStringList Translator::languageList(void)
 {
-    QString locale;
+    QStringList languageList = m_langHash.uniqueKeys();
 
-    locale = filename;                          // "opendcp_xx.qm"
-    locale.truncate(locale.lastIndexOf('.'));   // "opendcp_xx"
-    locale.remove(0, locale.indexOf('_') + 1);  // "xx"
-
-    return(locale);
-}
-
-QStringList Translator::loadLanguages(void)
-{
-    QStringList languageList;
-
-    QDir dir(m_langPath);
-    QStringList fileNames = dir.entryList(QStringList("opendcp_*.qm"));
-
-    for (int i = 0; i < fileNames.size(); ++i) {
-        QString language = filenameToLanguage(fileNames[i]);
-
-        languageList << language;
-    }
+    languageList.sort();
 
     return languageList;
 }
