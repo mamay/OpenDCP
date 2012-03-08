@@ -32,7 +32,7 @@ HEADERS  += mainwindow.h \
             translaor.h \
             mxfconversion_dialog.h
 
-FORMS    += fors/mainwindow.ui \
+FORMS    += forms/mainwindow.ui \
             forms/generatetitle.ui \
             forms/conversion.ui \
             forms/settings.ui

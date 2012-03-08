@@ -20,7 +20,7 @@
    <string>OpenDCP</string>
   </property>
   <property name="windowIcon">
-   <iconset>
+   <iconset resource="../resources/opendcp.qrc">
     <normaloff>:/images/opendcp.png</normaloff>:/images/opendcp.png</iconset>
   </property>
   <property name="unifiedTitleAndToolBarOnMac">
@@ -148,7 +148,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
            </widget>
            <widget class="QLabel" name="inImageRight">
@@ -211,7 +211,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
            </widget>
            <widget class="QSpinBox" name="startSpinBox">
@@ -802,7 +802,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
            </widget>
            <widget class="QLabel" name="outJ2kRight">
@@ -847,7 +847,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
            </widget>
           </widget>
@@ -1024,7 +1024,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Source Color :</string>
+             <string>Source Color:</string>
             </property>
            </widget>
            <widget class="QLabel" name="dciResizeLabel">
@@ -1227,7 +1227,7 @@
            </rect>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="page_1">
            <widget class="QGroupBox" name="inputPGroupBox">
@@ -2236,7 +2236,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>...</string>
+            <string notr="true">...</string>
            </property>
           </widget>
           <widget class="QLabel" name="sMxfOutLabel">
@@ -2302,7 +2302,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>...</string>
+            <string notr="true">...</string>
            </property>
           </widget>
          </widget>
@@ -3181,13 +3181,15 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="../resources/opendcp.qrc"/>
+ </resources>
  <connections/>
 </ui>

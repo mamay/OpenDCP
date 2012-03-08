@@ -343,7 +343,7 @@
     </item>
     <item>
      <property name="text">
-      <string>XX    No Subtitle</string>
+      <string notr="true">XX    No Subtitle</string>
      </property>
     </item>
    </widget>
