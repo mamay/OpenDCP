@@ -16,16 +16,16 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef DIALOGJ2KCONVERSION_H
-#define DIALOGJ2KCONVERSION_H
+#ifndef J2KCONVERSIONDIALOG_H
+#define J2KCONVERSIONDIALOG_H
 
-#include "ui_dialogj2kconversion.h"
+#include "ui_conversion.h"
 
-class DialogJ2kConversion : public QDialog, private Ui::DialogJ2kConversion {
+class J2kConversionDialog : public QDialog, private Ui::ConversionDialog {
     Q_OBJECT
 
 public:
-    DialogJ2kConversion(QWidget *parent = 0);
+    J2kConversionDialog(QWidget *parent = 0);
     void init(int imageCount, int threadCount);
 
 private:
@@ -46,4 +46,4 @@ private slots:
     void abort();
 };
 
-#endif // DIALOGJ2KCONVERSION_H
+#endif // J2KCONVERSIONDIALOG_H

@@ -16,20 +16,20 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef DIALOGSETTINGS_H
-#define DIALOGSETTINGS_H 
+#ifndef SETTINGS_H
+#define SETTINGS_H 
 
 #include <QSettings>
 #include <QDir>
-#include "ui_dialogSettings.h"
+#include "ui_settings.h"
 #include "translator.h"
 
-class DialogSettings : public QDialog, private Ui::DialogSettings
+class Settings : public QDialog, private Ui::Settings
 {
     Q_OBJECT
 
 public:
-    DialogSettings(QWidget *parent = 0);
+    Settings(QWidget *parent = 0);
 
 private:
     void setLanguage();
@@ -43,4 +43,4 @@ private slots:
 
 };
 
-#endif // DIALOGSETTINGS_H
+#endif // SETTINGS_H

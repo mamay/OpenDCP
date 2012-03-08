@@ -22,13 +22,12 @@
 #include <QMainWindow>
 #include <QtGui>
 #include <opendcp.h>
-#include "dialogj2kconversion.h"
-#include "dialogmxfconversion.h"
-#include "dialogSettings.h"
+#include "j2kconversion_dialog.h"
+#include "mxfconversion_dialog.h"
+#include "settings.h"
 #include "mxf-writer.h"
 
 class GenerateTitle;
-class DialogJ2kConversion;
 
 namespace Ui {
     class MainWindow;
@@ -105,13 +104,13 @@ private:
     void createLanguageMenu(void);
 
     Ui::MainWindow      *ui;
-    DialogSettings      *settingsDialog;
+    Settings            *settings;
 
     QSignalMapper       signalMapper;
     GenerateTitle       *generateTitle;
     QString             lastDir;
-    DialogJ2kConversion *dJ2kConversion;
-    DialogMxfConversion *dMxfConversion;
+    J2kConversionDialog *dJ2kConversion;
+    MxfConversionDialog *dMxfConversion;
     MxfWriter           *mxfWriterThread;
 
     // copy/paste

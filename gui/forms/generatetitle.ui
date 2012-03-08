@@ -53,7 +53,7 @@
      </font>
     </property>
     <property name="text">
-     <string/>
+     <string notr="true"/>
     </property>
     <property name="maxLength">
      <number>80</number>
@@ -268,6 +268,9 @@
      <font>
       <family>Courier</family>
      </font>
+    </property>
+    <property name="text">
+     <string notr="true"/>
     </property>
     <property name="maxLength">
      <number>14</number>
@@ -540,6 +543,12 @@
       <height>26</height>
      </rect>
     </property>
+    <property name="suffix">
+     <string notr="true"/>
+    </property>
+    <property name="prefix">
+     <string notr="true"/>
+    </property>
     <property name="minimum">
      <number>2000</number>
     </property>
@@ -556,6 +565,12 @@
       <height>25</height>
      </rect>
     </property>
+    <property name="suffix">
+     <string notr="true"/>
+    </property>
+    <property name="prefix">
+     <string notr="true"/>
+    </property>
     <property name="minimum">
      <number>1</number>
     </property>
@@ -571,6 +586,12 @@
       <width>45</width>
       <height>25</height>
      </rect>
+    </property>
+    <property name="suffix">
+     <string notr="true"/>
+    </property>
+    <property name="prefix">
+     <string notr="true"/>
     </property>
     <property name="minimum">
      <number>1</number>

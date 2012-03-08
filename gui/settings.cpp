@@ -17,10 +17,10 @@
 */
 
 #include <QMessageBox>
-#include "dialogSettings.h"
+#include "settings.h"
 #include "translator.h"
 
-DialogSettings::DialogSettings(QWidget *parent) :
+Settings::Settings(QWidget *parent) :
     QDialog(parent)
 {
     setupUi(this);
@@ -37,7 +37,7 @@ DialogSettings::DialogSettings(QWidget *parent) :
     load();
 }
 
-void DialogSettings::load()
+void Settings::load()
 {
     QString language = translator.currentLanguage();
     
@@ -45,7 +45,7 @@ void DialogSettings::load()
     comboLanguages->setCurrentIndex(idx);
 }
       
-void DialogSettings::save()
+void Settings::save()
 {
     QSettings settings;
 
@@ -53,9 +53,6 @@ void DialogSettings::save()
     translator.saveSettings(language);
 
     settings.setValue("user","Terrence Meiczinger");
-
-    //setLanguage();
-    //setOverwriteMode();
 
     close();
 }

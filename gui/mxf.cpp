@@ -189,12 +189,12 @@ void MainWindow::mxfStart() {
         }
         if (ui->mxfStereoscopicCheckBox->checkState()) {
             if ((ui->pictureLeftEdit->text().isEmpty() || ui->pictureRightEdit->text().isEmpty())) {
-                QMessageBox::critical(this, tr("Source content needed"),tr("Please select left and right source image directories to generate a stereoscopic MXF file."));
+                QMessageBox::critical(this, tr("Source content needed"),tr("Please select left and right source image directories."));
                 return;
             }
         } else {
             if ((ui->pictureLeftEdit->text().isEmpty())) {
-                QMessageBox::critical(this, tr("Source content needed"),tr("Please select a source image directory to generate an MXF picture file."));
+                QMessageBox::critical(this, tr("Source content needed"),tr("Please select a source image directory."));
                 return;
              }
         }
@@ -214,7 +214,7 @@ void MainWindow::mxfStart() {
             return;
         }
         if ((ui->pictureLeftEdit->text().isEmpty())) {
-            QMessageBox::critical(this, tr("Source content needed"),tr("Please select a source MPEG2 MXF file."));
+            QMessageBox::critical(this, tr("Source content needed"),tr("Please select a source MPEG2 file."));
             return;
         }
     }
@@ -228,7 +228,7 @@ void MainWindow::mxfStart() {
         if (ui->mxfSoundRadio2->isChecked()) {
             if (ui->aLeftEdit->text().isEmpty() ||
                 ui->aRightEdit->text().isEmpty()) {
-                QMessageBox::critical(this, tr("Source content needed"),tr("Please specify left and right wav files to generate an MXF sound file."));
+                QMessageBox::critical(this, tr("Source content needed"),tr("Please specify left and right wav files."));
                 return;
             }
         }
@@ -237,7 +237,7 @@ void MainWindow::mxfStart() {
                 ui->aSubEdit->text().isEmpty() ||
                 ui->aLeftSEdit->text().isEmpty() ||
                 ui->aLeftSEdit->text().isEmpty()) {
-                QMessageBox::critical(this, tr("Source content needed"),tr("Please specify at least 5.1 wav files to generate an MXF sound file."));
+                QMessageBox::critical(this, tr("Source content needed"),tr("Please specify 5.1 wav files."));
                     return;
             }
         }
@@ -264,7 +264,7 @@ void MainWindow::mxfCreateSubtitle() {
     }
 
     if (ui->sMxfOutEdit->text().isEmpty()) {
-        QMessageBox::critical(this, tr("Destination file needed"),tr("Please specify the destinaton subtitle MXF file."));
+        QMessageBox::critical(this, tr("Destination file needed"),tr("Please specify a destinaton subtitle MXF file."));
         return;
     }
 
@@ -287,7 +287,7 @@ void MainWindow::mxfCreateSubtitle() {
                              tr("Subtitle MXF creation failed."));
     } else {
         QMessageBox::information(this, tr("MXF Creation Error"),
-                         tr("Subtitle MXF creation failed."));
+                         tr("Subtitle MXF creation succeeded."));
     }
 
     delete_opendcp(mxfContext);
@@ -429,7 +429,7 @@ void MainWindow::mxfCreatePicture() {
     }
 
     if (inputList.size() < 1) {
-        QMessageBox::critical(this, tr("MXF Creation Error"), tr("No input files found"));
+        QMessageBox::critical(this, tr("MXF Creation Error"), tr("No input files found."));
         goto Done;
     } else {
         mxfWriterThread->setMxfInputs(mxfContext,inputList,outputFile);

@@ -17,9 +17,9 @@
 */
 
 #include <QDir>
-#include "dialogmxfconversion.h"
+#include "j2kconversion_dialog.h"
 
-DialogMxfConversion::DialogMxfConversion(QWidget *parent) : QDialog(parent)
+J2kConversionDialog::J2kConversionDialog(QWidget *parent) : QDialog(parent)
 {
     setupUi(this);
 
@@ -29,62 +29,69 @@ DialogMxfConversion::DialogMxfConversion(QWidget *parent) : QDialog(parent)
     connect(buttonStop, SIGNAL(clicked()), this, SLOT(abort()));
 }
 
-void DialogMxfConversion::init(int imageCount, QString outputFile)
+void J2kConversionDialog::init(int imageCount, int threadCount)
 {
-    currentCount  = 0;
-    done          = 0;
-    cancelled     = 0;
-    totalCount    = imageCount;
-    mxfOutputFile = outputFile;
+    QString labelText;
+
+    currentCount = 0;
+    done         = 0;
+    cancelled    = 0;
+    totalCount   = imageCount;
 
     progressBar->reset();
-    progressBar->setMinimum(0);
-    progressBar->setMaximum(totalCount);
+    if (totalCount) {
+        progressBar->setRange(0, totalCount);
+    } else {
+        progressBar->setRange(0, 100);
+    }
+
+    labelText.sprintf("Conversion using %d threads(s)",threadCount);
+    labelThreadCount->setText(labelText);
 
     setButtons(1);
 }
 
-void DialogMxfConversion::step()
+void J2kConversionDialog::step()
 {
     QString labelText;
-
-    if (done == 1 && cancelled == 0) {
+  
+    if (cancelled) {
+        labelText.sprintf("Completed %d of %d. Conversion cancelled.",currentCount,totalCount);
         currentCount = totalCount;
+        setButtons(0);
+    } else if (done) {
+        currentCount = totalCount;
+        labelText.sprintf("Completed %d of %d. Conversion done.",currentCount,totalCount);
+        setButtons(0);
+    } else {
+        labelText.sprintf("Completed %d of %d.",currentCount,totalCount);
     }
 
-    labelText.sprintf("MXF File Creation: %s  [Writing %d of %d]",mxfOutputFile.toAscii().constData(),currentCount,totalCount);
+    // hack to handle case where total count was 0
+    if (totalCount < 1) {
+        currentCount = 100;
+    }
+
     labelTotal->setText(labelText);
     progressBar->setValue(currentCount);
 
-    if (!done) {
-        currentCount++;
-    }
+    currentCount++;
 }
 
-void DialogMxfConversion::finished(int status)
+void J2kConversionDialog::finished()
 {
-    QString labelText;
-
     done = 1;
     step();
-    if (status) {
-        labelText.sprintf("MXF File Creation: Writing %d of %d. MXF file %s created successfully.",currentCount,totalCount,mxfOutputFile.toAscii().constData());
-        labelTotal->setText(labelText);
-    } else {
-        labelText.sprintf("MXF File Creation: Writing %d of %d. MXF file %s creation failed.",currentCount,totalCount,mxfOutputFile.toAscii().constData());
-        labelTotal->setText(labelText);
-    }
-    setButtons(0);
 }
 
-void DialogMxfConversion::abort()
+void J2kConversionDialog::abort()
 {
-    setButtons(0);
+    labelTotal->setText("Cancelling...");
     cancelled = 1;
     emit cancel();
 }
 
-void DialogMxfConversion::setButtons(int state)
+void J2kConversionDialog::setButtons(int state)
 {
     if (state == 0) {
         buttonClose->setEnabled(true);

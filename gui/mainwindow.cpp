@@ -19,9 +19,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "generatetitle.h"
-#include "dialogj2kconversion.h"
-#include "dialogmxfconversion.h"
-#include "dialogSettings.h"
+#include "j2kconversion_dialog.h"
+#include "mxfconversion_dialog.h"
+#include "settings.h"
 #include "mxf-writer.h"
 #include "opendcp.h"
 #include <QtGui>
@@ -32,14 +32,14 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    settingsDialog = 0;
+    settings = 0;
 
     // used for copy/paste
     textEdit = new QPlainTextEdit;
 
     generateTitle   = new GenerateTitle(this);
-    dJ2kConversion  = new DialogJ2kConversion();
-    dMxfConversion  = new DialogMxfConversion();
+    dJ2kConversion  = new J2kConversionDialog();
+    dMxfConversion  = new MxfConversionDialog();
     mxfWriterThread = new MxfWriter(this);
 
     // create menus
@@ -92,17 +92,17 @@ void MainWindow::createMenus()
 
 void MainWindow::createActions()
 {
-    newAct = new QAction(QIcon(":/images/new.png"), tr("&New"), this);
+    newAct = new QAction(tr("&New"), this);
     newAct->setShortcuts(QKeySequence::New);
     newAct->setStatusTip(tr("Create a new file"));
     connect(newAct, SIGNAL(triggered()), this, SLOT(newFile()));
 
-    openAct = new QAction(QIcon(":/images/open.png"), tr("&Open..."), this);
+    openAct = new QAction(tr("&Open..."), this);
     openAct->setShortcuts(QKeySequence::Open);
     openAct->setStatusTip(tr("Open an existing file"));
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
-    saveAct = new QAction(QIcon(":/images/save.png"), tr("&Save"), this);
+    saveAct = new QAction(tr("&Save"), this);
     saveAct->setShortcuts(QKeySequence::Save);
     saveAct->setStatusTip(tr("Save the document to disk"));
     connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
@@ -123,13 +123,13 @@ void MainWindow::createActions()
                             "clipboard"));
     connect(cutAct, SIGNAL(triggered()), textEdit, SLOT(cut()));
 
-    copyAct = new QAction(QIcon(":/images/copy.png"), tr("&Copy"), this);
+    copyAct = new QAction(tr("&Copy"), this);
     copyAct->setShortcuts(QKeySequence::Copy);
     copyAct->setStatusTip(tr("Copy the current selection's contents to the "
                              "clipboard"));
     connect(copyAct, SIGNAL(triggered()), textEdit, SLOT(copy()));
 
-    pasteAct = new QAction(QIcon(":/images/paste.png"), tr("&Paste"), this);
+    pasteAct = new QAction(tr("&Paste"), this);
     pasteAct->setShortcuts(QKeySequence::Paste);
     pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current "
                               "selection"));
@@ -280,8 +280,8 @@ int MainWindow::checkFileSequence(QStringList list)
     }
 
     if (sequential == STRING_NOTSEQUENTIAL) {
-        QTextStream(&msg) << "File list does not appear to be sequential between " << list.at(x-1);
-        QTextStream(&msg) << " and " << list.at(x) << ". Do you wish to continue?";
+        QTextStream(&msg) << tr("File list does not appear to be sequential between ") << list.at(x-1);
+        QTextStream(&msg) << tr(" and ") << list.at(x) << tr(". Do you wish to continue?");
         if (QMessageBox::question(this, tr("File Sequence Mismatch"), msg, QMessageBox::No,QMessageBox::Yes) == QMessageBox::No) {
             return DCP_ERROR;
         } else {
@@ -301,16 +301,16 @@ void MainWindow::about()
     QString msg;
     QTextStream(&msg) << OPENDCP_NAME << " Version " << OPENDCP_VERSION << "\n\n";
     QTextStream(&msg) << OPENDCP_COPYRIGHT << "\n\n" << OPENDCP_LICENSE << "\n\n" << OPENDCP_WEBSITE << "\n\n";
-    QMessageBox::about(this, "About OpenDCP",msg);
+    QMessageBox::about(this, "About OpenDCP", msg);
 }
 
 void MainWindow::preferences()
 {
-    if (!settingsDialog) {
-        settingsDialog = new DialogSettings(this);
+    if (!settings) {
+        settings = new Settings(this);
     }
 
-    if (settingsDialog->exec()) {
+    if (settings->exec()) {
         //QSettings *settings = new QSettings(locationDialog->format());
         //setSettingsObject(settings);
         //fallbacksAct->setEnabled(true);

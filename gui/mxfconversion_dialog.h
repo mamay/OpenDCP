@@ -16,16 +16,16 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef DIALOGMXFCONVERSION_H
-#define DIALOGMXFCONVERSION_H
+#ifndef MXFCONVERSIONDIALOG_H
+#define MXFCONVERSIONDIALOG_H
 
-#include "ui_dialogmxfconversion.h"
+#include "ui_conversion.h"
 
-class DialogMxfConversion : public QDialog, private Ui::DialogMxfConversion {
+class MxfConversionDialog : public QDialog, private Ui::ConversionDialog {
     Q_OBJECT
 
 public:
-    DialogMxfConversion(QWidget *parent = 0);
+    MxfConversionDialog(QWidget *parent = 0);
     void init(int imageCount, QString outputFile);
     void finished(int status);
 
@@ -47,4 +47,4 @@ private slots:
     void abort();
 };
 
-#endif // DIALOGMXFCONVERSION_H
+#endif // MXFCONVERSIONDIALOG_H

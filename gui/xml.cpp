@@ -57,10 +57,13 @@ void MainWindow::startDcp()
     QFileInfo   destination;
     int         overwrite;
     QMessageBox msgBox;
+    QString     DCP_FAIL_MSG;
 
     asset_list_t reelList[MAX_REELS];
 
     opendcp_t *xmlContext = create_opendcp();
+
+    DCP_FAIL_MSG = tr("DCP Creation Failed");
 
     // process options
     xmlContext->log_level = 0;
@@ -79,16 +82,16 @@ void MainWindow::startDcp()
 
     // check picture track is supplied
     if (ui->reelPictureEdit->text().isEmpty()) {
-        QMessageBox::critical(this, tr("Missing Picture Track"),
-                             tr("An MXF picture track is required"));
+        QMessageBox::critical(this, DCP_FAIL_MSG,
+                             tr("An MXF picture track is required."));
         goto Done;
     }
 
     // check durations
     if ((!ui->reelSoundEdit->text().isEmpty() && ui->reelPictureDurationSpinBox->value() != ui->reelSoundDurationSpinBox->value()) ||
         (!ui->reelSubtitleEdit->text().isEmpty() && ui->reelPictureDurationSpinBox->value() != ui->reelSubtitleDurationSpinBox->value())) {
-        QMessageBox::critical(this, tr("Duration Mismatch"),
-                             tr("The duration of all MXF tracks must be the same."));
+        QMessageBox::critical(this, DCP_FAIL_MSG,
+                              tr("The duration of all MXF tracks must be the same."));
         goto Done;
     }
 
@@ -114,8 +117,8 @@ void MainWindow::startDcp()
     add_cpl(xmlContext, &xmlContext->pkl[0]);
 
     if (add_reel(xmlContext, &xmlContext->pkl[0].cpl[0],reelList[0]) != DCP_SUCCESS) {
-        QMessageBox::critical(this, tr("Add Reel Failed"),
-                             tr("Could not add reel to CPL."));
+        QMessageBox::critical(this, DCP_FAIL_MSG,
+                              tr("Could not add reel to CPL."));
         goto Done;
     }
 
@@ -128,13 +131,14 @@ void MainWindow::startDcp()
     xmlContext->pkl[0].cpl[0].reel[0].asset[2].entry_point = ui->reelSubtitleOffsetSpinBox->value();
 
     if (validate_reel(xmlContext,&xmlContext->pkl[0].cpl[0],0) != DCP_SUCCESS) {
-        QMessageBox::critical(this, tr("Validating Reel Failed"),
-                             tr("Could not valiate reel."));
+        QMessageBox::critical(this, DCP_FAIL_MSG,
+                              tr("Could not valiate reel."));
         goto Done;
     }
 
     // set filenames
     path = QFileDialog::getExistingDirectory(this, tr("Choose destination folder"),QString::null);
+
     if (path.isEmpty()) {
         goto Done;
     }
@@ -157,23 +161,23 @@ void MainWindow::startDcp()
 
     // write XML Files
     if (write_cpl(xmlContext,&xmlContext->pkl[0].cpl[0]) != DCP_SUCCESS) {
-        QMessageBox::critical(this, tr("Write CPL Failed"),
-                             tr("Failed to create CPL."));
+        QMessageBox::critical(this, DCP_FAIL_MSG,
+                              tr("Failed to create composition playlist."));
         goto Done;
     }
     if (write_pkl(xmlContext,&xmlContext->pkl[0]) != DCP_SUCCESS) {
-        QMessageBox::critical(this, tr("Write PKL Failed"),
-                             tr("Failed to create PKL."));
+        QMessageBox::critical(this, DCP_FAIL_MSG,
+                              tr("Failed to create packaging list."));
         goto Done;
     }
     if (write_volumeindex(xmlContext) != DCP_SUCCESS) {
-        QMessageBox::critical(this, tr("Write VOLNDEX Failed"),
-                             tr("Failed to create VOLINDEX."));
+        QMessageBox::critical(this, DCP_FAIL_MSG,
+                              tr("Failed to create volume index."));
         goto Done;
     }
     if (write_assetmap(xmlContext) != DCP_SUCCESS) {
-        QMessageBox::critical(this, tr("Write CPL Failed"),
-                             tr("Failed to create CPL."));
+        QMessageBox::critical(this, DCP_FAIL_MSG,
+                              tr("Failed to create assetmap."));
         goto Done;
     }
 
@@ -262,7 +266,7 @@ void MainWindow::setPictureTrack()
     strcpy(file, path.toStdString().c_str());
     if (get_file_essence_class(file) != ACT_PICTURE) {
         QMessageBox::critical(this, tr("Not a Picture Track"),
-                             tr("The selected file is not a valid MXF picture track."));
+                              tr("The selected file is not a valid MXF picture track."));
     } else {
         ui->reelPictureEdit->setProperty("text", path);
         strcpy(pictureAsset.filename, ui->reelPictureEdit->text().toStdString().c_str());
@@ -324,7 +328,7 @@ void MainWindow::setSubtitleTrack()
     strcpy(file, path.toStdString().c_str());
     if (get_file_essence_class(file) != ACT_TIMED_TEXT) {
         QMessageBox::critical(this, tr("Not a Subtitle Track"),
-                             tr("The selected file is not a valid MXF subtitle track."));
+                              tr("The selected file is not a valid MXF subtitle track."));
     } else {
         ui->reelSubtitleEdit->setProperty("text", path);
         strcpy(subtitleAsset.filename, ui->reelSubtitleEdit->text().toStdString().c_str());

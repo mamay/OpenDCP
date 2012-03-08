@@ -20,7 +20,7 @@
    <string>OpenDCP</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources/opendcp.qrc">
+   <iconset>
     <normaloff>:/images/opendcp.png</normaloff>:/images/opendcp.png</iconset>
   </property>
   <property name="unifiedTitleAndToolBarOnMac">
@@ -61,7 +61,7 @@
          </rect>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="j2kTab">
          <attribute name="title">
@@ -229,6 +229,12 @@
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::PlusMinus</enum>
             </property>
+            <property name="suffix">
+             <string notr="true"/>
+            </property>
+            <property name="prefix">
+             <string notr="true"/>
+            </property>
             <property name="minimum">
              <number>1</number>
             </property>
@@ -276,6 +282,12 @@
             </property>
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::PlusMinus</enum>
+            </property>
+            <property name="suffix">
+             <string notr="true"/>
+            </property>
+            <property name="prefix">
+             <string notr="true"/>
             </property>
             <property name="minimum">
              <number>1</number>
@@ -325,7 +337,7 @@
              </size>
             </property>
             <property name="text">
-             <string>125 mb/s</string>
+             <string notr="true">125 mb/s</string>
             </property>
             <property name="indent">
              <number>0</number>
@@ -390,7 +402,7 @@
            <widget class="QComboBox" name="encoderComboBox">
             <property name="geometry">
              <rect>
-              <x>110</x>
+              <x>120</x>
               <y>30</y>
               <width>125</width>
               <height>26</height>
@@ -419,19 +431,19 @@
             </property>
             <item>
              <property name="text">
-              <string>OpenJPEG</string>
+              <string notr="true">OpenJPEG</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Kakadu</string>
+              <string notr="true">Kakadu</string>
              </property>
             </item>
            </widget>
            <widget class="QSlider" name="bwSlider">
             <property name="geometry">
              <rect>
-              <x>110</x>
+              <x>120</x>
               <y>120</y>
               <width>250</width>
               <height>25</height>
@@ -477,7 +489,7 @@
            <widget class="QSpinBox" name="threadsSpinBox">
             <property name="geometry">
              <rect>
-              <x>110</x>
+              <x>120</x>
               <y>150</y>
               <width>45</width>
               <height>25</height>
@@ -495,6 +507,12 @@
               <height>25</height>
              </size>
             </property>
+            <property name="suffix">
+             <string notr="true"/>
+            </property>
+            <property name="prefix">
+             <string notr="true"/>
+            </property>
             <property name="minimum">
              <number>1</number>
             </property>
@@ -502,7 +520,7 @@
            <widget class="QCheckBox" name="stereoscopicCheckBox">
             <property name="geometry">
              <rect>
-              <x>250</x>
+              <x>260</x>
               <y>60</y>
               <width>131</width>
               <height>25</height>
@@ -561,7 +579,7 @@
            <widget class="QComboBox" name="profileComboBox">
             <property name="geometry">
              <rect>
-              <x>110</x>
+              <x>120</x>
               <y>60</y>
               <width>125</width>
               <height>26</height>
@@ -587,12 +605,12 @@
             </property>
             <item>
              <property name="text">
-              <string>Cinema 2K</string>
+              <string notr="true">Cinema 2K</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Cinema 4K</string>
+              <string notr="true">Cinema 4K</string>
              </property>
             </item>
            </widget>
@@ -643,13 +661,13 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Threads:</string>
+             <string notr="true">Threads:</string>
             </property>
            </widget>
            <widget class="QCheckBox" name="overwritej2kCB">
             <property name="geometry">
              <rect>
-              <x>250</x>
+              <x>260</x>
               <y>30</y>
               <width>191</width>
               <height>25</height>
@@ -680,7 +698,7 @@
            <widget class="QComboBox" name="frameRateComboBox">
             <property name="geometry">
              <rect>
-              <x>110</x>
+              <x>120</x>
               <y>90</y>
               <width>71</width>
               <height>26</height>
@@ -700,32 +718,32 @@
             </property>
             <item>
              <property name="text">
-              <string>24</string>
+              <string notr="true">24</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>25</string>
+              <string notr="true">25</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>30</string>
+              <string notr="true">30</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>48</string>
+              <string notr="true">48</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>50</string>
+              <string notr="true">50</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>60</string>
+              <string notr="true">60</string>
              </property>
             </item>
            </widget>
@@ -899,7 +917,7 @@
            <widget class="QComboBox" name="colorComboBox">
             <property name="geometry">
              <rect>
-              <x>110</x>
+              <x>120</x>
               <y>30</y>
               <width>150</width>
               <height>26</height>
@@ -907,19 +925,19 @@
             </property>
             <item>
              <property name="text">
-              <string>sRGB</string>
+              <string notr="true">sRGB</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Rec. 709</string>
+              <string notr="true">Rec. 709</string>
              </property>
             </item>
            </widget>
            <widget class="QCheckBox" name="xyzCheckBox">
             <property name="geometry">
              <rect>
-              <x>280</x>
+              <x>290</x>
               <y>30</y>
               <width>131</width>
               <height>25</height>
@@ -956,7 +974,7 @@
            <widget class="QCheckBox" name="dpxLogCheckBox">
             <property name="geometry">
              <rect>
-              <x>430</x>
+              <x>440</x>
               <y>30</y>
               <width>141</width>
               <height>25</height>
@@ -984,7 +1002,7 @@
              <string>If input is DPX, use logarithmic conversion</string>
             </property>
             <property name="text">
-             <string>DPX Logarithmic</string>
+             <string notr="true">DPX Logarithmic</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -1025,7 +1043,7 @@
            <widget class="QComboBox" name="resizeComboBox">
             <property name="geometry">
              <rect>
-              <x>110</x>
+              <x>120</x>
               <y>60</y>
               <width>150</width>
               <height>26</height>
@@ -1085,12 +1103,12 @@
            </property>
            <item>
             <property name="text">
-             <string>MXF Interop</string>
+             <string notr="true">MXF Interop</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>SMPTE</string>
+             <string notr="true">SMPTE</string>
             </property>
            </item>
           </widget>
@@ -1118,32 +1136,32 @@
            </property>
            <item>
             <property name="text">
-             <string>24</string>
+             <string notr="true">24</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>25</string>
+             <string notr="true">25</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>30</string>
+             <string notr="true">30</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>48</string>
+             <string notr="true">48</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>50</string>
+             <string notr="true">50</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>60</string>
+             <string notr="true">60</string>
             </property>
            </item>
           </widget>
@@ -1171,17 +1189,17 @@
            </property>
            <item>
             <property name="text">
-             <string>JPEG2000</string>
+             <string notr="true">JPEG2000</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>MPEG2</string>
+             <string notr="true">MPEG2</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>WAV</string>
+             <string notr="true">WAV</string>
             </property>
            </item>
           </widget>
@@ -1209,7 +1227,7 @@
            </rect>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="page_1">
            <widget class="QGroupBox" name="inputPGroupBox">
@@ -1284,7 +1302,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>...</string>
+              <string notr="true">...</string>
              </property>
             </widget>
             <widget class="QLabel" name="pictureRightLabel">
@@ -1347,7 +1365,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>...</string>
+              <string notr="true">...</string>
              </property>
             </widget>
            </widget>
@@ -1404,7 +1422,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>...</string>
+              <string notr="true">...</string>
              </property>
             </widget>
             <widget class="QLineEdit" name="pMxfOutEdit">
@@ -1444,7 +1462,7 @@
               <rect>
                <x>10</x>
                <y>30</y>
-               <width>121</width>
+               <width>130</width>
                <height>27</height>
               </rect>
              </property>
@@ -1455,9 +1473,9 @@
             <widget class="QCheckBox" name="mxfSlideCheckBox">
              <property name="geometry">
               <rect>
-               <x>130</x>
+               <x>150</x>
                <y>30</y>
-               <width>101</width>
+               <width>100</width>
                <height>27</height>
               </rect>
              </property>
@@ -1468,11 +1486,17 @@
             <widget class="QSpinBox" name="mxfSlideSpinBox">
              <property name="geometry">
               <rect>
-               <x>230</x>
+               <x>260</x>
                <y>30</y>
                <width>57</width>
                <height>25</height>
               </rect>
+             </property>
+             <property name="suffix">
+              <string notr="true">s</string>
+             </property>
+             <property name="prefix">
+              <string notr="true"/>
              </property>
              <property name="maximum">
               <number>300</number>
@@ -1484,14 +1508,14 @@
             <widget class="QLabel" name="mxfSlideDurationLabel">
              <property name="geometry">
               <rect>
-               <x>290</x>
+               <x>330</x>
                <y>30</y>
                <width>141</width>
                <height>27</height>
               </rect>
              </property>
              <property name="text">
-              <string>s (duration per slide)</string>
+              <string>duration per slide</string>
              </property>
             </widget>
            </widget>
@@ -1530,6 +1554,9 @@
                <width>431</width>
                <height>23</height>
               </rect>
+             </property>
+             <property name="text">
+              <string notr="true"/>
              </property>
              <property name="readOnly">
               <bool>true</bool>
@@ -1570,6 +1597,9 @@
                <height>23</height>
               </rect>
              </property>
+             <property name="text">
+              <string notr="true"/>
+             </property>
              <property name="readOnly">
               <bool>true</bool>
              </property>
@@ -1590,7 +1620,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>...</string>
+              <string notr="true">...</string>
              </property>
             </widget>
             <widget class="QLineEdit" name="aRightEdit">
@@ -1601,6 +1631,9 @@
                <width>431</width>
                <height>23</height>
               </rect>
+             </property>
+             <property name="text">
+              <string notr="true"/>
              </property>
              <property name="readOnly">
               <bool>true</bool>
@@ -1628,6 +1661,9 @@
                <height>23</height>
               </rect>
              </property>
+             <property name="text">
+              <string notr="true"/>
+             </property>
              <property name="readOnly">
               <bool>true</bool>
              </property>
@@ -1641,6 +1677,9 @@
                <height>23</height>
               </rect>
              </property>
+             <property name="text">
+              <string notr="true"/>
+             </property>
              <property name="readOnly">
               <bool>true</bool>
              </property>
@@ -1653,6 +1692,9 @@
                <width>431</width>
                <height>23</height>
               </rect>
+             </property>
+             <property name="text">
+              <string notr="true"/>
              </property>
              <property name="readOnly">
               <bool>true</bool>
@@ -1674,7 +1716,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>...</string>
+              <string notr="true">...</string>
              </property>
             </widget>
             <widget class="QToolButton" name="aCenterButton">
@@ -1693,7 +1735,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>...</string>
+              <string notr="true">...</string>
              </property>
             </widget>
             <widget class="QToolButton" name="aSubButton">
@@ -1712,7 +1754,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>...</string>
+              <string notr="true">...</string>
              </property>
             </widget>
             <widget class="QToolButton" name="aLeftSButton">
@@ -1731,7 +1773,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>...</string>
+              <string notr="true">...</string>
              </property>
             </widget>
             <widget class="QToolButton" name="aRightSButton">
@@ -1750,7 +1792,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>...</string>
+              <string notr="true">...</string>
              </property>
             </widget>
             <widget class="QLabel" name="aLeftSLabel">
@@ -1794,6 +1836,9 @@
                <height>23</height>
               </rect>
              </property>
+             <property name="text">
+              <string notr="true"/>
+             </property>
              <property name="readOnly">
               <bool>true</bool>
              </property>
@@ -1814,7 +1859,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>...</string>
+              <string notr="true">...</string>
              </property>
             </widget>
             <widget class="QLabel" name="aVILabel">
@@ -1858,6 +1903,9 @@
                <height>23</height>
               </rect>
              </property>
+             <property name="text">
+              <string notr="true"/>
+             </property>
              <property name="readOnly">
               <bool>true</bool>
              </property>
@@ -1878,7 +1926,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>...</string>
+              <string notr="true">...</string>
              </property>
             </widget>
            </widget>
@@ -1935,7 +1983,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>...</string>
+              <string notr="true">...</string>
              </property>
             </widget>
             <widget class="QLineEdit" name="aMxfOutEdit">
@@ -1952,6 +2000,9 @@
                <horstretch>0</horstretch>
                <verstretch>25</verstretch>
               </sizepolicy>
+             </property>
+             <property name="text">
+              <string notr="true"/>
              </property>
              <property name="readOnly">
               <bool>true</bool>
@@ -1996,7 +2047,7 @@
               </rect>
              </property>
              <property name="text">
-              <string>7.1</string>
+              <string notr="true">7.1</string>
              </property>
             </widget>
             <widget class="QRadioButton" name="mxfSoundRadio5">
@@ -2009,7 +2060,7 @@
               </rect>
              </property>
              <property name="text">
-              <string>5.1</string>
+              <string notr="true">5.1</string>
              </property>
             </widget>
             <widget class="QCheckBox" name="mxfHVCheckBox">
@@ -2100,12 +2151,12 @@
            </property>
            <item>
             <property name="text">
-             <string>SMPTE (Timed Text)</string>
+             <string notr="true">SMPTE (Timed Text)</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>Closed Caption</string>
+             <string notr="true">Closed Caption</string>
             </property>
            </item>
           </widget>
@@ -2161,6 +2212,9 @@
              <horstretch>0</horstretch>
              <verstretch>25</verstretch>
             </sizepolicy>
+           </property>
+           <property name="text">
+            <string notr="true"/>
            </property>
            <property name="readOnly">
             <bool>true</bool>
@@ -2224,6 +2278,9 @@
              <horstretch>0</horstretch>
              <verstretch>25</verstretch>
             </sizepolicy>
+           </property>
+           <property name="text">
+            <string notr="true"/>
            </property>
            <property name="readOnly">
             <bool>true</bool>
@@ -2341,7 +2398,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>OPENDCP_FILM</string>
+            <string notr="true"/>
            </property>
            <property name="maxLength">
             <number>80</number>
@@ -2357,7 +2414,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>OpenDCP_CPL</string>
+            <string notr="true"/>
            </property>
            <property name="maxLength">
             <number>128</number>
@@ -2374,32 +2431,32 @@
            </property>
            <item>
             <property name="text">
-             <string/>
+             <string notr="true"/>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>G</string>
+             <string notr="true">G</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>PG</string>
+             <string notr="true">PG</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>PG-13</string>
+             <string notr="true">PG-13</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>R</string>
+             <string notr="true">R</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>NC-17</string>
+             <string notr="true">NC-17</string>
             </property>
            </item>
           </widget>
@@ -2414,52 +2471,52 @@
            </property>
            <item>
             <property name="text">
-             <string>advertisement</string>
+             <string notr="true">advertisement</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>feature</string>
+             <string notr="true">feature</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>policy</string>
+             <string notr="true">policy</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>psa</string>
+             <string notr="true">psa</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>rating</string>
+             <string notr="true">rating</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>short</string>
+             <string notr="true">short</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>teaser</string>
+             <string notr="true">teaser</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>test</string>
+             <string notr="true">test</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>trailer</string>
+             <string notr="true">trailer</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>transitional</string>
+             <string notr="true">transitional</string>
             </property>
            </item>
           </widget>
@@ -2502,7 +2559,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>OpenDCP</string>
+            <string notr="true"/>
            </property>
            <property name="maxLength">
             <number>128</number>
@@ -2512,13 +2569,13 @@
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>180</y>
-             <width>211</width>
+             <y>185</y>
+             <width>210</width>
              <height>20</height>
             </rect>
            </property>
            <property name="text">
-            <string>Add XML Digital Signatures</string>
+            <string notr="true">Add XML Digital Signatures</string>
            </property>
           </widget>
          </widget>
@@ -2560,7 +2617,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>OpenDCP_REEL</string>
+            <string notr="true"/>
            </property>
            <property name="maxLength">
             <number>128</number>
@@ -2611,7 +2668,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
            </widget>
            <widget class="QSpinBox" name="reelPictureDurationSpinBox">
@@ -2631,6 +2688,12 @@
             </property>
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::PlusMinus</enum>
+            </property>
+            <property name="suffix">
+             <string notr="true"/>
+            </property>
+            <property name="prefix">
+             <string notr="true"/>
             </property>
             <property name="maximum">
              <number>999999</number>
@@ -2660,6 +2723,12 @@
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::PlusMinus</enum>
             </property>
+            <property name="suffix">
+             <string notr="true"/>
+            </property>
+            <property name="prefix">
+             <string notr="true"/>
+            </property>
             <property name="maximum">
              <number>999999</number>
             </property>
@@ -2667,14 +2736,17 @@
            <widget class="QLabel" name="reelPictureOffsetLabel">
             <property name="geometry">
              <rect>
-              <x>350</x>
+              <x>330</x>
               <y>40</y>
-              <width>81</width>
+              <width>100</width>
               <height>25</height>
              </rect>
             </property>
             <property name="text">
              <string>Entry Point:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
            <widget class="QLabel" name="reelPictureOffsetFrameLabel">
@@ -2698,6 +2770,9 @@
               <width>451</width>
               <height>23</height>
              </rect>
+            </property>
+            <property name="text">
+             <string notr="true"/>
             </property>
            </widget>
            <widget class="QLabel" name="reelPictureDurationFrameLabel">
@@ -2759,7 +2834,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
            </widget>
            <widget class="QSpinBox" name="reelSoundDurationSpinBox">
@@ -2779,6 +2854,12 @@
             </property>
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::PlusMinus</enum>
+            </property>
+            <property name="suffix">
+             <string notr="true"/>
+            </property>
+            <property name="prefix">
+             <string notr="true"/>
             </property>
             <property name="maximum">
              <number>999999</number>
@@ -2805,6 +2886,12 @@
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::PlusMinus</enum>
             </property>
+            <property name="suffix">
+             <string notr="true"/>
+            </property>
+            <property name="prefix">
+             <string notr="true"/>
+            </property>
             <property name="maximum">
              <number>999999</number>
             </property>
@@ -2812,14 +2899,17 @@
            <widget class="QLabel" name="reelSoundOffsetLabel">
             <property name="geometry">
              <rect>
-              <x>350</x>
+              <x>330</x>
               <y>40</y>
-              <width>81</width>
+              <width>100</width>
               <height>25</height>
              </rect>
             </property>
             <property name="text">
              <string>Entry Point:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
            <widget class="QLabel" name="reelSoundOffsetFrameLabel">
@@ -2843,6 +2933,9 @@
               <width>451</width>
               <height>23</height>
              </rect>
+            </property>
+            <property name="text">
+             <string notr="true"/>
             </property>
            </widget>
            <widget class="QLabel" name="reelSoundDurationFrameLabel">
@@ -2904,7 +2997,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
            </widget>
            <widget class="QSpinBox" name="reelSubtitleDurationSpinBox">
@@ -2924,6 +3017,12 @@
             </property>
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::PlusMinus</enum>
+            </property>
+            <property name="suffix">
+             <string notr="true"/>
+            </property>
+            <property name="prefix">
+             <string notr="true"/>
             </property>
             <property name="maximum">
              <number>999999</number>
@@ -2950,6 +3049,12 @@
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::PlusMinus</enum>
             </property>
+            <property name="suffix">
+             <string notr="true"/>
+            </property>
+            <property name="prefix">
+             <string notr="true"/>
+            </property>
             <property name="maximum">
              <number>999999</number>
             </property>
@@ -2957,14 +3062,17 @@
            <widget class="QLabel" name="reelSubtitleOffsetLabel">
             <property name="geometry">
              <rect>
-              <x>350</x>
+              <x>330</x>
               <y>40</y>
-              <width>81</width>
+              <width>100</width>
               <height>25</height>
              </rect>
             </property>
             <property name="text">
              <string>Entry Point:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
            <widget class="QLabel" name="reelSubtitleOffsetFrameLabel">
@@ -2988,6 +3096,9 @@
               <width>451</width>
               <height>23</height>
              </rect>
+            </property>
+            <property name="text">
+             <string notr="true"/>
             </property>
            </widget>
            <widget class="QLabel" name="reelSubtitleDurationFrameLabel">
@@ -3070,15 +3181,13 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources>
-  <include location="resources/opendcp.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

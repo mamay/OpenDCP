@@ -12,26 +12,30 @@ TEMPLATE = app
 #RC_FILE = resources/opendcp.rc
 ICON =  resources/opendcp.icns
 
-SOURCES += main.cpp\
-           mainwindow.cpp \
-           j2k.cpp \
-           mxf.cpp \
-           xml.cpp \
-           generatetitle.cpp \
-           dialogj2kconversion.cpp \
-           mxf-writer.cpp \
-    dialogmxfconversion.cpp
+SOURCES +=  main.cpp\
+            mainwindow.cpp \
+            j2k.cpp \
+            mxf.cpp \
+            xml.cpp \
+            generatetitle.cpp \
+            j2kconversion_dialog.cpp \
+            settings.cpp \
+            translator.cpp \
+            mxf-writer.cpp \
+            mxfconversion_dialog.cpp
 
 HEADERS  += mainwindow.h \
             generatetitle.h \
-            dialogj2kconversion.h \
+            j2kconversion_dialog.h \
             mxf-writer.h \
-    dialogmxfconversion.h
+            settings.h\
+            translaor.h \
+            mxfconversion_dialog.h
 
-FORMS    += mainwindow.ui \
-            generatetitle.ui \
-            dialogj2kconversion.ui \
-            dialogmxfconversion.ui
+FORMS    += fors/mainwindow.ui \
+            forms/generatetitle.ui \
+            forms/conversion.ui \
+            forms/settings.ui
 
 QMAKE_LFLAGS = -D_FILE_OFFSET_BITS=64
 QMAKE_CXXFLAGS = -D_FILE_OFFSET_BITS=64

@@ -29,7 +29,7 @@
 #include <KM_memio.h>
 #include <KM_util.h>
 #include "opendcp.h"
-#include "dialogmxfconversion.h"
+#include "mxfconversion_dialog.h"
 
 using namespace ASDCP;
 using namespace Kumu;

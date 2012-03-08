@@ -1,6 +1,6 @@
 /*
      OpenDCP: Builds Digital Cinema Packages
-     Copyright (c) 2010-2011 Terrence Meiczinger, All Rights Reserved
+     Copyright (c) 2010-2012 Terrence Meiczinger, All Rights Reserved
 
      This program is free software: you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -78,27 +78,16 @@ void MainWindow::j2kSetStereoscopicState() {
 }
 
 void MainWindow::j2kCinemaProfileUpdate() {
-    if (ui->profileComboBox->currentIndex() == 0) {
-#ifdef Q_WS_WIN
-        //ui->threadsSpinBox->setMaximum(6);
-#endif
-        ui->threadsSpinBox->setMaximum(QThreadPool::globalInstance()->maxThreadCount());
-        ui->threadsSpinBox->setValue(QThread::idealThreadCount());
-    } else {
-#ifdef Q_WS_WIN
-        //ui->threadsSpinBox->setMaximum(2);
-#endif
-        ui->threadsSpinBox->setMaximum(QThreadPool::globalInstance()->maxThreadCount());
-        ui->threadsSpinBox->setValue(QThread::idealThreadCount());
-    }
+    return;
 }
 
 void MainWindow::j2kBwSliderUpdate() {
-    int bw = ui->bwSlider->value();
-    QString string;
+    QString bwValueLabel;
 
-    string.sprintf("%d mb/s",bw);
-    ui->bwValueLabel->setText(string);
+    int bw = ui->bwSlider->value();
+
+    bwValueLabel.sprintf("%d mb/s",bw);
+    ui->bwValueLabel->setText(bwValueLabel);
 }
 
 // globals for threads
@@ -110,16 +99,15 @@ QString outLeftDir;
 QString outRightDir;
 
 void MainWindow::preview(int index = 0) {
-    QString filter = "*.tif;*.tiff;*.dpx";
-    QDir inLeftDir;
     QFileInfo fileInfo;
     QString file;
     QImage image;
 
     fileInfo = inLeftList.at(index);
     file = fileInfo.absoluteFilePath();
+
     if (!image.load(file)) {
-        ui->previewLabel->setText("Image preview not supported for this file");
+        ui->previewLabel->setText(tr("Image preview not supported for this file"));
     } else {
         QPixmap pixmap(QPixmap::fromImage(image).scaled(ui->previewLabel->size(), Qt::KeepAspectRatio));
         ui->previewLabel->setPixmap(pixmap);

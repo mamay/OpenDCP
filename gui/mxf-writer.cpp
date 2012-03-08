@@ -28,8 +28,8 @@
 #include <openssl/sha.h>
 
 #include "opendcp.h"
+#include "mxfconversion_dialog.h"
 #include "mxf-writer.h"
-#include "dialogmxfconversion.h"
 
 using namespace ASDCP;
 
