@@ -1,6 +1,6 @@
 /*
     OpenDCP: Builds Digital Cinema Packages
-    Copyright (c) 2010 Terrence Meiczinger, All Rights Reserved
+    Copyright (c) 2010-2012 Terrence Meiczinger, All Rights Reserved
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,485 +16,217 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
- * Copyright (c) 2002-2007, Communications and Remote Sensing Laboratory, Universite catholique de Louvain (UCL), Belgium
- * Copyright (c) 2002-2007, Professor Benoit Macq
- * Copyright (c) 2001-2003, David Janssens
- * Copyright (c) 2002-2003, Yannick Verschueren
- * Copyright (c) 2003-2007, Francois-Olivier Devaux and Antonin Descampe
- * Copyright (c) 2005, Herve Drolon, FreeImage Team
- * Copyright (c) 2006-2007, Parvatha Elangovan
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, bmpCLUDbmpG, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  bmp NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, bmpDIRECT, bmpCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (bmpCLUDbmpG, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSbmpESS
- * bmpTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER bmp
- * CONTRACT, STRICT LIABILITY, OR TORT (bmpCLUDbmpG NEGLIGENCE OR OTHERWISE)
- * ARISbmpG bmp ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
-
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <sys/stat.h>
-#include <openjpeg.h>
-#include "../opendcp.h"
+#include <stdint.h>
+#include "opendcp.h"
 #include "opendcp_image.h"
-#include "opendcp_xyz.h"
 
-/*
- * Get logarithm of an integer and round downwards.
- *
- * log2(a)
- */
-static int int_floorlog2(int a) {
-	int l;
-	for (l = 0; a > 1; l++) {
-		a >>= 1;
-	}
-	return l;
-}
+#define MAGIC_NUMBER 0x4D42
 
-/*
- * Divide an integer by a power of 2 and round upwards.
- *
- * a divided by 2^b
- */
-static int int_ceildivpow2(int a, int b) {
-	return (a + (1 << b) - 1) >> b;
-}
+typedef enum {
+    BMP_R         = 0,
+    BMP_G         = 1,
+    BMP_B         = 2
+} bmp_color_enum;
 
-/*
- * Divide an integer and round upwards.
- *
- * a divided by b
- */
-static int int_ceildiv(int a, int b) {
-	return (a + b - 1) / b;
-}
+typedef enum {
+    BMP_TOP         = 0,
+    BMP_BOTTOM      = 1,
+} bmp_row_order_enum;
 
-/* WORD defines a two byte word */
-typedef unsigned short int WORD;
-
-/* DWORD defines a four byte word */
-typedef unsigned long int DWORD;
-
-struct bmpfile_header {
-  uint32_t filesz;
-  uint16_t creator1;
-  uint16_t creator2;
-  uint32_t bmp_offset;
-};
+typedef enum {
+    BMP_RGB       = 0,          /* no compression                 */
+    BMP_RLE8      = 1,          /* 8-bit run-length-encoded       */
+    BMP_RLE4      = 2,          /* 4-bit run-length-encoded       */
+    BMP_BITFIELDS = 3,          /* RGB bitmap                     */
+    BMP_JPEG      = 4,          /* JPEG (not supported)           */
+    BMP_PNG       = 5           /* PNG (not supported)            */
+} bmp_compression_enum;
 
 typedef struct {
-  WORD bfType;			/* 'BM' for Bitmap (19776) */
-  DWORD bfSize;			/* Size of the file        */
-  WORD bfReserved1;		/* Reserved : 0            */
-  WORD bfReserved2;		/* Reserved : 0            */
-  DWORD bfOffBits;		/* Offset                  */
-} BITMAPFILEHEADER_t;
+    uint16_t magic_num;         /* magic number 0x4d42            */
+} bmp_magic_num_t;
 
 typedef struct {
-  DWORD biSize;			/* Size of the structure in bytes */
-  DWORD biWidth;		/* Width of the image in pixels */
-  DWORD biHeight;		/* Heigth of the image in pixels */
-  WORD biPlanes;		/* 1 */
-  WORD biBitCount;		/* Number of color bits by pixels */
-  DWORD biCompression;		/* Type of encoding 0: none 1: RLE8 2: RLE4 */
-  DWORD biSizeImage;		/* Size of the image in bytes */
-  DWORD biXpelsPerMeter;	/* Horizontal (X) resolution in pixels/meter */
-  DWORD biYpelsPerMeter;	/* Vertical (Y) resolution in pixels/meter */
-  DWORD biClrUsed;		/* Number of color used in the image (0: ALL) */
-  DWORD biClrImportant;		/* Number of important color (0: ALL) */
-} BITMAPINFOHEADER_t;
+    uint32_t size;              /* file size in bytes             */
+    uint32_t reserved;          /* rervered1, reserved2           */
+    uint32_t offset;            /* offset to image data in bytes  */
+} bmp_file_header_t;
 
-int read_bmp(odcp_image_t **image_ptr, const char *infile, int fd) {
-    FILE *bmp;
-    int subsampling_dx = parameters->subsampling_dx;
-    int subsampling_dy = parameters->subsampling_dy;
+typedef struct {
+    uint32_t header_size;        /* header size in bytes          */
+    int32_t  width;              /* width of image                */
+    int32_t  height;             /* height of image               */
+    uint16_t planes;             /* number of color components    */
+    uint16_t bpp;                /* bits per pixel                */
+    uint32_t compression;        /* compression method            */
+    uint32_t image_size;         /* image size in bytes           */
+    int32_t  x_ppm;              /* x pels                        */
+    int32_t  y_ppm;              /* y pels                        */
+    uint32_t colors_used;        /* number of colors              */
+    uint32_t colors_important;   /* number of important colors    */
+} bmp_image_header_t;
 
-    int i, numcomps, w, h;
-    OPJ_COLOR_SPACE color_space;
-opj_image_cmptparm_t cmptparm[3];	/* maximum of 3 components */
-opj_image_t * image = NULL;
+typedef struct {
+    bmp_file_header_t        file;
+    bmp_image_header_t       image;
+    int                      row_order;
+} bmp_image_t;
 
-	BITMAPFILEHEADER_t bmp_file_h;
-	BITMAPINFOHEADER_t bmp_info_h;
-	unsigned char *RGB;
-	unsigned char *table_R, *table_G, *table_B;
-	unsigned int j, PAD = 0;
+/* BMPs are sometimes bottom to top, so invert if needed */
+static inline invert_row(bmp_image_t bmp, int index) {
+    int w = bmp.image.width;
+    int h = bmp.image.height;
 
-    int index,w,h,image_size;
-
-	int x, y;
-	int gray_scale = 1, not_end_file = 1; 
-
-	unsigned int line = 0, col = 0;
-	unsigned char v, v2;
-  
-    /* open tiff using filename or file descriptor */
-    if (fd == 0) {
-        bmp = fopen(infile,"rb");
-    } else {
-        bmp = fd;
+    if (bmp.row_order == BMP_BOTTOM) {
+      index = (h - index / w) * w + ((index % w) - w);
     }
 
-    if (!bmp) {
-        dcp_log(LOG_ERROR,"Failed to open %s for reading\n", infile);
+    return index;
+}
+
+void print_bmp_header(bmp_image_t *bmp) {
+    dcp_log(LOG_DEBUG,"%-15.15s: file size:    %d","read_bmp",bmp->file.size);
+    dcp_log(LOG_DEBUG,"%-15.15s: data offset:  %d","read_bmp",bmp->file.offset);
+
+    dcp_log(LOG_DEBUG,"%-15.15s: header_size:  %d","read_bmp",bmp->image.header_size);
+    dcp_log(LOG_DEBUG,"%-15.15s: width:        %d","read_bmp",bmp->image.width);
+    dcp_log(LOG_DEBUG,"%-15.15s: height:       %d","read_bmp",bmp->image.height);
+    dcp_log(LOG_DEBUG,"%-15.15s: planes:       %d","read_bmp",bmp->image.planes);
+    dcp_log(LOG_DEBUG,"%-15.15s: bpp:          %d","read_bmp",bmp->image.bpp);
+    dcp_log(LOG_DEBUG,"%-15.15s: compression:  %d","read_bmp",bmp->image.compression);
+    dcp_log(LOG_DEBUG,"%-15.15s: size:         %d","read_bmp",bmp->image.image_size);
+    dcp_log(LOG_DEBUG,"%-15.15s: x:            %d","read_bmp",bmp->image.x_ppm);
+    dcp_log(LOG_DEBUG,"%-15.15s: y:            %d","read_bmp",bmp->image.y_ppm);
+    dcp_log(LOG_DEBUG,"%-15.15s: colors_used:  %d","read_bmp",bmp->image.colors_used);
+    dcp_log(LOG_DEBUG,"%-15.15s: colors_impor: %d","read_bmp",bmp->image.colors_important);
+
+    dcp_log(LOG_DEBUG,"%-15.15s: row_order:    %d","read_bmp",bmp->row_order);
+}
+
+int read_bmp(odcp_image_t **image_ptr, const char *infile, int fd) {
+    bmp_magic_num_t magic;
+    bmp_image_t     bmp;
+    FILE            *bmp_fp;
+    odcp_image_t    *image = 00;
+    int             pixels = 0;
+    int i,j,w,h;
+
+    /* open bmp using filename or file descriptor */
+    dcp_log(LOG_DEBUG,"%-15.15s: opening bmp file %s","read_bmp",infile);
+
+    if (fd == 0) {
+        bmp_fp = fopen(infile, "rb");
+    } else {
+        bmp_fp = (FILE *)infile;
+    }
+
+    if (!bmp_fp) {
+        dcp_log(LOG_ERROR,"%-15.15s: opening bmp file %s","read_bmp",infile);
         return DCP_FATAL;
     }
 
-    bmp_file_h.bfType = getc(bmp);
-    bmp_file_h.bfType = (getc(bmp) << 8) + bmp_file_h.bfType;
-	
-	if (bmp_file_h.bfType != 19778) {
-		fprintf(stderr,"Error, not a BMP file!\n");
-		return 0;
-	} else {
-		/* FILE HEADER */
-		/* ------------- */
-		bmp_file_h.bfSize = getc(bmp);
-		bmp_file_h.bfSize = (getc(bmp) << 8) + bmp_file_h.bfSize;
-		bmp_file_h.bfSize = (getc(bmp) << 16) + bmp_file_h.bfSize;
-		bmp_file_h.bfSize = (getc(bmp) << 24) + bmp_file_h.bfSize;
-
-		bmp_file_h.bfReserved1 = getc(bmp);
-		bmp_file_h.bfReserved1 = (getc(bmp) << 8) + bmp_file_h.bfReserved1;
-
-		bmp_file_h.bfReserved2 = getc(bmp);
-		bmp_file_h.bfReserved2 = (getc(bmp) << 8) + bmp_file_h.bfReserved2;
-
-		bmp_file_h.bfOffBits = getc(bmp);
-		bmp_file_h.bfOffBits = (getc(bmp) << 8) + bmp_file_h.bfOffBits;
-		bmp_file_h.bfOffBits = (getc(bmp) << 16) + bmp_file_h.bfOffBits;
-		bmp_file_h.bfOffBits = (getc(bmp) << 24) + bmp_file_h.bfOffBits;
-
-		/* bmpFO HEADER */
-		/* ------------- */
-
-		Info_h.biSize = getc(bmp);
-		Info_h.biSize = (getc(bmp) << 8) + Info_h.biSize;
-		Info_h.biSize = (getc(bmp) << 16) + Info_h.biSize;
-		Info_h.biSize = (getc(bmp) << 24) + Info_h.biSize;
-
-		Info_h.biWidth = getc(bmp);
-		Info_h.biWidth = (getc(bmp) << 8) + Info_h.biWidth;
-		Info_h.biWidth = (getc(bmp) << 16) + Info_h.biWidth;
-		Info_h.biWidth = (getc(bmp) << 24) + Info_h.biWidth;
-		w = Info_h.biWidth;
-
-		Info_h.biHeight = getc(bmp);
-		Info_h.biHeight = (getc(bmp) << 8) + Info_h.biHeight;
-		Info_h.biHeight = (getc(bmp) << 16) + Info_h.biHeight;
-		Info_h.biHeight = (getc(bmp) << 24) + Info_h.biHeight;
-		h = Info_h.biHeight;
-
-		Info_h.biPlanes = getc(bmp);
-		Info_h.biPlanes = (getc(bmp) << 8) + Info_h.biPlanes;
-
-		Info_h.biBitCount = getc(bmp);
-		Info_h.biBitCount = (getc(bmp) << 8) + Info_h.biBitCount;
-
-		Info_h.biCompression = getc(bmp);
-		Info_h.biCompression = (getc(bmp) << 8) + Info_h.biCompression;
-		Info_h.biCompression = (getc(bmp) << 16) + Info_h.biCompression;
-		Info_h.biCompression = (getc(bmp) << 24) + Info_h.biCompression;
-
-		Info_h.biSizeImage = getc(bmp);
-		Info_h.biSizeImage = (getc(bmp) << 8) + Info_h.biSizeImage;
-		Info_h.biSizeImage = (getc(bmp) << 16) + Info_h.biSizeImage;
-		Info_h.biSizeImage = (getc(bmp) << 24) + Info_h.biSizeImage;
-
-		Info_h.biXpelsPerMeter = getc(bmp);
-		Info_h.biXpelsPerMeter = (getc(bmp) << 8) + Info_h.biXpelsPerMeter;
-		Info_h.biXpelsPerMeter = (getc(bmp) << 16) + Info_h.biXpelsPerMeter;
-		Info_h.biXpelsPerMeter = (getc(bmp) << 24) + Info_h.biXpelsPerMeter;
-
-		Info_h.biYpelsPerMeter = getc(bmp);
-		Info_h.biYpelsPerMeter = (getc(bmp) << 8) + Info_h.biYpelsPerMeter;
-		Info_h.biYpelsPerMeter = (getc(bmp) << 16) + Info_h.biYpelsPerMeter;
-		Info_h.biYpelsPerMeter = (getc(bmp) << 24) + Info_h.biYpelsPerMeter;
-
-		Info_h.biClrUsed = getc(bmp);
-		Info_h.biClrUsed = (getc(bmp) << 8) + Info_h.biClrUsed;
-		Info_h.biClrUsed = (getc(bmp) << 16) + Info_h.biClrUsed;
-		Info_h.biClrUsed = (getc(bmp) << 24) + Info_h.biClrUsed;
-
-		Info_h.biClrImportant = getc(bmp);
-		Info_h.biClrImportant = (getc(bmp) << 8) + Info_h.biClrImportant;
-		Info_h.biClrImportant = (getc(bmp) << 16) + Info_h.biClrImportant;
-		Info_h.biClrImportant = (getc(bmp) << 24) + Info_h.biClrImportant;
-
-		/* Read the data and store them in the OUT file */
+    if (fread(&magic,sizeof(bmp_magic_num_t),1,bmp_fp) < 0) {
+        dcp_log(LOG_ERROR,"%-15.15s: failed to read magic number","read_bmp");
+        return DCP_FATAL;
+    }
     
-		if (Info_h.biBitCount == 24) {
-			numcomps = 3;
-			color_space = CLRSPC_SRGB;
-			/* initialize image components */
-			memset(&cmptparm[0], 0, 3 * sizeof(opj_image_cmptparm_t));
-			for(i = 0; i < numcomps; i++) {
-				cmptparm[i].prec = 8;
-				cmptparm[i].bpp = 8;
-				cmptparm[i].sgnd = 0;
-				cmptparm[i].dx = subsampling_dx;
-				cmptparm[i].dy = subsampling_dy;
-				cmptparm[i].w = w;
-				cmptparm[i].h = h;
-			}
-			/* create the image */
-			image = opj_image_create(numcomps, &cmptparm[0], color_space);
-			if(!image) {
-				fclose(bmp);
-				return NULL;
-			}
+    if (fread(&bmp,sizeof(bmp_image_t),1,bmp_fp) < 0) {
+        dcp_log(LOG_ERROR,"%-15.15s: failed to header","read_bmp");
+        return DCP_FATAL;
+    }
 
-			/* set image offset and reference grid */
-			image->x0 = parameters->image_offset_x0;
-			image->y0 = parameters->image_offset_y0;
-			image->x1 =	!image->x0 ? (w - 1) * subsampling_dx + 1 : image->x0 + (w - 1) * subsampling_dx + 1;
-			image->y1 =	!image->y0 ? (h - 1) * subsampling_dy + 1 : image->y0 + (h - 1) * subsampling_dy + 1;
+    if (magic.magic_num != MAGIC_NUMBER) {
+         dcp_log(LOG_ERROR,"%s is not a valid BMP file", infile);
+         return DCP_FATAL;
+    }
 
-			/* set image data */
+    if (bmp.image.height < 0) {
+        bmp.row_order = BMP_TOP;
+    } else {
+        bmp.row_order = BMP_BOTTOM;
+    }
 
-			/* Place the cursor at the beginning of the image information */
-			fseek(bmp, 0, SEEK_SET);
-			fseek(bmp, bmp_file_h.bfOffBits, SEEK_SET);
-			
-			W = Info_h.biWidth;
-			H = Info_h.biHeight;
+    w = bmp.image.width;
+    h = abs(bmp.image.height);
+    pixels = w * h;
 
-			/* PAD = 4 - (3 * W) % 4; */
-			/* PAD = (PAD == 4) ? 0 : PAD; */
-			PAD = (3 * W) % 4 ? 4 - (3 * W) % 4 : 0;
-			
-			RGB = (unsigned char *) malloc((3 * W + PAD) * H * sizeof(unsigned char));
-			
-			fread(RGB, sizeof(unsigned char), (3 * W + PAD) * H, bmp);
-			
-			index = 0;
+    print_bmp_header(&bmp);
+    
+    switch (bmp.image.compression) {
+        case BMP_RGB:
+            break;
+        case BMP_RLE8:
+        case BMP_RLE4:
+        case BMP_BITFIELDS:
+        case BMP_JPEG:
+        case BMP_PNG:
+        default:
+            dcp_log(LOG_ERROR, "Unsupported image compression: %d\n", bmp.image.compression);
+            return DCP_FATAL;
+            break;
+    }
 
-			for(y = 0; y < (int)H; y++) {
-				unsigned char *scanline = RGB + (3 * W + PAD) * (H - 1 - y);
-				for(x = 0; x < (int)W; x++) {
-					unsigned char *pixel = &scanline[3 * x];
-					image->comps[0].data[index] = pixel[2];	/* R */
-					image->comps[1].data[index] = pixel[1];	/* G */
-					image->comps[2].data[index] = pixel[0];	/* B */
-					index++;
-				}
-			}
+    /* apparently, some applications don't fill in the image size */
+    if (bmp.image.image_size == 0) {
+        bmp.image.image_size = bmp.file.size - sizeof(bmp_magic_num_t) - sizeof(bmp_image_t);
+    }
 
-			free(RGB);
+    if (bmp.image.bpp < 24 || bmp.image.bpp > 32) {
+        dcp_log(LOG_ERROR, "%d-bit depth is not supported.",bmp.image.bpp);
+        return DCP_FATAL;
+    }
+  
+    /* create the image */
+    dcp_log(LOG_DEBUG,"%-15.15s: allocating odcp image","read_bmp");
+    image = odcp_image_create(3,w,h);
+    dcp_log(LOG_DEBUG,"%-15.15s: image allocated","read_bmp");
 
-		} else if (Info_h.biBitCount == 8 && Info_h.biCompression == 0) {
-			table_R = (unsigned char *) malloc(256 * sizeof(unsigned char));
-			table_G = (unsigned char *) malloc(256 * sizeof(unsigned char));
-			table_B = (unsigned char *) malloc(256 * sizeof(unsigned char));
-			
-			for (j = 0; j < Info_h.biClrUsed; j++) {
-				table_B[j] = getc(bmp);
-				table_G[j] = getc(bmp);
-				table_R[j] = getc(bmp);
-				getc(bmp);
-				if (table_R[j] != table_G[j] && table_R[j] != table_B[j] && table_G[j] != table_B[j])
-					gray_scale = 0;
-			}
-			
-			/* Place the cursor at the beginning of the image information */
-			fseek(bmp, 0, SEEK_SET);
-			fseek(bmp, bmp_file_h.bfOffBits, SEEK_SET);
-			
-			W = Info_h.biWidth;
-			H = Info_h.biHeight;
-			if (Info_h.biWidth % 2)
-				W++;
-			
-			numcomps = gray_scale ? 1 : 3;
-			color_space = gray_scale ? CLRSPC_GRAY : CLRSPC_SRGB;
-			/* initialize image components */
-			memset(&cmptparm[0], 0, 3 * sizeof(opj_image_cmptparm_t));
-			for(i = 0; i < numcomps; i++) {
-				cmptparm[i].prec = 8;
-				cmptparm[i].bpp = 8;
-				cmptparm[i].sgnd = 0;
-				cmptparm[i].dx = subsampling_dx;
-				cmptparm[i].dy = subsampling_dy;
-				cmptparm[i].w = w;
-				cmptparm[i].h = h;
-			}
-			/* create the image */
-			image = opj_image_create(numcomps, &cmptparm[0], color_space);
-			if(!image) {
-				fclose(bmp);
-				return NULL;
-			}
+    fseek(bmp_fp, bmp.file.offset, SEEK_SET);
 
-			/* set image offset and reference grid */
-			image->x0 = parameters->image_offset_x0;
-			image->y0 = parameters->image_offset_y0;
-			image->x1 =	!image->x0 ? (w - 1) * subsampling_dx + 1 : image->x0 + (w - 1) * subsampling_dx + 1;
-			image->y1 =	!image->y0 ? (h - 1) * subsampling_dy + 1 : image->y0 + (h - 1) * subsampling_dy + 1;
+    /* RGB(A) */
+    if (bmp.image.compression == BMP_RGB) {
+        /* 16-bits per pixel */
+        if (bmp.image.bpp == 16 ) {
+            uint8_t data[2];
+            for (i=0; i<pixels; i++) { 
+                fread(&data,sizeof(data),1,bmp_fp);
+                int p = invert_row(bmp, i);
+                image->component[BMP_B].data[p] = data[0] << 2;
+                image->component[BMP_G].data[p] = data[0] << 4;
+                image->component[BMP_R].data[p] = data[1] << 2;
+            }
+        /* 24-bits per pixel */
+        } else if (bmp.image.bpp == 24 ) {
+            uint8_t data[3];
+            for (i=0; i<pixels; i++) { 
+                fread(&data,sizeof(data),1,bmp_fp);
+                int p = invert_row(bmp, i);
+                image->component[BMP_B].data[p] = data[0] << 4;
+                image->component[BMP_G].data[p] = data[1] << 4;
+                image->component[BMP_R].data[p] = data[2] << 4;
+            }
+        /* 32-bits per pixel */
+        } else if (bmp.image.bpp == 32 ) {
+            uint8_t data[4];
+            for (i=0; i<pixels; i++) { 
+                fread(&data,sizeof(data),1,bmp_fp);
+                int p = invert_row(bmp, i);
+                image->component[BMP_B].data[p] = data[0] << 4;
+                image->component[BMP_G].data[p] = data[1] << 4;
+                image->component[BMP_R].data[p] = data[2] << 4;
+            }
+        }
+    }
+    /* RGB(A) */
 
-			/* set image data */
+    fclose(bmp_fp);
 
-			RGB = (unsigned char *) malloc(W * H * sizeof(unsigned char));
-			
-			fread(RGB, sizeof(unsigned char), W * H, bmp);
-			if (gray_scale) {
-				index = 0;
-				for (j = 0; j < W * H; j++) {
-					if ((j % W < W - 1 && Info_h.biWidth % 2) || !(Info_h.biWidth % 2)) {
-						image->comps[0].data[index] = table_R[RGB[W * H - ((j) / (W) + 1) * W + (j) % (W)]];
-						index++;
-					}
-				}
+    dcp_log(LOG_DEBUG,"%-15.15s: BMP read complete","read_bmp");
+    *image_ptr = image;
 
-			} else {		
-				index = 0;
-				for (j = 0; j < W * H; j++) {
-					if ((j % W < W - 1 && Info_h.biWidth % 2) || !(Info_h.biWidth % 2)) {
-						unsigned char pixel_index = RGB[W * H - ((j) / (W) + 1) * W + (j) % (W)];
-						image->comps[0].data[index] = table_R[pixel_index];
-						image->comps[1].data[index] = table_G[pixel_index];
-						image->comps[2].data[index] = table_B[pixel_index];
-						index++;
-					}
-				}
-			}
-			free(RGB);
-      free(table_R);
-      free(table_G);
-      free(table_B);
-		} else if (Info_h.biBitCount == 8 && Info_h.biCompression == 1) {				
-			table_R = (unsigned char *) malloc(256 * sizeof(unsigned char));
-			table_G = (unsigned char *) malloc(256 * sizeof(unsigned char));
-			table_B = (unsigned char *) malloc(256 * sizeof(unsigned char));
-			
-			for (j = 0; j < Info_h.biClrUsed; j++) {
-				table_B[j] = getc(bmp);
-				table_G[j] = getc(bmp);
-				table_R[j] = getc(bmp);
-				getc(bmp);
-				if (table_R[j] != table_G[j] && table_R[j] != table_B[j] && table_G[j] != table_B[j])
-					gray_scale = 0;
-			}
-
-			numcomps = gray_scale ? 1 : 3;
-			color_space = gray_scale ? CLRSPC_GRAY : CLRSPC_SRGB;
-			/* initialize image components */
-			memset(&cmptparm[0], 0, 3 * sizeof(opj_image_cmptparm_t));
-			for(i = 0; i < numcomps; i++) {
-				cmptparm[i].prec = 8;
-				cmptparm[i].bpp = 8;
-				cmptparm[i].sgnd = 0;
-				cmptparm[i].dx = subsampling_dx;
-				cmptparm[i].dy = subsampling_dy;
-				cmptparm[i].w = w;
-				cmptparm[i].h = h;
-			}
-			/* create the image */
-			image = opj_image_create(numcomps, &cmptparm[0], color_space);
-			if(!image) {
-				fclose(bmp);
-				return NULL;
-			}
-
-			/* set image offset and reference grid */
-			image->x0 = parameters->image_offset_x0;
-			image->y0 = parameters->image_offset_y0;
-			image->x1 =	!image->x0 ? (w - 1) * subsampling_dx + 1 : image->x0 + (w - 1) * subsampling_dx + 1;
-			image->y1 =	!image->y0 ? (h - 1) * subsampling_dy + 1 : image->y0 + (h - 1) * subsampling_dy + 1;
-
-			/* set image data */
-			
-			/* Place the cursor at the beginning of the image information */
-			fseek(bmp, 0, SEEK_SET);
-			fseek(bmp, bmp_file_h.bfOffBits, SEEK_SET);
-			
-			RGB = (unsigned char *) malloc(Info_h.biWidth * Info_h.biHeight * sizeof(unsigned char));
-            
-			while (not_end_file) {
-				v = getc(bmp);
-				if (v) {
-					v2 = getc(bmp);
-					for (i = 0; i < (int) v; i++) {
-						RGB[line * Info_h.biWidth + col] = v2;
-						col++;
-					}
-				} else {
-					v = getc(bmp);
-					switch (v) {
-						case 0:
-							col = 0;
-							line++;
-							break;
-						case 1:
-							line++;
-							not_end_file = 0;
-							break;
-						case 2:
-							fprintf(stderr,"No Delta supported\n");
-							opj_image_destroy(image);
-							fclose(bmp);
-							return NULL;
-						default:
-							for (i = 0; i < v; i++) {
-								v2 = getc(bmp);
-								RGB[line * Info_h.biWidth + col] = v2;
-								col++;
-							}
-							if (v % 2)
-								v2 = getc(bmp);
-							break;
-					}
-				}
-			}
-			if (gray_scale) {
-				index = 0;
-				for (line = 0; line < Info_h.biHeight; line++) {
-					for (col = 0; col < Info_h.biWidth; col++) {
-						image->comps[0].data[index] = table_R[(int)RGB[(Info_h.biHeight - line - 1) * Info_h.biWidth + col]];
-						index++;
-					}
-				}
-			} else {
-				index = 0;
-				for (line = 0; line < Info_h.biHeight; line++) {
-					for (col = 0; col < Info_h.biWidth; col++) {
-						unsigned char pixel_index = (int)RGB[(Info_h.biHeight - line - 1) * Info_h.biWidth + col];
-						image->comps[0].data[index] = table_R[pixel_index];
-						image->comps[1].data[index] = table_G[pixel_index];
-						image->comps[2].data[index] = table_B[pixel_index];
-						index++;
-					}
-				}
-			}
-			free(RGB);
-      free(table_R);
-      free(table_G);
-      free(table_B);
-	} else {
-		fprintf(stderr, 
-			"Other system than 24 bits/pixels or 8 bits (no RLE coding) is not yet implemented [%d]\n", Info_h.biBitCount);
-	}
-	fclose(bmp);
- }
- 
- return image;
+    return DCP_SUCCESS;
 }

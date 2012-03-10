@@ -16,9 +16,10 @@ SET(OPENDCP_SRC_FILES
      opendcp_common.c
      opendcp_log.c
      asdcp_intf.cpp
-     image/opendcp_tif.c
      image/opendcp_image.c
+     image/opendcp_bmp.c
      image/opendcp_dpx.c
+     image/opendcp_tif.c
 )
 
 IF(ENABLE_XMLSEC)

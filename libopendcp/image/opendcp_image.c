@@ -153,13 +153,14 @@ int read_image(odcp_image_t **image, char *file) {
     extension++;
 
     if (strnicmp(extension,"tif",3) == 0) {
-        result = read_tif(image, file,0);
+        result = read_tif(image, file, 0);
     } else if (strnicmp(extension,"dpx",3) == 0) {
-        result = read_dpx(image, 0, file,0);
+        result = read_dpx(image, 0, file, 0);
+    } else if (strnicmp(extension,"bmp",3) == 0) {
+        result = read_bmp(image, file, 0);
     }
 
     if (result != DCP_SUCCESS) {
-        dcp_log(LOG_ERROR,"Unable to read tiff file %s", file);
         return DCP_FATAL;
     }
 
@@ -356,7 +357,8 @@ static inline rgb_pixel_float_t get_pixel(odcp_image_t *image, int x, int y) {
     rgb_pixel_float_t p;
     int i;
 
-    i = (x+y) + ((image->w-1)*y);
+    i = x + (image->w*y);
+    //i = (x+y) + ((image->w-1)*y);
 
     p.r = image->component[0].data[i];
     p.g = image->component[1].data[i];
@@ -454,7 +456,7 @@ int resize(odcp_image_t **image, int profile, int method) {
             for(x=0; x<w; x++) {
                 dx = x * tx;
                 p = get_pixel(ptr, dx, dy);
-                i = (x+y) + ((w-1)*y);
+                i = x + (w*y);
                 d_image->component[0].data[i] = (int)p.r;
                 d_image->component[1].data[i] = (int)p.g;
                 d_image->component[2].data[i] = (int)p.b;
