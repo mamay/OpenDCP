@@ -182,7 +182,7 @@ void MainWindow::j2kUpdateEndSpinBox() {
 }
 
 void MainWindow::j2kCheckLeftInputFiles() {
-    QString filter = "*.tif;*.tiff;*.dpx";
+    QString filter = "*.tif;*.tiff;*.dpx;*.bmp";
     QDir inLeftDir;
 
     inLeftDir.cd(ui->inImageLeftEdit->text());
@@ -210,7 +210,7 @@ void MainWindow::j2kCheckLeftInputFiles() {
 }
 
 void MainWindow::j2kCheckRightInputFiles() {
-    QString filter = "*.tif;*.tiff;*.dpx";
+    QString filter = "*.tif;*.tiff;*.dpx;*.bmp";
     QDir inRightDir;
 
     inRightDir.cd(ui->inImageRightEdit->text());
