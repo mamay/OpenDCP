@@ -667,6 +667,27 @@
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>contentEdit</tabstop>
+  <tabstop>filmEdit</tabstop>
+  <tabstop>typeComboBox</tabstop>
+  <tabstop>aspectComboBox</tabstop>
+  <tabstop>languageAudioComboBox</tabstop>
+  <tabstop>languageSubtitleComboBox</tabstop>
+  <tabstop>territoryComboBox</tabstop>
+  <tabstop>ratingComboBox</tabstop>
+  <tabstop>audioComboBox</tabstop>
+  <tabstop>narrativeComboBox</tabstop>
+  <tabstop>resolutionComboBox</tabstop>
+  <tabstop>studioComboBox</tabstop>
+  <tabstop>facilityComboBox</tabstop>
+  <tabstop>dateYearSB</tabstop>
+  <tabstop>dateMonthSB</tabstop>
+  <tabstop>dateDaySB</tabstop>
+  <tabstop>stereoscopicComboBox</tabstop>
+  <tabstop>packageComboBox</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
