@@ -1,6 +1,6 @@
 /*
      OpenDCP: Builds Digital Cinema Packages
-     Copyright (c) 2010-2011 Terrence Meiczinger, All Rights Reserved
+     Copyright (c) 2010-2012 Terrence Meiczinger, All Rights Reserved
 
      This program is free software: you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -18,12 +18,15 @@
 
 #include <QDir>
 #include "mxfconversion_dialog.h"
+#include "ui_conversion.h"
 
 MxfConversionDialog::MxfConversionDialog(QWidget *parent) : QDialog(parent)
 {
     setupUi(this);
 
     setWindowFlags(Qt::Dialog | Qt::WindowMinimizeButtonHint);
+
+    this->setWindowTitle("MXF Creation");
 
     connect(buttonClose, SIGNAL(clicked()), this, SLOT(close()));
     connect(buttonStop, SIGNAL(clicked()), this, SLOT(abort()));
