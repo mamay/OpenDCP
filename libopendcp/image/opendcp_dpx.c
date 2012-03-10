@@ -158,7 +158,7 @@ typedef struct {
 
 typedef struct { 
     uint32_t    time_code;           /* SMPTE time code */
-    uint32_t    userBits;            /* SMPTE user bits */
+    uint32_t    user_bits;           /* SMPTE user bits */
     char        interlace;           /* interlace ( 0 = noninterlaced, 1 = 2:1 interlace*/
     char        field_num;           /* field number */
     char        video_signal;        /* video signal standard (table 4)*/

@@ -113,12 +113,12 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
     }
 
     if (result != DCP_SUCCESS) {
-        dcp_log(LOG_ERROR,"Unable to read tiff file %s",in_file);
+        dcp_log(LOG_ERROR,"Unable to read file %s",in_file);
         return DCP_FATAL;
     }
 
     if (!odcp_image) {
-        dcp_log(LOG_ERROR,"Unable to load tiff file %s",in_file);
+        dcp_log(LOG_ERROR,"Unable to load file %s",in_file);
         return DCP_FATAL;
     }
 
