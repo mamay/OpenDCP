@@ -128,7 +128,10 @@ int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *fil
             }
         }
         extension = strrchr(in_path,'.');
-        if (strnicmp(++extension,"tif",3) == 0 || strnicmp(++extension,"dpx",3)) {
+        ++extension;
+        if (strnicmp(extension,"tif",3) == 0
+            || strnicmp(extension,"bmp",3) == 0
+            || strnicmp(extension,"dpx",3) == 0) {
             filelist->file_count = 1;
             sprintf(filelist->in[0],"%s",in_path);
             sprintf(filelist->out[0],"%s",out_path);
@@ -458,7 +461,7 @@ int main (int argc, char **argv) {
             }
 
             if (result == DCP_FATAL) {
-                dcp_log(LOG_ERROR,"JPEG200 conversion %s failed",filelist->in[c]);
+                dcp_log(LOG_ERROR,"JPEG2000 conversion %s failed",filelist->in[c]);
                 dcp_fatal(opendcp,"Exiting...");
             } else {
                 dcp_log(LOG_INFO,"JPEG2000 conversion %s complete",filelist->in[c]);
