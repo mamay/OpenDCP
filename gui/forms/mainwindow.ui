@@ -61,11 +61,11 @@
          </rect>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="j2kTab">
          <attribute name="title">
-          <string>JPEG2000</string>
+          <string notr="true">JPEG2000</string>
          </attribute>
          <widget class="QWidget" name="widget" native="true">
           <property name="geometry">
@@ -965,7 +965,7 @@
              <string>Perform RGB to XYZ colorspace conversion</string>
             </property>
             <property name="text">
-             <string>XYZ Conversion</string>
+             <string>XYZ Transform</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -1065,7 +1065,7 @@
         </widget>
         <widget class="QWidget" name="mxfTab">
          <attribute name="title">
-          <string>MXF Creator</string>
+          <string notr="true">MXF</string>
          </attribute>
          <widget class="QGroupBox" name="mxfGroupBox">
           <property name="geometry">
@@ -1089,7 +1089,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>Package:</string>
+            <string>Label:</string>
            </property>
           </widget>
           <widget class="QComboBox" name="mxfTypeComboBox">
@@ -1175,7 +1175,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>Source:</string>
+            <string>Type:</string>
            </property>
           </widget>
           <widget class="QComboBox" name="mxfSourceTypeComboBox">
@@ -1227,7 +1227,7 @@
            </rect>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="page_1">
            <widget class="QGroupBox" name="inputPGroupBox">
@@ -1872,7 +1872,7 @@
               </rect>
              </property>
              <property name="text">
-              <string>Narrative:</string>
+              <string>VI-N</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -1888,7 +1888,7 @@
               </rect>
              </property>
              <property name="text">
-              <string>Voice Emphasis:</string>
+              <string>HI:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -2085,7 +2085,7 @@
         </widget>
         <widget class="QWidget" name="subTab">
          <attribute name="title">
-          <string>Subtitles</string>
+          <string notr="true">Subtitles</string>
          </attribute>
          <widget class="QGroupBox" name="subtitleGroupBox">
           <property name="geometry">
@@ -2109,7 +2109,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>Package:</string>
+            <string>Label:</string>
            </property>
           </widget>
           <widget class="QComboBox" name="mxfTypeComboBox_2">
@@ -2322,7 +2322,7 @@
         </widget>
         <widget class="QWidget" name="xmlTab">
          <attribute name="title">
-          <string>DCP Package</string>
+          <string notr="true">DCP</string>
          </attribute>
          <widget class="QGroupBox" name="cplGroupBox">
           <property name="geometry">
