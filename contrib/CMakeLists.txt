@@ -130,9 +130,16 @@ EXTERNALPROJECT_ADD(08_TIFF
 )
 ENDIF(COMPILE_TIFF)
 
+#-- temporary workaround
+IF(WIN32)
+    SET(OPENJPEG_URL http://opendcp.googlecode.com/files/openjpeg_v1_4_sources_r697.tar.gz)
+ELSE()
+    SET(OPENJPEG_URL http://openjpeg.googlecode.com/files/openjpeg-1.5.0.tar.gz) 
+ENDIF()
+
 IF(COMPILE_OPENJPEG)
 EXTERNALPROJECT_ADD(09_OpenJPEG
-    URL http://openjpeg.googlecode.com/files/openjpeg-1.5.0.tar.gz 
+    URL ${OPENJPEG_URL}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                       --disable-dependency-tracking --enable-static=yes --enable-shared=no --enable-png=no --enable-tiff=no ${TARGET}
