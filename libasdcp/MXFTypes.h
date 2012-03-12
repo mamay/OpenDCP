@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2005-2009, John Hurst
+Copyright (c) 2005-2012, John Hurst
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    MXFTypes.h
-    \version $Id: MXFTypes.h,v 1.26 2009/05/18 23:34:18 jhurst Exp $
+    \version $Id: MXFTypes.h,v 1.29 2012/02/21 02:09:31 jhurst Exp $
     \brief   MXF objects
 */
 
@@ -237,55 +237,20 @@ namespace ASDCP
 	};
 
       //
-      class Timestamp : public Kumu::IArchive
+    class ISO8String : public std::string, public Kumu::IArchive
 	{
 	public:
-	  ui16_t Year;
-	  ui8_t  Month;
-	  ui8_t  Day;
-	  ui8_t  Hour;
-	  ui8_t  Minute;
-	  ui8_t  Second;
-	  ui8_t  Tick;
+	  ISO8String() {}
+	  ~ISO8String() {}
 
-	  Timestamp();
-	  Timestamp(const Timestamp& rhs);
-	  Timestamp(const char* datestr);
-	  virtual ~Timestamp();
+	  const ISO8String& operator=(const char*);
+	  const ISO8String& operator=(const std::string&);
 
-	  const Timestamp& operator=(const Timestamp& rhs);
-	  bool operator<(const Timestamp& rhs) const;
-	  bool operator==(const Timestamp& rhs) const;
-	  bool operator!=(const Timestamp& rhs) const;
-
-	  // decode and set value from string formatted by EncodeAsString
-	  Result_t    SetFromString(const char* datestr);
-	  
-	  // add the given number of days or hours to the timestamp value. Values less than zero
-	  // will cause the value to decrease
-	  void AddDays(i32_t);
-	  void AddHours(i32_t);
-
-	  // Write the timestamp value to the given buffer in the form 2004-05-01 13:20:00.000
-	  // returns 0 if the buffer is smaller than DateTimeLen
 	  const char* EncodeString(char* str_buf, ui32_t buf_len) const;
-
-	  //
-	  inline virtual bool Unarchive(Kumu::MemIOReader* Reader) {
-	    if ( ! Reader->ReadUi16BE(&Year) ) return false;
-	    if ( ! Reader->ReadRaw(&Month, 6) ) return false;
-	    return true;
-	  }
-
-	  inline virtual bool HasValue() const { return true; }
-	  inline virtual ui32_t ArchiveLength() const { return 8L; }
-
-	  //
-	  inline virtual bool Archive(Kumu::MemIOWriter* Writer) const {
-	    if ( ! Writer->WriteUi16BE(Year) ) return false;
-	    if ( ! Writer->WriteRaw(&Month, 6) ) return false;
-	    return true;
-	  }
+	  inline virtual bool HasValue() const { return ! empty(); }
+	  inline virtual ui32_t ArchiveLength() const { return sizeof(ui32_t) + size(); }
+	  virtual bool Unarchive(Kumu::MemIOReader* Reader);
+	  virtual bool Archive(Kumu::MemIOWriter* Writer) const;
 	};
 
       //
@@ -359,8 +324,6 @@ namespace ASDCP
       //
       class VersionType : public Kumu::IArchive
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(VersionType);
-
 	public:
 	  enum Release_t { RL_UNKNOWN, RL_RELEASE, RL_DEVELOPMENT, RL_PATCHED, RL_BETA, RL_PRIVATE };
 	  ui16_t Major;
@@ -370,7 +333,18 @@ namespace ASDCP
 	  Release_t Release;
 
 	  VersionType() : Major(0), Minor(0), Patch(0), Build(0), Release(RL_UNKNOWN) {}
-	  ~VersionType() {}
+	  VersionType(const VersionType& rhs) { Copy(rhs); }
+	  virtual ~VersionType() {}
+
+	  const VersionType& operator=(const VersionType& rhs) { Copy(rhs); return *this; }
+	  void Copy(const VersionType& rhs) {
+	    Major = rhs.Major;
+	    Minor = rhs.Minor;
+	    Patch = rhs.Patch;
+	    Build = rhs.Build;
+	    Release = rhs.Release;
+	  }
+
 	  void Dump(FILE* = 0);
 
 	  const char* EncodeString(char* str_buf, ui32_t buf_len) const {
@@ -405,11 +379,18 @@ namespace ASDCP
       //
       class Raw : public Kumu::ByteString
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(Raw);
-
 	public:
 	  Raw();
-	  ~Raw();
+	  Raw(const Raw& rhs) { Copy(rhs); }
+	  virtual ~Raw();
+
+	  const Raw& operator=(const Raw& rhs) { Copy(rhs); return *this; }
+	  void Copy(const Raw& rhs) {
+	    if ( KM_SUCCESS(Capacity(rhs.Length())) )
+	      {
+		Set(rhs);
+	      }
+	  }
 
 	  //
           virtual bool Unarchive(Kumu::MemIOReader* Reader);

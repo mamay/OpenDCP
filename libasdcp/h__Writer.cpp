@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2004-2010, John Hurst
+Copyright (c) 2004-2012, John Hurst
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    h__Writer.cpp
-    \version $Id: h__Writer.cpp,v 1.50 2010/11/15 17:04:13 jhurst Exp $
+    \version $Id: h__Writer.cpp,v 1.51 2012/02/07 18:54:25 jhurst Exp $
     \brief   MXF file writer base class
 */
 
@@ -73,6 +73,7 @@ ASDCP::h__Writer::h__Writer(const Dictionary& d) :
   m_HeaderSize(0), m_EssenceStart(0),
   m_EssenceDescriptor(0), m_FramesWritten(0), m_StreamOffset(0)
 {
+  default_md_object_init();
 }
 
 ASDCP::h__Writer::~h__Writer()

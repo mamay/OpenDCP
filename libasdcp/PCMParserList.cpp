@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2004-2009, John Hurst
+Copyright (c) 2004-2012, John Hurst
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    PCMParserList.cpp
-    \version $Id: PCMParserList.cpp,v 1.7 2010/08/16 18:01:35 jhurst Exp $
+    \version $Id: PCMParserList.cpp,v 1.9 2012/02/21 02:09:31 jhurst Exp $
     \brief   Read WAV file(s), multiplex multiple PCM frame buffers into one
 */
 
@@ -48,7 +48,7 @@ ASDCP::ParserInstance::~ParserInstance()
 
 // PCM::CalcSampleSize(ADesc);
 Result_t
-ASDCP::ParserInstance::OpenRead(const char* filename, Rational& PictureRate)
+ASDCP::ParserInstance::OpenRead(const char* filename, const Rational& PictureRate)
 {
   ASDCP_TEST_NULL_STR(filename);
 
@@ -108,21 +108,32 @@ ASDCP::PCMParserList::~PCMParserList()
     }
 }
 
+//
+Result_t
+ASDCP::PCMParserList::OpenRead(ui32_t argc, const char** argv, const Rational& PictureRate)
+{
+  ASDCP_TEST_NULL_STR(argv);
+  PathList_t TmpFileList;
+
+  for ( ui32_t i = 0; i < argc; ++i )
+    TmpFileList.push_back(argv[i]);
+
+  return OpenRead(TmpFileList, PictureRate);
+}
 
 //
 Result_t
-ASDCP::PCMParserList::OpenRead(ui32_t argc, const char** argv, Rational& PictureRate)
+ASDCP::PCMParserList::OpenRead(const Kumu::PathList_t& argv, const Rational& PictureRate)
 {
-  ASDCP_TEST_NULL_STR(argv);
   Result_t result = RESULT_OK;
   PathList_t::iterator fi;
-  PathList_t TmpFileList;
+  Kumu::PathList_t file_list;
 
-  if ( argc == 1 && PathIsDirectory(argv[0]) )
+  if ( argv.size() == 1 && PathIsDirectory(argv.front()) )
     {
       DirScanner Dir;
       char name_buf[MaxFilePath];
-      result = Dir.Open(argv[0]);
+      result = Dir.Open(argv.front().c_str());
 
       if ( KM_SUCCESS(result) )
 	result = Dir.GetNext(name_buf);
@@ -131,8 +142,8 @@ ASDCP::PCMParserList::OpenRead(ui32_t argc, const char** argv, Rational& Picture
 	{
 	  if ( name_buf[0] != '.' ) // no hidden files
 	    {
-	      std::string tmp_path = std::string(argv[0]) + "/" + name_buf;
-	      TmpFileList.push_back(tmp_path);
+	      std::string tmp_path = argv.front() + "/" + name_buf;
+	      file_list.push_back(tmp_path);
 	    }
 
 	  result = Dir.GetNext(name_buf);
@@ -141,23 +152,22 @@ ASDCP::PCMParserList::OpenRead(ui32_t argc, const char** argv, Rational& Picture
       if ( result == RESULT_ENDOFFILE )
 	{
 	  result = RESULT_OK;
-	  TmpFileList.sort();
+	  file_list.sort();
 	}
     }
   else
     {
-      for ( ui32_t i = 0; i < argc; ++i )
-	TmpFileList.push_back(argv[i]);
+      file_list = argv;
     }
 
-  for ( fi = TmpFileList.begin(); KM_SUCCESS(result) && fi != TmpFileList.end(); fi++ )
+  for ( fi = file_list.begin(); KM_SUCCESS(result) && fi != file_list.end(); ++fi )
     {
       mem_ptr<ParserInstance> I = new ParserInstance;
       result = I->OpenRead(fi->c_str(), PictureRate);
 
       if ( ASDCP_SUCCESS(result) )
 	{
-	  if ( fi == TmpFileList.begin() )
+	  if ( fi == file_list.begin() )
 	    {
 	      m_ADesc = I->ADesc;
 	    }
@@ -197,7 +207,7 @@ ASDCP::PCMParserList::OpenRead(ui32_t argc, const char** argv, Rational& Picture
   if ( ASDCP_SUCCESS(result) )
     {
       m_ADesc.ChannelCount = m_ChannelCount;
-      m_ADesc.AvgBps = ceil(m_ADesc.AudioSamplingRate.Quotient()) * m_ADesc.BlockAlign;
+      m_ADesc.AvgBps = (ui32_t)(ceil(m_ADesc.AudioSamplingRate.Quotient()) * m_ADesc.BlockAlign);
     }
   else
     {

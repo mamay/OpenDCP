@@ -76,9 +76,9 @@ char *dcp_log_timestamp() {
 
 void dcp_log_init(int level, const char *file) {
     if (file != NULL) {
-        dcp_log_file  = 1;
-        fp = fopen("opendcp.log", "w");
-        fprintf(fp,"======================\nOpenDCP Version %s\n======================\n",OPENDCP_VERSION);
+        dcp_log_file  = 0;
+        //fp = fopen("opendcp.log", "w");
+        //fprintf(fp,"======================\nOpenDCP Version %s\n======================\n",OPENDCP_VERSION);
     }
     dcp_set_log_level(level);
 }

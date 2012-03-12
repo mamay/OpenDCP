@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2005-2011, John Hurst
+Copyright (c) 2005-2012, John Hurst
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,11 +25,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    MXFTypes.cpp
-    \version $Id: MXFTypes.cpp,v 1.24 2011/10/27 22:07:13 jhurst Exp $
+    \version $Id: MXFTypes.cpp,v 1.27 2012/02/21 02:09:31 jhurst Exp $
     \brief   MXF objects
 */
 
 #include <KM_prng.h>
+#include <KM_tai.h>
 #include "MXFTypes.h"
 #include <KM_log.h>
 
@@ -178,7 +179,10 @@ ASDCP::UMID::MakeUMID(int Type, const UUID& AssetID)
 }
 
 
-// Write the timestamp value to the given buffer in the form 2004-05-01 13:20:00.000
+// Write the UMID value to the given buffer in the form
+//   [00000000.0000.0000.00000000],00,00,00,00,00000000.0000.0000.00000000.00000000]
+// or
+//   [00000000.0000.0000.00000000],00,00,00,00,00000000-0000-0000-0000-000000000000]
 // returns 0 if the buffer is smaller than DateTimeLen
 const char*
 ASDCP::UMID::EncodeString(char* str_buf, ui32_t buf_len) const
@@ -325,241 +329,59 @@ ASDCP::MXF::UTF16String::Archive(Kumu::MemIOWriter* Writer) const
   return true;
 }
 
-
 //------------------------------------------------------------------------------------------
 //
 
-#ifdef WIN32
-
-#define TIMESTAMP_TO_SYSTIME(ts, t) \
-  (t)->wYear    = (ts).Year;   /* year */ \
-  (t)->wMonth   = (ts).Month;  /* month of year (1 - 12) */ \
-  (t)->wDay     = (ts).Day;    /* day of month (1 - 31) */ \
-  (t)->wHour    = (ts).Hour;   /* hours (0 - 23) */ \
-  (t)->wMinute  = (ts).Minute; /* minutes (0 - 59) */ \
-  (t)->wSecond  = (ts).Second; /* seconds (0 - 60) */ \
-  (t)->wDayOfWeek = 0; \
-  (t)->wMilliseconds = ((ts).Tick * 4);
-
-#define SYSTIME_TO_TIMESTAMP(t, ts) \
-  (ts).Year   = (t)->wYear;    /* year */ \
-  (ts).Month  = (t)->wMonth;   /* month of year (1 - 12) */ \
-  (ts).Day    = (t)->wDay;     /* day of month (1 - 31) */ \
-  (ts).Hour   = (t)->wHour;    /* hours (0 - 23) */ \
-  (ts).Minute = (t)->wMinute;  /* minutes (0 - 59) */ \
-  (ts).Second = (t)->wSecond;  /* seconds (0 - 60) */ \
-  (ts).Tick   = (t)->wMilliseconds / 4;
-
 //
-ASDCP::MXF::Timestamp::Timestamp() :
-  Year(0), Month(0),  Day(0), Hour(0), Minute(0), Second(0), Tick(0)
+const ASDCP::MXF::ISO8String&
+ASDCP::MXF::ISO8String::operator=(const char* sz)
 {
-  SYSTEMTIME sys_time;
-  GetSystemTime(&sys_time);
-  SYSTIME_TO_TIMESTAMP(&sys_time, *this);
-}
+  if ( sz == 0 || *sz == 0 )
+    erase();
 
-//
-bool
-ASDCP::MXF::Timestamp::operator<(const Timestamp& rhs) const
-{
-  SYSTEMTIME lhst, rhst;
-  FILETIME lft, rft;
-
-  TIMESTAMP_TO_SYSTIME(*this, &lhst);
-  TIMESTAMP_TO_SYSTIME(rhs, &rhst);
-  SystemTimeToFileTime(&lhst, &lft);
-  SystemTimeToFileTime(&rhst, &rft);
-  return ( CompareFileTime(&lft, &rft) == -1 );
-}
-
-inline ui64_t
-seconds_to_ns100(ui32_t seconds)
-{
-  return ((ui64_t)seconds * 10000000);
-}
-
-//
-void
-ASDCP::MXF::Timestamp::AddDays(i32_t days)
-{
-  SYSTEMTIME current_st;
-  FILETIME current_ft;
-  ULARGE_INTEGER current_ul;
-
-  if ( days != 0 )
-    {
-      TIMESTAMP_TO_SYSTIME(*this, &current_st);
-      SystemTimeToFileTime(&current_st, &current_ft);
-      memcpy(&current_ul, &current_ft, sizeof(current_ul));
-      current_ul.QuadPart += ( seconds_to_ns100(86400) * (ui64_t)days );
-      memcpy(&current_ft, &current_ul, sizeof(current_ft));
-      FileTimeToSystemTime(&current_ft, &current_st);
-      SYSTIME_TO_TIMESTAMP(&current_st, *this);
-    }
-}
-
-//
-void
-ASDCP::MXF::Timestamp::AddHours(i32_t hours)
-{
-  SYSTEMTIME current_st;
-  FILETIME current_ft;
-  ULARGE_INTEGER current_ul;
-
-  if ( hours != 0 )
-    {
-      TIMESTAMP_TO_SYSTIME(*this, &current_st);
-      SystemTimeToFileTime(&current_st, &current_ft);
-      memcpy(&current_ul, &current_ft, sizeof(current_ul));
-      current_ul.QuadPart += ( seconds_to_ns100(3600) * (ui64_t)hours );
-      memcpy(&current_ft, &current_ul, sizeof(current_ft));
-      FileTimeToSystemTime(&current_ft, &current_st);
-      SYSTIME_TO_TIMESTAMP(&current_st, *this);
-    }
-}
-
-#else // KM_WIN32
-
-#include <time.h>
-
-#define TIMESTAMP_TO_TM(ts, t) \
-  (t)->tm_year = (ts).Year - 1900;   /* year - 1900 */ \
-  (t)->tm_mon  = (ts).Month - 1;     /* month of year (0 - 11) */ \
-  (t)->tm_mday = (ts).Day;           /* day of month (1 - 31) */ \
-  (t)->tm_hour = (ts).Hour;          /* hours (0 - 23) */ \
-  (t)->tm_min  = (ts).Minute;        /* minutes (0 - 59) */ \
-  (t)->tm_sec  = (ts).Second;        /* seconds (0 - 60) */
-
-#define TM_TO_TIMESTAMP(t, ts) \
-  (ts).Year   = (t)->tm_year + 1900;    /* year - 1900 */ \
-  (ts).Month  = (t)->tm_mon + 1;     /* month of year (0 - 11) */ \
-  (ts).Day    = (t)->tm_mday;    /* day of month (1 - 31) */ \
-  (ts).Hour   = (t)->tm_hour;    /* hours (0 - 23) */ \
-  (ts).Minute = (t)->tm_min;     /* minutes (0 - 59) */ \
-  (ts).Second = (t)->tm_sec;     /* seconds (0 - 60) */
-
-//
-ASDCP::MXF::Timestamp::Timestamp() :
-  Year(0), Month(0),  Day(0), Hour(0), Minute(0), Second(0)
-{
-  time_t t_now = time(0);
-  struct tm*  now = gmtime(&t_now);
-  TM_TO_TIMESTAMP(now, *this);
-}
-
-//
-bool
-ASDCP::MXF::Timestamp::operator<(const Timestamp& rhs) const
-{
-  struct tm lhtm, rhtm;
-  TIMESTAMP_TO_TM(*this, &lhtm);
-  TIMESTAMP_TO_TM(rhs, &rhtm);
-  return ( timegm(&lhtm) < timegm(&rhtm) );
-}
-
-//
-void
-ASDCP::MXF::Timestamp::AddDays(i32_t days)
-{
-  struct tm current;
-
-  if ( days != 0 )
-    {
-      TIMESTAMP_TO_TM(*this, &current);
-      time_t adj_time = timegm(&current);
-      adj_time += 86400 * days;
-      struct tm*  now = gmtime(&adj_time);
-      TM_TO_TIMESTAMP(now, *this);
-    }
-}
-
-//
-void
-ASDCP::MXF::Timestamp::AddHours(i32_t hours)
-{
-  struct tm current;
-
-  if ( hours != 0 )
-    {
-      TIMESTAMP_TO_TM(*this, &current);
-      time_t adj_time = timegm(&current);
-      adj_time += 3600 * hours;
-      struct tm*  now = gmtime(&adj_time);
-      TM_TO_TIMESTAMP(now, *this);
-    }
-}
-
-#endif // KM_WIN32
-
-
-ASDCP::MXF::Timestamp::Timestamp(const Timestamp& rhs) : IArchive()
-{
-  Year   = rhs.Year;
-  Month  = rhs.Month;
-  Day    = rhs.Day;
-  Hour   = rhs.Hour;
-  Minute = rhs.Minute;
-  Second = rhs.Second;
-}
-
-ASDCP::MXF::Timestamp::~Timestamp()
-{
-}
-
-//
-const ASDCP::MXF::Timestamp&
-ASDCP::MXF::Timestamp::operator=(const Timestamp& rhs)
-{
-  Year   = rhs.Year;
-  Month  = rhs.Month;
-  Day    = rhs.Day;
-  Hour   = rhs.Hour;
-  Minute = rhs.Minute;
-  Second = rhs.Second;
+  else
+    this->assign(sz);
+  
   return *this;
 }
 
 //
-bool
-ASDCP::MXF::Timestamp::operator==(const Timestamp& rhs) const
+const ASDCP::MXF::ISO8String&
+ASDCP::MXF::ISO8String::operator=(const std::string& str)
 {
-  if ( Year == rhs.Year
-       && Month  == rhs.Month
-       && Day    == rhs.Day
-       && Hour   == rhs.Hour
-       && Minute == rhs.Minute
-       && Second == rhs.Second )
-    return true;
-
-  return false;
-}
-
-//
-bool
-ASDCP::MXF::Timestamp::operator!=(const Timestamp& rhs) const
-{
-  if ( Year != rhs.Year
-       || Month  != rhs.Month
-       || Day    != rhs.Day
-       || Hour   != rhs.Hour
-       || Minute != rhs.Minute
-       || Second != rhs.Second )
-    return true;
-
-  return false;
+  this->assign(str);
+  return *this;
 }
 
 //
 const char*
-ASDCP::MXF::Timestamp::EncodeString(char* str_buf, ui32_t buf_len) const
+ASDCP::MXF::ISO8String::EncodeString(char* str_buf, ui32_t buf_len) const
 {
-  // 2004-05-01 13:20:00.000
-  snprintf(str_buf, buf_len,
-	   "%04hu-%02hu-%02hu %02hu:%02hu:%02hu.000",
-           Year, Month, Day, Hour, Minute, Second);
-  
+  ui32_t write_len = Kumu::xmin(buf_len - 1, (ui32_t)size());
+  strncpy(str_buf, c_str(), write_len);
+  str_buf[write_len] = 0;
   return str_buf;
+}
+
+//
+bool
+ASDCP::MXF::ISO8String::Unarchive(Kumu::MemIOReader* Reader)
+{
+  assign((char*)Reader->CurrentData(), Reader->Remainder());
+  return true;
+}
+
+//
+bool
+ASDCP::MXF::ISO8String::Archive(Kumu::MemIOWriter* Writer) const
+{
+  if ( size() > IdentBufferLen )
+    {
+      DefaultLogSink().Error("String length exceeds maximum %u bytes\n", IdentBufferLen);
+      return false;
+    }
+
+  return Writer->WriteString(*this);
 }
 
 //------------------------------------------------------------------------------------------

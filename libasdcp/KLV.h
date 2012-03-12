@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    KLV.h
-  \version $Id: KLV.h,v 1.23 2011/10/27 22:07:13 jhurst Exp $
+  \version $Id: KLV.h,v 1.25 2012/02/08 02:59:21 jhurst Exp $
   \brief   KLV objects
 */
 
@@ -143,8 +143,9 @@ inline const char* ui64sz(ui64_t i, char* buf)
   //
   class Dictionary
     {
-      std::map<ASDCP::UL, ui32_t> m_md_lookup;
-      std::map<ui32_t, ASDCP::UL> m_md_rev_lookup;
+      std::map<ASDCP::UL, ui32_t>   m_md_lookup;
+      std::map<std::string, ui32_t> m_md_sym_lookup;
+      std::map<ui32_t, ASDCP::UL>   m_md_rev_lookup;
       MDDEntry m_MDD_Table[(ui32_t)ASDCP::MDD_Max];
 
       ASDCP_NO_COPY_CONSTRUCT(Dictionary);
@@ -160,6 +161,7 @@ inline const char* ui64sz(ui64_t i, char* buf)
       bool DeleteEntry(ui32_t index);
 
       const MDDEntry* FindUL(const byte_t*) const;
+      const MDDEntry* FindSymbol(const std::string&) const;
       const MDDEntry& Type(MDD_t type_id) const;
 
       inline const byte_t* ul(MDD_t type_id) const {
@@ -195,6 +197,7 @@ inline const char* ui64sz(ui64_t i, char* buf)
       ui32_t        m_KLLength;
       const byte_t* m_ValueStart;
       ui32_t        m_ValueLength;
+      UL m_UL;
 
     public:
       KLVPacket() : m_KeyStart(0), m_KLLength(0), m_ValueStart(0), m_ValueLength(0) {}
@@ -213,10 +216,16 @@ inline const char* ui64sz(ui64_t i, char* buf)
       }
 
       virtual UL       GetUL();
+      virtual bool     SetUL(const UL&);
       virtual bool     HasUL(const byte_t*);
       virtual Result_t InitFromBuffer(const byte_t*, ui32_t);
       virtual Result_t InitFromBuffer(const byte_t*, ui32_t, const UL& label);
       virtual Result_t WriteKLToBuffer(ASDCP::FrameBuffer&, const UL& label, ui32_t length);
+      virtual Result_t WriteKLToBuffer(ASDCP::FrameBuffer& fb, ui32_t length) {
+	if ( ! m_UL.HasValue() )
+	  return RESULT_STATE;
+	return WriteKLToBuffer(fb, m_UL, length); }
+
       virtual void     Dump(FILE*, const Dictionary& Dict, bool show_value);
     };
 

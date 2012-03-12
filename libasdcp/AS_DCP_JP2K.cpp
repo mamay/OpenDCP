@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2004-2010, John Hurst
+Copyright (c) 2004-2012, John Hurst
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    AS_DCP_JP2k.cpp
-    \version $Id: AS_DCP_JP2K.cpp,v 1.52 2011/07/27 21:01:49 jhurst Exp $
+    \version $Id: AS_DCP_JP2K.cpp,v 1.54 2012/02/07 18:54:24 jhurst Exp $
     \brief   AS-DCP library, JPEG 2000 essence reader and writer implementation
 */
 
@@ -461,6 +461,36 @@ ASDCP::JP2K::MXFReader::~MXFReader()
 {
 }
 
+// Warning: direct manipulation of MXF structures can interfere
+// with the normal operation of the wrapper.  Caveat emptor!
+//
+ASDCP::MXF::OPAtomHeader&
+ASDCP::JP2K::MXFReader::OPAtomHeader()
+{
+  if ( m_Reader.empty() )
+    {
+      assert(g_OPAtomHeader);
+      return *g_OPAtomHeader;
+    }
+
+  return m_Reader->m_HeaderPart;
+}
+
+// Warning: direct manipulation of MXF structures can interfere
+// with the normal operation of the wrapper.  Caveat emptor!
+//
+ASDCP::MXF::OPAtomIndexFooter&
+ASDCP::JP2K::MXFReader::OPAtomIndexFooter()
+{
+  if ( m_Reader.empty() )
+    {
+      assert(g_OPAtomIndexFooter);
+      return *g_OPAtomIndexFooter;
+    }
+
+  return m_Reader->m_FooterPart;
+}
+
 // Open the file for reading. The file must exist. Returns error if the
 // operation cannot be completed.
 ASDCP::Result_t
@@ -633,6 +663,36 @@ ASDCP::JP2K::MXFSReader::MXFSReader()
 
 ASDCP::JP2K::MXFSReader::~MXFSReader()
 {
+}
+
+// Warning: direct manipulation of MXF structures can interfere
+// with the normal operation of the wrapper.  Caveat emptor!
+//
+ASDCP::MXF::OPAtomHeader&
+ASDCP::JP2K::MXFSReader::OPAtomHeader()
+{
+  if ( m_Reader.empty() )
+    {
+      assert(g_OPAtomHeader);
+      return *g_OPAtomHeader;
+    }
+
+  return m_Reader->m_HeaderPart;
+}
+
+// Warning: direct manipulation of MXF structures can interfere
+// with the normal operation of the wrapper.  Caveat emptor!
+//
+ASDCP::MXF::OPAtomIndexFooter&
+ASDCP::JP2K::MXFSReader::OPAtomIndexFooter()
+{
+  if ( m_Reader.empty() )
+    {
+      assert(g_OPAtomIndexFooter);
+      return *g_OPAtomIndexFooter;
+    }
+
+  return m_Reader->m_FooterPart;
 }
 
 // Open the file for reading. The file must exist. Returns error if the
@@ -977,6 +1037,35 @@ ASDCP::JP2K::MXFWriter::~MXFWriter()
 {
 }
 
+// Warning: direct manipulation of MXF structures can interfere
+// with the normal operation of the wrapper.  Caveat emptor!
+//
+ASDCP::MXF::OPAtomHeader&
+ASDCP::JP2K::MXFWriter::OPAtomHeader()
+{
+  if ( m_Writer.empty() )
+    {
+      assert(g_OPAtomHeader);
+      return *g_OPAtomHeader;
+    }
+
+  return m_Writer->m_HeaderPart;
+}
+
+// Warning: direct manipulation of MXF structures can interfere
+// with the normal operation of the wrapper.  Caveat emptor!
+//
+ASDCP::MXF::OPAtomIndexFooter&
+ASDCP::JP2K::MXFWriter::OPAtomIndexFooter()
+{
+  if ( m_Writer.empty() )
+    {
+      assert(g_OPAtomIndexFooter);
+      return *g_OPAtomIndexFooter;
+    }
+
+  return m_Writer->m_FooterPart;
+}
 
 // Open the file for writing. The file must not exist. Returns error if
 // the operation cannot be completed.
@@ -1079,6 +1168,35 @@ ASDCP::JP2K::MXFSWriter::~MXFSWriter()
 {
 }
 
+// Warning: direct manipulation of MXF structures can interfere
+// with the normal operation of the wrapper.  Caveat emptor!
+//
+ASDCP::MXF::OPAtomHeader&
+ASDCP::JP2K::MXFSWriter::OPAtomHeader()
+{
+  if ( m_Writer.empty() )
+    {
+      assert(g_OPAtomHeader);
+      return *g_OPAtomHeader;
+    }
+
+  return m_Writer->m_HeaderPart;
+}
+
+// Warning: direct manipulation of MXF structures can interfere
+// with the normal operation of the wrapper.  Caveat emptor!
+//
+ASDCP::MXF::OPAtomIndexFooter&
+ASDCP::JP2K::MXFSWriter::OPAtomIndexFooter()
+{
+  if ( m_Writer.empty() )
+    {
+      assert(g_OPAtomIndexFooter);
+      return *g_OPAtomIndexFooter;
+    }
+
+  return m_Writer->m_FooterPart;
+}
 
 // Open the file for writing. The file must not exist. Returns error if
 // the operation cannot be completed.

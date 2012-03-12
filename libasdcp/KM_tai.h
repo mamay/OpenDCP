@@ -44,7 +44,7 @@ The libtai source code is in the public domain.
 */
 
   /*! \file    KM_tai.h
-    \version $Id: KM_tai.h,v 1.4 2009/10/07 19:47:21 msheby Exp $
+    \version $Id: KM_tai.h,v 1.5 2012/02/21 02:09:30 jhurst Exp $
     \brief   portable time functions
   */
 
@@ -64,7 +64,7 @@ namespace Kumu
     struct tai
     {
       ui64_t x;
-      inline void add_seconds(i32_t s)  { x += s * 1; }
+      inline void add_seconds(i32_t s)  { x += s; }
       inline void add_minutes(i32_t m) { x += m * 60; }
       inline void add_hours(i32_t h) { x += h * 3600; }
       inline void add_days(i32_t d) { x += d * 86400; }

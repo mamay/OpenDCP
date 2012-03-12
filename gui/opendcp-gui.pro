@@ -19,6 +19,7 @@ SOURCES +=  main.cpp\
             xml.cpp \
             generatetitle.cpp \
             j2kconversion_dialog.cpp \
+            conversion.cpp \
             settings.cpp \
             translator.cpp \
             mxf-writer.cpp \
@@ -28,7 +29,8 @@ HEADERS  += mainwindow.h \
             generatetitle.h \
             j2kconversion_dialog.h \
             mxf-writer.h \
-            settings.h\
+            conversion.h \
+            settings.h \
             translaor.h \
             mxfconversion_dialog.h
 

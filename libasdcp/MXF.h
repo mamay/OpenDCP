@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2005-2009, John Hurst
+Copyright (c) 2005-2012, John Hurst
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    MXF.h
-    \version $Id: MXF.h,v 1.36 2009/05/18 23:34:18 jhurst Exp $
+    \version $Id: MXF.h,v 1.42 2012/03/05 13:11:47 jhurst Exp $
     \brief   MXF objects
 */
 
@@ -136,7 +136,7 @@ namespace ASDCP
 
 	  Partition(const Dictionary*&);
 	  virtual ~Partition();
-	  virtual void     AddChildObject(InterchangeObject*);
+	  virtual void     AddChildObject(InterchangeObject*); // takes ownership
 	  virtual Result_t InitFromFile(const Kumu::FileReader& Reader);
 	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
 	  virtual Result_t WriteToFile(Kumu::FileWriter& Writer, UL& PartitionLabel);
@@ -161,6 +161,9 @@ namespace ASDCP
 	    public:
 	      TagValue    Tag;
 	      ASDCP::UL   UL;
+
+	      LocalTagEntry() { Tag.a = Tag.b = 0; }
+	    LocalTagEntry(const TagValue& tag, ASDCP::UL& ul) : Tag(tag), UL(ul) {}
 
 	      inline const char* EncodeString(char* str_buf, ui32_t buf_len) const {
 		snprintf(str_buf, buf_len, "%02x %02x: ", Tag.a, Tag.b);
@@ -206,17 +209,16 @@ namespace ASDCP
 	{
 	  InterchangeObject();
 
-	protected:
-	  const MDDEntry* m_Typeinfo;
-
 	public:
 	  const Dictionary*& m_Dict;
 	  IPrimerLookup* m_Lookup;
 	  UUID           InstanceUID;
 	  UUID           GenerationUID;
 
-	InterchangeObject(const Dictionary*& d) : m_Typeinfo(0), m_Dict(d), m_Lookup(0) {}
+	InterchangeObject(const Dictionary*& d) : m_Dict(d), m_Lookup(0) {}
 	  virtual ~InterchangeObject() {}
+
+	  virtual void Copy(const InterchangeObject& rhs);
           virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
 	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
 	  virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
@@ -234,8 +236,7 @@ namespace ASDCP
 
 	public:
 	  const Dictionary*& m_Dict;
-	  UUID         GenerationUID;
-	  Timestamp    LastModifiedDate;
+	  Kumu::Timestamp    LastModifiedDate;
 	  ui16_t       Version;
 	  ui32_t       ObjectModelVersion;
 	  UUID         PrimaryPackage;
@@ -245,8 +246,10 @@ namespace ASDCP
 	  Batch<UL>    EssenceContainers;
 	  Batch<UL>    DMSchemes;
 
-	Preface(const Dictionary*& d) : InterchangeObject(d), m_Dict(d), Version(258), ObjectModelVersion(0) {}
+	  Preface(const Dictionary*& d);
 	  virtual ~Preface() {}
+
+	  virtual void Copy(const Preface& rhs);
           virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
 	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
 	  virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
@@ -271,6 +274,7 @@ namespace ASDCP
 	      ui32_t  ElementData;
 
 	      DeltaEntry() : PosTableIndex(-1), Slice(0), ElementData(0) {}
+	      DeltaEntry(i8_t pos, ui8_t slice, ui32_t data) : PosTableIndex(pos), Slice(slice), ElementData(data) {}
 	      inline bool HasValue() const { return true; }
 	      ui32_t      ArchiveLength() const { return sizeof(ui32_t) + 2; }
 	      bool        Unarchive(Kumu::MemIOReader* Reader);
@@ -292,7 +296,9 @@ namespace ASDCP
 	      //	      std::list<ui32_t>  SliceOffset;
 	      //	      Array<Rational>    PosTable;
 
-	      IndexEntry() : TemporalOffset(0), KeyFrameOffset(0), Flags(0), StreamOffset() {}
+	      IndexEntry() : TemporalOffset(0), KeyFrameOffset(0), Flags(0), StreamOffset(0) {}
+	      IndexEntry(i8_t t_ofst, i8_t k_ofst, ui8_t flags, ui64_t s_ofst) :
+	            TemporalOffset(t_ofst), KeyFrameOffset(k_ofst), Flags(flags), StreamOffset(s_ofst) {}
 	      inline bool HasValue() const { return true; }
 	      ui32_t      ArchiveLength() const { return sizeof(ui64_t) + 3; };
 	      bool        Unarchive(Kumu::MemIOReader* Reader);
@@ -315,6 +321,8 @@ namespace ASDCP
 
 	  IndexTableSegment(const Dictionary*&);
 	  virtual ~IndexTableSegment();
+
+	  virtual void Copy(const IndexTableSegment& rhs);
 	  virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
 	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
 	  virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
@@ -351,6 +359,7 @@ namespace ASDCP
 	  virtual Result_t GetMDObjectByID(const UUID&, InterchangeObject** = 0);
 	  virtual Result_t GetMDObjectByType(const byte_t*, InterchangeObject** = 0);
 	  virtual Result_t GetMDObjectsByType(const byte_t* ObjectID, std::list<InterchangeObject*>& ObjectList);
+	  virtual ASDCP::MXF::RIP& GetRIP();
 	  Identification*  GetIdentification();
 	  SourcePackage*   GetSourcePackage();
 	};
@@ -363,7 +372,9 @@ namespace ASDCP
 	  ui32_t              m_BytesPerEditUnit;
 	  Rational            m_EditRate;
 	  ui32_t              m_BodySID;
+
 	  ASDCP_NO_COPY_CONSTRUCT(OPAtomIndexFooter);
+	  OPAtomIndexFooter();
 
 	public:
 	  const Dictionary*&   m_Dict;
@@ -377,6 +388,10 @@ namespace ASDCP
 	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
 	  virtual Result_t WriteToFile(Kumu::FileWriter& Writer, ui64_t duration);
 	  virtual void     Dump(FILE* = 0);
+
+	  virtual Result_t GetMDObjectByID(const UUID&, InterchangeObject** = 0);
+	  virtual Result_t GetMDObjectByType(const byte_t*, InterchangeObject** = 0);
+	  virtual Result_t GetMDObjectsByType(const byte_t* ObjectID, std::list<InterchangeObject*>& ObjectList);
 
 	  virtual Result_t Lookup(ui32_t frame_num, IndexTableSegment::IndexEntry&) const;
 	  virtual void     PushIndexEntry(const IndexTableSegment::IndexEntry&);

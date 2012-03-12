@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2005-2009, John Hurst
+Copyright (c) 2005-2012, John Hurst
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*! \file    Metadata.h
-    \version $Id: Metadata.h,v 1.26 2010/11/15 17:04:13 jhurst Exp $
+    \version $Id: Metadata.h,v 1.29 2012/02/21 02:09:31 jhurst Exp $
     \brief   MXF metadata objects
 */
 
@@ -45,7 +45,6 @@ namespace ASDCP
       //
       class Identification : public InterchangeObject
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(Identification);
 	  Identification();
 
 	public:
@@ -56,24 +55,27 @@ namespace ASDCP
           VersionType ProductVersion;
           UTF16String VersionString;
           UUID ProductUID;
-          Timestamp ModificationDate;
+          Kumu::Timestamp ModificationDate;
           VersionType ToolkitVersion;
           UTF16String Platform;
 
-  Identification(const Dictionary*& d) : InterchangeObject(d), m_Dict(d) {}
-	  virtual ~Identification() {}
-          virtual const char* HasName() { return "Identification"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      Identification(const Dictionary*& d);
+      Identification(const Identification& rhs);
+      virtual ~Identification() {}
+
+      const Identification& operator=(const Identification& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const Identification& rhs);
+      virtual const char* HasName() { return "Identification"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class ContentStorage : public InterchangeObject
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(ContentStorage);
 	  ContentStorage();
 
 	public:
@@ -81,20 +83,23 @@ namespace ASDCP
           Batch<UUID> Packages;
           Batch<UUID> EssenceContainerData;
 
-  ContentStorage(const Dictionary*& d) : InterchangeObject(d), m_Dict(d) {}
-	  virtual ~ContentStorage() {}
-          virtual const char* HasName() { return "ContentStorage"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      ContentStorage(const Dictionary*& d);
+      ContentStorage(const ContentStorage& rhs);
+      virtual ~ContentStorage() {}
+
+      const ContentStorage& operator=(const ContentStorage& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const ContentStorage& rhs);
+      virtual const char* HasName() { return "ContentStorage"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class EssenceContainerData : public InterchangeObject
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(EssenceContainerData);
 	  EssenceContainerData();
 
 	public:
@@ -103,81 +108,93 @@ namespace ASDCP
           ui32_t IndexSID;
           ui32_t BodySID;
 
-  EssenceContainerData(const Dictionary*& d) : InterchangeObject(d), m_Dict(d), IndexSID(0), BodySID(0) {}
-	  virtual ~EssenceContainerData() {}
-          virtual const char* HasName() { return "EssenceContainerData"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      EssenceContainerData(const Dictionary*& d);
+      EssenceContainerData(const EssenceContainerData& rhs);
+      virtual ~EssenceContainerData() {}
+
+      const EssenceContainerData& operator=(const EssenceContainerData& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const EssenceContainerData& rhs);
+      virtual const char* HasName() { return "EssenceContainerData"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class GenericPackage : public InterchangeObject
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(GenericPackage);
 	  GenericPackage();
 
 	public:
 	  const Dictionary*& m_Dict;
           UMID PackageUID;
           UTF16String Name;
-          Timestamp PackageCreationDate;
-          Timestamp PackageModifiedDate;
+          Kumu::Timestamp PackageCreationDate;
+          Kumu::Timestamp PackageModifiedDate;
           Batch<UUID> Tracks;
 
-  GenericPackage(const Dictionary*& d) : InterchangeObject(d), m_Dict(d) {}
-	  virtual ~GenericPackage() {}
-          virtual const char* HasName() { return "GenericPackage"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
+      GenericPackage(const Dictionary*& d);
+      GenericPackage(const GenericPackage& rhs);
+      virtual ~GenericPackage() {}
+
+      const GenericPackage& operator=(const GenericPackage& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const GenericPackage& rhs);
+      virtual const char* HasName() { return "GenericPackage"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
 	};
 
       //
       class MaterialPackage : public GenericPackage
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(MaterialPackage);
 	  MaterialPackage();
 
 	public:
 	  const Dictionary*& m_Dict;
 
-  MaterialPackage(const Dictionary*& d) : GenericPackage(d), m_Dict(d) {}
-	  virtual ~MaterialPackage() {}
-          virtual const char* HasName() { return "MaterialPackage"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      MaterialPackage(const Dictionary*& d);
+      MaterialPackage(const MaterialPackage& rhs);
+      virtual ~MaterialPackage() {}
+
+      const MaterialPackage& operator=(const MaterialPackage& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const MaterialPackage& rhs);
+      virtual const char* HasName() { return "MaterialPackage"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class SourcePackage : public GenericPackage
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(SourcePackage);
 	  SourcePackage();
 
 	public:
 	  const Dictionary*& m_Dict;
           UUID Descriptor;
 
-  SourcePackage(const Dictionary*& d) : GenericPackage(d), m_Dict(d) {}
-	  virtual ~SourcePackage() {}
-          virtual const char* HasName() { return "SourcePackage"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      SourcePackage(const Dictionary*& d);
+      SourcePackage(const SourcePackage& rhs);
+      virtual ~SourcePackage() {}
+
+      const SourcePackage& operator=(const SourcePackage& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const SourcePackage& rhs);
+      virtual const char* HasName() { return "SourcePackage"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class GenericTrack : public InterchangeObject
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(GenericTrack);
 	  GenericTrack();
 
 	public:
@@ -187,37 +204,43 @@ namespace ASDCP
           UTF16String TrackName;
           UUID Sequence;
 
-  GenericTrack(const Dictionary*& d) : InterchangeObject(d), m_Dict(d), TrackID(0), TrackNumber(0) {}
-	  virtual ~GenericTrack() {}
-          virtual const char* HasName() { return "GenericTrack"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
+      GenericTrack(const Dictionary*& d);
+      GenericTrack(const GenericTrack& rhs);
+      virtual ~GenericTrack() {}
+
+      const GenericTrack& operator=(const GenericTrack& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const GenericTrack& rhs);
+      virtual const char* HasName() { return "GenericTrack"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
 	};
 
       //
       class StaticTrack : public GenericTrack
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(StaticTrack);
 	  StaticTrack();
 
 	public:
 	  const Dictionary*& m_Dict;
 
-  StaticTrack(const Dictionary*& d) : GenericTrack(d), m_Dict(d) {}
-	  virtual ~StaticTrack() {}
-          virtual const char* HasName() { return "StaticTrack"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      StaticTrack(const Dictionary*& d);
+      StaticTrack(const StaticTrack& rhs);
+      virtual ~StaticTrack() {}
+
+      const StaticTrack& operator=(const StaticTrack& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const StaticTrack& rhs);
+      virtual const char* HasName() { return "StaticTrack"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class Track : public GenericTrack
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(Track);
 	  Track();
 
 	public:
@@ -225,20 +248,23 @@ namespace ASDCP
           Rational EditRate;
           ui64_t Origin;
 
-  Track(const Dictionary*& d) : GenericTrack(d), m_Dict(d), Origin(0) {}
-	  virtual ~Track() {}
-          virtual const char* HasName() { return "Track"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      Track(const Dictionary*& d);
+      Track(const Track& rhs);
+      virtual ~Track() {}
+
+      const Track& operator=(const Track& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const Track& rhs);
+      virtual const char* HasName() { return "Track"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class StructuralComponent : public InterchangeObject
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(StructuralComponent);
 	  StructuralComponent();
 
 	public:
@@ -246,38 +272,44 @@ namespace ASDCP
           UL DataDefinition;
           ui64_t Duration;
 
-  StructuralComponent(const Dictionary*& d) : InterchangeObject(d), m_Dict(d), Duration(0) {}
-	  virtual ~StructuralComponent() {}
-          virtual const char* HasName() { return "StructuralComponent"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
+      StructuralComponent(const Dictionary*& d);
+      StructuralComponent(const StructuralComponent& rhs);
+      virtual ~StructuralComponent() {}
+
+      const StructuralComponent& operator=(const StructuralComponent& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const StructuralComponent& rhs);
+      virtual const char* HasName() { return "StructuralComponent"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
 	};
 
       //
       class Sequence : public StructuralComponent
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(Sequence);
 	  Sequence();
 
 	public:
 	  const Dictionary*& m_Dict;
           Batch<UUID> StructuralComponents;
 
-  Sequence(const Dictionary*& d) : StructuralComponent(d), m_Dict(d) {}
-	  virtual ~Sequence() {}
-          virtual const char* HasName() { return "Sequence"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      Sequence(const Dictionary*& d);
+      Sequence(const Sequence& rhs);
+      virtual ~Sequence() {}
+
+      const Sequence& operator=(const Sequence& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const Sequence& rhs);
+      virtual const char* HasName() { return "Sequence"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class SourceClip : public StructuralComponent
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(SourceClip);
 	  SourceClip();
 
 	public:
@@ -286,20 +318,23 @@ namespace ASDCP
           UMID SourcePackageID;
           ui32_t SourceTrackID;
 
-  SourceClip(const Dictionary*& d) : StructuralComponent(d), m_Dict(d), StartPosition(0), SourceTrackID(0) {}
-	  virtual ~SourceClip() {}
-          virtual const char* HasName() { return "SourceClip"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      SourceClip(const Dictionary*& d);
+      SourceClip(const SourceClip& rhs);
+      virtual ~SourceClip() {}
+
+      const SourceClip& operator=(const SourceClip& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const SourceClip& rhs);
+      virtual const char* HasName() { return "SourceClip"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class TimecodeComponent : public StructuralComponent
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(TimecodeComponent);
 	  TimecodeComponent();
 
 	public:
@@ -308,20 +343,23 @@ namespace ASDCP
           ui64_t StartTimecode;
           ui8_t DropFrame;
 
-  TimecodeComponent(const Dictionary*& d) : StructuralComponent(d), m_Dict(d), RoundedTimecodeBase(0), StartTimecode(0), DropFrame(0) {}
-	  virtual ~TimecodeComponent() {}
-          virtual const char* HasName() { return "TimecodeComponent"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      TimecodeComponent(const Dictionary*& d);
+      TimecodeComponent(const TimecodeComponent& rhs);
+      virtual ~TimecodeComponent() {}
+
+      const TimecodeComponent& operator=(const TimecodeComponent& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const TimecodeComponent& rhs);
+      virtual const char* HasName() { return "TimecodeComponent"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class GenericDescriptor : public InterchangeObject
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(GenericDescriptor);
 	  GenericDescriptor();
 
 	public:
@@ -329,18 +367,21 @@ namespace ASDCP
           Batch<UUID> Locators;
           Batch<UUID> SubDescriptors;
 
-  GenericDescriptor(const Dictionary*& d) : InterchangeObject(d), m_Dict(d) {}
-	  virtual ~GenericDescriptor() {}
-          virtual const char* HasName() { return "GenericDescriptor"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
+      GenericDescriptor(const Dictionary*& d);
+      GenericDescriptor(const GenericDescriptor& rhs);
+      virtual ~GenericDescriptor() {}
+
+      const GenericDescriptor& operator=(const GenericDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const GenericDescriptor& rhs);
+      virtual const char* HasName() { return "GenericDescriptor"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
 	};
 
       //
       class FileDescriptor : public GenericDescriptor
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(FileDescriptor);
 	  FileDescriptor();
 
 	public:
@@ -351,20 +392,23 @@ namespace ASDCP
           UL EssenceContainer;
           UL Codec;
 
-  FileDescriptor(const Dictionary*& d) : GenericDescriptor(d), m_Dict(d), LinkedTrackID(0), ContainerDuration(0) {}
-	  virtual ~FileDescriptor() {}
-          virtual const char* HasName() { return "FileDescriptor"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      FileDescriptor(const Dictionary*& d);
+      FileDescriptor(const FileDescriptor& rhs);
+      virtual ~FileDescriptor() {}
+
+      const FileDescriptor& operator=(const FileDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const FileDescriptor& rhs);
+      virtual const char* HasName() { return "FileDescriptor"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class GenericSoundEssenceDescriptor : public FileDescriptor
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(GenericSoundEssenceDescriptor);
 	  GenericSoundEssenceDescriptor();
 
 	public:
@@ -376,20 +420,23 @@ namespace ASDCP
           ui32_t QuantizationBits;
           ui8_t DialNorm;
 
-  GenericSoundEssenceDescriptor(const Dictionary*& d) : FileDescriptor(d), m_Dict(d), Locked(0), AudioRefLevel(0), ChannelCount(0), QuantizationBits(0), DialNorm(0) {}
-	  virtual ~GenericSoundEssenceDescriptor() {}
-          virtual const char* HasName() { return "GenericSoundEssenceDescriptor"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      GenericSoundEssenceDescriptor(const Dictionary*& d);
+      GenericSoundEssenceDescriptor(const GenericSoundEssenceDescriptor& rhs);
+      virtual ~GenericSoundEssenceDescriptor() {}
+
+      const GenericSoundEssenceDescriptor& operator=(const GenericSoundEssenceDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const GenericSoundEssenceDescriptor& rhs);
+      virtual const char* HasName() { return "GenericSoundEssenceDescriptor"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class WaveAudioDescriptor : public GenericSoundEssenceDescriptor
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(WaveAudioDescriptor);
 	  WaveAudioDescriptor();
 
 	public:
@@ -399,20 +446,23 @@ namespace ASDCP
           ui32_t AvgBps;
           UL ChannelAssignment;
 
-  WaveAudioDescriptor(const Dictionary*& d) : GenericSoundEssenceDescriptor(d), m_Dict(d), BlockAlign(0), SequenceOffset(0), AvgBps(0) {}
-	  virtual ~WaveAudioDescriptor() {}
-          virtual const char* HasName() { return "WaveAudioDescriptor"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      WaveAudioDescriptor(const Dictionary*& d);
+      WaveAudioDescriptor(const WaveAudioDescriptor& rhs);
+      virtual ~WaveAudioDescriptor() {}
+
+      const WaveAudioDescriptor& operator=(const WaveAudioDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const WaveAudioDescriptor& rhs);
+      virtual const char* HasName() { return "WaveAudioDescriptor"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class GenericPictureEssenceDescriptor : public FileDescriptor
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(GenericPictureEssenceDescriptor);
 	  GenericPictureEssenceDescriptor();
 
 	public:
@@ -423,20 +473,23 @@ namespace ASDCP
           Rational AspectRatio;
           UL PictureEssenceCoding;
 
-  GenericPictureEssenceDescriptor(const Dictionary*& d) : FileDescriptor(d), m_Dict(d), FrameLayout(0), StoredWidth(0), StoredHeight(0) {}
-	  virtual ~GenericPictureEssenceDescriptor() {}
-          virtual const char* HasName() { return "GenericPictureEssenceDescriptor"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      GenericPictureEssenceDescriptor(const Dictionary*& d);
+      GenericPictureEssenceDescriptor(const GenericPictureEssenceDescriptor& rhs);
+      virtual ~GenericPictureEssenceDescriptor() {}
+
+      const GenericPictureEssenceDescriptor& operator=(const GenericPictureEssenceDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const GenericPictureEssenceDescriptor& rhs);
+      virtual const char* HasName() { return "GenericPictureEssenceDescriptor"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class RGBAEssenceDescriptor : public GenericPictureEssenceDescriptor
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(RGBAEssenceDescriptor);
 	  RGBAEssenceDescriptor();
 
 	public:
@@ -444,20 +497,23 @@ namespace ASDCP
           ui32_t ComponentMaxRef;
           ui32_t ComponentMinRef;
 
-  RGBAEssenceDescriptor(const Dictionary*& d) : GenericPictureEssenceDescriptor(d), m_Dict(d), ComponentMaxRef(0), ComponentMinRef(0) {}
-	  virtual ~RGBAEssenceDescriptor() {}
-          virtual const char* HasName() { return "RGBAEssenceDescriptor"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      RGBAEssenceDescriptor(const Dictionary*& d);
+      RGBAEssenceDescriptor(const RGBAEssenceDescriptor& rhs);
+      virtual ~RGBAEssenceDescriptor() {}
+
+      const RGBAEssenceDescriptor& operator=(const RGBAEssenceDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const RGBAEssenceDescriptor& rhs);
+      virtual const char* HasName() { return "RGBAEssenceDescriptor"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class JPEG2000PictureSubDescriptor : public InterchangeObject
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(JPEG2000PictureSubDescriptor);
 	  JPEG2000PictureSubDescriptor();
 
 	public:
@@ -476,20 +532,23 @@ namespace ASDCP
           Raw CodingStyleDefault;
           Raw QuantizationDefault;
 
-  JPEG2000PictureSubDescriptor(const Dictionary*& d) : InterchangeObject(d), m_Dict(d), Rsize(0), Xsize(0), Ysize(0), XOsize(0), YOsize(0), XTsize(0), YTsize(0), XTOsize(0), YTOsize(0), Csize(0) {}
-	  virtual ~JPEG2000PictureSubDescriptor() {}
-          virtual const char* HasName() { return "JPEG2000PictureSubDescriptor"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      JPEG2000PictureSubDescriptor(const Dictionary*& d);
+      JPEG2000PictureSubDescriptor(const JPEG2000PictureSubDescriptor& rhs);
+      virtual ~JPEG2000PictureSubDescriptor() {}
+
+      const JPEG2000PictureSubDescriptor& operator=(const JPEG2000PictureSubDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const JPEG2000PictureSubDescriptor& rhs);
+      virtual const char* HasName() { return "JPEG2000PictureSubDescriptor"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class CDCIEssenceDescriptor : public GenericPictureEssenceDescriptor
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(CDCIEssenceDescriptor);
 	  CDCIEssenceDescriptor();
 
 	public:
@@ -499,20 +558,23 @@ namespace ASDCP
           ui32_t VerticalSubsampling;
           ui8_t ColorSiting;
 
-  CDCIEssenceDescriptor(const Dictionary*& d) : GenericPictureEssenceDescriptor(d), m_Dict(d), ComponentDepth(0), HorizontalSubsampling(0), VerticalSubsampling(0), ColorSiting(0) {}
-	  virtual ~CDCIEssenceDescriptor() {}
-          virtual const char* HasName() { return "CDCIEssenceDescriptor"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      CDCIEssenceDescriptor(const Dictionary*& d);
+      CDCIEssenceDescriptor(const CDCIEssenceDescriptor& rhs);
+      virtual ~CDCIEssenceDescriptor() {}
+
+      const CDCIEssenceDescriptor& operator=(const CDCIEssenceDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const CDCIEssenceDescriptor& rhs);
+      virtual const char* HasName() { return "CDCIEssenceDescriptor"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class MPEG2VideoDescriptor : public CDCIEssenceDescriptor
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(MPEG2VideoDescriptor);
 	  MPEG2VideoDescriptor();
 
 	public:
@@ -522,20 +584,23 @@ namespace ASDCP
           ui32_t BitRate;
           ui8_t ProfileAndLevel;
 
-  MPEG2VideoDescriptor(const Dictionary*& d) : CDCIEssenceDescriptor(d), m_Dict(d), CodedContentType(0), LowDelay(0), BitRate(0), ProfileAndLevel(0) {}
-	  virtual ~MPEG2VideoDescriptor() {}
-          virtual const char* HasName() { return "MPEG2VideoDescriptor"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      MPEG2VideoDescriptor(const Dictionary*& d);
+      MPEG2VideoDescriptor(const MPEG2VideoDescriptor& rhs);
+      virtual ~MPEG2VideoDescriptor() {}
+
+      const MPEG2VideoDescriptor& operator=(const MPEG2VideoDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const MPEG2VideoDescriptor& rhs);
+      virtual const char* HasName() { return "MPEG2VideoDescriptor"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class DMSegment : public InterchangeObject
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(DMSegment);
 	  DMSegment();
 
 	public:
@@ -546,40 +611,46 @@ namespace ASDCP
           UTF16String EventComment;
           UUID DMFramework;
 
-  DMSegment(const Dictionary*& d) : InterchangeObject(d), m_Dict(d), EventStartPosition(0), Duration(0) {}
-	  virtual ~DMSegment() {}
-          virtual const char* HasName() { return "DMSegment"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      DMSegment(const Dictionary*& d);
+      DMSegment(const DMSegment& rhs);
+      virtual ~DMSegment() {}
+
+      const DMSegment& operator=(const DMSegment& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const DMSegment& rhs);
+      virtual const char* HasName() { return "DMSegment"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class CryptographicFramework : public InterchangeObject
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(CryptographicFramework);
 	  CryptographicFramework();
 
 	public:
 	  const Dictionary*& m_Dict;
           UUID ContextSR;
 
-  CryptographicFramework(const Dictionary*& d) : InterchangeObject(d), m_Dict(d) {}
-	  virtual ~CryptographicFramework() {}
-          virtual const char* HasName() { return "CryptographicFramework"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      CryptographicFramework(const Dictionary*& d);
+      CryptographicFramework(const CryptographicFramework& rhs);
+      virtual ~CryptographicFramework() {}
+
+      const CryptographicFramework& operator=(const CryptographicFramework& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const CryptographicFramework& rhs);
+      virtual const char* HasName() { return "CryptographicFramework"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class CryptographicContext : public InterchangeObject
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(CryptographicContext);
 	  CryptographicContext();
 
 	public:
@@ -590,40 +661,46 @@ namespace ASDCP
           UL MICAlgorithm;
           UUID CryptographicKeyID;
 
-  CryptographicContext(const Dictionary*& d) : InterchangeObject(d), m_Dict(d) {}
-	  virtual ~CryptographicContext() {}
-          virtual const char* HasName() { return "CryptographicContext"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      CryptographicContext(const Dictionary*& d);
+      CryptographicContext(const CryptographicContext& rhs);
+      virtual ~CryptographicContext() {}
+
+      const CryptographicContext& operator=(const CryptographicContext& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const CryptographicContext& rhs);
+      virtual const char* HasName() { return "CryptographicContext"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class GenericDataEssenceDescriptor : public FileDescriptor
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(GenericDataEssenceDescriptor);
 	  GenericDataEssenceDescriptor();
 
 	public:
 	  const Dictionary*& m_Dict;
           UL DataEssenceCoding;
 
-  GenericDataEssenceDescriptor(const Dictionary*& d) : FileDescriptor(d), m_Dict(d) {}
-	  virtual ~GenericDataEssenceDescriptor() {}
-          virtual const char* HasName() { return "GenericDataEssenceDescriptor"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      GenericDataEssenceDescriptor(const Dictionary*& d);
+      GenericDataEssenceDescriptor(const GenericDataEssenceDescriptor& rhs);
+      virtual ~GenericDataEssenceDescriptor() {}
+
+      const GenericDataEssenceDescriptor& operator=(const GenericDataEssenceDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const GenericDataEssenceDescriptor& rhs);
+      virtual const char* HasName() { return "GenericDataEssenceDescriptor"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class TimedTextDescriptor : public GenericDataEssenceDescriptor
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(TimedTextDescriptor);
 	  TimedTextDescriptor();
 
 	public:
@@ -632,20 +709,23 @@ namespace ASDCP
           UTF16String UCSEncoding;
           UTF16String NamespaceURI;
 
-  TimedTextDescriptor(const Dictionary*& d) : GenericDataEssenceDescriptor(d), m_Dict(d) {}
-	  virtual ~TimedTextDescriptor() {}
-          virtual const char* HasName() { return "TimedTextDescriptor"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      TimedTextDescriptor(const Dictionary*& d);
+      TimedTextDescriptor(const TimedTextDescriptor& rhs);
+      virtual ~TimedTextDescriptor() {}
+
+      const TimedTextDescriptor& operator=(const TimedTextDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const TimedTextDescriptor& rhs);
+      virtual const char* HasName() { return "TimedTextDescriptor"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class TimedTextResourceSubDescriptor : public InterchangeObject
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(TimedTextResourceSubDescriptor);
 	  TimedTextResourceSubDescriptor();
 
 	public:
@@ -654,53 +734,159 @@ namespace ASDCP
           UTF16String MIMEMediaType;
           ui32_t EssenceStreamID;
 
-  TimedTextResourceSubDescriptor(const Dictionary*& d) : InterchangeObject(d), m_Dict(d), EssenceStreamID(0) {}
-	  virtual ~TimedTextResourceSubDescriptor() {}
-          virtual const char* HasName() { return "TimedTextResourceSubDescriptor"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      TimedTextResourceSubDescriptor(const Dictionary*& d);
+      TimedTextResourceSubDescriptor(const TimedTextResourceSubDescriptor& rhs);
+      virtual ~TimedTextResourceSubDescriptor() {}
+
+      const TimedTextResourceSubDescriptor& operator=(const TimedTextResourceSubDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const TimedTextResourceSubDescriptor& rhs);
+      virtual const char* HasName() { return "TimedTextResourceSubDescriptor"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class StereoscopicPictureSubDescriptor : public InterchangeObject
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(StereoscopicPictureSubDescriptor);
 	  StereoscopicPictureSubDescriptor();
 
 	public:
 	  const Dictionary*& m_Dict;
 
-  StereoscopicPictureSubDescriptor(const Dictionary*& d) : InterchangeObject(d), m_Dict(d) {}
-	  virtual ~StereoscopicPictureSubDescriptor() {}
-          virtual const char* HasName() { return "StereoscopicPictureSubDescriptor"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      StereoscopicPictureSubDescriptor(const Dictionary*& d);
+      StereoscopicPictureSubDescriptor(const StereoscopicPictureSubDescriptor& rhs);
+      virtual ~StereoscopicPictureSubDescriptor() {}
+
+      const StereoscopicPictureSubDescriptor& operator=(const StereoscopicPictureSubDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const StereoscopicPictureSubDescriptor& rhs);
+      virtual const char* HasName() { return "StereoscopicPictureSubDescriptor"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
       //
       class NetworkLocator : public InterchangeObject
 	{
-	  ASDCP_NO_COPY_CONSTRUCT(NetworkLocator);
 	  NetworkLocator();
 
 	public:
 	  const Dictionary*& m_Dict;
           UTF16String URLString;
 
-  NetworkLocator(const Dictionary*& d) : InterchangeObject(d), m_Dict(d) {}
-	  virtual ~NetworkLocator() {}
-          virtual const char* HasName() { return "NetworkLocator"; }
-          virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
-          virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
-	  virtual void     Dump(FILE* = 0);
-	  virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
-	  virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+      NetworkLocator(const Dictionary*& d);
+      NetworkLocator(const NetworkLocator& rhs);
+      virtual ~NetworkLocator() {}
+
+      const NetworkLocator& operator=(const NetworkLocator& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const NetworkLocator& rhs);
+      virtual const char* HasName() { return "NetworkLocator"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+	};
+
+      //
+      class MCALabelSubDescriptor : public InterchangeObject
+	{
+	  MCALabelSubDescriptor();
+
+	public:
+	  const Dictionary*& m_Dict;
+          UL MCALabelDictionaryID;
+          UUID MCALinkID;
+          UTF16String MCATagSymbol;
+          UTF16String MCATagName;
+          ui32_t MCAChannelID;
+          ISO8String RFC5646SpokenLanguage;
+
+      MCALabelSubDescriptor(const Dictionary*& d);
+      MCALabelSubDescriptor(const MCALabelSubDescriptor& rhs);
+      virtual ~MCALabelSubDescriptor() {}
+
+      const MCALabelSubDescriptor& operator=(const MCALabelSubDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const MCALabelSubDescriptor& rhs);
+      virtual const char* HasName() { return "MCALabelSubDescriptor"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+	};
+
+      //
+      class AudioChannelLabelSubDescriptor : public MCALabelSubDescriptor
+	{
+	  AudioChannelLabelSubDescriptor();
+
+	public:
+	  const Dictionary*& m_Dict;
+          UUID SoundfieldGroupLinkID;
+
+      AudioChannelLabelSubDescriptor(const Dictionary*& d);
+      AudioChannelLabelSubDescriptor(const AudioChannelLabelSubDescriptor& rhs);
+      virtual ~AudioChannelLabelSubDescriptor() {}
+
+      const AudioChannelLabelSubDescriptor& operator=(const AudioChannelLabelSubDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const AudioChannelLabelSubDescriptor& rhs);
+      virtual const char* HasName() { return "AudioChannelLabelSubDescriptor"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+	};
+
+      //
+      class SoundfieldGroupLabelSubDescriptor : public MCALabelSubDescriptor
+	{
+	  SoundfieldGroupLabelSubDescriptor();
+
+	public:
+	  const Dictionary*& m_Dict;
+          Array<UUID> GroupOfSoundfieldGroupsLinkID;
+
+      SoundfieldGroupLabelSubDescriptor(const Dictionary*& d);
+      SoundfieldGroupLabelSubDescriptor(const SoundfieldGroupLabelSubDescriptor& rhs);
+      virtual ~SoundfieldGroupLabelSubDescriptor() {}
+
+      const SoundfieldGroupLabelSubDescriptor& operator=(const SoundfieldGroupLabelSubDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const SoundfieldGroupLabelSubDescriptor& rhs);
+      virtual const char* HasName() { return "SoundfieldGroupLabelSubDescriptor"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
+	};
+
+      //
+      class GroupOfSoundfieldGroupsLabelSubDescriptor : public MCALabelSubDescriptor
+	{
+	  GroupOfSoundfieldGroupsLabelSubDescriptor();
+
+	public:
+	  const Dictionary*& m_Dict;
+
+      GroupOfSoundfieldGroupsLabelSubDescriptor(const Dictionary*& d);
+      GroupOfSoundfieldGroupsLabelSubDescriptor(const GroupOfSoundfieldGroupsLabelSubDescriptor& rhs);
+      virtual ~GroupOfSoundfieldGroupsLabelSubDescriptor() {}
+
+      const GroupOfSoundfieldGroupsLabelSubDescriptor& operator=(const GroupOfSoundfieldGroupsLabelSubDescriptor& rhs) { Copy(rhs); return *this; }
+      virtual void Copy(const GroupOfSoundfieldGroupsLabelSubDescriptor& rhs);
+      virtual const char* HasName() { return "GroupOfSoundfieldGroupsLabelSubDescriptor"; }
+      virtual Result_t InitFromTLVSet(TLVReader& TLVSet);
+      virtual Result_t WriteToTLVSet(TLVWriter& TLVSet);
+      virtual void     Dump(FILE* = 0);
+      virtual Result_t InitFromBuffer(const byte_t* p, ui32_t l);
+      virtual Result_t WriteToBuffer(ASDCP::FrameBuffer&);
 	};
 
     } // namespace MXF
