@@ -152,7 +152,7 @@ void MainWindow::mxfSetStereoscopicState() {
         if (ui->mxfSourceTypeComboBox->currentIndex() == 0) {
             ui->pictureLeftLabel->setText(tr("Directory:"));
         } else {
-            ui->pictureLeftLabel->setText(tr("M2V File:"));
+            ui->pictureLeftLabel->setText(tr("M2V:"));
         }
         ui->pictureRightLabel->hide();
         ui->pictureRightEdit->hide();
