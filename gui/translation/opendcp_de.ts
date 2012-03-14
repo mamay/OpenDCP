@@ -22,9 +22,8 @@
 <context>
     <name>GenerateTitle</name>
     <message>
-        <location filename="../../build/gui/ui_generatetitle.h" line="263"/>
         <source>Dialog</source>
-        <translation>Dialog</translation>
+        <translation type="obsolete">Dialog</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="264"/>
@@ -32,9 +31,18 @@
         <translation>Filmtitel Wizard</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_generatetitle.h" line="265"/>
         <source>Content Title:</source>
-        <translation>Inhalt Titel:</translation>
+        <translation type="obsolete">Inhalt Titel:</translation>
+    </message>
+    <message>
+        <location filename="../../build/gui/ui_generatetitle.h" line="263"/>
+        <source>Title Generator</source>
+        <translation type="unfinished">Titel-Generator</translation>
+    </message>
+    <message>
+        <location filename="../../build/gui/ui_generatetitle.h" line="265"/>
+        <source>Title:</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="266"/>

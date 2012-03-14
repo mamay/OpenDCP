@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Title Generator</string>
   </property>
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
@@ -35,7 +35,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Content Title:</string>
+     <string>Title:</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="contentEdit">

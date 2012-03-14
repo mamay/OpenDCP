@@ -22,19 +22,19 @@
 <context>
     <name>GenerateTitle</name>
     <message>
-        <location filename="../../build/gui/ui_generatetitle.h" line="263"/>
-        <source>Dialog</source>
-        <translation>Diálogo</translation>
-    </message>
-    <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="264"/>
         <source>Film Title Wizard</source>
         <translation>Generador de Título</translation>
     </message>
     <message>
+        <location filename="../../build/gui/ui_generatetitle.h" line="263"/>
+        <source>Title Generator</source>
+        <translation>Generador de Título</translation>
+    </message>
+    <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="265"/>
-        <source>Content Title:</source>
-        <translation>Título del Contenido:</translation>
+        <source>Title:</source>
+        <translation>Título</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="266"/>
