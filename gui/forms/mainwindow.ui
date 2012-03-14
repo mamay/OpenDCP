@@ -61,7 +61,7 @@
          </rect>
         </property>
         <property name="currentIndex">
-         <number>3</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="j2kTab">
          <attribute name="title">
@@ -116,9 +116,9 @@
            <widget class="QLineEdit" name="inImageLeftEdit">
             <property name="geometry">
              <rect>
-              <x>80</x>
+              <x>85</x>
               <y>30</y>
-              <width>480</width>
+              <width>475</width>
               <height>23</height>
              </rect>
             </property>
@@ -179,9 +179,9 @@
            <widget class="QLineEdit" name="inImageRightEdit">
             <property name="geometry">
              <rect>
-              <x>80</x>
+              <x>85</x>
               <y>60</y>
-              <width>480</width>
+              <width>475</width>
               <height>23</height>
              </rect>
             </property>
@@ -318,7 +318,7 @@
            <widget class="QLabel" name="bwValueLabel">
             <property name="geometry">
              <rect>
-              <x>370</x>
+              <x>390</x>
               <y>120</y>
               <width>63</width>
               <height>25</height>
@@ -354,7 +354,7 @@
              <rect>
               <x>10</x>
               <y>90</y>
-              <width>110</width>
+              <width>115</width>
               <height>27</height>
              </rect>
             </property>
@@ -379,7 +379,7 @@
              <rect>
               <x>10</x>
               <y>30</y>
-              <width>110</width>
+              <width>115</width>
               <height>27</height>
              </rect>
             </property>
@@ -408,7 +408,7 @@
            <widget class="QComboBox" name="encoderComboBox">
             <property name="geometry">
              <rect>
-              <x>120</x>
+              <x>130</x>
               <y>30</y>
               <width>125</width>
               <height>26</height>
@@ -449,7 +449,7 @@
            <widget class="QSlider" name="bwSlider">
             <property name="geometry">
              <rect>
-              <x>120</x>
+              <x>130</x>
               <y>120</y>
               <width>250</width>
               <height>25</height>
@@ -495,7 +495,7 @@
            <widget class="QSpinBox" name="threadsSpinBox">
             <property name="geometry">
              <rect>
-              <x>120</x>
+              <x>130</x>
               <y>150</y>
               <width>45</width>
               <height>25</height>
@@ -526,9 +526,9 @@
            <widget class="QCheckBox" name="stereoscopicCheckBox">
             <property name="geometry">
              <rect>
-              <x>260</x>
+              <x>270</x>
               <y>60</y>
-              <width>131</width>
+              <width>175</width>
               <height>25</height>
              </rect>
             </property>
@@ -556,7 +556,7 @@
              <rect>
               <x>10</x>
               <y>60</y>
-              <width>110</width>
+              <width>115</width>
               <height>27</height>
              </rect>
             </property>
@@ -585,7 +585,7 @@
            <widget class="QComboBox" name="profileComboBox">
             <property name="geometry">
              <rect>
-              <x>120</x>
+              <x>130</x>
               <y>60</y>
               <width>125</width>
               <height>26</height>
@@ -625,7 +625,7 @@
              <rect>
               <x>10</x>
               <y>120</y>
-              <width>110</width>
+              <width>115</width>
               <height>27</height>
              </rect>
             </property>
@@ -656,7 +656,7 @@
              <rect>
               <x>10</x>
               <y>150</y>
-              <width>110</width>
+              <width>115</width>
               <height>27</height>
              </rect>
             </property>
@@ -673,9 +673,9 @@
            <widget class="QCheckBox" name="overwritej2kCB">
             <property name="geometry">
              <rect>
-              <x>260</x>
+              <x>270</x>
               <y>30</y>
-              <width>191</width>
+              <width>175</width>
               <height>25</height>
              </rect>
             </property>
@@ -704,7 +704,7 @@
            <widget class="QComboBox" name="frameRateComboBox">
             <property name="geometry">
              <rect>
-              <x>120</x>
+              <x>130</x>
               <y>90</y>
               <width>71</width>
               <height>26</height>
@@ -788,9 +788,9 @@
            <widget class="QLineEdit" name="outJ2kLeftEdit">
             <property name="geometry">
              <rect>
-              <x>80</x>
+              <x>85</x>
               <y>30</y>
-              <width>480</width>
+              <width>475</width>
               <height>23</height>
              </rect>
             </property>
@@ -833,9 +833,9 @@
            <widget class="QLineEdit" name="outJ2kRightEdit">
             <property name="geometry">
              <rect>
-              <x>80</x>
+              <x>85</x>
               <y>60</y>
-              <width>480</width>
+              <width>475</width>
               <height>23</height>
              </rect>
             </property>
@@ -923,7 +923,7 @@
            <widget class="QComboBox" name="colorComboBox">
             <property name="geometry">
              <rect>
-              <x>120</x>
+              <x>130</x>
               <y>30</y>
               <width>150</width>
               <height>26</height>
@@ -943,7 +943,7 @@
            <widget class="QCheckBox" name="xyzCheckBox">
             <property name="geometry">
              <rect>
-              <x>290</x>
+              <x>300</x>
               <y>30</y>
               <width>131</width>
               <height>25</height>
@@ -980,9 +980,9 @@
            <widget class="QCheckBox" name="dpxLogCheckBox">
             <property name="geometry">
              <rect>
-              <x>440</x>
+              <x>450</x>
               <y>30</y>
-              <width>141</width>
+              <width>131</width>
               <height>25</height>
              </rect>
             </property>
@@ -1049,7 +1049,7 @@
            <widget class="QComboBox" name="resizeComboBox">
             <property name="geometry">
              <rect>
-              <x>120</x>
+              <x>130</x>
               <y>60</y>
               <width>150</width>
               <height>26</height>
@@ -1090,7 +1090,7 @@
             <rect>
              <x>10</x>
              <y>60</y>
-             <width>100</width>
+             <width>115</width>
              <height>27</height>
             </rect>
            </property>
@@ -1101,7 +1101,7 @@
           <widget class="QComboBox" name="mxfTypeComboBox">
            <property name="geometry">
             <rect>
-             <x>110</x>
+             <x>130</x>
              <y>60</y>
              <width>120</width>
              <height>27</height>
@@ -1123,7 +1123,7 @@
             <rect>
              <x>10</x>
              <y>90</y>
-             <width>100</width>
+             <width>115</width>
              <height>27</height>
             </rect>
            </property>
@@ -1134,7 +1134,7 @@
           <widget class="QComboBox" name="mxfFrameRateComboBox">
            <property name="geometry">
             <rect>
-             <x>110</x>
+             <x>130</x>
              <y>90</y>
              <width>120</width>
              <height>27</height>
@@ -1176,7 +1176,7 @@
             <rect>
              <x>10</x>
              <y>30</y>
-             <width>100</width>
+             <width>115</width>
              <height>27</height>
             </rect>
            </property>
@@ -1187,7 +1187,7 @@
           <widget class="QComboBox" name="mxfSourceTypeComboBox">
            <property name="geometry">
             <rect>
-             <x>110</x>
+             <x>130</x>
              <y>30</y>
              <width>120</width>
              <height>27</height>
@@ -2110,7 +2110,7 @@
             <rect>
              <x>10</x>
              <y>60</y>
-             <width>70</width>
+             <width>115</width>
              <height>27</height>
             </rect>
            </property>
@@ -2121,7 +2121,7 @@
           <widget class="QComboBox" name="mxfTypeComboBox_2">
            <property name="geometry">
             <rect>
-             <x>90</x>
+             <x>130</x>
              <y>60</y>
              <width>120</width>
              <height>27</height>
@@ -2138,7 +2138,7 @@
             <rect>
              <x>10</x>
              <y>30</y>
-             <width>70</width>
+             <width>115</width>
              <height>27</height>
             </rect>
            </property>
@@ -2149,7 +2149,7 @@
           <widget class="QComboBox" name="mxfSourceTypeComboBox_2">
            <property name="geometry">
             <rect>
-             <x>90</x>
+             <x>130</x>
              <y>30</y>
              <width>171</width>
              <height>27</height>
@@ -2184,7 +2184,7 @@
             <rect>
              <x>10</x>
              <y>30</y>
-             <width>70</width>
+             <width>75</width>
              <height>25</height>
             </rect>
            </property>
@@ -2207,9 +2207,9 @@
           <widget class="QLineEdit" name="subInEdit">
            <property name="geometry">
             <rect>
-             <x>80</x>
+             <x>85</x>
              <y>30</y>
-             <width>480</width>
+             <width>475</width>
              <height>23</height>
             </rect>
            </property>
@@ -2250,7 +2250,7 @@
             <rect>
              <x>10</x>
              <y>65</y>
-             <width>70</width>
+             <width>75</width>
              <height>25</height>
             </rect>
            </property>
@@ -2273,9 +2273,9 @@
           <widget class="QLineEdit" name="sMxfOutEdit">
            <property name="geometry">
             <rect>
-             <x>80</x>
+             <x>85</x>
              <y>65</y>
-             <width>480</width>
+             <width>475</width>
              <height>23</height>
             </rect>
            </property>
@@ -2623,7 +2623,7 @@
             <rect>
              <x>110</x>
              <y>30</y>
-             <width>451</width>
+             <width>450</width>
              <height>23</height>
             </rect>
            </property>
@@ -2778,7 +2778,7 @@
              <rect>
               <x>110</x>
               <y>10</y>
-              <width>451</width>
+              <width>450</width>
               <height>23</height>
              </rect>
             </property>
@@ -2941,7 +2941,7 @@
              <rect>
               <x>110</x>
               <y>10</y>
-              <width>451</width>
+              <width>450</width>
               <height>23</height>
              </rect>
             </property>
@@ -3104,7 +3104,7 @@
              <rect>
               <x>110</x>
               <y>10</y>
-              <width>451</width>
+              <width>450</width>
               <height>23</height>
              </rect>
             </property>
