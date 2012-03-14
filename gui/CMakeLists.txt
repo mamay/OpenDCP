@@ -58,9 +58,10 @@ SET(OPENDCP_GUI_RES_CXX
 #--set language support-------------------------------------------------------
 SET(LANGUAGES 
     en 
-    fr 
-    de 
     es
+    fr 
+    it
+    de 
 )
 
 SET(LANGUAGE_TS_FILES)
