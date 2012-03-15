@@ -22,13 +22,13 @@
 <context>
     <name>GenerateTitle</name>
     <message>
-        <location filename="../../build/gui/ui_generatetitle.h" line="264"/>
-        <source>Film Title Wizard</source>
+        <location filename="../../build/gui/ui_generatetitle.h" line="263"/>
+        <source>Title Generator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_generatetitle.h" line="263"/>
-        <source>Title Generator</source>
+        <location filename="../../build/gui/ui_generatetitle.h" line="264"/>
+        <source>Film Title Wizard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -226,6 +226,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1204"/>
+        <source>XYZ Transform</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1206"/>
         <source>If input is DPX, use logarithmic conversion</source>
         <translation type="unfinished"></translation>
@@ -253,6 +258,18 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1215"/>
         <source>MXF Parameters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1216"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1242"/>
+        <source>Label:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1218"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1247"/>
+        <source>Type:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -353,23 +370,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1218"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1247"/>
-        <source>Type:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1204"/>
-        <source>XYZ Transform</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1216"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1242"/>
-        <source>Label:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1248"/>
         <source>Subtitle</source>
         <translation type="unfinished"></translation>
@@ -402,7 +402,7 @@
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1254"/>
-        <source>Content Title:</source>
+        <source>Title:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -446,10 +446,14 @@
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1264"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1265"/>
         <location filename="../../build/gui/ui_mainwindow.h" line="1269"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1270"/>
         <location filename="../../build/gui/ui_mainwindow.h" line="1274"/>
+        <source>frame</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1265"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1270"/>
         <location filename="../../build/gui/ui_mainwindow.h" line="1275"/>
         <source>frames</source>
         <translation type="unfinished"></translation>

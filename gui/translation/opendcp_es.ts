@@ -34,7 +34,7 @@
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="265"/>
         <source>Title:</source>
-        <translation>Título</translation>
+        <translation>Título:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="266"/>
@@ -353,6 +353,11 @@
         <translation>SMPTE</translation>
     </message>
     <message>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1254"/>
+        <source>Title:</source>
+        <translation>Título:</translation>
+    </message>
+    <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1218"/>
         <location filename="../../build/gui/ui_mainwindow.h" line="1247"/>
         <source>Type:</source>
@@ -401,11 +406,6 @@
         <translation>Anotación:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1254"/>
-        <source>Content Title:</source>
-        <translation>Título:</translation>
-    </message>
-    <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1255"/>
         <source>Rating:</source>
         <translation>Clasificación:</translation>
@@ -446,10 +446,14 @@
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1264"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1265"/>
         <location filename="../../build/gui/ui_mainwindow.h" line="1269"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1270"/>
         <location filename="../../build/gui/ui_mainwindow.h" line="1274"/>
+        <source>frame</source>
+        <translation>fotograma</translation>
+    </message>
+    <message>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1265"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1270"/>
         <location filename="../../build/gui/ui_mainwindow.h" line="1275"/>
         <source>frames</source>
         <translation>fotogramas</translation>

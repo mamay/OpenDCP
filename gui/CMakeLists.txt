@@ -203,7 +203,10 @@ ELSEIF(WIN32)
     SET(TRANSLATION_DEST_DIR translation)
 ENDIF()
 
-FILE(GLOB LANGUAGE_FILES "${CMAKE_CURRENT_BINARY_DIR}/translation/i18n/*.qm")
-MESSAGE(STATUS "Installing language files ${LANGUAGE_FILES} into ${TRANSLATION_DEST_DIR}")
-INSTALL(FILES     ${LANGUAGE_FILES} DESTINATION ${TRANSLATION_DEST_DIR})
+INSTALL(
+    CODE "
+    file(GLOB LANGUAGE_FILES \"${CMAKE_CURRENT_BINARY_DIR}/translation/i18n/*.qm\")
+    file(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}/${TRANSLATION_DEST_DIR}\" TYPE FILE FILES \${LANGUAGE_FILES}) 
+    "
+)
 #----------------------------------------------------------------------------

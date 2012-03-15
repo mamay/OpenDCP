@@ -318,7 +318,7 @@
            <widget class="QLabel" name="bwValueLabel">
             <property name="geometry">
              <rect>
-              <x>390</x>
+              <x>410</x>
               <y>120</y>
               <width>63</width>
               <height>25</height>
@@ -354,7 +354,7 @@
              <rect>
               <x>10</x>
               <y>90</y>
-              <width>115</width>
+              <width>125</width>
               <height>27</height>
              </rect>
             </property>
@@ -379,7 +379,7 @@
              <rect>
               <x>10</x>
               <y>30</y>
-              <width>115</width>
+              <width>125</width>
               <height>27</height>
              </rect>
             </property>
@@ -408,7 +408,7 @@
            <widget class="QComboBox" name="encoderComboBox">
             <property name="geometry">
              <rect>
-              <x>130</x>
+              <x>150</x>
               <y>30</y>
               <width>125</width>
               <height>26</height>
@@ -449,7 +449,7 @@
            <widget class="QSlider" name="bwSlider">
             <property name="geometry">
              <rect>
-              <x>130</x>
+              <x>150</x>
               <y>120</y>
               <width>250</width>
               <height>25</height>
@@ -495,7 +495,7 @@
            <widget class="QSpinBox" name="threadsSpinBox">
             <property name="geometry">
              <rect>
-              <x>130</x>
+              <x>150</x>
               <y>150</y>
               <width>45</width>
               <height>25</height>
@@ -526,7 +526,7 @@
            <widget class="QCheckBox" name="stereoscopicCheckBox">
             <property name="geometry">
              <rect>
-              <x>270</x>
+              <x>290</x>
               <y>60</y>
               <width>190</width>
               <height>25</height>
@@ -556,7 +556,7 @@
              <rect>
               <x>10</x>
               <y>60</y>
-              <width>115</width>
+              <width>125</width>
               <height>27</height>
              </rect>
             </property>
@@ -585,7 +585,7 @@
            <widget class="QComboBox" name="profileComboBox">
             <property name="geometry">
              <rect>
-              <x>130</x>
+              <x>150</x>
               <y>60</y>
               <width>125</width>
               <height>26</height>
@@ -625,7 +625,7 @@
              <rect>
               <x>10</x>
               <y>120</y>
-              <width>115</width>
+              <width>125</width>
               <height>27</height>
              </rect>
             </property>
@@ -656,7 +656,7 @@
              <rect>
               <x>10</x>
               <y>150</y>
-              <width>115</width>
+              <width>125</width>
               <height>27</height>
              </rect>
             </property>
@@ -673,7 +673,7 @@
            <widget class="QCheckBox" name="overwritej2kCB">
             <property name="geometry">
              <rect>
-              <x>270</x>
+              <x>290</x>
               <y>30</y>
               <width>190</width>
               <height>25</height>
@@ -704,7 +704,7 @@
            <widget class="QComboBox" name="frameRateComboBox">
             <property name="geometry">
              <rect>
-              <x>130</x>
+              <x>150</x>
               <y>90</y>
               <width>71</width>
               <height>26</height>
@@ -923,7 +923,7 @@
            <widget class="QComboBox" name="colorComboBox">
             <property name="geometry">
              <rect>
-              <x>130</x>
+              <x>150</x>
               <y>30</y>
               <width>150</width>
               <height>26</height>
@@ -943,9 +943,9 @@
            <widget class="QCheckBox" name="xyzCheckBox">
             <property name="geometry">
              <rect>
-              <x>300</x>
+              <x>320</x>
               <y>30</y>
-              <width>131</width>
+              <width>140</width>
               <height>25</height>
              </rect>
             </property>
@@ -982,7 +982,7 @@
              <rect>
               <x>450</x>
               <y>30</y>
-              <width>131</width>
+              <width>140</width>
               <height>25</height>
              </rect>
             </property>
@@ -1019,7 +1019,7 @@
              <rect>
               <x>10</x>
               <y>30</y>
-              <width>115</width>
+              <width>125</width>
               <height>27</height>
              </rect>
             </property>
@@ -1038,7 +1038,7 @@
              <rect>
               <x>10</x>
               <y>60</y>
-              <width>115</width>
+              <width>125</width>
               <height>27</height>
              </rect>
             </property>
@@ -1049,7 +1049,7 @@
            <widget class="QComboBox" name="resizeComboBox">
             <property name="geometry">
              <rect>
-              <x>130</x>
+              <x>150</x>
               <y>60</y>
               <width>150</width>
               <height>26</height>
@@ -2365,7 +2365,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>Content Title:</string>
+            <string>Title:</string>
            </property>
           </widget>
           <widget class="QLabel" name="cplRatingLabel">
@@ -2770,7 +2770,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>frames</string>
+             <string>frame</string>
             </property>
            </widget>
            <widget class="QLineEdit" name="reelPictureEdit">
@@ -2933,7 +2933,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>frames</string>
+             <string>frame</string>
             </property>
            </widget>
            <widget class="QLineEdit" name="reelSoundEdit">
@@ -3096,7 +3096,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>frames</string>
+             <string>frame</string>
             </property>
            </widget>
            <widget class="QLineEdit" name="reelSubtitleEdit">
@@ -3192,7 +3192,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>
