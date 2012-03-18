@@ -61,7 +61,7 @@
          </rect>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="j2kTab">
          <attribute name="title">
@@ -1019,7 +1019,7 @@
              <rect>
               <x>10</x>
               <y>30</y>
-              <width>125</width>
+              <width>141</width>
               <height>27</height>
              </rect>
             </property>
@@ -1038,7 +1038,7 @@
              <rect>
               <x>10</x>
               <y>60</y>
-              <width>125</width>
+              <width>141</width>
               <height>27</height>
              </rect>
             </property>
@@ -2535,6 +2535,12 @@
              <height>23</height>
             </rect>
            </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="font">
             <font>
              <pointsize>10</pointsize>
@@ -2643,19 +2649,6 @@
              <height>71</height>
             </rect>
            </property>
-           <widget class="QLabel" name="reelPictureDurationLabel">
-            <property name="geometry">
-             <rect>
-              <x>110</x>
-              <y>40</y>
-              <width>65</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Duration:</string>
-            </property>
-           </widget>
            <widget class="QLabel" name="reelPictureLabel">
             <property name="geometry">
              <rect>
@@ -2682,97 +2675,6 @@
              <string notr="true">...</string>
             </property>
            </widget>
-           <widget class="QSpinBox" name="reelPictureDurationSpinBox">
-            <property name="geometry">
-             <rect>
-              <x>180</x>
-              <y>40</y>
-              <width>80</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-            <property name="buttonSymbols">
-             <enum>QAbstractSpinBox::PlusMinus</enum>
-            </property>
-            <property name="suffix">
-             <string notr="true"/>
-            </property>
-            <property name="prefix">
-             <string notr="true"/>
-            </property>
-            <property name="maximum">
-             <number>999999</number>
-            </property>
-            <property name="value">
-             <number>0</number>
-            </property>
-           </widget>
-           <widget class="QSpinBox" name="reelPictureOffsetSpinBox">
-            <property name="geometry">
-             <rect>
-              <x>430</x>
-              <y>40</y>
-              <width>80</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="frame">
-             <bool>true</bool>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-            <property name="buttonSymbols">
-             <enum>QAbstractSpinBox::PlusMinus</enum>
-            </property>
-            <property name="suffix">
-             <string notr="true"/>
-            </property>
-            <property name="prefix">
-             <string notr="true"/>
-            </property>
-            <property name="maximum">
-             <number>999999</number>
-            </property>
-           </widget>
-           <widget class="QLabel" name="reelPictureOffsetLabel">
-            <property name="geometry">
-             <rect>
-              <x>330</x>
-              <y>40</y>
-              <width>100</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Entry Point:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-           <widget class="QLabel" name="reelPictureOffsetFrameLabel">
-            <property name="geometry">
-             <rect>
-              <x>520</x>
-              <y>40</y>
-              <width>50</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>frame</string>
-            </property>
-           </widget>
            <widget class="QLineEdit" name="reelPictureEdit">
             <property name="geometry">
              <rect>
@@ -2786,18 +2688,105 @@
              <string notr="true"/>
             </property>
            </widget>
-           <widget class="QLabel" name="reelPictureDurationFrameLabel">
+           <widget class="QWidget" name="layoutWidget">
             <property name="geometry">
              <rect>
-              <x>270</x>
+              <x>110</x>
               <y>40</y>
-              <width>50</width>
-              <height>25</height>
+              <width>451</width>
+              <height>27</height>
              </rect>
             </property>
-            <property name="text">
-             <string>frames</string>
-            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <item>
+              <widget class="QLabel" name="reelPictureDurationLabel">
+               <property name="text">
+                <string>Duration:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="reelPictureDurationSpinBox">
+               <property name="layoutDirection">
+                <enum>Qt::LeftToRight</enum>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::PlusMinus</enum>
+               </property>
+               <property name="suffix">
+                <string notr="true"/>
+               </property>
+               <property name="prefix">
+                <string notr="true"/>
+               </property>
+               <property name="maximum">
+                <number>999999</number>
+               </property>
+               <property name="value">
+                <number>0</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="reelPictureDurationFrameLabel">
+               <property name="text">
+                <string>frames</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="Line" name="line_5">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="reelPictureOffsetLabel">
+               <property name="text">
+                <string>Entry Point:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="reelPictureOffsetSpinBox">
+               <property name="layoutDirection">
+                <enum>Qt::LeftToRight</enum>
+               </property>
+               <property name="frame">
+                <bool>true</bool>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::PlusMinus</enum>
+               </property>
+               <property name="suffix">
+                <string notr="true"/>
+               </property>
+               <property name="prefix">
+                <string notr="true"/>
+               </property>
+               <property name="maximum">
+                <number>999999</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="reelPictureOffsetFrameLabel">
+               <property name="text">
+                <string>frame</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </widget>
           <widget class="QWidget" name="reelSoundWidget" native="true">
@@ -2809,19 +2798,6 @@
              <height>71</height>
             </rect>
            </property>
-           <widget class="QLabel" name="reelSoundDurationLabel">
-            <property name="geometry">
-             <rect>
-              <x>110</x>
-              <y>40</y>
-              <width>65</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Duration:</string>
-            </property>
-           </widget>
            <widget class="QLabel" name="reelSoundLabel">
             <property name="geometry">
              <rect>
@@ -2848,94 +2824,6 @@
              <string notr="true">...</string>
             </property>
            </widget>
-           <widget class="QSpinBox" name="reelSoundDurationSpinBox">
-            <property name="geometry">
-             <rect>
-              <x>180</x>
-              <y>40</y>
-              <width>80</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-            <property name="buttonSymbols">
-             <enum>QAbstractSpinBox::PlusMinus</enum>
-            </property>
-            <property name="suffix">
-             <string notr="true"/>
-            </property>
-            <property name="prefix">
-             <string notr="true"/>
-            </property>
-            <property name="maximum">
-             <number>999999</number>
-            </property>
-            <property name="value">
-             <number>0</number>
-            </property>
-           </widget>
-           <widget class="QSpinBox" name="reelSoundOffsetSpinBox">
-            <property name="geometry">
-             <rect>
-              <x>430</x>
-              <y>40</y>
-              <width>80</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-            <property name="buttonSymbols">
-             <enum>QAbstractSpinBox::PlusMinus</enum>
-            </property>
-            <property name="suffix">
-             <string notr="true"/>
-            </property>
-            <property name="prefix">
-             <string notr="true"/>
-            </property>
-            <property name="maximum">
-             <number>999999</number>
-            </property>
-           </widget>
-           <widget class="QLabel" name="reelSoundOffsetLabel">
-            <property name="geometry">
-             <rect>
-              <x>330</x>
-              <y>40</y>
-              <width>100</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Entry Point:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-           <widget class="QLabel" name="reelSoundOffsetFrameLabel">
-            <property name="geometry">
-             <rect>
-              <x>520</x>
-              <y>40</y>
-              <width>50</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>frame</string>
-            </property>
-           </widget>
            <widget class="QLineEdit" name="reelSoundEdit">
             <property name="geometry">
              <rect>
@@ -2949,18 +2837,102 @@
              <string notr="true"/>
             </property>
            </widget>
-           <widget class="QLabel" name="reelSoundDurationFrameLabel">
+           <widget class="QWidget" name="layoutWidget">
             <property name="geometry">
              <rect>
-              <x>270</x>
+              <x>110</x>
               <y>40</y>
-              <width>50</width>
-              <height>25</height>
+              <width>451</width>
+              <height>27</height>
              </rect>
             </property>
-            <property name="text">
-             <string>frames</string>
-            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QLabel" name="reelSoundDurationLabel">
+               <property name="text">
+                <string>Duration:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="reelSoundDurationSpinBox">
+               <property name="layoutDirection">
+                <enum>Qt::LeftToRight</enum>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::PlusMinus</enum>
+               </property>
+               <property name="suffix">
+                <string notr="true"/>
+               </property>
+               <property name="prefix">
+                <string notr="true"/>
+               </property>
+               <property name="maximum">
+                <number>999999</number>
+               </property>
+               <property name="value">
+                <number>0</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="reelSoundDurationFrameLabel">
+               <property name="text">
+                <string>frames</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="Line" name="line">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="reelSoundOffsetLabel">
+               <property name="text">
+                <string>Entry Point:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="reelSoundOffsetSpinBox">
+               <property name="layoutDirection">
+                <enum>Qt::LeftToRight</enum>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::PlusMinus</enum>
+               </property>
+               <property name="suffix">
+                <string notr="true"/>
+               </property>
+               <property name="prefix">
+                <string notr="true"/>
+               </property>
+               <property name="maximum">
+                <number>999999</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="reelSoundOffsetFrameLabel">
+               <property name="text">
+                <string>frame</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </widget>
           <widget class="QWidget" name="reelSubtitleWidget" native="true">
@@ -2972,19 +2944,6 @@
              <height>71</height>
             </rect>
            </property>
-           <widget class="QLabel" name="reelSubtitleDurationLabel">
-            <property name="geometry">
-             <rect>
-              <x>110</x>
-              <y>40</y>
-              <width>65</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Duration:</string>
-            </property>
-           </widget>
            <widget class="QLabel" name="reelSubtitleLabel">
             <property name="geometry">
              <rect>
@@ -3011,94 +2970,6 @@
              <string notr="true">...</string>
             </property>
            </widget>
-           <widget class="QSpinBox" name="reelSubtitleDurationSpinBox">
-            <property name="geometry">
-             <rect>
-              <x>180</x>
-              <y>40</y>
-              <width>80</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-            <property name="buttonSymbols">
-             <enum>QAbstractSpinBox::PlusMinus</enum>
-            </property>
-            <property name="suffix">
-             <string notr="true"/>
-            </property>
-            <property name="prefix">
-             <string notr="true"/>
-            </property>
-            <property name="maximum">
-             <number>999999</number>
-            </property>
-            <property name="value">
-             <number>0</number>
-            </property>
-           </widget>
-           <widget class="QSpinBox" name="reelSubtitleOffsetSpinBox">
-            <property name="geometry">
-             <rect>
-              <x>430</x>
-              <y>40</y>
-              <width>80</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-            <property name="buttonSymbols">
-             <enum>QAbstractSpinBox::PlusMinus</enum>
-            </property>
-            <property name="suffix">
-             <string notr="true"/>
-            </property>
-            <property name="prefix">
-             <string notr="true"/>
-            </property>
-            <property name="maximum">
-             <number>999999</number>
-            </property>
-           </widget>
-           <widget class="QLabel" name="reelSubtitleOffsetLabel">
-            <property name="geometry">
-             <rect>
-              <x>330</x>
-              <y>40</y>
-              <width>100</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Entry Point:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-           <widget class="QLabel" name="reelSubtitleOffsetFrameLabel">
-            <property name="geometry">
-             <rect>
-              <x>520</x>
-              <y>40</y>
-              <width>50</width>
-              <height>25</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>frame</string>
-            </property>
-           </widget>
            <widget class="QLineEdit" name="reelSubtitleEdit">
             <property name="geometry">
              <rect>
@@ -3112,18 +2983,102 @@
              <string notr="true"/>
             </property>
            </widget>
-           <widget class="QLabel" name="reelSubtitleDurationFrameLabel">
+           <widget class="QWidget" name="layoutWidget">
             <property name="geometry">
              <rect>
-              <x>270</x>
+              <x>110</x>
               <y>40</y>
-              <width>50</width>
-              <height>25</height>
+              <width>451</width>
+              <height>27</height>
              </rect>
             </property>
-            <property name="text">
-             <string>frames</string>
-            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QLabel" name="reelSubtitleDurationLabel">
+               <property name="text">
+                <string>Duration:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="reelSubtitleDurationSpinBox">
+               <property name="layoutDirection">
+                <enum>Qt::LeftToRight</enum>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::PlusMinus</enum>
+               </property>
+               <property name="suffix">
+                <string notr="true"/>
+               </property>
+               <property name="prefix">
+                <string notr="true"/>
+               </property>
+               <property name="maximum">
+                <number>999999</number>
+               </property>
+               <property name="value">
+                <number>0</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="reelSubtitleDurationFrameLabel">
+               <property name="text">
+                <string>frames</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="Line" name="line_4">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="reelSubtitleOffsetLabel">
+               <property name="text">
+                <string>Entry Point:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="reelSubtitleOffsetSpinBox">
+               <property name="layoutDirection">
+                <enum>Qt::LeftToRight</enum>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::PlusMinus</enum>
+               </property>
+               <property name="suffix">
+                <string notr="true"/>
+               </property>
+               <property name="prefix">
+                <string notr="true"/>
+               </property>
+               <property name="maximum">
+                <number>999999</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="reelSubtitleOffsetFrameLabel">
+               <property name="text">
+                <string>frame</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </widget>
           <widget class="Line" name="line_1">
@@ -3170,7 +3125,7 @@
           <property name="geometry">
            <rect>
             <x>570</x>
-            <y>580</y>
+            <y>670</y>
             <width>115</width>
             <height>40</height>
            </rect>
@@ -3178,6 +3133,55 @@
           <property name="text">
            <string>Create DCP</string>
           </property>
+         </widget>
+         <widget class="QGroupBox" name="gbDCP">
+          <property name="geometry">
+           <rect>
+            <x>80</x>
+            <y>580</y>
+            <width>600</width>
+            <height>80</height>
+           </rect>
+          </property>
+          <property name="title">
+           <string>Options</string>
+          </property>
+          <widget class="QWidget" name="">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>30</y>
+             <width>186</width>
+             <height>40</height>
+            </rect>
+           </property>
+           <layout class="QFormLayout" name="formLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>MXF File Behavior: </string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QRadioButton" name="rbCopyMxf">
+              <property name="text">
+               <string>Copy</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QRadioButton" name="rbMoveMxf">
+              <property name="text">
+               <string>Move</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </widget>
        </widget>
@@ -3192,7 +3196,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

@@ -1,5 +1,5 @@
 /*
-     OpenDCP: Builds Digital Cinema Packages
+     : Builds Digital Cinema Packages
      Copyright (c) 2010-2011 Terrence Meiczinger, All Rights Reserved
 
      This program is free software: you can redistribute it and/or modify
@@ -73,7 +73,7 @@ void MainWindow::startDcp()
         xmlContext->xml_signature.use_external = 0;
     }
 
-    dcp_log_init(xmlContext->log_level, "opendcp.log");
+    dcp_log_init(xmlContext->log_level, ".log");
     strcpy(xmlContext->xml.title, ui->cplTitleEdit->text().toStdString().c_str());
     strcpy(xmlContext->xml.annotation, ui->cplAnnotationEdit->text().toStdString().c_str());
     strcpy(xmlContext->xml.issuer, ui->cplIssuerEdit->text().toStdString().c_str());
@@ -187,12 +187,21 @@ void MainWindow::startDcp()
     destination.setFile(path + "/" + source.fileName());
 
     if (!ui->reelPictureEdit->text().isEmpty() && source.absoluteFilePath() != destination.absoluteFilePath()) {
-        if (QMessageBox::question(this,tr("Move MXF File"),tr("The destination DCP folder and source picture MXF folder are different. Do you want move (not copy) the MXF file to the destination DCP folder?"),
-                                  QMessageBox::No,QMessageBox::Yes) == QMessageBox::Yes) {
-            if (destination.isFile()) {
+        if (destination.isFile()) {
+            if (QMessageBox::question(this,tr("Move MXF File"),tr("The destination picture MXF already exists to you want to replace?"),
+                                      QMessageBox::No,QMessageBox::Yes) == QMessageBox::Yes) {
                 QFile::remove(destination.absoluteFilePath());
             }
+        }
+        if (ui->rbMoveMxf->isChecked()) {
             QFile::rename(source.absoluteFilePath(), destination.absoluteFilePath());
+        } else {
+            QMessageBox* msgBox = new QMessageBox( this );
+            msgBox->setWindowTitle("File Copy");
+            msgBox->setText("Copying picture file...");
+            msgBox->open();
+            QFile::copy(source.absoluteFilePath(), destination.absoluteFilePath());
+            msgBox->close();;
         }
     }
 
@@ -200,12 +209,22 @@ void MainWindow::startDcp()
     source.setFile(xmlContext->pkl[0].cpl[0].reel[0].asset[1].filename);
     destination.setFile(path + "/" + source.fileName());
     if (!ui->reelSoundEdit->text().isEmpty() && source.absoluteFilePath() != destination.absoluteFilePath()) {
-        if (QMessageBox::question(this,tr("Move MXF File"),tr("The destination DCP folder and source sound MXF folder are different. Do you want move (not copy) the MXF file to the destination DCP folder?"),
-                                  QMessageBox::No,QMessageBox::Yes) == QMessageBox::Yes) {
-            if (destination.isFile()) {
+        if (destination.isFile()) {
+            if (QMessageBox::question(this,tr("Move MXF File"),tr("The destination sound MXF already exists to you want to replace?"),
+                                      QMessageBox::No,QMessageBox::Yes) == QMessageBox::Yes) {
                 QFile::remove(destination.absoluteFilePath());
             }
+        }
+        if (ui->rbMoveMxf->isChecked()) {
             QFile::rename(source.absoluteFilePath(), destination.absoluteFilePath());
+        } else {
+            QMessageBox* msgBox = new QMessageBox( this );
+            //msgBox->setAttribute( QWidget::WA_DeleteOnClose );
+            msgBox->setWindowTitle("File Copy");
+            msgBox->setText("Copying sound file...");
+            msgBox->open();
+            QFile::copy(source.absoluteFilePath(), destination.absoluteFilePath());
+            msgBox->close();
         }
     }
 
@@ -213,12 +232,21 @@ void MainWindow::startDcp()
     source.setFile(xmlContext->pkl[0].cpl[0].reel[0].asset[2].filename);
     destination.setFile(path + "/" + source.fileName());
     if (!ui->reelSubtitleEdit->text().isEmpty() && source.absoluteFilePath() != destination.absoluteFilePath()) {
-        if (QMessageBox::question(this,tr("Move MXF File"),tr("The destination DCP folder and source subtitle MXF folder are different. Do you want move (not copy) the MXF file to the destination DCP folder?"),
-                                  QMessageBox::No,QMessageBox::Yes) == QMessageBox::Yes) {
-            if (destination.isFile()) {
+        if (destination.isFile()) {
+            if (QMessageBox::question(this,tr("Move MXF File"),tr("The destination subtitle MXF already exists to you want to replace?"),
+                                      QMessageBox::No,QMessageBox::Yes) == QMessageBox::Yes) {
                 QFile::remove(destination.absoluteFilePath());
             }
+        }
+        if (ui->rbMoveMxf->isChecked()) {
             QFile::rename(source.absoluteFilePath(), destination.absoluteFilePath());
+        } else {
+            QMessageBox* msgBox = new QMessageBox( this );
+            msgBox->setWindowTitle("File Copy");
+            msgBox->setText("Copying subtitle file...");
+            msgBox->open();
+            QFile::copy(source.absoluteFilePath(), destination.absoluteFilePath());
+            msgBox->close();;
         }
     }
 
