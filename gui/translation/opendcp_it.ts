@@ -24,7 +24,7 @@
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="264"/>
         <source>Film Title Wizard</source>
-        <translation>Generazione automatica del titolo</translation>
+        <translation>Aiuto formulazione titolo del film</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="263"/>
@@ -39,7 +39,7 @@
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="266"/>
         <source>Aspect Ratio:</source>
-        <translation>Formato dell&apos;immagine:</translation>
+        <translation>Formato immagine:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="271"/>
@@ -68,23 +68,23 @@
     </message>
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="292"/>
-        <source>Langage Audio:</source>
-        <translation>Lingua dell&apos;audio</translation>
+        <source>Language Audio:</source>
+        <translation>Lingua audio:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="297"/>
-        <source>Langage Subtitle:</source>
-        <translation>Lingua dei sottotitoli:</translation>
+        <source>Language Subtitle:</source>
+        <translation>Lingua sottotitoli:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="304"/>
         <source>Territory:</source>
-        <translation>Area geografica:</translation>
+        <translation>Area:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="309"/>
         <source>Audio Type:</source>
-        <translation>Formato dell&apos;audio:</translation>
+        <translation>Formato audio:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="310"/>
@@ -122,7 +122,7 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1306"/>
         <source>Input Directories</source>
-        <translation>Cartella in ingresso</translation>
+        <translation>Cartella ingresso</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1307"/>
@@ -162,17 +162,17 @@
         <location filename="../../build/gui/ui_mainwindow.h" line="1312"/>
         <location filename="../../build/gui/ui_mainwindow.h" line="1347"/>
         <source>Frame Rate:</source>
-        <translation>Fot/Sec</translation>
+        <translation>Fot./s:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1313"/>
         <source>Encoder:</source>
-        <translation>Programma di compressione:</translation>
+        <translation>Compressore:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1315"/>
         <source>Stereoscopic image sequence</source>
-        <translation>Sequenza di immagini stereoscopiche</translation>
+        <translation>Sequenza immagini stereoscopiche</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1317"/>
@@ -193,17 +193,17 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1321"/>
         <source>Overwrite existing j2c files. Uncheck if you are resuming a previous conversion, which will save time.</source>
-        <translation>Sovrascrivi i file j2c esistenti. Deseleziona se vuoi riprendere una precedente conversione. Risparmierai tempo.</translation>
+        <translation>Sovrascrivi file j2c esistenti. Deseleziona se vuoi riprendere una conversione interrotta. Risparmierai tempo.</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1323"/>
         <source>Overwrite Existing</source>
-        <translation>Sovrascrivi l&apos;attuale</translation>
+        <translation>Sovrascrivi attuali</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1324"/>
         <source>Output Directories</source>
-        <translation>Cartella in uscita</translation>
+        <translation>Cartella uscita</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1327"/>
@@ -218,17 +218,17 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1330"/>
         <source>Image Parameters</source>
-        <translation>Parametri dell&apos;immagine</translation>
+        <translation>Parametri immagine</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1332"/>
         <source>Perform RGB to XYZ colorspace conversion</source>
-        <translation>Esegui conversione dello spazio del colore da RGB a XYZ</translation>
+        <translation>Esegui conversione colore da RGB a XYZ</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1336"/>
         <source>If input is DPX, use logarithmic conversion</source>
-        <translation>Se i file in ingresso sono DPX, usa conversione logaritmica</translation>
+        <translation>Se in ingresso vi sono DPX, usa conversione logaritmica</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1338"/>
@@ -248,7 +248,7 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1343"/>
         <source>Nearest Pixel</source>
-        <translation>Pixel più vicino</translation>
+        <translation>Pixel pi&amp;ugrave; vicino</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1345"/>
@@ -263,12 +263,12 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1350"/>
         <source>Picture Input</source>
-        <translation>Immagini in ingresso</translation>
+        <translation>Immagini ingresso</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1353"/>
         <source>Output Files</source>
-        <translation>File in uscita</translation>
+        <translation>File uscita</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1354"/>
@@ -279,7 +279,7 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1355"/>
         <source>Picture Parameters</source>
-        <translation>Parametri dell&apos;immagine</translation>
+        <translation>Parametri immagine</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1357"/>
@@ -289,12 +289,12 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1358"/>
         <source>duration per slide</source>
-        <translation>Durata di ciascun slide</translation>
+        <translation>Durata di uno slide</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1359"/>
         <source>Sound Input</source>
-        <translation>Audio in ingresso</translation>
+        <translation>Audio ingresso</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1361"/>
@@ -304,7 +304,7 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1363"/>
         <source>Sub:</source>
-        <translation>Subwoofer</translation>
+        <translation>Subwoofer:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1364"/>
@@ -319,7 +319,7 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1366"/>
         <source>Output File</source>
-        <translation>File in uscita</translation>
+        <translation>File uscita</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1367"/>
@@ -340,7 +340,7 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1370"/>
         <source>Hearing/Visually Impaired</source>
-        <translation>Canali di supporto per disabilità acustica/visiva</translation>
+        <translation>Canali disabilit&amp;agrave; acustica/visiva</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1371"/>
@@ -360,22 +360,22 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1407"/>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opzioni</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1408"/>
-        <source>MXF File Behavior: </source>
-        <translation type="unfinished"></translation>
+        <source>MXF File Behavior:</source>
+        <translation type="unfinished">Comportamento MXF:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1409"/>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Copia</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1410"/>
         <source>Move</source>
-        <translation type="unfinished"></translation>
+        <translation>Sposta</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1348"/>
@@ -386,7 +386,7 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1334"/>
         <source>XYZ Transform</source>
-        <translation>Transform XYZ</translation>
+        <translation>Transformata XYZ</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1346"/>
@@ -417,13 +417,13 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1382"/>
         <source>Composition Parameters</source>
-        <translation>Parametri della composizione</translation>
+        <translation>Parametri composizione</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1383"/>
         <location filename="../../build/gui/ui_mainwindow.h" line="1390"/>
         <source>Annotation:</source>
-        <translation>Note:</translation>
+        <translation>Nota:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1385"/>
@@ -433,12 +433,12 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1386"/>
         <source>Kind:</source>
-        <translation>Tipologia:</translation>
+        <translation>Tipo:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1387"/>
         <source>Title Generator</source>
-        <translation>Generatore del titolo</translation>
+        <translation>Generatore titolo</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1388"/>
@@ -462,21 +462,21 @@
         <location filename="../../build/gui/ui_mainwindow.h" line="1399"/>
         <location filename="../../build/gui/ui_mainwindow.h" line="1404"/>
         <source>Entry Point:</source>
-        <translation>Punto di ingresso:</translation>
+        <translation>Punto ingresso:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1395"/>
         <location filename="../../build/gui/ui_mainwindow.h" line="1400"/>
         <location filename="../../build/gui/ui_mainwindow.h" line="1405"/>
         <source>frame</source>
-        <translation>fotogrammi</translation>
+        <translation>fot.</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1393"/>
         <location filename="../../build/gui/ui_mainwindow.h" line="1398"/>
         <location filename="../../build/gui/ui_mainwindow.h" line="1403"/>
         <source>frames</source>
-        <translation>fotogrammi</translation>
+        <translation>fot.</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1401"/>
@@ -498,65 +498,65 @@
     <message>
         <location filename="../j2k.cpp" line="110"/>
         <source>Image preview not supported for this file</source>
-        <translation>Anteprima dell&apos;immagine non supportata per questo file</translation>
+        <translation>Anteprima immagine non supportata per questo file</translation>
     </message>
     <message>
         <location filename="../j2k.cpp" line="195"/>
         <location filename="../j2k.cpp" line="223"/>
         <source>No image files found</source>
-        <translation>Non è stato trovato alcun file immagine</translation>
+        <translation>Non &amp;egrave; stata trovata alcuna immagine</translation>
     </message>
     <message>
         <location filename="../j2k.cpp" line="196"/>
         <location filename="../j2k.cpp" line="224"/>
         <source>No valid image files were found in the selected directory</source>
-        <translation>Non è stato trovato alcun file immagine valido nella cartella selezionata</translation>
+        <translation>Non c&apos;&amp;egrave; alcuna immagine valida nella cartella selezionata</translation>
     </message>
     <message>
         <location filename="../j2k.cpp" line="292"/>
         <source>Source Directories Needed</source>
-        <translation>Manca l&apos;indicazione della cartella di origine</translation>
+        <translation>Manca indicazione cartella origine</translation>
     </message>
     <message>
         <location filename="../j2k.cpp" line="292"/>
         <source>Please select source directories</source>
-        <translation>Per favore selezione la cartella d&apos;origine</translation>
+        <translation>Per favore seleziona cartella origine</translation>
     </message>
     <message>
         <location filename="../j2k.cpp" line="295"/>
         <source>Destination Directories Needed</source>
-        <translation>Manca l&apos;indicazione delle cartelle di destinazione</translation>
+        <translation>Manca indicazione cartelle destinazione</translation>
     </message>
     <message>
         <location filename="../j2k.cpp" line="295"/>
         <source>Please select destination directories</source>
-        <translation>Per favore seleziona le cartelle di destinazione</translation>
+        <translation>Per favore seleziona cartelle destinazione</translation>
     </message>
     <message>
         <location filename="../j2k.cpp" line="302"/>
         <source>Source Directory Needed</source>
-        <translation>Manca la cartella di origine</translation>
+        <translation>Manca cartella origine</translation>
     </message>
     <message>
         <location filename="../j2k.cpp" line="302"/>
         <source>Please select a source directory</source>
-        <translation>Per favore seleziona una cartella d&apos;origine</translation>
+        <translation>Per favore seleziona cartella origine</translation>
     </message>
     <message>
         <location filename="../j2k.cpp" line="305"/>
         <source>Destination Directory Needed</source>
-        <translation>Manca la cartella di destinazione</translation>
+        <translation>Manca cartella destinazione</translation>
     </message>
     <message>
         <location filename="../j2k.cpp" line="305"/>
         <source>Please select a destination directory</source>
-        <translation>Per favore seleziona una cartella di destinazione</translation>
+        <translation>Per favore seleziona cartella destinazione</translation>
     </message>
     <message>
         <location filename="../j2k.cpp" line="313"/>
         <location filename="../mxf.cpp" line="409"/>
         <source>File Count Mismatch</source>
-        <translation>Divergenza nel conteggio dei file</translation>
+        <translation>Divergenza conteggio file</translation>
     </message>
     <message>
         <location filename="../j2k.cpp" line="314"/>
@@ -567,62 +567,62 @@
     <message>
         <location filename="../j2k.cpp" line="322"/>
         <source>Invalid DCI Resolution</source>
-        <translation>Risoluzione non valida secondo DCI</translation>
+        <translation>Non &amp;egrave; una risoluzione DCI valida</translation>
     </message>
     <message>
         <location filename="../j2k.cpp" line="323"/>
         <source>Images are not DCI compliant, select DCI resize to automatically resize or supply DCI compliant images</source>
-        <translation>Le immagini non sono conformi a DCI, seleziona conforma le dimensioni a DCI per ridimensionare automaticamente o fornissci immagini conformi a DCI</translation>
+        <translation>Le immagini non sono conformi DCI, seleziona conforma dimensioni DCI per ridimensionare automaticamente o fornisci immagini conformi DCI</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="97"/>
         <source>Create a new file</source>
-        <translation>Crea un nuovo file</translation>
+        <translation>Crea nuovo file</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="102"/>
         <source>Open an existing file</source>
-        <translation>Apri un file esistente</translation>
+        <translation>Apri file esistente</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="107"/>
         <source>Save the document to disk</source>
-        <translation>Salva il documento sul disco</translation>
+        <translation>Salva documento sul disco</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="112"/>
         <source>Save the document under a new name</source>
-        <translation>Salva il documento con un nuovo nome</translation>
+        <translation>Salva documento con nuovo nome</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="117"/>
         <source>Exit the application</source>
-        <translation>Esci dall&apos;applicazione</translation>
+        <translation>Termina applicazione</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="122"/>
         <source>Cut the current selection&apos;s contents to the clipboard</source>
-        <translation>Elimina i contenuti della selezione corrente e copiali nella clipboard</translation>
+        <translation>Elimina contenuti della selezione corrente e copiali nella clipboard</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="128"/>
         <source>Copy the current selection&apos;s contents to the clipboard</source>
-        <translation>Copia i contenuti della selezione corrente nella clipboard</translation>
+        <translation>Copia contenuti della selezione corrente nella clipboard</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="134"/>
         <source>Paste the clipboard&apos;s contents into the current selection</source>
-        <translation>Incolla i contenuti della clipboard nella selezione corrente</translation>
+        <translation>Incolla contenuti della clipboard nella selezione corrente</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="139"/>
         <source>Show the application&apos;s About box</source>
-        <translation>Mostra il riquadro &quot;A proposito&quot; dell&apos;applicazione</translation>
+        <translation>Mostra &quot;A proposito&quot; dell&apos;applicazione</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="143"/>
         <source>Application preferences</source>
-        <translation>Preferenze dell&apos;applicazione</translation>
+        <translation>Preferenze applicazione</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="199"/>
@@ -632,29 +632,29 @@
     <message>
         <location filename="../mainwindow.cpp" line="201"/>
         <source>Choose a directory of images</source>
-        <translation>Seleziona una cartella di immagini</translation>
+        <translation>Seleziona cartella di immagini</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="205"/>
         <source>DCDM Subtitle File</source>
-        <translation>File dei sottotitoli del DCDM</translation>
+        <translation>File sottotitoli del DCDM</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="208"/>
         <source>Save MXF as</source>
-        <translation>Salva l&apos;MXF come</translation>
+        <translation>Salva MXF come</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="211"/>
         <location filename="../xml.cpp" line="287"/>
         <location filename="../xml.cpp" line="318"/>
         <source>Choose a file to open</source>
-        <translation>Seleziona un file da aprire</translation>
+        <translation>Seleziona file da aprire</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="278"/>
         <source>File Sequence Check Error</source>
-        <translation>Errore nel controllo della sequenza dei file</translation>
+        <translation>Errore controllo sequenza dei file</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="278"/>
@@ -692,13 +692,13 @@
         <location filename="../mxf.cpp" line="225"/>
         <location filename="../mxf.cpp" line="267"/>
         <source>Destination file needed</source>
-        <translation>Manca il file di destinazione</translation>
+        <translation>Manca file di destinazione</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="187"/>
         <location filename="../mxf.cpp" line="213"/>
         <source>Please select a destination picture MXF file.</source>
-        <translation>Per favore seleziona un file di destinazione per l&apos;MXF delle immagini.</translation>
+        <translation>Per favore seleziona file destinazione per MXF immagini.</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="192"/>
@@ -707,62 +707,62 @@
         <location filename="../mxf.cpp" line="231"/>
         <location filename="../mxf.cpp" line="240"/>
         <source>Source content needed</source>
-        <translation>Manca il contenuto in ingresso</translation>
+        <translation>Manca contenuto in ingresso</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="192"/>
         <source>Please select left and right source image directories.</source>
-        <translation>Per favore seleziona le cartelle con le immagini sinitre e destre in ingresso.</translation>
+        <translation>Per favore seleziona cartelle ingresso con immagini sinitre/destre.</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="197"/>
         <source>Please select a source image directory.</source>
-        <translation>Per favore seleziona una cartella con le immagini in ingresso.</translation>
+        <translation>Per favore seleziona cartella con immagini in ingresso.</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="204"/>
         <source>Invalid frame rate</source>
-        <translation>Frequnza delle immagini non valida</translation>
+        <translation>Frequenza immagini non valida</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="204"/>
         <source>Stereoscopic MXF only supports 24, 25, or 30 fps.</source>
-        <translation>L&apos;MXF stereoscopico supporta soltanto 24, 25 o 30 fotogrammi al secondo.</translation>
+        <translation>MXF stereoscopico supporta soltanto 24, 25 o 30 fot./s.</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="217"/>
         <source>Please select a source MPEG2 file.</source>
-        <translation>Per favore seleziona un file MPEG2 in ingresso.</translation>
+        <translation>Per favore seleziona file MPEG2 in ingresso.</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="225"/>
         <source>Please select a destination sound MXF file.</source>
-        <translation>Per favore seleziona un file audio MXF di destinazione.</translation>
+        <translation>Per favore seleziona file audio MXF di destinazione.</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="231"/>
         <source>Please specify left and right wav files.</source>
-        <translation>Per favore specifiva i file wav sinistro e destro.</translation>
+        <translation>Per favore specifica file wav sinistro/destro.</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="240"/>
         <source>Please specify 5.1 wav files.</source>
-        <translation>Per favore specifica i file wave 5.1</translation>
+        <translation>Per favore specifica file wav 5.1.</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="262"/>
         <source>Source subtitle needed</source>
-        <translation>Mancano i sottotitoli in ingresso</translation>
+        <translation>Mancano sottotitoli in ingresso</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="262"/>
         <source>Please specify an input subtitle XML file.</source>
-        <translation>Per favore specifica un file di sottotitoli XML in ingresso.</translation>
+        <translation>Per favore specifica file XML sottotitoli in ingresso.</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="267"/>
         <source>Please specify a destinaton subtitle MXF file.</source>
-        <translation>Per favore specifica un file MXF di sottotitoli in uscita.</translation>
+        <translation>Per favore specifica file MXF sottotitoli in uscita.</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="286"/>
@@ -771,124 +771,124 @@
         <location filename="../mxf.cpp" line="432"/>
         <location filename="../mxf.cpp" line="440"/>
         <source>MXF Creation Error</source>
-        <translation>Errore nella creazione del MXF</translation>
+        <translation>Errore creazione MXF</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="287"/>
         <source>Subtitle MXF creation failed.</source>
-        <translation>La creazione del MXF dei sottotitoli è fallita.</translation>
+        <translation>Creazione MXF dei sottotitoli fallita.</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="290"/>
         <source>Subtitle MXF creation succeeded.</source>
-        <translation>La creazione del MXF dei sottotitoli ha avuto successo.</translation>
+        <translation>La creazione MXF sottotitoli ha avuto successo.</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="355"/>
         <source>Sound MXF creation failed.</source>
-        <translation>La creazione del MXF audio è fallita.</translation>
+        <translation>Creazione MXF audio fallita.</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="432"/>
         <source>No input files found.</source>
-        <translation>Non è stato trovato alcun file in ingresso.</translation>
+        <translation>Nessun file in ingresso.</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="440"/>
         <source>Picture MXF creation failed.</source>
-        <translation>Creazione del MXF delle immagini fallita.</translation>
+        <translation>Creazione MXF immagini fallita.</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="66"/>
         <source>DCP Creation Failed</source>
-        <translation>Creazione del DCP fallita</translation>
+        <translation>Creazione DCP fallita</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="86"/>
         <source>An MXF picture track is required.</source>
-        <translation>Una traccia di immagini MXF deve essere specificata.</translation>
+        <translation>Devi specificare una traccia immagini MXF.</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="94"/>
         <source>The duration of all MXF tracks must be the same.</source>
-        <translation>La durata di tutte le tracce MXF deve essere la medesima.</translation>
+        <translation>La durata di tutte le tracce MXF deve essere la stessa.</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="121"/>
         <source>Could not add reel to CPL.</source>
-        <translation>Non è stato possibile aggiungere il rullo alla CPL.</translation>
+        <translation>Impossibile aggiungere il rullo alla CPL.</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="135"/>
         <source>Could not valiate reel.</source>
-        <translation>Non è stato possibile verificare il rullo.</translation>
+        <translation>Impossibile verificare il rullo.</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="140"/>
         <source>Choose destination folder</source>
-        <translation>Scegli la cartella di destinazione</translation>
+        <translation>Scegli la cartella destinazione</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="165"/>
         <source>Failed to create composition playlist.</source>
-        <translation>Creazione della playlist della composizione fallita.</translation>
+        <translation>Creazione playlist della composizione fallita.</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="170"/>
         <source>Failed to create packaging list.</source>
-        <translation>Creazione della lista di packaging fallita.</translation>
+        <translation>Creazione lista packaging fallita.</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="175"/>
         <source>Failed to create volume index.</source>
-        <translation>Creazione dell&apos;indice del volume fallita.</translation>
+        <translation>Creazione indice del volume fallita.</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="180"/>
         <source>Failed to create assetmap.</source>
-        <translation>Creazione dell&apos;assetmap fallita.</translation>
+        <translation>Creazione assetmap fallita.</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="191"/>
         <location filename="../xml.cpp" line="213"/>
         <location filename="../xml.cpp" line="236"/>
         <source>Move MXF File</source>
-        <translation>Sposta il file MXF</translation>
+        <translation>Sposta file MXF</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="191"/>
-        <source>The destination picture MXF already exists to you want to replace?</source>
-        <translation type="unfinished"></translation>
+        <source>The destination picture MXF already exists, do you want to replace?</source>
+        <translation>MXF immagini esiste gi&amp;agrave;, vuoi sostituirlo?</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="213"/>
-        <source>The destination sound MXF already exists to you want to replace?</source>
-        <translation type="unfinished"></translation>
+        <source>The destination sound MXF already exists, do you want to replace?</source>
+        <translation>MXF audio esiste gi&amp;agrave;, vuoi sostituirlo?</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="236"/>
-        <source>The destination subtitle MXF already exists to you want to replace?</source>
-        <translation type="unfinished"></translation>
+        <source>The destination subtitle MXF already exists, do you want to replace?</source>
+        <translation>MXF sottotitoli esiste gi&amp;agrave;, vuoi sostituirlo?</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="296"/>
         <source>Not a Picture Track</source>
-        <translation>Non è una traccia di immagini</translation>
+        <translation>Non &amp;egrave; una traccia immagini</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="297"/>
         <source>The selected file is not a valid MXF picture track.</source>
-        <translation>Il file selezionato non è una traccia immagini MXF valida.</translation>
+        <translation>Il file selezionato non &amp;egrave; una traccia immagini MXF valida.</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="327"/>
         <source>Not a Sound Track</source>
-        <translation>Non è una traccia audio</translation>
+        <translation>Non &amp;egrave; una traccia audio</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="328"/>
         <source>The selected file is not a valid MXF sound track.</source>
-        <translation>Il file selezionato non è una traccia MXF audio valida.</translation>
+        <translation>Il file selezionato non &amp;egrave; una traccia MXF audio valida.</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="349"/>
@@ -898,12 +898,12 @@
     <message>
         <location filename="../xml.cpp" line="358"/>
         <source>Not a Subtitle Track</source>
-        <translation>Non è una traccia di sottotitoli</translation>
+        <translation>Non &amp;egrave; una traccia sottotitoli</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="359"/>
         <source>The selected file is not a valid MXF subtitle track.</source>
-        <translation>Il file selezionato non è una traccia di sottoticoli MXF valida</translation>
+        <translation>Il file selezionato non &amp;egrave; una traccia sottoticoli MXF valida</translation>
     </message>
 </context>
 <context>
@@ -916,12 +916,12 @@
     <message>
         <location filename="../../build/gui/ui_settings.h" line="115"/>
         <source>Language</source>
-        <translation>Linguaggio</translation>
+        <translation>Lingua</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_settings.h" line="116"/>
         <source>Language:</source>
-        <translation>Linguaggio:</translation>
+        <translation>Lingua:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_settings.h" line="117"/>
@@ -931,7 +931,7 @@
     <message>
         <location filename="../../build/gui/ui_settings.h" line="118"/>
         <source>Yes</source>
-        <translation>Sì</translation>
+        <translation>S&amp;igrave;</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_settings.h" line="119"/>

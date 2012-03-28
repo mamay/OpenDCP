@@ -188,7 +188,7 @@ void MainWindow::startDcp()
 
     if (!ui->reelPictureEdit->text().isEmpty() && source.absoluteFilePath() != destination.absoluteFilePath()) {
         if (destination.isFile()) {
-            if (QMessageBox::question(this,tr("Move MXF File"),tr("The destination picture MXF already exists to you want to replace?"),
+            if (QMessageBox::question(this,tr("Move MXF File"),tr("The destination picture MXF already exists, do you want to replace?"),
                                       QMessageBox::No,QMessageBox::Yes) == QMessageBox::Yes) {
                 QFile::remove(destination.absoluteFilePath());
             }
@@ -210,7 +210,7 @@ void MainWindow::startDcp()
     destination.setFile(path + "/" + source.fileName());
     if (!ui->reelSoundEdit->text().isEmpty() && source.absoluteFilePath() != destination.absoluteFilePath()) {
         if (destination.isFile()) {
-            if (QMessageBox::question(this,tr("Move MXF File"),tr("The destination sound MXF already exists to you want to replace?"),
+            if (QMessageBox::question(this,tr("Move MXF File"),tr("The destination sound MXF already exists, do you want to replace?"),
                                       QMessageBox::No,QMessageBox::Yes) == QMessageBox::Yes) {
                 QFile::remove(destination.absoluteFilePath());
             }
@@ -233,7 +233,7 @@ void MainWindow::startDcp()
     destination.setFile(path + "/" + source.fileName());
     if (!ui->reelSubtitleEdit->text().isEmpty() && source.absoluteFilePath() != destination.absoluteFilePath()) {
         if (destination.isFile()) {
-            if (QMessageBox::question(this,tr("Move MXF File"),tr("The destination subtitle MXF already exists to you want to replace?"),
+            if (QMessageBox::question(this,tr("Move MXF File"),tr("The destination subtitle MXF already exists, do you want to replace?"),
                                       QMessageBox::No,QMessageBox::Yes) == QMessageBox::Yes) {
                 QFile::remove(destination.absoluteFilePath());
             }

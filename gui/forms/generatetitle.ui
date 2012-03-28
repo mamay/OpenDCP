@@ -286,7 +286,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Langage Audio:</string>
+     <string>Language Audio:</string>
     </property>
    </widget>
    <widget class="QComboBox" name="languageAudioComboBox">
@@ -319,7 +319,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Langage Subtitle:</string>
+     <string>Language Subtitle:</string>
     </property>
    </widget>
    <widget class="QComboBox" name="languageSubtitleComboBox">

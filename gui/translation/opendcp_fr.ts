@@ -68,12 +68,12 @@
     </message>
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="292"/>
-        <source>Langage Audio:</source>
+        <source>Language Audio:</source>
         <translation>Langue de l&apos;audio:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="297"/>
-        <source>Langage Subtitle:</source>
+        <source>Language Subtitle:</source>
         <translation>Langue des sous-titres:</translation>
     </message>
     <message>
@@ -360,22 +360,22 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1407"/>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Options</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1408"/>
-        <source>MXF File Behavior: </source>
-        <translation type="unfinished"></translation>
+        <source>MXF File Behavior:</source>
+        <translation>Comportement de fichier MXF:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1409"/>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Copier</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1410"/>
         <source>Move</source>
-        <translation type="unfinished"></translation>
+        <translation>Déplacer</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1348"/>
@@ -857,18 +857,18 @@
     </message>
     <message>
         <location filename="../xml.cpp" line="191"/>
-        <source>The destination picture MXF already exists to you want to replace?</source>
-        <translation type="unfinished"></translation>
+        <source>The destination picture MXF already exists, do you want to replace?</source>
+        <translation>Le MXF image de destination existe déjà, voulez-vous remplacer?</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="213"/>
-        <source>The destination sound MXF already exists to you want to replace?</source>
-        <translation type="unfinished"></translation>
+        <source>The destination sound MXF already exists, do you want to replace?</source>
+        <translation>Le MXF son de destination existe déjà, voulez-vous remplacer?</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="236"/>
-        <source>The destination subtitle MXF already exists to you want to replace?</source>
-        <translation type="unfinished"></translation>
+        <source>The destination subtitle MXF already exists, do you want to replace?</source>
+        <translation>La destination des sous-titres MXF existe déjà, voulez-vous remplacer?</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="296"/>

@@ -1233,7 +1233,7 @@
            </rect>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="page_1">
            <widget class="QGroupBox" name="inputPGroupBox">
@@ -2688,7 +2688,7 @@
              <string notr="true"/>
             </property>
            </widget>
-           <widget class="QWidget" name="layoutWidget">
+           <widget class="QWidget" name="layoutWidget1">
             <property name="geometry">
              <rect>
               <x>110</x>
@@ -2837,7 +2837,7 @@
              <string notr="true"/>
             </property>
            </widget>
-           <widget class="QWidget" name="layoutWidget">
+           <widget class="QWidget" name="layoutWidget2">
             <property name="geometry">
              <rect>
               <x>110</x>
@@ -2983,7 +2983,7 @@
              <string notr="true"/>
             </property>
            </widget>
-           <widget class="QWidget" name="layoutWidget">
+           <widget class="QWidget" name="layoutWidget3">
             <property name="geometry">
              <rect>
               <x>110</x>
@@ -3146,7 +3146,7 @@
           <property name="title">
            <string>Options</string>
           </property>
-          <widget class="QWidget" name="">
+          <widget class="QWidget" name="layoutWidget4">
            <property name="geometry">
             <rect>
              <x>10</x>
@@ -3155,11 +3155,11 @@
              <height>40</height>
             </rect>
            </property>
-           <layout class="QFormLayout" name="formLayout">
+           <layout class="QFormLayout" name="optionsLayout">
             <item row="0" column="0">
              <widget class="QLabel" name="label">
               <property name="text">
-               <string>MXF File Behavior: </string>
+               <string>MXF File Behavior:</string>
               </property>
              </widget>
             </item>
