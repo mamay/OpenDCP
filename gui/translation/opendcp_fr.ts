@@ -115,20 +115,20 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1305"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1306"/>
         <source>OpenDCP</source>
         <translation>OpenDCP</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1306"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1307"/>
         <source>Input Directories</source>
         <translation>Répertoire source</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1307"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1325"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1351"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1360"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1308"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1326"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1352"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1361"/>
         <location filename="../j2k.cpp" line="57"/>
         <location filename="../j2k.cpp" line="58"/>
         <location filename="../mxf.cpp" line="147"/>
@@ -136,355 +136,355 @@
         <translation>Gauche:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1308"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1326"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1352"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1362"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1309"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1327"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1353"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1363"/>
         <source>Right:</source>
         <translation>Droit:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1309"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1310"/>
         <source>Start:</source>
         <translation>Début:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1310"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1311"/>
         <source>End:</source>
         <translation>Fin:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1311"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1312"/>
         <source>JPEG2000 Encoder Parameters</source>
         <translation>Paramètres d&apos;encodage JPEG2000</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1312"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1347"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1313"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1348"/>
         <source>Frame Rate:</source>
         <translation>Cadence d&apos;images:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1313"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1314"/>
         <source>Encoder:</source>
         <translation>Encodeur:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1315"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1316"/>
         <source>Stereoscopic image sequence</source>
         <translation>Séquence d&apos;images stéréoscopique</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1317"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1356"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1318"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1357"/>
         <source>Stereoscopic</source>
         <translation>Stéréoscopique</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1318"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1319"/>
         <source>Profile:</source>
         <translation>Profil:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1319"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1320"/>
         <source>Bandwidth:</source>
         <translation>Bande passante:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1321"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1322"/>
         <source>Overwrite existing j2c files. Uncheck if you are resuming a previous conversion, which will save time.</source>
         <translation>Ecraser les fichiers J2C existants. Décochez la case si vous reprenez une conversion précédente, pour gagner du temps.</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1323"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1324"/>
         <source>Overwrite Existing</source>
         <translation>Ecraser existant</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1324"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1325"/>
         <source>Output Directories</source>
         <translation>Répertoire de sortie</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1327"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1328"/>
         <source>Convert</source>
         <translation>Convertir</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1328"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1329"/>
         <source>Preview</source>
         <translation>Prévisualisation</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1330"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1331"/>
         <source>Image Parameters</source>
         <translation>Paramètres de l&apos;image</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1332"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1333"/>
         <source>Perform RGB to XYZ colorspace conversion</source>
         <translation>Effectuer la conversion colorimétrique de l&apos;espace RVB à XYZ</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1336"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1337"/>
         <source>If input is DPX, use logarithmic conversion</source>
         <translation>Si les fichiers sources sont en DPX, utiliser la conversion logarithmique</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1338"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1339"/>
         <source>Source Color:</source>
         <translation>Profil colorimétrique de la source:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1339"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1340"/>
         <source>DCI Resize:</source>
         <translation>Redimensionnement DCI:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1342"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1343"/>
         <source>None</source>
         <translation>Aucun</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1343"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1344"/>
         <source>Nearest Pixel</source>
         <translation>Au pixel le plus proche</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1345"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1346"/>
         <source>MXF Parameters</source>
         <translation>Paramètres MXF</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1349"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1350"/>
         <source>Create MXF</source>
         <translation>Créer MXF</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1350"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1351"/>
         <source>Picture Input</source>
         <translation>Fichier source (images)</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1353"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1354"/>
         <source>Output Files</source>
         <translation>Fichiers de sortie</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1354"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1391"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1355"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1392"/>
         <source>Picture:</source>
         <translation>Image:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1355"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1356"/>
         <source>Picture Parameters</source>
         <translation>Paramètres de l&apos;image</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1357"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1358"/>
         <source>Slideshow</source>
         <translation>Diaporama</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1358"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1359"/>
         <source>duration per slide</source>
         <translation>durée par diapositive</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1359"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1360"/>
         <source>Sound Input</source>
         <translation>Fichier source (audio)</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1361"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1362"/>
         <source>Center:</source>
         <translation>Centre:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1363"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1364"/>
         <source>Sub:</source>
         <translation>Basse:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1364"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1365"/>
         <source>Left Surround:</source>
         <translation>Ambiance Gauche:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1365"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1366"/>
         <source>Right Surround:</source>
         <translation>Ambiance Droite:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1366"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1367"/>
         <source>Output File</source>
         <translation>Fichier de sortie</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1367"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1396"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1368"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1397"/>
         <source>Sound:</source>
         <translation>Son:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1368"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1369"/>
         <source>Sound Parameters</source>
         <translation>Paramètres audio</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1369"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1370"/>
         <source>Stereo</source>
         <translation>Stéréo</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1370"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1371"/>
         <source>Hearing/Visually Impaired</source>
         <translation>Malentendants/malvoyants</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1371"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1372"/>
         <source>Subtitles and Closed Captions</source>
         <translation>Sous-titres et sous-titrages</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1375"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1376"/>
         <source>SMPTE</source>
         <translation>SMPTE</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1384"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1385"/>
         <source>Title:</source>
         <translation>Titre:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1407"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1408"/>
         <source>Options</source>
         <translation>Options</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1408"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1409"/>
         <source>MXF File Behavior:</source>
         <translation>Comportement de fichier MXF:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1409"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1410"/>
         <source>Copy</source>
         <translation>Copier</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1410"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1411"/>
         <source>Move</source>
         <translation>Déplacer</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1348"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1377"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1349"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1378"/>
         <source>Type:</source>
         <translation>Type:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1334"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1335"/>
         <source>XYZ Transform</source>
         <translation>Transformer XYZ</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1346"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1372"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1347"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1373"/>
         <source>Label:</source>
         <translation>Etiquette:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1378"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1379"/>
         <source>Subtitle</source>
         <translation>Sous-titre</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1379"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1380"/>
         <source>Input:</source>
         <translation>Entrée:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1380"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1381"/>
         <source>Output:</source>
         <translation>Sortie:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1381"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1382"/>
         <source>Create</source>
         <translation>Créer</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1382"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1383"/>
         <source>Composition Parameters</source>
         <translation>Paramètres de composition</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1383"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1390"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1384"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1391"/>
         <source>Annotation:</source>
         <translation>Annotation:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1385"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1386"/>
         <source>Rating:</source>
         <translation>Classification:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1386"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1387"/>
         <source>Kind:</source>
         <translation>Genre:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1387"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1388"/>
         <source>Title Generator</source>
         <translation>Générateur de Titre</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1388"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1389"/>
         <source>Issuer:</source>
         <translation>Diffuseur:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1389"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1390"/>
         <source>Reel</source>
         <translation>Bobine</translation>
-    </message>
-    <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1392"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1397"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1402"/>
-        <source>Duration:</source>
-        <translation>Durée:</translation>
-    </message>
-    <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1394"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1399"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1404"/>
-        <source>Entry Point:</source>
-        <translation>Point d&apos;entrée:</translation>
-    </message>
-    <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1395"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1400"/>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1405"/>
-        <source>frame</source>
-        <translation>image</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1393"/>
         <location filename="../../build/gui/ui_mainwindow.h" line="1398"/>
         <location filename="../../build/gui/ui_mainwindow.h" line="1403"/>
+        <source>Duration:</source>
+        <translation>Durée:</translation>
+    </message>
+    <message>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1395"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1400"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1405"/>
+        <source>Entry Point:</source>
+        <translation>Point d&apos;entrée:</translation>
+    </message>
+    <message>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1396"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1401"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1406"/>
+        <source>frame</source>
+        <translation>image</translation>
+    </message>
+    <message>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1394"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1399"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1404"/>
         <source>frames</source>
         <translation>images</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1401"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1402"/>
         <source>Subtitle:</source>
         <translation>Sous-titre:</translation>
     </message>
     <message>
-        <location filename="../../build/gui/ui_mainwindow.h" line="1406"/>
+        <location filename="../../build/gui/ui_mainwindow.h" line="1407"/>
         <source>Create DCP</source>
         <translation>Créer DCP</translation>
     </message>
