@@ -49,6 +49,6 @@ SET(UPLOAD_FILE ${PROJECT_BINARY_DIR}/${PACKAGE_FILE_NAME})
 #--upload target--------------------------------------------------------------
 MESSAGE(STATUS "${UPLOADER} -s ${SUMMARY} -p ${GOOGLE_PROJECT} -u ${USER} ${UPLOAD_FILE}")
 ADD_CUSTOM_TARGET(upload
-  #COMMAND ${UPLOADER} -s ${SUMMARY} -p ${GOOGLE_PROJECT} -u ${USER} ${UPLOAD_FILE}
+  COMMAND ${UPLOADER} -s ${SUMMARY} -p ${GOOGLE_PROJECT} -u ${USER} ${UPLOAD_FILE}
 )
 #-----------------------------------------------------------------------------
