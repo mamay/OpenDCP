@@ -62,6 +62,7 @@ SET(LANGUAGES
     fr 
     it
     de 
+    pt
 )
 
 SET(LANGUAGE_TS_FILES)
