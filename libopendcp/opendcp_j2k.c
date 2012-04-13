@@ -149,8 +149,8 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
 
     if ( opendcp->j2k.encoder == J2K_KAKADU ) {
         char tempfile[255];
-        sprintf(tempfile,"%s/tmp_%s.tif",tmp_path,basename(in_file));
-        dcp_log(LOG_DEBUG,"%-15.15s: Writing temporary tif %s","convet_to_j2k",tempfile);
+        sprintf(tempfile,"%s/tmp_%s",tmp_path,basename(in_file));
+        dcp_log(LOG_DEBUG,"%-15.15s: Writing temporary tif %s","convert_to_j2k",tempfile);
         result = write_tif(odcp_image,tempfile,0);
         odcp_image_free(odcp_image);
         
@@ -206,10 +206,7 @@ int encode_kakadu(opendcp_t *opendcp, char *in_file, char *out_file) {
 
     max_comp_size = ((float)max_cs_len)/1.25;
 
-    sprintf(k_lengths,"Creslengths=%d",max_cs_len);
-    for (j=0;j<3;j++) {
-        sprintf(k_lengths,"%s Creslengths:C%d=%d,%d",k_lengths,j,max_cs_len,max_comp_size);
-    }
+    sprintf(k_lengths,"Creslengths=%d Creslengths:C0=%d,%d Creslengths:C1=%d,%d Creslengths:C2=%d,%d",max_cs_len,max_cs_len,max_comp_size,max_cs_len,max_comp_size,max_cs_len,max_comp_size);
 
     if (opendcp->cinema_profile == DCP_CINEMA2K) {
         sprintf(cmd,"kdu_compress -i \"%s\" -o \"%s\" Sprofile=CINEMA2K %s -quiet",in_file,out_file,k_lengths);
