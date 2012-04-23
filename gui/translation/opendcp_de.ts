@@ -104,7 +104,7 @@
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="321"/>
         <source>Package Type:</source>
-        <translation>Paket Fassung:</translation>
+        <translation>Paketversion:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_generatetitle.h" line="330"/>
@@ -188,7 +188,7 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1320"/>
         <source>Bandwidth:</source>
-        <translation>Bandbreite:</translation>
+        <translation>Datenrate:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1322"/>
@@ -365,17 +365,17 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1409"/>
         <source>MXF File Behavior:</source>
-        <translation>MXF-Datei-Verhalten:</translation>
+        <translation>MXF Dateien:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1410"/>
         <source>Copy</source>
-        <translation>kopieren Sie</translation>
+        <translation>MXF kopieren</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1411"/>
         <source>Move</source>
-        <translation>Bewegen</translation>
+        <translation>MXF verschieben</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1349"/>
@@ -386,13 +386,13 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1335"/>
         <source>XYZ Transform</source>
-        <translation>Transform XYZ</translation>
+        <translation>XYZ Transformation</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1347"/>
         <location filename="../../build/gui/ui_mainwindow.h" line="1373"/>
         <source>Label:</source>
-        <translation>Etikett:</translation>
+        <translation>Typ:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1379"/>
@@ -498,7 +498,7 @@
     <message>
         <location filename="../j2k.cpp" line="110"/>
         <source>Image preview not supported for this file</source>
-        <translation>Bildvorschau für diese Datei nicht unterstützt</translation>
+        <translation>Bildvorschau dieser Datei nicht möglich</translation>
     </message>
     <message>
         <location filename="../j2k.cpp" line="195"/>
@@ -572,7 +572,7 @@
     <message>
         <location filename="../j2k.cpp" line="323"/>
         <source>Images are not DCI compliant, select DCI resize to automatically resize or supply DCI compliant images</source>
-        <translation>Bilder nicht DCI-konform. Wählen Sie automatische DCI-Skalierung oder stellen Sie DCI-konforme Bilder bereit</translation>
+        <translation>Bilder nicht DCI-konform. Wählen Sie DCI-Skalierung oder stellen Sie DCI-konforme Bilder bereit</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="97"/>
@@ -692,7 +692,7 @@
         <location filename="../mxf.cpp" line="225"/>
         <location filename="../mxf.cpp" line="267"/>
         <source>Destination file needed</source>
-        <translation>Zieldatei benötigt</translation>
+        <translation>Zieldatei erforderlich</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="187"/>
@@ -707,7 +707,7 @@
         <location filename="../mxf.cpp" line="231"/>
         <location filename="../mxf.cpp" line="240"/>
         <source>Source content needed</source>
-        <translation>Quelle benötigt</translation>
+        <translation>Quelle erforderlich</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="192"/>
@@ -752,7 +752,7 @@
     <message>
         <location filename="../mxf.cpp" line="262"/>
         <source>Source subtitle needed</source>
-        <translation>Quelldatei Untertitel benötigt</translation>
+        <translation>Quelldatei Untertitel erforderlich</translation>
     </message>
     <message>
         <location filename="../mxf.cpp" line="262"/>
@@ -858,17 +858,17 @@
     <message>
         <location filename="../xml.cpp" line="191"/>
         <source>The destination picture MXF already exists, do you want to replace?</source>
-        <translation>Die Ziel-Bild MXF bereits vorhanden ist, wollen Sie ersetzen?</translation>
+        <translation>Die Zieldatei Bild MXF existiert bereits, wollen Sie sie ersetzen?</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="213"/>
         <source>The destination sound MXF already exists, do you want to replace?</source>
-        <translation>Die Ziel-Sound MXF bereits vorhanden ist, wollen Sie ersetzen?</translation>
+        <translation>Die Zieldatei Sound MXF existiert bereits, wollen Sie sie ersetzen?</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="236"/>
         <source>The destination subtitle MXF already exists, do you want to replace?</source>
-        <translation>Die Ziel-Untertitel MXF bereits vorhanden ist, wollen Sie ersetzen?</translation>
+        <translation>Die Zieldatei Untertitel MXF existiert bereits, wollen Sie sie ersetzen?</translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="296"/>
