@@ -77,7 +77,7 @@ typedef struct {
 } bmp_image_t;
 
 /* BMPs are sometimes bottom to top, so invert if needed */
-static inline invert_row(bmp_image_t bmp, int index) {
+static inline int invert_row(bmp_image_t bmp, int index) {
     int w = bmp.image.width;
     int h = bmp.image.height;
 
@@ -113,7 +113,7 @@ int read_bmp(odcp_image_t **image_ptr, const char *infile, int fd) {
     FILE            *bmp_fp;
     odcp_image_t    *image = 00;
     int             pixels = 0;
-    int i,j,w,h;
+    int i,w,h;
 
     /* open bmp using filename or file descriptor */
     dcp_log(LOG_DEBUG,"%-15.15s: opening bmp file %s","read_bmp",infile);

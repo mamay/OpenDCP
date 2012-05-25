@@ -14,7 +14,7 @@ SET(OPENDCP_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD})
 SET(OPENDCP_NAME ${PROJECT_NAME})
 SET(OPENDCP_COPYRIGHT "(c) 2010-2012 Terrence Meiczinger. All rights reserved.")
 SET(OPENDCP_LICENSE "The program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.")
-SET(OPENDCP_WEBSITE "http://www.opendcp.org")
+SET(OPENDCP_URL "http://www.opendcp.org")
 #-------------------------------------------------------------------------------
 
 #--check 32 or 64-bit-----------------------------------------------------------
@@ -63,7 +63,7 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 #-------------------------------------------------------------------------------
 
 #--set base compiler flags------------------------------------------------------
-SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -O3 ${OPENMP}")
+SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -Wall -O3 ${OPENMP}")
 SET(CMAKE_CXX_FLAGS ${CMAKE_C_FLAGS})
 #-------------------------------------------------------------------------------
 
@@ -130,7 +130,7 @@ ENDIF()
 #-------------------------------------------------------------------------------
 
 #--contrib paths----------------------------------------------------------------
-SET(OPENDCP_URL http://opendcp.googlecode.com/files)
+SET(OPENDCP_CONTRIB_URL http://opendcp.googlecode.com/files)
 SET(PREFIX ${PROJECT_BINARY_DIR}/contrib)
 SET(PREFIX_ARG --prefix=${PREFIX})
 #-------------------------------------------------------------------------------

@@ -219,10 +219,9 @@ int find_ext_offset(char str[]) {
 
 int check_increment(char *str[], int index,int str_size) {
     long x;
-    int seq_offset, ext_offset;
+    int seq_offset;
 
     seq_offset = find_seq_offset(str[0], str[str_size-1]);
-    ext_offset = find_ext_offset(str[0]);
 
     x = strtol(str[index]+seq_offset,NULL,10);
 

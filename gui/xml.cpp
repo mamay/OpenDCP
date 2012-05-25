@@ -55,7 +55,6 @@ void MainWindow::startDcp()
     QString     filename;
     QFileInfo   source;
     QFileInfo   destination;
-    int         overwrite;
     QMessageBox msgBox;
     QString     DCP_FAIL_MSG;
 
@@ -182,7 +181,6 @@ void MainWindow::startDcp()
     }
 
     // copy the picture mxf files
-    overwrite = 0;
     source.setFile(xmlContext->pkl[0].cpl[0].reel[0].asset[0].filename);
     destination.setFile(path + "/" + source.fileName());
 

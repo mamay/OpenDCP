@@ -30,6 +30,44 @@
 #define strnicmp strncasecmp
 #endif
 
+const char *XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
+
+
+const char *NS_CPL[]    = { "None", 
+                            "http://www.digicine.com/PROTO-ASDCP-CPL-20040511#", /* MXF Interop */
+                            "http://www.smpte-ra.org/schemas/429-7/2006/CPL"};   /* SMPTE */
+
+const char *NS_CPL_3D[] = { "None",
+                             "http://www.digicine.com/schemas/437-Y/2007/Main-Stereo-Picture-CPL",   /* MXF Interop */
+                             "http://www.smpte-ra.org/schemas/429-10/2008/Main-Stereo-Picture-CPL"}; /* SMPTE */
+
+const char *NS_PKL[]    = { "None",
+                            "http://www.digicine.com/PROTO-ASDCP-PKL-20040311#", /* MXF Interop */
+                            "http://www.smpte-ra.org/schemas/429-8/2007/PKL"};   /* SMPTE */
+
+const char *NS_AM[]     = { "None",
+                            "http://www.digicine.com/PROTO-ASDCP-AM-20040311#",  /* MXF Interop */
+                            "http://www.smpte-ra.org/schemas/429-9/2007/AM"};    /* SMPTE */
+
+const char *DS_DSIG = "http://www.w3.org/2000/09/xmldsig#";                     /* digial signature */
+const char *DS_CMA  = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315";        /* canonicalization method */
+const char *DS_DMA  = "http://www.w3.org/2000/09/xmldsig#sha1";                 /* digest method */
+const char *DS_TMA  = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";  /* transport method */
+
+const char *DS_SMA[] = { "None",
+                         "http://www.w3.org/2000/09/xmldsig#rsa-sha1",         /* MXF Interop */
+                         "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"}; /* SMPTE */
+
+const char *RATING_AGENCY[] = { "None",
+                                "http://www.mpaa.org/2003-ratings",
+                                "http://rcq.qc.ca/2003-ratings"};
+
+const char *DCP_LOG[] = { "NONE",
+                          "ERROR",
+                          "WARN",
+                          "INFO",
+                          "DEBUG"};
+
 void dcp_fatal(opendcp_t *opendcp, char *error) {
     dcp_log(LOG_ERROR, "%s",error);
     exit(DCP_FATAL);

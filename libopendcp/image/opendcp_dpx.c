@@ -349,7 +349,6 @@ static double dpx_log(int in, int white, float gamma) {
 int dpx_log_to_lin(int value, float gamma) {
     double gain;
     double offset;
-    int value2;
 
     gain = 4095.0 / (1 - dpx_log(DEFAULT_BLACK_POINT, DEFAULT_WHITE_POINT, gamma));
     offset = gain - 4095;
@@ -361,7 +360,6 @@ int dpx_log_to_lin(int value, float gamma) {
     if (value < DEFAULT_WHITE_POINT) {
         double f_i;
         f_i = dpx_log(value, DEFAULT_WHITE_POINT, gamma);
-        value2 = (int)((f_i*gain)-offset);
         return ((int)((f_i*gain)-offset));
     }
     
@@ -400,7 +398,6 @@ void print_dpx_header(dpx_image_t *dpx, int endian) {
 int read_dpx(odcp_image_t **image_ptr, int dpx_log, const char *infile, int fd) {
     dpx_image_t     dpx;
     FILE            *dpx_fp;
-    float           gamma;
     odcp_image_t    *image = 00;
     int image_size,endian,logarithmic = 0;
     int i,j,w,h,bps,spp;
@@ -467,10 +464,8 @@ int read_dpx(odcp_image_t **image_ptr, int dpx_log, const char *infile, int fd) 
         logarithmic = 0;
     } else if (dpx_log == DPX_FILM) {
         logarithmic = 1;
-        gamma = FILM_GAMMA;
     } else if (dpx_log == DPX_VIDEO) {
         logarithmic = 1;
-        gamma = VIDEO_GAMMA;
     }
 
     w = r_32(dpx.image.pixels_per_line, endian);
