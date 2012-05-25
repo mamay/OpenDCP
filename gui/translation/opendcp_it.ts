@@ -167,7 +167,7 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1314"/>
         <source>Encoder:</source>
-        <translation>Compressore:</translation>
+        <translation>Compressione:</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1316"/>
@@ -238,7 +238,7 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1340"/>
         <source>DCI Resize:</source>
-        <translation>Conforma dimensioni a DCI:</translation>
+        <translation>Ridimensiona (DCI):</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1343"/>
@@ -284,12 +284,12 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1358"/>
         <source>Slideshow</source>
-        <translation>Sequenza di slide</translation>
+        <translation>Sequenza slide</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1359"/>
         <source>duration per slide</source>
-        <translation>Durata di uno slide</translation>
+        <translation>Durata slide</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1360"/>
@@ -386,7 +386,7 @@
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1335"/>
         <source>XYZ Transform</source>
-        <translation>Transformata XYZ</translation>
+        <translation>Trasformata XYZ</translation>
     </message>
     <message>
         <location filename="../../build/gui/ui_mainwindow.h" line="1347"/>
