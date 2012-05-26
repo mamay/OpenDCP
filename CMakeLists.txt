@@ -175,6 +175,12 @@ IF(APPLE)
     SET(COMPILE_OPENJPEG 1)
     SET(LIBS ${LIBS} -L${LIB_DIR} -lopenjpeg)
 
+    SET(COMPILE_SNDFILE 1)
+    SET(LIBS ${LIBS} -L${LIB_DIR} -lsndfile)
+
+    SET(COMPILE_SAMPLERATE 1)
+    SET(LIBS ${LIBS} -L${LIB_DIR} -lsamplerate)
+
     ADD_SUBDIRECTORY(contrib)
 ELSEIF(WIN32)
     #-- Win32 cross-compiling
