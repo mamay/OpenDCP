@@ -443,7 +443,6 @@ int write_volumeindex(opendcp_t *opendcp) {
     xmlIndentTreeOutput = 1;
     xmlDocPtr        doc;
     xmlTextWriterPtr xml;
-    char             filename[MAX_PATH_LENGTH];
     int              rc;
 
     dcp_log(LOG_INFO,"Writing VOLINDEX file %.256s",opendcp->volindex.filename);

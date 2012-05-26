@@ -182,7 +182,7 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
 }
 
 int encode_kakadu(opendcp_t *opendcp, char *in_file, char *out_file) {
-    int j,result;
+    int result;
     int max_cs_len;
     int max_comp_size;
     char k_lengths[128];

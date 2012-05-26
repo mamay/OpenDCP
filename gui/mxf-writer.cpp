@@ -185,7 +185,7 @@ Result_t MxfWriter::writeJ2kMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
     Result_t                result = RESULT_OK;
     ui32_t                  start_frame;
     ui32_t                  mxf_duration;
-    ui32_t                  slide_duration;
+    ui32_t                  slide_duration = 0;
 
     // set the starting frame
     if (opendcp->mxf.start_frame && mxfFileList.size() >= (opendcp->mxf.start_frame-1)) {
@@ -293,7 +293,7 @@ Result_t MxfWriter::writeJ2kStereoscopicMxf(opendcp_t *opendcp, QFileInfoList mx
     writer_info_t           writer_info;
     Result_t                result = RESULT_OK;
     ui32_t                  mxf_duration;
-    ui32_t                  slide_duration;
+    ui32_t                  slide_duration = 0;
     ui32_t                  start_frame;
 
     // set the starting frame
@@ -455,7 +455,7 @@ Result_t MxfWriter::writePcmMxf(opendcp_t *opendcp, QFileInfoList mxfFileList, Q
     writer_info_t        writer_info;
     Result_t             result = RESULT_OK;
     ui32_t               mxf_duration;
-    ui32_t               file_count = 0;
+    i32_t                file_count = 0;
   
     Rational edit_rate(opendcp->frame_rate,1);
 

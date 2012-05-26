@@ -39,62 +39,36 @@ extern "C" {
 #define MAX_WIDTH_2K        2048 
 #define MAX_HEIGHT_2K       1080 
 
-static const char* OPENDCP_VERSION   = "${OPENDCP_VERSION}"; 
-static const char *OPENDCP_NAME      = "${OPENDCP_NAME}"; 
-static const char *OPENDCP_COPYRIGHT = "${OPENDCP_COPYRIGHT}"; 
-static const char *OPENDCP_LICENSE   = "${OPENDCP_LICENSE}"; 
-static const char *OPENDCP_WEBSITE   = "${OPENDCP_WEBSITE}"; 
-
-/* XML Namespaces */
-static const char *XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
-
-static const char *NS_CPL[]   = { "None",
-                                  "http://www.digicine.com/PROTO-ASDCP-CPL-20040511#",
-                                  "http://www.smpte-ra.org/schemas/429-7/2006/CPL"};
-
-static const char *NS_PKL[]   = { "None",
-                                  "http://www.digicine.com/PROTO-ASDCP-PKL-20040311#",
-                                  "http://www.smpte-ra.org/schemas/429-8/2007/PKL"};
-
-static const char *NS_AM[]    = { "None",
-                                  "http://www.digicine.com/PROTO-ASDCP-AM-20040311#",
-                                  "http://www.smpte-ra.org/schemas/429-9/2007/AM"};
-
-static const char *NS_CPL_3D[] = { "None",
-                                   "http://www.digicine.com/schemas/437-Y/2007/Main-Stereo-Picture-CPL",
-                                   "http://www.smpte-ra.org/schemas/429-10/2008/Main-Stereo-Picture-CPL"};
-
-/* Digital signature canonicalization method algorithm */
-static const char *DS_DSIG     = "http://www.w3.org/2000/09/xmldsig#"; 
-
-/* Digital signature canonicalization method algorithm */
-static const char *DS_CMA      = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315";
-
-/* Digital signature digest method algorithm */
-static const char *DS_DMA      =  "http://www.w3.org/2000/09/xmldsig#sha1";
-
-/* Digital signature signature method algorithm */
-static const char *DS_SMA[]    = { "None",
-                                   "http://www.w3.org/2000/09/xmldsig#rsa-sha1",
-                                   "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"};
-
-/* Digital signature transport method algorithm */
-static const char *DS_TMA      = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
-
-static const char *RATING_AGENCY[] = { "None",
-                                       "http://www.mpaa.org/2003-ratings",
-                                       "http://rcq.qc.ca/2003-ratings"};
-
-static const char *DCP_LOG[] = { "NONE",
-                                 "ERROR",
-                                 "WARN",
-                                 "INFO",
-                                 "DEBUG"};
+/* library information */
+#define OPENDCP_NAME       "${OPENDCP_NAME}"
+#define OPENDCP_VERSION    "${OPENDCP_VERSION}"
+#define OPENDCP_COPYRIGHT  "${OPENDCP_COPYRIGHT}"
+#define OPENDCP_LICENSE    "${OPENDCP_LICENSE}"
+#define OPENDCP_URL        "${OPENDCP_URL}"
 
 /* Defaults */
-static const char *DCP_ANNOTATION = "OPENDCP-FILM";
-static const char *DCP_TITLE      = "OPENDCP-FILM-TITLE";
-static const char *DCP_KIND       = "feature";
+#define DCP_ANNOTATION  "OPENDCP-FILM"
+#define DCP_TITLE       "OPENDCP-FILM-TITLE"
+#define DCP_KIND        "feature"
+
+#define sdsdsd 1 
+
+/* XML Namespaces */
+extern const char *XML_HEADER;
+extern const char *NS_CPL[];
+extern const char *NS_PKL[];
+extern const char *NS_AM[];
+extern const char *NS_CPL_3D[];
+
+/* digital signatures */
+extern const char *DS_DSIG;  /* digital signature */
+extern const char *DS_CMA;   /* canonicalization method */
+extern const char *DS_DMA;   /* digest method */
+extern const char *DS_TMA;   /* transport method */
+extern const char *DS_SMA[]; /* signature method */
+
+extern const char *RATING_AGENCY[]; 
+extern const char *DCP_LOG[];
 
 typedef unsigned char byte_t; 
 
@@ -184,14 +158,6 @@ enum DCP_ERROR_MESSAGES {
     STRING_NOTSEQUENTIAL,
 
     DCP_ERROR_MAX
-};
-
-static const char *ERR_STRING[] = {
-    "NONE",
-    "ERROR",
-    "WARN",
-    "INFO",
-    "DEBUG"
 };
 
 typedef struct filelist_t {

@@ -158,6 +158,8 @@ int read_image(odcp_image_t **image, char *file) {
         result = read_dpx(image, 0, file, 0);
     } else if (strnicmp(extension,"bmp",3) == 0) {
         result = read_bmp(image, file, 0);
+    } else {
+        result = DCP_ERROR;
     }
 
     if (result != DCP_SUCCESS) {
@@ -189,9 +191,7 @@ int odcp_image_readline(odcp_image_t *image, int y, unsigned char *data) {
 }
 
 int check_image_compliance(int profile, odcp_image_t *image, char *file) {
-    char         *extension;
     int          w,h;
-    int          result   = 0;
     odcp_image_t *odcp_image;
 
     if (image == NULL) {
@@ -369,7 +369,7 @@ static inline rgb_pixel_float_t get_pixel(odcp_image_t *image, int x, int y) {
 
 int letterbox(odcp_image_t **image, int w, int h) {
     int num_components = 3;
-    int i,x,y;
+    int x,y;
     odcp_image_t *ptr = *image;
     rgb_pixel_float_t p;
 
@@ -383,9 +383,9 @@ int letterbox(odcp_image_t **image, int w, int h) {
     for(y=0; y<h; y++) {
         for(x=0; x<w; x++) {
             p = get_pixel(ptr, x, y);
-            d_image->component[0].data[i] = (int)p.r;
-            d_image->component[1].data[i] = (int)p.g;
-            d_image->component[2].data[i] = (int)p.b;
+            d_image->component[0].data[0] = (int)p.r;
+            d_image->component[1].data[0] = (int)p.g;
+            d_image->component[2].data[0] = (int)p.b;
          }
     }
 
