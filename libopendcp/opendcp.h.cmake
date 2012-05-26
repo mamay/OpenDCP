@@ -51,8 +51,6 @@ extern "C" {
 #define DCP_TITLE       "OPENDCP-FILM-TITLE"
 #define DCP_KIND        "feature"
 
-#define sdsdsd 1 
-
 /* XML Namespaces */
 extern const char *XML_HEADER;
 extern const char *NS_CPL[];
