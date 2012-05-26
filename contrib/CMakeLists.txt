@@ -117,6 +117,28 @@ ELSE()
     SET(EXPAT_PREFIX "yes")
 ENDIF()
 
+IF(COMPILE_SNDFILE)
+EXTERNALPROJECT_ADD(10_SNDFILE
+    URL http://www.mega-nerd.com/libsndfile/files/libsndfile-1.0.25.tar.gz
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
+                      --disable-dependency-tracking --enable-static=yes --enable-shared=no
+    BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
+    INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+)
+ENDIF(COMPILE_SNDFILE)
+
+IF(COMPILE_SAMPLERATE)
+EXTERNALPROJECT_ADD(11_SAMPLERATE
+    URL http://www.mega-nerd.com/SRC/libsamplerate-0.1.8.tar.gz
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
+                      --disable-dependency-tracking --enable-static=yes --enable-shared=no
+    BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
+    INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+)
+ENDIF(COMPILE_SAMPLERATE)
+
 IF(COMPILE_TIFF)
 EXTERNALPROJECT_ADD(08_TIFF
     URL http://download.osgeo.org/libtiff/tiff-4.0.0.tar.gz
