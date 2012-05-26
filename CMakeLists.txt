@@ -63,7 +63,7 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 #-------------------------------------------------------------------------------
 
 #--set base compiler flags------------------------------------------------------
-SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -Wall -O3 ${OPENMP}")
+SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -W -O3 ${OPENMP}")
 SET(CMAKE_CXX_FLAGS ${CMAKE_C_FLAGS})
 #-------------------------------------------------------------------------------
 
@@ -178,7 +178,7 @@ IF(APPLE)
     SET(COMPILE_SNDFILE 1)
     SET(LIBS ${LIBS} -L${LIB_DIR} -lsndfile)
 
-    SET(COMPILE_SAMPLERATE 1)
+    SET(COMPILE_SAMPLERATE 0)
     SET(LIBS ${LIBS} -L${LIB_DIR} -lsamplerate)
 
     ADD_SUBDIRECTORY(contrib)

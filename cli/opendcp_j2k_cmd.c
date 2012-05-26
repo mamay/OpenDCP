@@ -374,8 +374,8 @@ int main (int argc, char **argv) {
     }
 
     /* bandwidth check */
-    if (opendcp->j2k.bw < 50 || opendcp->j2k.bw > 250) {
-        dcp_fatal(opendcp,"Bandwidth must be between 50 and 250");
+    if (opendcp->j2k.bw < 10 || opendcp->j2k.bw > 250) {
+        dcp_fatal(opendcp,"Bandwidth must be between 10 and 250");
     } else {
         opendcp->j2k.bw *= 1000000;
     }
@@ -417,7 +417,7 @@ int main (int argc, char **argv) {
     /* check file name lengths are equal */
     if (filelist->file_count > 1) {
         int x,f = 0;
-        int len = strlen(filelist->in[0]);
+        unsigned int len = strlen(filelist->in[0]);
         for (x=1;x<filelist->file_count;x++) {
             if (strlen(filelist->in[x]) != len) {
                 f = 1;

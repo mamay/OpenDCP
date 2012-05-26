@@ -31,8 +31,8 @@ typedef struct {
     tdata_t    strip_data;
     tsize_t    strip_size;
     tsize_t    read_size;
-    int        strip_num;
-    int        image_size;
+    uint32_t   strip_num;
+    uint32_t   image_size;
     int        w;
     int        h;
     uint16_t   bps;
@@ -50,7 +50,7 @@ void tif_set_strip(tiff_image_t *tif) {
 
 int read_tif(odcp_image_t **image_ptr, const char *infile, int fd) {
     tiff_image_t tif;
-    int          i,index;
+    unsigned int i,index;
     odcp_image_t *image = 00;
 
     memset(&tif, 0, sizeof(tiff_image_t));

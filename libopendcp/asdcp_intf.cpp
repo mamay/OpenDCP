@@ -638,7 +638,7 @@ int write_pcm_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     writer_info_t        writer_info;
     Result_t             result = RESULT_OK; 
     ui32_t               mxf_duration;
-    ui32_t               file_count = 0;
+    i32_t                file_count = 0;
 
     Rational edit_rate(opendcp->frame_rate,1);
 

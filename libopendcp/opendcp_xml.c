@@ -29,6 +29,8 @@
 
 #define XML_ENCODING "UTF-8"
 
+extern int write_dsig_template(opendcp_t *opendcp, xmlTextWriterPtr xml);
+
 #ifdef WIN32
 char *strsep (char **stringp, const char *delim) {
     register char *s;

@@ -129,12 +129,12 @@ int read_bmp(odcp_image_t **image_ptr, const char *infile, int fd) {
         return DCP_FATAL;
     }
 
-    if (fread(&magic,sizeof(bmp_magic_num_t),1,bmp_fp) < 0) {
+    if (fread(&magic,sizeof(bmp_magic_num_t),1,bmp_fp) < sizeof(bmp_magic_num_t)) {
         dcp_log(LOG_ERROR,"%-15.15s: failed to read magic number","read_bmp");
         return DCP_FATAL;
     }
     
-    if (fread(&bmp,sizeof(bmp_image_t),1,bmp_fp) < 0) {
+    if (fread(&bmp,sizeof(bmp_image_t),1,bmp_fp) <= sizeof(bmp_image_t)) {
         dcp_log(LOG_ERROR,"%-15.15s: failed to header","read_bmp");
         return DCP_FATAL;
     }
