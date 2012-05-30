@@ -376,7 +376,6 @@ extern "C" int write_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_
             rc = MXF_UNKOWN_ESSENCE_TYPE;
             break;
     }
- 
 
     return rc; 
 }
@@ -638,7 +637,7 @@ int write_pcm_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     writer_info_t        writer_info;
     Result_t             result = RESULT_OK; 
     ui32_t               mxf_duration;
-    i32_t                file_count = 0;
+    i32_t                file_index = 0;
 
     Rational edit_rate(opendcp->frame_rate,1);
 
@@ -649,29 +648,31 @@ int write_pcm_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
         return MXF_WAV_FILE_OPEN_ERROR;
     }
 
-    /* read audio descriptot */
+    /* read audio descriptor */
     pcm_parser_channel[0].FillAudioDescriptor(audio_desc);
+    audio_desc.ChannelCount = 0;
+    audio_desc.BlockAlign   = 0;
 
-    for (file_count = 0; file_count < filelist->file_count; file_count++) {
-        result = pcm_parser_channel[file_count].OpenRead(filelist->in[file_count], edit_rate);
+    for (file_index = 0; file_index < filelist->file_count; file_index++) {
+        result = pcm_parser_channel[file_index].OpenRead(filelist->in[file_index], edit_rate);
         if (ASDCP_FAILURE(result)) {
-            dcp_log(LOG_ERROR,"Could not open %s",filelist->in[file_count]);
+            dcp_log(LOG_ERROR,"Could not open %s",filelist->in[file_index]);
             return MXF_WAV_FILE_OPEN_ERROR;
         }
-        pcm_parser_channel[file_count].FillAudioDescriptor(audio_desc_channel[file_count]);
-        if (audio_desc_channel[file_count].AudioSamplingRate != audio_desc.AudioSamplingRate) {
+        pcm_parser_channel[file_index].FillAudioDescriptor(audio_desc_channel[file_index]);
+        if (audio_desc_channel[file_index].AudioSamplingRate != audio_desc.AudioSamplingRate) {
             dcp_log(LOG_ERROR,"Mismatched sampling rate");
             return MXF_WAV_FILE_OPEN_ERROR;
         }
-        if (audio_desc_channel[file_count].QuantizationBits != audio_desc.QuantizationBits) {
+        if (audio_desc_channel[file_index].QuantizationBits != audio_desc.QuantizationBits) {
             dcp_log(LOG_ERROR,"Mismatched bit rate");
             return MXF_WAV_FILE_OPEN_ERROR;
         }
-        if (audio_desc_channel[file_count].ContainerDuration != audio_desc.ContainerDuration) {
+        if (audio_desc_channel[file_index].ContainerDuration != audio_desc.ContainerDuration) {
             dcp_log(LOG_ERROR,"Mismatched duration");
             return MXF_WAV_FILE_OPEN_ERROR;
         }
-        frame_buffer_channel[file_count].Capacity(PCM::CalcFrameBufferSize(audio_desc_channel[file_count]));
+        frame_buffer_channel[file_index].Capacity(PCM::CalcFrameBufferSize(audio_desc_channel[file_index]));
     }
 
     if (ASDCP_FAILURE(result)) {
@@ -679,10 +680,13 @@ int write_pcm_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
     }
 
     /*  set total audio characteristics */
+    for (file_index = 0; file_index < filelist->file_count; file_index++) {
+        audio_desc.ChannelCount += audio_desc_channel[file_index].ChannelCount;
+        audio_desc.BlockAlign   += audio_desc_channel[file_index].BlockAlign;
+    }
+
     audio_desc.EditRate = edit_rate;
-    audio_desc.ChannelCount = filelist->file_count;
-    audio_desc.BlockAlign  = audio_desc.BlockAlign * filelist->file_count;
-    audio_desc.AvgBps = audio_desc.AvgBps * filelist->file_count; 
+    audio_desc.AvgBps   = audio_desc.AvgBps * filelist->file_count; 
 
     /* set total frame buffer size */
     frame_buffer.Capacity(PCM::CalcFrameBufferSize(audio_desc));
@@ -703,6 +707,7 @@ int write_pcm_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
         mxf_duration = opendcp->duration;
     }
 
+    /* start parsing */
     while (ASDCP_SUCCESS(result) && mxf_duration--) {
         byte_t *data_s = frame_buffer.Data();
         byte_t *data_e = data_s + frame_buffer.Capacity();
@@ -710,15 +715,15 @@ int write_pcm_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
         int    offset = 0;
 
         /* read a frame from each file */
-        for (file_count = 0; file_count < filelist->file_count; file_count++) {
-            memset(frame_buffer_channel[file_count].Data(), 0, frame_buffer_channel[file_count].Capacity());
-            result = pcm_parser_channel[file_count].ReadFrame(frame_buffer_channel[file_count]);
+        for (file_index = 0; file_index < filelist->file_count; file_index++) {
+            memset(frame_buffer_channel[file_index].Data(), 0, frame_buffer_channel[file_index].Capacity());
+            result = pcm_parser_channel[file_index].ReadFrame(frame_buffer_channel[file_index]);
             if (ASDCP_FAILURE(result)) {
                 continue;
             }
-            if (frame_buffer_channel[file_count].Size() != frame_buffer_channel[file_count].Capacity()) {
+            if (frame_buffer_channel[file_index].Size() != frame_buffer_channel[file_index].Capacity()) {
                 dcp_log(LOG_INFO,"frame was short, expect size: %d actual size: %d. MXF Duration will be reduced by one frame",
-                                  frame_buffer_channel[file_count].Size(), frame_buffer_channel[file_count].Capacity());
+                                  frame_buffer_channel[file_index].Size(), frame_buffer_channel[file_index].Capacity());
                 result = RESULT_ENDOFFILE;
                 continue;
             }
@@ -727,8 +732,8 @@ int write_pcm_mxf(opendcp_t *opendcp, filelist_t *filelist, char *output_file) {
         /* write sample from each frame to output buffer */
         if (ASDCP_SUCCESS(result)) {
             while (data_s < data_e) {
-                for (file_count = 0; file_count < filelist->file_count; file_count++) {
-                    byte_t *frame = frame_buffer_channel[file_count].Data()+offset;
+                for (file_index = 0; file_index < filelist->file_count; file_index++) {
+                    byte_t *frame = frame_buffer_channel[file_index].Data()+offset;
                     memcpy(data_s,frame,sample_size);
                     data_s += sample_size;
                 }
