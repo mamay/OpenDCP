@@ -26,10 +26,6 @@
 #include <time.h>
 #include "opendcp.h"
 
-#ifndef WIN32
-#define strnicmp strncasecmp
-#endif
-
 const char *XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
 
 

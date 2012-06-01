@@ -30,10 +30,6 @@
 #include "opendcp.h"
 #include "opendcp_cli.h"
 
-#ifndef WIN32
-#define strnicmp strncasecmp
-#endif
-
 extern int build_filelist(char *input, char *output, filelist_t *filelist, int file_type);
 extern int get_file_count(char *path, int file_type);
 
@@ -48,7 +44,7 @@ int check_extension(char *filename, char *pattern) {
 
     extension++;
 
-   if (strnicmp(extension,pattern,3) !=0) {
+   if (strncasecmp(extension,pattern,3) !=0) {
        return 0;
    }
 
@@ -80,13 +76,13 @@ int file_filter(struct dirent *filename) {
 
     /* return only known asset types */
     if (filter == MXF_INPUT) {
-        if (strnicmp(extension,"j2c",3) != 0 &&
-            strnicmp(extension,"j2k",3) != 0 &&
-            strnicmp(extension,"wav",3) != 0)
+        if (strncasecmp(extension,"j2c",3) != 0 &&
+            strncasecmp(extension,"j2k",3) != 0 &&
+            strncasecmp(extension,"wav",3) != 0)
         return 0;
     } else if (filter == J2K_INPUT) {
-        if (strnicmp(extension,"tif",3) != 0 &&
-            strnicmp(extension,"dpx",3) != 0)
+        if (strncasecmp(extension,"tif",3) != 0 &&
+            strncasecmp(extension,"dpx",3) != 0)
         return 0;
     }
 

@@ -16,12 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifdef WIN32
-#include "win32/opendcp_win32_getopt.h"
-#else
 #include <getopt.h>
 #include <signal.h>
-#endif
 #ifdef OPENMP
 #include <omp.h>
 #endif
@@ -33,10 +29,6 @@
 #include <sys/stat.h>
 #include <opendcp.h>
 #include "opendcp_cli.h"
-
-#ifndef WIN32
-#define strnicmp strncasecmp
-#endif
 
 #ifndef _WIN32
 sig_atomic_t SIGINT_received = 0;
@@ -129,9 +121,9 @@ int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *fil
         }
         extension = strrchr(in_path,'.');
         ++extension;
-        if (strnicmp(extension,"tif",3) == 0
-            || strnicmp(extension,"bmp",3) == 0
-            || strnicmp(extension,"dpx",3) == 0) {
+        if (strncasecmp(extension,"tif",3) == 0
+            || strncasecmp(extension,"bmp",3) == 0
+            || strncasecmp(extension,"dpx",3) == 0) {
             filelist->file_count = 1;
             sprintf(filelist->in[0],"%s",in_path);
             sprintf(filelist->out[0],"%s",out_path);

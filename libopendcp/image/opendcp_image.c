@@ -30,10 +30,6 @@
 #define CLIP(m,max)                                 \
   (m)<0?0:((m)>max?max:(m))
 
-#ifndef WIN32
-#define strnicmp strncasecmp
-#endif
-
 extern int rgb_to_xyz_calculate(odcp_image_t *image, int index);
 extern int rgb_to_xyz_lut(odcp_image_t *image, int index);
 
@@ -108,11 +104,11 @@ int read_image(odcp_image_t **image, char *file) {
     extension = strrchr(file,'.');
     extension++;
 
-    if (strnicmp(extension,"tif",3) == 0) {
+    if (strncasecmp(extension,"tif",3) == 0) {
         result = read_tif(image, file, 0);
-    } else if (strnicmp(extension,"dpx",3) == 0) {
+    } else if (strncasecmp(extension,"dpx",3) == 0) {
         result = read_dpx(image, 0, file, 0);
-    } else if (strnicmp(extension,"bmp",3) == 0) {
+    } else if (strncasecmp(extension,"bmp",3) == 0) {
         result = read_bmp(image, file, 0);
     } else {
         result = DCP_ERROR;

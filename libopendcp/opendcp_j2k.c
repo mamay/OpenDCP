@@ -29,10 +29,6 @@
 #endif
 #include "opendcp.h"
 
-#ifndef WIN32
-#define strnicmp strncasecmp
-#endif
-
 int encode_kakadu(opendcp_t *opendcp, char *in_file, char *out_file);
 int encode_openjpeg(opendcp_t *opendcp, opj_image_t *opj_image, char *out_file); 
 
