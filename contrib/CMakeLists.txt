@@ -32,7 +32,7 @@ ENDIF(COMPILE_ZLIB)
 
 IF(COMPILE_LIBXML2)
     EXTERNALPROJECT_ADD(02_XML2
-        URL ${OPENDCP_URL}/libxml2-2.7.8.tar.gz
+        URL ${OPENDCP_CONTRIB_URL}/libxml2-2.7.8.tar.gz
         BUILD_IN_SOURCE 1
         CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                           --disable-dependency-tracking --enable-static=yes --enable-shared=no
@@ -46,7 +46,7 @@ ENDIF(COMPILE_LIBXML2)
 IF(ENABLE_XMLSEC AND COMPILE_XMLSEC)
     IF(COMPILE_LIBXSLT)
         EXTERNALPROJECT_ADD(03_XSLT
-            URL ${OPENDCP_URL}/libxslt-1.1.26.tar.gz
+            URL ${OPENDCP_CONTRIB_URL}/libxslt-1.1.26.tar.gz
             BUILD_IN_SOURCE 1
             PATCH_COMMAND patch -d <SOURCE_DIR> -p0 -t -N < ${PROJECT_SOURCE_DIR}/contrib/libxslt-1.1.26.patch
             CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
@@ -80,7 +80,7 @@ ENDIF(ENABLE_XMLSEC AND COMPILE_XMLSEC)
 
 IF(COMPILE_EXPAT)
     EXTERNALPROJECT_ADD(04_EXPAT
-        URL ${OPENDCP_URL}/expat-2.0.1.tar.gz
+        URL ${OPENDCP_CONTRIB_URL}/expat-2.0.1.tar.gz
         BUILD_IN_SOURCE 1
         CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
                           --disable-dependency-tracking --enable-static=yes --enable-shared=no
@@ -116,6 +116,28 @@ ELSE()
     SET(OPENSSL_PREFIX "yes")
     SET(EXPAT_PREFIX "yes")
 ENDIF()
+
+IF(COMPILE_SNDFILE)
+EXTERNALPROJECT_ADD(10_SNDFILE
+    URL http://www.mega-nerd.com/libsndfile/files/libsndfile-1.0.25.tar.gz
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
+                      --disable-dependency-tracking --enable-static=yes --enable-shared=no
+    BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
+    INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+)
+ENDIF(COMPILE_SNDFILE)
+
+IF(COMPILE_SAMPLERATE)
+EXTERNALPROJECT_ADD(11_SAMPLERATE
+    URL http://www.mega-nerd.com/SRC/libsamplerate-0.1.8.tar.gz
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ${CONFIGURE} ${PREFIX_ARG} ${AUTO_CFLAGS} ${AUTO_CXXFLAGS} ${AUTO_LDFLAGS}
+                      --disable-dependency-tracking --enable-static=yes --enable-shared=no
+    BUILD_COMMAND ${MAKE} -f <SOURCE_DIR>/Makefile
+    INSTALL_COMMAND ${INSTALL} -f <SOURCE_DIR>/Makefile install ${INSTALL_DIR}
+)
+ENDIF(COMPILE_SAMPLERATE)
 
 IF(COMPILE_TIFF)
 EXTERNALPROJECT_ADD(08_TIFF

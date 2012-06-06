@@ -30,10 +30,6 @@
 #include "opendcp.h"
 #include "opendcp_cli.h"
 
-#ifndef WIN32
-#define strnicmp strncasecmp
-#endif
-
 extern int build_filelist(char *input, char *output, filelist_t *filelist, int file_type);
 extern int get_file_count(char *path, int file_type);
 
@@ -48,7 +44,7 @@ int check_extension(char *filename, char *pattern) {
 
     extension++;
 
-   if (strnicmp(extension,pattern,3) !=0) {
+   if (strncasecmp(extension,pattern,3) !=0) {
        return 0;
    }
 
@@ -80,13 +76,13 @@ int file_filter(struct dirent *filename) {
 
     /* return only known asset types */
     if (filter == MXF_INPUT) {
-        if (strnicmp(extension,"j2c",3) != 0 &&
-            strnicmp(extension,"j2k",3) != 0 &&
-            strnicmp(extension,"wav",3) != 0)
+        if (strncasecmp(extension,"j2c",3) != 0 &&
+            strncasecmp(extension,"j2k",3) != 0 &&
+            strncasecmp(extension,"wav",3) != 0)
         return 0;
     } else if (filter == J2K_INPUT) {
-        if (strnicmp(extension,"tif",3) != 0 &&
-            strnicmp(extension,"dpx",3) != 0)
+        if (strncasecmp(extension,"tif",3) != 0 &&
+            strncasecmp(extension,"dpx",3) != 0)
         return 0;
     }
 
@@ -195,8 +191,8 @@ void filelist_free(filelist_t *filelist) {
 }
 
 int find_seq_offset(char str1[], char str2[]) {
-    int i;
-    int offset = 0;
+    unsigned int i;
+    unsigned int offset = 0;
 
     for (i = 0; (i < strlen(str1)) && (offset == 0); i++) {
         if(str1[i] != str2[i])
@@ -219,10 +215,9 @@ int find_ext_offset(char str[]) {
 
 int check_increment(char *str[], int index,int str_size) {
     long x;
-    int seq_offset, ext_offset;
+    int seq_offset;
 
     seq_offset = find_seq_offset(str[0], str[str_size-1]);
-    ext_offset = find_ext_offset(str[0]);
 
     x = strtol(str[index]+seq_offset,NULL,10);
 
@@ -235,8 +230,9 @@ int check_increment(char *str[], int index,int str_size) {
 
 /* check if two strings are sequential */
 int check_sequential(char str1[],char str2[]) {
-    long i,x,y;
-    int  offset = 0;
+    unsigned i;
+    long     x,y;
+    unsigned int  offset = 0;
 
     if (strlen(str1) != strlen(str2)) {
         return STRING_LENGTH_NOTEQUAL;

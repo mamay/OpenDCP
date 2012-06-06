@@ -67,12 +67,12 @@ char *dn_oneline(X509_NAME *xn) {
     return result;
 }
 
-char *strip_cert(const char *data) {
+char *strip_cert(const unsigned char *data) {
     int i,len;
     int offset = 28;
     char *buffer;
 
-    len = strlen(data) - 53;
+    len = strlen((char *)data) - 53;
     buffer = (char *)malloc(len);
     memset(buffer,0,(len));
     for (i=0;i<len-2;i++) {
@@ -84,7 +84,7 @@ char *strip_cert(const char *data) {
 
 char *strip_cert_file(char *filename) {
     int i=0;
-    char text[5000];
+    unsigned char text[5000];
     char *ptr;
     FILE *fp=fopen(filename, "rb");
 
@@ -145,7 +145,11 @@ int write_dsig_template(opendcp_t *opendcp, xmlTextWriterPtr xml) {
                 return DCP_FATAL;
             }
             x[i] = PEM_read_bio_X509(bio[i], NULL, NULL, NULL);
-            BIO_set_close(bio[i], BIO_NOCLOSE);
+
+            if (!BIO_set_close(bio[i], BIO_NOCLOSE)) {
+                dcp_log(LOG_ERROR,"Could set BIO close flag");
+                return DCP_FATAL;
+            }
 
             if (x[i] == NULL) {
                 dcp_log(LOG_ERROR,"Could not read certificate");
@@ -368,7 +372,7 @@ xmlSecKeysMngrPtr load_certificates_sign(opendcp_t *opendcp) {
     if (opendcp->xml_signature.private_key) {
         key = xmlSecCryptoAppKeyLoad(opendcp->xml_signature.private_key, xmlSecKeyDataFormatPem, NULL, NULL, NULL);
     } else {
-        key = xmlSecCryptoAppKeyLoadMemory(opendcp_private_key, strlen(opendcp_private_key),xmlSecKeyDataFormatPem, NULL, NULL, NULL);
+        key = xmlSecCryptoAppKeyLoadMemory(opendcp_private_key, strlen((char *)opendcp_private_key),xmlSecKeyDataFormatPem, NULL, NULL, NULL);
     }
   
     if (xmlSecCryptoAppDefaultKeysMngrAdoptKey(key_manager, key) < 0) {
@@ -385,7 +389,7 @@ xmlSecKeysMngrPtr load_certificates_sign(opendcp_t *opendcp) {
             return(NULL);
         }
     } else {
-        if (xmlSecCryptoAppKeysMngrCertLoadMemory(key_manager, opendcp_root_cert, strlen(opendcp_root_cert), xmlSecKeyDataFormatPem, xmlSecKeyDataTypeTrusted) < 0) {
+        if (xmlSecCryptoAppKeysMngrCertLoadMemory(key_manager, opendcp_root_cert, strlen((char* )opendcp_root_cert), xmlSecKeyDataFormatPem, xmlSecKeyDataTypeTrusted) < 0) {
             fprintf(stderr,"Error: failed to load pem certificate from memory\n");
             xmlSecKeysMngrDestroy(key_manager);
             return(NULL);
@@ -400,7 +404,7 @@ xmlSecKeysMngrPtr load_certificates_sign(opendcp_t *opendcp) {
             return(NULL);
         }
     } else {
-        if (xmlSecCryptoAppKeysMngrCertLoadMemory(key_manager, opendcp_ca_cert, strlen(opendcp_ca_cert), xmlSecKeyDataFormatPem, xmlSecKeyDataTypeTrusted) < 0) {
+        if (xmlSecCryptoAppKeysMngrCertLoadMemory(key_manager, opendcp_ca_cert, strlen((char *)opendcp_ca_cert), xmlSecKeyDataFormatPem, xmlSecKeyDataTypeTrusted) < 0) {
             fprintf(stderr,"Error: failed to load pem certificate from memory\n");
             xmlSecKeysMngrDestroy(key_manager);
             return(NULL);
@@ -532,7 +536,7 @@ int xml_verify(char *filename) {
     xmlNodePtr       cur_node;
     int              result = DCP_FATAL;
     xmlSecKeysMngrPtr key_manager = NULL;
-    char cert[5000];
+    unsigned char cert[5000];
     int  cert_l;
 
     xmlsec_init();
@@ -569,14 +573,14 @@ int xml_verify(char *filename) {
 
     /* find certificates */
     cur_node = sign_node;
-    while (x509d_node = xmlSecFindNode(cur_node, xmlSecNodeX509Data, xmlSecDSigNs)) {
+    while ((x509d_node = xmlSecFindNode(cur_node, xmlSecNodeX509Data, xmlSecDSigNs))) {
         cert_node = xmlSecFindNode(x509d_node, xmlSecNodeX509Certificate, xmlSecDSigNs);
         if(cert_node == NULL) {
             dcp_log(LOG_ERROR, "X509certficate node not found");
             goto done;
         }
-        sprintf(cert,"-----BEGIN CERTIFICATE-----\n%s\n-----END CERTIFICATE-----\n",xmlNodeGetContent(cert_node));
-        cert_l = strlen(cert);
+        sprintf((char *)cert,"-----BEGIN CERTIFICATE-----\n%s\n-----END CERTIFICATE-----\n",xmlNodeGetContent(cert_node));
+        cert_l = strlen((char *)cert);
         if (xmlSecCryptoAppKeysMngrCertLoadMemory(key_manager, cert, cert_l, xmlSecKeyDataFormatPem, xmlSecKeyDataTypeTrusted) < 0) {
             dcp_log(LOG_ERROR, "couldn't read X509certificate node value");
             goto done;

@@ -17,21 +17,13 @@
 */
 
 #include <string.h>
-#ifdef WIN32
-#include "win32/opendcp_win32_getopt.h"
-#else
 #include <getopt.h>
-#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
 #include <sys/stat.h>
 #include <opendcp.h>
 #include "opendcp_cli.h"
-
-#ifndef WIN32
-#define strnicmp strncasecmp
-#endif
 
 int get_filelist(opendcp_t *opendcp,char *in_path,filelist_t *filelist);
 

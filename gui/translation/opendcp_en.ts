@@ -863,7 +863,7 @@
     <message>
         <location filename="../xml.cpp" line="213"/>
         <source>The destination sound MXF already exists, do you want to replace?</source>
-        <translation>MXF immagini esiste gi&amp;agrave;, vuoi sostituirlo?</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../xml.cpp" line="236"/>

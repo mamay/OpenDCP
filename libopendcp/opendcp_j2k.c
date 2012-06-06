@@ -29,10 +29,6 @@
 #endif
 #include "opendcp.h"
 
-#ifndef WIN32
-#define strnicmp strncasecmp
-#endif
-
 int encode_kakadu(opendcp_t *opendcp, char *in_file, char *out_file);
 int encode_openjpeg(opendcp_t *opendcp, opj_image_t *opj_image, char *out_file); 
 
@@ -94,6 +90,51 @@ void set_cinema_encoder_parameters(opendcp_t *opendcp, opj_cparameters_t *parame
     if ( opendcp->cinema_profile == DCP_CINEMA4K ) {
             parameters->numpocs = initialize_4K_poc(parameters->POC,parameters->numresolution);
     }
+}
+
+/* convert opendcp to openjpeg image format */
+int odcp_to_opj(odcp_image_t *odcp, opj_image_t **opj_ptr) {
+    OPJ_COLOR_SPACE color_space;
+    opj_image_cmptparm_t cmptparm[3];
+    opj_image_t *opj = NULL;
+    int j,size;
+
+    color_space = CLRSPC_SRGB;
+
+    /* initialize image components */
+    memset(&cmptparm[0], 0, odcp->n_components * sizeof(opj_image_cmptparm_t));
+    for (j = 0;j <  odcp->n_components;j++) {
+            cmptparm[j].w = odcp->w;
+            cmptparm[j].h = odcp->h;
+            cmptparm[j].prec = odcp->precision;
+            cmptparm[j].bpp = odcp->bpp;
+            cmptparm[j].sgnd = odcp->signed_bit;
+            cmptparm[j].dx = odcp->dx;
+            cmptparm[j].dy = odcp->dy;
+    }
+
+    /* create the image */
+    opj = opj_image_create(odcp->n_components, &cmptparm[0], color_space);
+
+    if(!opj) {
+        dcp_log(LOG_ERROR,"Failed to create image");
+        return DCP_FATAL;
+    }
+
+    /* set image offset and reference grid */
+    opj->x0 = odcp->x0;
+    opj->y0 = odcp->y0;
+    opj->x1 = odcp->x1;
+    opj->y1 = odcp->y1;
+
+    size = odcp->w * odcp->h;
+
+    memcpy(opj->comps[0].data,odcp->component[0].data,size*sizeof(int));
+    memcpy(opj->comps[1].data,odcp->component[1].data,size*sizeof(int));
+    memcpy(opj->comps[2].data,odcp->component[2].data,size*sizeof(int));
+
+    *opj_ptr = opj;
+    return DCP_SUCCESS;
 }
 
 int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_path) {
@@ -182,7 +223,7 @@ int convert_to_j2k(opendcp_t *opendcp, char *in_file, char *out_file, char *tmp_
 }
 
 int encode_kakadu(opendcp_t *opendcp, char *in_file, char *out_file) {
-    int j,result;
+    int result;
     int max_cs_len;
     int max_comp_size;
     char k_lengths[128];

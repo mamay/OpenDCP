@@ -30,11 +30,8 @@
 #define CLIP(m,max)                                 \
   (m)<0?0:((m)>max?max:(m))
 
-#ifndef WIN32
-#define strnicmp strncasecmp
-#endif
-
-extern int odcp_to_opj(odcp_image_t *odcp, opj_image_t **opj_ptr);
+extern int rgb_to_xyz_calculate(odcp_image_t *image, int index);
+extern int rgb_to_xyz_lut(odcp_image_t *image, int index);
 
 /* create opendcp image structure */
 odcp_image_t *odcp_image_create(int n_components, int w, int h) {
@@ -100,51 +97,6 @@ void odcp_image_free(odcp_image_t *odcp_image) {
     }
 }
 
-/* convert opendcp to openjpeg image format */
-int odcp_to_opj(odcp_image_t *odcp, opj_image_t **opj_ptr) {
-    OPJ_COLOR_SPACE color_space;
-    opj_image_cmptparm_t cmptparm[3];
-    opj_image_t *opj = NULL;
-    int j,size;
-
-    color_space = CLRSPC_SRGB;
-
-    /* initialize image components */
-    memset(&cmptparm[0], 0, odcp->n_components * sizeof(opj_image_cmptparm_t));
-    for (j = 0;j <  odcp->n_components;j++) {
-            cmptparm[j].w = odcp->w;
-            cmptparm[j].h = odcp->h;
-            cmptparm[j].prec = odcp->precision;
-            cmptparm[j].bpp = odcp->bpp;
-            cmptparm[j].sgnd = odcp->signed_bit;
-            cmptparm[j].dx = odcp->dx;
-            cmptparm[j].dy = odcp->dy;
-    }
-
-    /* create the image */
-    opj = opj_image_create(odcp->n_components, &cmptparm[0], color_space);
-
-    if(!opj) {
-        dcp_log(LOG_ERROR,"Failed to create image");
-        return DCP_FATAL;
-    }
-
-    /* set image offset and reference grid */
-    opj->x0 = odcp->x0;
-    opj->y0 = odcp->y0;
-    opj->x1 = odcp->x1; 
-    opj->y1 = odcp->y1; 
-
-    size = odcp->w * odcp->h;
-
-    memcpy(opj->comps[0].data,odcp->component[0].data,size*sizeof(int));
-    memcpy(opj->comps[1].data,odcp->component[1].data,size*sizeof(int));
-    memcpy(opj->comps[2].data,odcp->component[2].data,size*sizeof(int));
-
-    *opj_ptr = opj;
-    return DCP_SUCCESS;
-}
-
 int read_image(odcp_image_t **image, char *file) {
     char *extension;
     int  result;
@@ -152,12 +104,14 @@ int read_image(odcp_image_t **image, char *file) {
     extension = strrchr(file,'.');
     extension++;
 
-    if (strnicmp(extension,"tif",3) == 0) {
+    if (strncasecmp(extension,"tif",3) == 0) {
         result = read_tif(image, file, 0);
-    } else if (strnicmp(extension,"dpx",3) == 0) {
+    } else if (strncasecmp(extension,"dpx",3) == 0) {
         result = read_dpx(image, 0, file, 0);
-    } else if (strnicmp(extension,"bmp",3) == 0) {
+    } else if (strncasecmp(extension,"bmp",3) == 0) {
         result = read_bmp(image, file, 0);
+    } else {
+        result = DCP_ERROR;
     }
 
     if (result != DCP_SUCCESS) {
@@ -189,9 +143,7 @@ int odcp_image_readline(odcp_image_t *image, int y, unsigned char *data) {
 }
 
 int check_image_compliance(int profile, odcp_image_t *image, char *file) {
-    char         *extension;
     int          w,h;
-    int          result   = 0;
     odcp_image_t *odcp_image;
 
     if (image == NULL) {
@@ -369,7 +321,7 @@ static inline rgb_pixel_float_t get_pixel(odcp_image_t *image, int x, int y) {
 
 int letterbox(odcp_image_t **image, int w, int h) {
     int num_components = 3;
-    int i,x,y;
+    int x,y;
     odcp_image_t *ptr = *image;
     rgb_pixel_float_t p;
 
@@ -383,9 +335,9 @@ int letterbox(odcp_image_t **image, int w, int h) {
     for(y=0; y<h; y++) {
         for(x=0; x<w; x++) {
             p = get_pixel(ptr, x, y);
-            d_image->component[0].data[i] = (int)p.r;
-            d_image->component[1].data[i] = (int)p.g;
-            d_image->component[2].data[i] = (int)p.b;
+            d_image->component[0].data[0] = (int)p.r;
+            d_image->component[1].data[0] = (int)p.g;
+            d_image->component[2].data[0] = (int)p.b;
          }
     }
 

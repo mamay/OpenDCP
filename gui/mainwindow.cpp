@@ -300,7 +300,7 @@ void MainWindow::about()
 {
     QString msg;
     QTextStream(&msg) << OPENDCP_NAME << " Version " << OPENDCP_VERSION << "\n\n";
-    QTextStream(&msg) << OPENDCP_COPYRIGHT << "\n\n" << OPENDCP_LICENSE << "\n\n" << OPENDCP_WEBSITE << "\n\n";
+    QTextStream(&msg) << OPENDCP_COPYRIGHT << "\n\n" << OPENDCP_LICENSE << "\n\n" << OPENDCP_URL << "\n\n";
     QMessageBox::about(this, "About OpenDCP", msg);
 }
 

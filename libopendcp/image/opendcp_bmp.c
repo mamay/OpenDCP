@@ -77,7 +77,7 @@ typedef struct {
 } bmp_image_t;
 
 /* BMPs are sometimes bottom to top, so invert if needed */
-static inline invert_row(bmp_image_t bmp, int index) {
+static inline int invert_row(bmp_image_t bmp, int index) {
     int w = bmp.image.width;
     int h = bmp.image.height;
 
@@ -113,7 +113,7 @@ int read_bmp(odcp_image_t **image_ptr, const char *infile, int fd) {
     FILE            *bmp_fp;
     odcp_image_t    *image = 00;
     int             pixels = 0;
-    int i,j,w,h;
+    int i,w,h;
 
     /* open bmp using filename or file descriptor */
     dcp_log(LOG_DEBUG,"%-15.15s: opening bmp file %s","read_bmp",infile);
@@ -129,12 +129,12 @@ int read_bmp(odcp_image_t **image_ptr, const char *infile, int fd) {
         return DCP_FATAL;
     }
 
-    if (fread(&magic,sizeof(bmp_magic_num_t),1,bmp_fp) < 0) {
+    if (fread(&magic,sizeof(bmp_magic_num_t),1,bmp_fp) < sizeof(bmp_magic_num_t)) {
         dcp_log(LOG_ERROR,"%-15.15s: failed to read magic number","read_bmp");
         return DCP_FATAL;
     }
     
-    if (fread(&bmp,sizeof(bmp_image_t),1,bmp_fp) < 0) {
+    if (fread(&bmp,sizeof(bmp_image_t),1,bmp_fp) <= sizeof(bmp_image_t)) {
         dcp_log(LOG_ERROR,"%-15.15s: failed to header","read_bmp");
         return DCP_FATAL;
     }

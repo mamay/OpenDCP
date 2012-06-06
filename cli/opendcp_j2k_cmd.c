@@ -16,12 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifdef WIN32
-#include "win32/opendcp_win32_getopt.h"
-#else
 #include <getopt.h>
 #include <signal.h>
-#endif
 #ifdef OPENMP
 #include <omp.h>
 #endif
@@ -33,10 +29,6 @@
 #include <sys/stat.h>
 #include <opendcp.h>
 #include "opendcp_cli.h"
-
-#ifndef WIN32
-#define strnicmp strncasecmp
-#endif
 
 #ifndef _WIN32
 sig_atomic_t SIGINT_received = 0;
@@ -81,7 +73,7 @@ void dcp_usage() {
     fprintf(fp,"       -n | --no_overwrite                - do not overwrite existing jpeg2000 files\n");
     fprintf(fp,"       -l | --log_level <level>           - sets the log level 0:Quiet, 1:Error, 2:Warn (default),  3:Info, 4:Debug\n");
     fprintf(fp,"       -h | --help                        - show help\n");
-    fprintf(fp,"       -c | --lut                         - select color conversion LUT, 0:srgb, 1:rec709\n");
+    fprintf(fp,"       -c | --lut                         - select color conversion LUT, 0:srgb, 1:rec709, 2:P3\n");
     fprintf(fp,"       -z | --resize                      - resize image to DCI compliant resolution\n");
     fprintf(fp,"       -s | --start                       - start frame\n");
     fprintf(fp,"       -d | --end                         - end frame\n");
@@ -129,9 +121,9 @@ int get_filelist(opendcp_t *opendcp,char *in_path,char *out_path,filelist_t *fil
         }
         extension = strrchr(in_path,'.');
         ++extension;
-        if (strnicmp(extension,"tif",3) == 0
-            || strnicmp(extension,"bmp",3) == 0
-            || strnicmp(extension,"dpx",3) == 0) {
+        if (strncasecmp(extension,"tif",3) == 0
+            || strncasecmp(extension,"bmp",3) == 0
+            || strncasecmp(extension,"dpx",3) == 0) {
             filelist->file_count = 1;
             sprintf(filelist->in[0],"%s",in_path);
             sprintf(filelist->out[0],"%s",out_path);
@@ -374,8 +366,8 @@ int main (int argc, char **argv) {
     }
 
     /* bandwidth check */
-    if (opendcp->j2k.bw < 50 || opendcp->j2k.bw > 250) {
-        dcp_fatal(opendcp,"Bandwidth must be between 50 and 250");
+    if (opendcp->j2k.bw < 10 || opendcp->j2k.bw > 250) {
+        dcp_fatal(opendcp,"Bandwidth must be between 10 and 250");
     } else {
         opendcp->j2k.bw *= 1000000;
     }
@@ -417,7 +409,7 @@ int main (int argc, char **argv) {
     /* check file name lengths are equal */
     if (filelist->file_count > 1) {
         int x,f = 0;
-        int len = strlen(filelist->in[0]);
+        unsigned int len = strlen(filelist->in[0]);
         for (x=1;x<filelist->file_count;x++) {
             if (strlen(filelist->in[x]) != len) {
                 f = 1;
